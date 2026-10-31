@@ -1,6 +1,6 @@
 {
-  "name": "Grace & Truth Church App",
-  "description": "Church portal for community events, daily verses & devotionals, prayer requests, and administrator content management.",
+  "name": "Vietnamese Revival Church",
+  "description": "Vietnamese Revival Church in Tempe, Arizona. Weekly Sunday worship from 3:00 PM to 5:00 PM, upcoming gatherings, and daily scripture.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

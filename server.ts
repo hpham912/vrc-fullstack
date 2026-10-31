@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { db } from './src/db/index.ts';
 import {
@@ -28,7 +29,7 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Grace & Truth Church App', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'Vietnamese Revival Church', timestamp: new Date().toISOString() });
 });
 
 // User sync & verification endpoint
@@ -575,11 +576,18 @@ Please return a valid JSON object matching this schema exactly:
 // Vite middleware in dev or static files in production
 async function startServer() {
   if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'dist')));
+    const distPath = __dirname.endsWith('dist')
+      ? __dirname
+      : path.join(__dirname, 'dist');
+
+    console.log(`Serving production static assets from: ${distPath}`);
+    app.use(express.static(distPath));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   } else {
+    // Development mode: mount Vite dev server middleware
+    console.log('Mounting Vite dev server middleware');
     const { createServer } = await import('vite');
     const vite = await createServer({
       server: { middlewareMode: true },
@@ -589,7 +597,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Grace & Truth Church server listening on http://0.0.0.0:${PORT}`);
+    console.log(`Vietnamese Revival Church server listening on http://0.0.0.0:${PORT}`);
   });
 }
 

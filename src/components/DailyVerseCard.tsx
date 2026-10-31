@@ -11,7 +11,6 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  HeartHandshake,
   PenTool,
 } from 'lucide-react';
 
@@ -33,7 +32,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   const [copied, setCopied] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
 
-  // Sync if todayVerse loads later
   React.useEffect(() => {
     if (todayVerse && !selectedVerse) {
       setSelectedVerse(todayVerse);
@@ -42,7 +40,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   const verse = selectedVerse || todayVerse;
 
-  // Text to speech
   const toggleSpeech = () => {
     if (!verse) return;
     if (isSpeaking) {
@@ -55,8 +52,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       window.speechSynthesis.cancel();
       const textToRead = `${verse.reference}. ${verse.verseText}. Reflection: ${verse.reflection}`;
       const utterance = new SpeechSynthesisUtterance(textToRead);
-      utterance.rate = 0.88;
-      utterance.pitch = 1.0;
+      utterance.rate = 0.9;
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       setIsSpeaking(true);
@@ -66,10 +62,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   const copyToClipboard = () => {
     if (!verse) return;
-    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\nDaily Devotional from Grace & Truth Church`;
+    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\nVietnamese Revival Church Daily Verse`;
     navigator.clipboard.writeText(shareText);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = () => {
@@ -87,136 +83,116 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   if (!verse) {
     return (
-      <div className="py-12 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-        <p className="mt-2 text-stone-500 text-sm">Loading daily scripture...</p>
+      <div className="py-20 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-stone-800"></div>
+        <p className="mt-3 text-stone-500 text-sm">Loading scripture...</p>
       </div>
     );
   }
 
+  const verseDateFormatted = new Date(verse.date + 'T00:00:00').toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              Daily Scripture & Devotional
-            </span>
-            {verse.theme && (
-              <span className="text-xs font-medium text-stone-500 bg-stone-100 px-2.5 py-0.5 rounded-md">
-                Theme: {verse.theme}
-              </span>
-            )}
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 mt-2">
-            Word of Encouragement
-          </h1>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1">
+            Lời Chúa Mỗi Ngày • Daily Bread
+          </span>
+          <h2 className="text-3xl font-serif font-bold text-stone-900">
+            Scripture & Devotional
+          </h2>
         </div>
 
-        {/* Action buttons */}
+        {/* Action icons */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleSpeech}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
               isSpeaking
                 ? 'bg-amber-600 text-white border-amber-600 animate-pulse'
-                : 'bg-white hover:bg-stone-50 text-stone-700 border-stone-200 shadow-sm'
+                : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
             }`}
-            title={isSpeaking ? 'Stop Audio' : 'Listen to Scripture'}
+            title={isSpeaking ? 'Stop audio' : 'Listen to scripture'}
           >
-            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
-            <span>{isSpeaking ? 'Pause Audio' : 'Listen'}</span>
+            {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-700" />}
+            <span>{isSpeaking ? 'Pause' : 'Listen'}</span>
           </button>
 
           <button
             onClick={copyToClipboard}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-sm transition-colors"
-            title="Copy to Clipboard"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-500" />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
+            <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
 
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-stone-50 text-stone-700 border border-stone-200 shadow-sm transition-colors"
-            title="Share Scripture"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors"
           >
-            <Share2 className="w-4 h-4 text-stone-500" />
+            <Share2 className="w-3.5 h-3.5 text-stone-400" />
             <span>Share</span>
           </button>
 
           {isAdmin && onOpenAdminPortal && (
             <button
               onClick={() => onOpenAdminPortal('verses')}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500 hover:bg-amber-600 text-stone-950 transition-colors shadow-sm"
-              title="Post or Edit Verses"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-medium shadow-xs"
             >
-              <PenTool className="w-3.5 h-3.5" />
-              <span>Manage</span>
+              <PenTool className="w-3.5 h-3.5 text-amber-400" />
+              <span>Edit Verse</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Main Scripture Card */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50/80 via-stone-50 to-orange-50/40 border border-amber-200/80 p-6 sm:p-10 shadow-lg shadow-amber-950/5">
-        {/* Subtle decorative cross background watermark */}
-        <div className="absolute -right-8 -bottom-8 pointer-events-none opacity-5 text-amber-950">
-          <BookOpen className="w-64 h-64" />
-        </div>
-
-        {/* Date indicator */}
-        <div className="flex items-center justify-between text-xs text-stone-500 pb-4 border-b border-amber-200/60 mb-6">
-          <div className="flex items-center gap-1.5">
+      <div className="bg-white rounded-3xl border border-stone-200/90 p-8 sm:p-12 shadow-xs space-y-8">
+        {/* Date & Translation */}
+        <div className="flex items-center justify-between text-xs text-stone-500 pb-4 border-b border-stone-100">
+          <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-amber-700" />
-            <span className="font-medium text-stone-700">
-              {new Date(verse.date + 'T00:00:00').toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
+            <span>{verseDateFormatted}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="bg-amber-100/90 text-amber-800 font-semibold px-2 py-0.5 rounded text-[11px]">
-              {verse.translation}
-            </span>
-          </div>
+          <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-[11px]">
+            {verse.translation}
+          </span>
         </div>
 
-        {/* Verse text */}
-        <blockquote className="my-4">
-          <p className="font-serif text-xl sm:text-2xl lg:text-3xl font-medium leading-relaxed sm:leading-snug text-stone-900 tracking-wide">
+        {/* The Scripture Passage */}
+        <blockquote className="my-6">
+          <p className="font-serif text-2xl sm:text-3xl text-stone-900 leading-relaxed tracking-normal font-normal">
             “{verse.verseText}”
           </p>
-          <footer className="mt-4 flex items-center justify-end">
-            <cite className="font-serif text-lg sm:text-xl font-bold not-italic text-amber-800 tracking-wide">
+          <footer className="mt-4 text-right">
+            <cite className="font-serif text-lg font-bold text-amber-800 not-italic">
               — {verse.reference}
             </cite>
           </footer>
         </blockquote>
 
-        {/* Devotional Reflection */}
-        <div className="mt-8 pt-6 border-t border-amber-200/60">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 mb-3">
-            <BookOpen className="w-4 h-4 text-amber-700" />
+        {/* Reflection */}
+        <div className="pt-6 border-t border-stone-100 space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
             Pastoral Reflection
-          </h2>
-          <p className="text-stone-700 text-sm sm:text-base leading-relaxed whitespace-pre-line font-normal">
+          </h3>
+          <p className="text-stone-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
             {verse.reflection}
           </p>
 
           {verse.prayer && (
-            <div className="mt-6 p-4 rounded-xl bg-amber-100/60 border border-amber-200/70">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 mb-1.5">
-                <HeartHandshake className="w-3.5 h-3.5 text-amber-700" />
-                Today's Prayer
-              </h3>
-              <p className="text-stone-800 text-sm italic font-serif leading-relaxed">
+            <div className="mt-6 p-5 rounded-2xl bg-amber-50/70 border border-amber-200/60">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 block mb-1">
+                Lời Cầu Nguyện • Today's Prayer
+              </span>
+              <p className="font-serif italic text-stone-800 text-sm leading-relaxed">
                 "{verse.prayer}"
               </p>
             </div>
@@ -224,24 +200,24 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
         </div>
       </div>
 
-      {/* Archive / Browse past days */}
+      {/* Past Devotionals Archive */}
       {allVerses.length > 1 && (
-        <div className="mt-6">
+        <div className="mt-8">
           <button
             onClick={() => setShowArchive(!showArchive)}
-            className="flex items-center justify-between w-full p-3 bg-white hover:bg-stone-50 border border-stone-200 rounded-xl text-stone-700 text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center justify-between w-full p-4 bg-white hover:bg-stone-50 border border-stone-200 rounded-2xl text-stone-700 text-xs font-semibold transition-colors"
           >
             <span className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-600" />
-              Browse Past Daily Devotionals ({allVerses.length} available)
+              <BookOpen className="w-4 h-4 text-amber-700" />
+              Browse Past Scripture Readings ({allVerses.length} available)
             </span>
             {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
 
           {showArchive && (
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {allVerses.map((item) => {
-                const isCurrent = verse.id === item.id;
+                const isSelected = verse.id === item.id;
                 return (
                   <div
                     key={item.id}
@@ -252,22 +228,18 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                         setIsSpeaking(false);
                       }
                     }}
-                    className={`p-4 rounded-xl cursor-pointer border transition-all text-left ${
-                      isCurrent
-                        ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300'
+                    className={`p-4 rounded-xl cursor-pointer border text-left transition-all ${
+                      isSelected
+                        ? 'bg-amber-50/80 border-amber-300 ring-1 ring-amber-300'
                         : 'bg-white hover:bg-stone-50 border-stone-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs text-stone-500 mb-1">
+                    <div className="flex items-center justify-between text-[11px] text-stone-400 mb-1">
                       <span>{item.date}</span>
-                      <span className="font-semibold text-amber-700">{item.translation}</span>
+                      <span className="font-medium text-amber-700">{item.translation}</span>
                     </div>
-                    <p className="font-serif font-bold text-stone-900 text-sm truncate">
-                      {item.reference}
-                    </p>
-                    <p className="text-stone-600 text-xs line-clamp-2 mt-1">
-                      "{item.verseText}"
-                    </p>
+                    <p className="font-serif font-bold text-stone-900 text-sm">{item.reference}</p>
+                    <p className="text-stone-600 text-xs line-clamp-2 mt-1">"{item.verseText}"</p>
                   </div>
                 );
               })}
