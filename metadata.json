@@ -1,0 +1,6 @@
+{
+  "name": "Grace & Truth Church App",
+  "description": "Church portal for community events, daily verses & devotionals, prayer requests, and administrator content management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
