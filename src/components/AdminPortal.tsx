@@ -3,6 +3,7 @@ import { ChurchEvent, DailyVerse, Announcement } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { apiUrl } from '../utils/api.ts';
+import { NotificationService } from '../services/notificationService.ts';
 import {
   Calendar,
   BookOpen,
@@ -189,9 +190,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         throw new Error(data.error || 'Failed to save event');
       }
 
-      showFeedback('success', editingEventId 
+        showFeedback('success', editingEventId 
         ? (language === 'vi' ? 'Cập nhật sự kiện thành công!' : 'Event updated successfully!') 
         : (language === 'vi' ? 'Đã thêm sự kiện vào lịch hội thánh!' : 'New event published successfully!'));
+
+      // Dispatch local/push notification
+      NotificationService.triggerNotification(
+        `New Church Event: ${eventTitle.trim()}`,
+        `${eventDate} • ${eventStartTime} at ${eventLocation.trim()}`
+      );
+
       resetEventForm();
       onRefreshData();
       setActiveTab('manage-events');
@@ -283,6 +291,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       if (!res.ok) throw new Error('Failed to save verse');
       showFeedback('success', language === 'vi' ? 'Đã lưu Lời Chúa hằng ngày!' : 'Daily scripture saved successfully!');
+
+      // Dispatch local/push notification
+      NotificationService.triggerNotification(
+        `Scripture of the Day: ${verseReference.trim()}`,
+        `"${verseText.slice(0, 100)}..."`
+      );
+
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message || 'Error saving daily verse');

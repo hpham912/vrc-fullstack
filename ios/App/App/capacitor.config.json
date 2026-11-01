@@ -3,6 +3,8 @@
 	"appName": "Vietnamese Revival Church",
 	"webDir": "dist",
 	"server": {
+		"url": "https://ais-pre-fercpswbhnqtm3nrhczvka-277174947415.us-west2.run.app",
+		"cleartext": false,
 		"androidScheme": "https",
 		"iosScheme": "https"
 	},
@@ -10,7 +12,11 @@
 		"contentInset": "always",
 		"preferredContentMode": "mobile",
 		"scheme": "Vietnamese Revival Church",
-		"backgroundColor": "#FDFCFB"
+		"backgroundColor": "#FDFCFB",
+		"allowsLinkPreview": false,
+		"scrollEnabled": true
 	},
-	"packageClassList": []
+	"packageClassList": [
+		"LocalNotificationsPlugin"
+	]
 }
