@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent, DailyVerse, Announcement } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { apiUrl } from '../utils/api.ts';
 import {
   Calendar,
   BookOpen,
@@ -100,7 +101,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     const token = getToken();
     if (!token) return;
     try {
-      const res = await fetch('/api/auth/admins', {
+      const res = await fetch(apiUrl('/api/auth/admins'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -171,7 +172,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         organizerEmail: eventOrganizerEmail.trim(),
       };
 
-      const url = editingEventId ? `/api/events/${editingEventId}` : '/api/events';
+      const url = editingEventId ? apiUrl(`/api/events/${editingEventId}`) : apiUrl('/api/events');
       const method = editingEventId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -205,7 +206,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!window.confirm(language === 'vi' ? 'Bạn có chắc chắn muốn xóa sự kiện này?' : 'Delete this gathering from the calendar?')) return;
     try {
       const token = getToken();
-      const res = await fetch(`/api/events/${id}`, {
+      const res = await fetch(apiUrl(`/api/events/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -226,7 +227,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setGeneratingAi(true);
       const token = getToken();
-      const res = await fetch('/api/ai/generate-devotional', {
+      const res = await fetch(apiUrl('/api/ai/generate-devotional'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +264,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
-      const res = await fetch('/api/verses', {
+      const res = await fetch(apiUrl('/api/verses'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -294,7 +295,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!window.confirm(language === 'vi' ? 'Xóa câu Lời Chúa này?' : 'Delete this daily devotional?')) return;
     try {
       const token = getToken();
-      await fetch(`/api/verses/${id}`, {
+      await fetch(apiUrl(`/api/verses/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -316,7 +317,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
-      const res = await fetch('/api/auth/create-admin', {
+      const res = await fetch(apiUrl('/api/auth/create-admin'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -352,7 +353,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
     try {
       const token = getToken();
-      const res = await fetch(`/api/auth/admins/${id}`, {
+      const res = await fetch(apiUrl(`/api/auth/admins/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -374,7 +375,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(apiUrl('/api/auth/change-password'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
