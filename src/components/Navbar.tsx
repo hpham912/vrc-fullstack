@@ -90,18 +90,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Language Switcher Pill */}
             <div className="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 text-xs font-semibold">
               <button
-                onClick={() => setLanguage('vi')}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                  language === 'vi'
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-800'
-                }`}
-                title="Tiếng Việt"
-              >
-                <span>🇻🇳</span>
-                <span>VI</span>
-              </button>
-              <button
                 onClick={() => setLanguage('en')}
                 className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
                   language === 'en'
@@ -112,6 +100,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <span>🇺🇸</span>
                 <span>EN</span>
+              </button>
+              <button
+                onClick={() => setLanguage('vi')}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                  language === 'vi'
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+                title="Tiếng Việt"
+              >
+                <span>🇻🇳</span>
+                <span>VI</span>
               </button>
             </div>
 

@@ -125,7 +125,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'vi',
+  language: 'en',
   setLanguage: () => {},
   toggleLanguage: () => {},
   t: (key: string) => key,
@@ -134,7 +134,7 @@ const LanguageContext = createContext<LanguageContextType>({
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('vrc_church_lang');
-    return (saved === 'en' || saved === 'vi') ? saved : 'vi';
+    return (saved === 'en' || saved === 'vi') ? saved : 'en';
   });
 
   const setLanguage = (lang: Language) => {

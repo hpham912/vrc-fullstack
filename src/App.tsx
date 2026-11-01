@@ -65,8 +65,6 @@ function ChurchAppContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* Top Banner Notice */}
-      <AnnouncementBar announcements={announcements} />
 
       {/* Main Navigation */}
       <Navbar
