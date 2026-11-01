@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
+import { LanguageProvider, useLanguage } from './context/LanguageContext.tsx';
 import { Navbar } from './components/Navbar.tsx';
 import { AnnouncementBar } from './components/AnnouncementBar.tsx';
 import { DailyVerseCard } from './components/DailyVerseCard.tsx';
 import { EventsSection } from './components/EventsSection.tsx';
 import { ChurchInfoSection } from './components/ChurchInfoSection.tsx';
 import { AdminPortal } from './components/AdminPortal.tsx';
+import { AdminLoginModal } from './components/AdminLoginModal.tsx';
 import { ChurchEvent, DailyVerse, Announcement } from './types.ts';
 import {
   Calendar,
   BookOpen,
-  ShieldCheck,
-  Sparkles,
   ArrowRight,
-  Clock,
-  MapPin,
   Plus,
 } from 'lucide-react';
 
 function ChurchAppContent() {
-  const { user, isAdmin, signInWithGoogle } = useAuth();
+  const { adminUser, isAdmin, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState('events');
   const [events, setEvents] = useState<ChurchEvent[]>([]);
@@ -28,7 +27,8 @@ function ChurchAppContent() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Admin Modal
+  // Modals
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [adminPortalOpen, setAdminPortalOpen] = useState(false);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
 
@@ -65,7 +65,7 @@ function ChurchAppContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* Top Announcements */}
+      {/* Top Banner Notice */}
       <AnnouncementBar announcements={announcements} />
 
       {/* Main Navigation */}
@@ -73,22 +73,29 @@ function ChurchAppContent() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         openAdminPortal={() => openAdminWithTab('create-event')}
+        openLoginModal={() => setLoginModalOpen(true)}
       />
 
-      {/* Modern, Airy Hero Banner */}
+      {/* Modern Hero Banner with Both Vietnamese & English Title Preserved */}
       <div className="relative overflow-hidden bg-white border-b border-stone-200/70 py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-800 text-xs font-semibold tracking-wide">
             <span className="text-amber-600 font-serif">✝</span>
-            <span>Hội Thánh Phục Hưng Việt Nam</span>
+            <span>Tempe, Arizona • Hội Thánh Phục Hưng</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
-            Vietnamese Revival Church
-          </h1>
+          {/* Bilingual Title Always Displayed */}
+          <div className="space-y-1">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              Hội Thánh Phục Hưng Việt Nam
+            </h1>
+            <p className="text-lg sm:text-2xl font-serif text-amber-800 font-semibold tracking-tight">
+              Vietnamese Revival Church
+            </p>
+          </div>
 
-          <p className="text-stone-500 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            A welcoming community of faith, worshipping God, growing together in Scripture, and serving our community.
+          <p className="text-stone-500 text-sm sm:text-base max-w-xl mx-auto leading-relaxed pt-1">
+            {t('heroSubtitle')}
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
@@ -100,7 +107,7 @@ function ChurchAppContent() {
                   : 'bg-stone-100 text-stone-800 hover:bg-stone-200'
               }`}
             >
-              Upcoming Events
+              {t('heroUpcoming')}
             </button>
             <button
               onClick={() => setActiveTab('verse')}
@@ -110,7 +117,7 @@ function ChurchAppContent() {
                   : 'bg-stone-100 text-stone-800 hover:bg-stone-200'
               }`}
             >
-              Daily Scripture
+              {t('heroScripture')}
             </button>
             <button
               onClick={() => setActiveTab('about')}
@@ -120,7 +127,7 @@ function ChurchAppContent() {
                   : 'bg-stone-100 text-stone-800 hover:bg-stone-200'
               }`}
             >
-              Service Times
+              {t('heroSchedule')}
             </button>
 
             {isAdmin && (
@@ -129,7 +136,7 @@ function ChurchAppContent() {
                 className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-xs transition-all"
               >
                 <Plus className="w-4 h-4" />
-                Add Event
+                <span>{t('heroAddEvent')}</span>
               </button>
             )}
           </div>
@@ -155,13 +162,13 @@ function ChurchAppContent() {
               onOpenAdminPortal={openAdminWithTab}
             />
 
-            {/* Subtle banner to jump to events */}
+            {/* Jump to events banner */}
             <div className="max-w-4xl mx-auto px-4 pb-16 text-center">
               <button
                 onClick={() => setActiveTab('events')}
                 className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-stone-900 underline"
               >
-                <span>View scheduled worship services & gatherings</span>
+                <span>{language === 'vi' ? 'Xem các buổi thờ phượng và sinh hoạt sắp tới' : 'View scheduled worship services & gatherings'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -171,7 +178,14 @@ function ChurchAppContent() {
         {activeTab === 'about' && <ChurchInfoSection />}
       </main>
 
-      {/* Admin Portal Modal */}
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onLoginSuccess={() => openAdminWithTab('create-event')}
+      />
+
+      {/* Admin Management Dashboard Modal */}
       {adminPortalOpen && (
         <AdminPortal
           events={events}
@@ -183,15 +197,15 @@ function ChurchAppContent() {
         />
       )}
 
-      {/* Clean Minimalist Footer */}
+      {/* Minimalist Footer */}
       <footer className="bg-white border-t border-stone-200/80 py-12 px-4 sm:px-6 lg:px-8 mt-12 text-stone-500 text-xs">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
             <span className="font-serif text-lg font-bold text-stone-900">
-              Vietnamese Revival Church
+              Hội Thánh Phục Hưng Việt Nam
             </span>
             <span className="text-stone-300">|</span>
-            <span className="text-stone-600">Hội Thánh Phục Hưng</span>
+            <span className="text-stone-600 font-serif">Vietnamese Revival Church</span>
           </div>
 
           <div className="flex items-center gap-6">
@@ -199,41 +213,41 @@ function ChurchAppContent() {
               onClick={() => setActiveTab('events')}
               className="hover:text-stone-900 transition-colors"
             >
-              Events
+              {t('navEvents')}
             </button>
             <button
               onClick={() => setActiveTab('verse')}
               className="hover:text-stone-900 transition-colors"
             >
-              Daily Bread
+              {t('navVerse')}
             </button>
             <button
               onClick={() => setActiveTab('about')}
               className="hover:text-stone-900 transition-colors"
             >
-              Services
+              {t('navAbout')}
             </button>
             {isAdmin ? (
               <button
                 onClick={() => openAdminWithTab('create-event')}
                 className="text-amber-800 font-semibold hover:underline"
               >
-                Admin Dashboard
+                {t('navAdmin')}
               </button>
             ) : (
               <button
-                onClick={signInWithGoogle}
+                onClick={() => setLoginModalOpen(true)}
                 className="text-stone-600 hover:text-stone-900 font-medium"
               >
-                Admin Login
+                {t('navLogin')}
               </button>
             )}
           </div>
         </div>
 
         <div className="max-w-5xl mx-auto mt-6 pt-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-400 text-[11px]">
-          <p>© {new Date().getFullYear()} Vietnamese Revival Church. All rights reserved.</p>
-          <p>Reliable PostgreSQL Storage • Google Cloud Run</p>
+          <p>© {new Date().getFullYear()} Vietnamese Revival Church • Tempe, Arizona. {t('footerRights')}</p>
+          <p>{t('footerPlatform')}</p>
         </div>
       </footer>
     </div>
@@ -242,8 +256,10 @@ function ChurchAppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ChurchAppContent />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <ChurchAppContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

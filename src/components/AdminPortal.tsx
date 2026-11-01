@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChurchEvent, DailyVerse, Announcement } from '../types.ts';
 import { useAuth } from '../context/AuthContext.tsx';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   Calendar,
   BookOpen,
@@ -14,7 +15,20 @@ import {
   CheckCircle2,
   AlertCircle,
   RefreshCw,
+  Users,
+  KeyRound,
+  UserPlus,
+  ShieldCheck,
 } from 'lucide-react';
+
+interface AdminAccount {
+  id: number;
+  username: string;
+  email: string;
+  displayName: string;
+  role: string;
+  createdAt: string;
+}
 
 interface AdminPortalProps {
   events: ChurchEvent[];
@@ -33,7 +47,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   onClose,
   onRefreshData,
 }) => {
-  const { user, getToken } = useAuth();
+  const { adminUser, getToken } = useAuth();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -50,8 +65,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [eventLocation, setEventLocation] = useState('Main Sanctuary');
   const [eventAddress, setEventAddress] = useState('Tempe, Arizona');
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
-  const [eventOrganizer, setEventOrganizer] = useState(user?.displayName || 'Pastoral Ministry Team');
-  const [eventOrganizerEmail, setEventOrganizerEmail] = useState(user?.email || 'contact@vnrevivalchurch.org');
+  const [eventOrganizer, setEventOrganizer] = useState(adminUser?.displayName || 'Pastoral Ministry Team');
+  const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vnrevivalchurch.org');
 
   // Daily Verse Form State
   const [verseDate, setVerseDate] = useState(new Date().toISOString().split('T')[0]);
@@ -67,10 +82,41 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [announceTitle, setAnnounceTitle] = useState('');
   const [announceContent, setAnnounceContent] = useState('');
 
+  // Admin Accounts Management State
+  const [adminList, setAdminList] = useState<AdminAccount[]>([]);
+  const [newAdminUsername, setNewAdminUsername] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [newAdminDisplayName, setNewAdminDisplayName] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
   const showFeedback = (type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });
-    setTimeout(() => setFeedback(null), 3500);
+    setTimeout(() => setFeedback(null), 4000);
   };
+
+  const loadAdminAccounts = async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/admins', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAdminList(data);
+      }
+    } catch (err) {
+      console.error('Failed to load admins:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'admin-accounts') {
+      loadAdminAccounts();
+    }
+  }, [activeTab]);
 
   const resetEventForm = () => {
     setEditingEventId(null);
@@ -78,10 +124,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventDescription('');
     setEventCategory('Worship');
     setEventDate(new Date().toISOString().split('T')[0]);
-    setEventStartTime('10:00 AM');
-    setEventEndTime('12:00 PM');
+    setEventStartTime('03:00 PM');
+    setEventEndTime('05:00 PM');
     setEventLocation('Main Sanctuary');
-    setEventAddress('');
+    setEventAddress('Tempe, Arizona');
     setEventIsFeatured(false);
   };
 
@@ -94,7 +140,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventStartTime(evt.startTime);
     setEventEndTime(evt.endTime || '');
     setEventLocation(evt.location);
-    setEventAddress(evt.address || '');
+    setEventAddress(evt.address || 'Tempe, Arizona');
     setEventIsFeatured(evt.isFeatured);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');
@@ -104,13 +150,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventTitle.trim() || !eventDescription.trim() || !eventDate || !eventStartTime || !eventLocation) {
-      showFeedback('error', 'Please fill in all required event details.');
+      showFeedback('error', language === 'vi' ? 'Vui lòng điền đầy đủ các thông tin sự kiện bắt buộc.' : 'Please fill in all required event details.');
       return;
     }
 
     try {
       setSubmitting(true);
-      const token = await getToken();
+      const token = getToken();
       const payload = {
         title: eventTitle.trim(),
         description: eventDescription.trim(),
@@ -119,7 +165,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         startTime: eventStartTime,
         endTime: eventEndTime || null,
         location: eventLocation.trim(),
-        address: eventAddress.trim() || null,
+        address: eventAddress.trim() || 'Tempe, Arizona',
         isFeatured: eventIsFeatured,
         organizerName: eventOrganizer.trim(),
         organizerEmail: eventOrganizerEmail.trim(),
@@ -142,7 +188,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         throw new Error(data.error || 'Failed to save event');
       }
 
-      showFeedback('success', editingEventId ? 'Event updated successfully!' : 'New event published to Vietnamese Revival Church calendar!');
+      showFeedback('success', editingEventId 
+        ? (language === 'vi' ? 'Cập nhật sự kiện thành công!' : 'Event updated successfully!') 
+        : (language === 'vi' ? 'Đã thêm sự kiện vào lịch hội thánh!' : 'New event published successfully!'));
       resetEventForm();
       onRefreshData();
       setActiveTab('manage-events');
@@ -154,15 +202,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   const handleDeleteEvent = async (id: number) => {
-    if (!window.confirm('Delete this gathering from the calendar?')) return;
+    if (!window.confirm(language === 'vi' ? 'Bạn có chắc chắn muốn xóa sự kiện này?' : 'Delete this gathering from the calendar?')) return;
     try {
-      const token = await getToken();
+      const token = getToken();
       const res = await fetch(`/api/events/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to delete event');
-      showFeedback('success', 'Event removed.');
+      showFeedback('success', language === 'vi' ? 'Đã xóa sự kiện.' : 'Event removed.');
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message || 'Error deleting event');
@@ -171,13 +219,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   const handleAiDraftDevotional = async () => {
     if (!verseReference.trim()) {
-      showFeedback('error', 'Please enter a Scripture reference (e.g. "Romans 8:28" or "Giăng 3:16") first.');
+      showFeedback('error', language === 'vi' ? 'Vui lòng nhập đoạn Kinh Thánh (ví dụ: "Giăng 3:16" hoặc "Phi-líp 4:6-7")' : 'Please enter a Scripture reference (e.g. "Romans 8:28" or "John 3:16") first.');
       return;
     }
 
     try {
       setGeneratingAi(true);
-      const token = await getToken();
+      const token = getToken();
       const res = await fetch('/api/ai/generate-devotional', {
         method: 'POST',
         headers: {
@@ -197,7 +245,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       if (generated.prayer) setVersePrayer(generated.prayer);
       if (generated.theme) setVerseTheme(generated.theme);
 
-      showFeedback('success', 'Devotional draft prepared! Review and save below.');
+      showFeedback('success', language === 'vi' ? 'Bản thảo suy gẫm đã sẵn sàng!' : 'Devotional draft prepared! Review and save below.');
     } catch (err: any) {
       showFeedback('error', err.message || 'Error generating reflection');
     } finally {
@@ -208,13 +256,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveVerse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verseDate || !verseReference.trim() || !verseText.trim() || !verseReflection.trim()) {
-      showFeedback('error', 'Please fill in date, reference, verse text, and reflection.');
+      showFeedback('error', language === 'vi' ? 'Vui lòng điền ngày, câu gốc, nội dung và suy gẫm.' : 'Please fill in date, reference, verse text, and reflection.');
       return;
     }
 
     try {
       setSubmitting(true);
-      const token = await getToken();
+      const token = getToken();
       const res = await fetch('/api/verses', {
         method: 'POST',
         headers: {
@@ -233,7 +281,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       });
 
       if (!res.ok) throw new Error('Failed to save verse');
-      showFeedback('success', 'Daily scripture saved successfully!');
+      showFeedback('success', language === 'vi' ? 'Đã lưu Lời Chúa hằng ngày!' : 'Daily scripture saved successfully!');
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message || 'Error saving daily verse');
@@ -243,43 +291,54 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   const handleDeleteVerse = async (id: number) => {
-    if (!window.confirm('Delete this daily devotional?')) return;
+    if (!window.confirm(language === 'vi' ? 'Xóa câu Lời Chúa này?' : 'Delete this daily devotional?')) return;
     try {
-      const token = await getToken();
+      const token = getToken();
       await fetch(`/api/verses/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      showFeedback('success', 'Verse deleted.');
+      showFeedback('success', language === 'vi' ? 'Đã xóa Lời Chúa.' : 'Verse deleted.');
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message);
     }
   };
 
-  const handleSaveAnnouncement = async (e: React.FormEvent) => {
+  // Create new Admin Account handler
+  const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!announceTitle.trim() || !announceContent.trim()) return;
+    if (!newAdminUsername.trim() || !newAdminPassword.trim() || !newAdminDisplayName.trim()) {
+      showFeedback('error', language === 'vi' ? 'Vui lòng điền tên đăng nhập, mật khẩu và tên hiển thị' : 'Please fill in username, password, and display name');
+      return;
+    }
 
     try {
       setSubmitting(true);
-      const token = await getToken();
-      await fetch('/api/announcements', {
+      const token = getToken();
+      const res = await fetch('/api/auth/create-admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: announceTitle.trim(),
-          content: announceContent.trim(),
-          priority: 'normal',
+          username: newAdminUsername.trim(),
+          password: newAdminPassword.trim(),
+          displayName: newAdminDisplayName.trim(),
+          email: newAdminEmail.trim() || undefined,
         }),
       });
-      showFeedback('success', 'Announcement published!');
-      setAnnounceTitle('');
-      setAnnounceContent('');
-      onRefreshData();
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create admin');
+
+      showFeedback('success', language === 'vi' ? `Tạo tài khoản quản trị [${newAdminUsername}] thành công!` : `Admin account [${newAdminUsername}] created!`);
+      setNewAdminUsername('');
+      setNewAdminPassword('');
+      setNewAdminDisplayName('');
+      setNewAdminEmail('');
+      loadAdminAccounts();
     } catch (err: any) {
       showFeedback('error', err.message);
     } finally {
@@ -287,17 +346,52 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleDeleteAnnouncement = async (id: number) => {
+  // Delete Admin Account handler
+  const handleDeleteAdmin = async (id: number, username: string) => {
+    if (!window.confirm(language === 'vi' ? `Bạn có chắc chắn muốn xóa tài khoản quản trị [${username}]?` : `Are you sure you want to delete admin account [${username}]?`)) return;
+
     try {
-      const token = await getToken();
-      await fetch(`/api/announcements/${id}`, {
+      const token = getToken();
+      const res = await fetch(`/api/auth/admins/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      showFeedback('success', 'Announcement removed.');
-      onRefreshData();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete admin');
+
+      showFeedback('success', language === 'vi' ? 'Đã xóa tài khoản quản trị.' : 'Admin account deleted.');
+      loadAdminAccounts();
     } catch (err: any) {
       showFeedback('error', err.message);
+    }
+  };
+
+  // Change Password handler
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword) return;
+
+    try {
+      setSubmitting(true);
+      const token = getToken();
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Password update failed');
+
+      showFeedback('success', language === 'vi' ? 'Đổi mật khẩu thành công!' : 'Password updated successfully!');
+      setOldPassword('');
+      setNewPassword('');
+    } catch (err: any) {
+      showFeedback('error', err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -308,10 +402,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div className="p-6 bg-stone-900 text-white flex items-center justify-between border-b border-stone-800 flex-shrink-0">
           <div>
             <h2 className="text-xl font-serif font-bold text-white">
-              Vietnamese Revival Church • Admin Portal
+              {t('adminDashboardTitle')}
             </h2>
             <p className="text-xs text-stone-400 mt-0.5">
-              Logged in as <span className="text-amber-400">{user?.displayName || user?.email}</span>
+              {language === 'vi' ? 'Đăng nhập với tư cách: ' : 'Logged in as: '}
+              <span className="text-amber-400 font-semibold">{adminUser?.displayName} (@{adminUser?.username})</span>
             </p>
           </div>
 
@@ -352,56 +447,57 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         )}
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 flex-shrink-0">
+        <div className="flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 flex-shrink-0 overflow-x-auto scrollbar-none">
           <button
             onClick={() => {
               setActiveTab('create-event');
               if (!editingEventId) resetEventForm();
             }}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5 ${
               activeTab === 'create-event'
                 ? 'border-stone-900 text-stone-900 bg-white rounded-t-xl'
                 : 'border-transparent text-stone-500 hover:text-stone-900'
             }`}
           >
             <Plus className="w-3.5 h-3.5" />
-            {editingEventId ? 'Edit Event' : 'Add New Event'}
+            {editingEventId ? (language === 'vi' ? 'Sửa Sự Kiện' : 'Edit Event') : t('tabAddEvent')}
           </button>
 
           <button
             onClick={() => setActiveTab('manage-events')}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5 ${
               activeTab === 'manage-events'
                 ? 'border-stone-900 text-stone-900 bg-white rounded-t-xl'
                 : 'border-transparent text-stone-500 hover:text-stone-900'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            Manage Events ({events.length})
+            {t('tabManageEvents')} ({events.length})
           </button>
 
           <button
             onClick={() => setActiveTab('verses')}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5 ${
               activeTab === 'verses'
                 ? 'border-stone-900 text-stone-900 bg-white rounded-t-xl'
                 : 'border-transparent text-stone-500 hover:text-stone-900'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            Daily Scripture ({allVerses.length})
+            {t('tabVerses')} ({allVerses.length})
           </button>
 
+          {/* New Admin Accounts Tab as requested */}
           <button
-            onClick={() => setActiveTab('announcements')}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
-              activeTab === 'announcements'
-                ? 'border-stone-900 text-stone-900 bg-white rounded-t-xl'
-                : 'border-transparent text-stone-500 hover:text-stone-900'
+            onClick={() => setActiveTab('admin-accounts')}
+            className={`px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              activeTab === 'admin-accounts'
+                ? 'border-amber-600 text-amber-900 bg-white rounded-t-xl font-bold'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
-            <Bell className="w-3.5 h-3.5" />
-            Notices ({announcements.length})
+            <Users className="w-3.5 h-3.5 text-amber-600" />
+            <span>{t('tabAdminAccounts')}</span>
           </button>
         </div>
 
@@ -412,7 +508,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <form onSubmit={handleSaveEvent} className="space-y-4 max-w-2xl mx-auto">
               <div className="flex items-center justify-between pb-2 border-b border-stone-200">
                 <h3 className="text-base font-serif font-bold text-stone-900">
-                  {editingEventId ? 'Edit Event' : 'Add New Event to Calendar'}
+                  {editingEventId ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event') : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
                 </h3>
                 {editingEventId && (
                   <button
@@ -420,19 +516,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     onClick={resetEventForm}
                     className="text-xs text-stone-500 hover:text-stone-800 underline"
                   >
-                    Cancel Editing
+                    {language === 'vi' ? 'Hủy Sửa' : 'Cancel Editing'}
                   </button>
                 )}
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Event Title *
+                  {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Lễ Thờ Phượng Chúa Nhật / Sunday Celebration"
+                  placeholder="e.g. Lễ Thờ Phượng Chúa Nhật / Sunday Worship Celebration"
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
@@ -441,12 +537,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Description *
+                  {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
                 </label>
                 <textarea
                   rows={3}
                   required
-                  placeholder="Event details, scripture topic, speaker, or what to expect..."
+                  placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
                   value={eventDescription}
                   onChange={(e) => setEventDescription(e.target.value)}
                   className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
@@ -456,7 +552,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Category
+                    {language === 'vi' ? 'Phân Loại' : 'Category'}
                   </label>
                   <select
                     value={eventCategory}
@@ -472,7 +568,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Date *
+                    {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
                   </label>
                   <input
                     type="date"
@@ -485,12 +581,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Start Time *
+                    {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. 10:00 AM"
+                    placeholder="03:00 PM"
                     value={eventStartTime}
                     onChange={(e) => setEventStartTime(e.target.value)}
                     className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
@@ -501,11 +597,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    End Time (Optional)
+                    {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. 12:00 PM"
+                    placeholder="05:00 PM"
                     value={eventEndTime}
                     onChange={(e) => setEventEndTime(e.target.value)}
                     className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
@@ -514,12 +610,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    Location / Room *
+                    {language === 'vi' ? 'Địa Điểm / Phòng Nhóm *' : 'Location *'}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Main Sanctuary, Fellowship Hall, Zoom"
+                    placeholder="Main Sanctuary, Tempe, Arizona"
                     value={eventLocation}
                     onChange={(e) => setEventLocation(e.target.value)}
                     className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
@@ -535,7 +631,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     onChange={(e) => setEventIsFeatured(e.target.checked)}
                     className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
                   />
-                  Mark as Featured Event
+                  {language === 'vi' ? 'Đánh dấu là sự kiện nổi bật' : 'Mark as Featured Event'}
                 </label>
               </div>
 
@@ -546,7 +642,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   className="px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  {submitting ? 'Saving...' : editingEventId ? 'Update Event' : 'Publish Event'}
+                  {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : editingEventId ? (language === 'vi' ? 'Cập Nhật' : 'Update Event') : (language === 'vi' ? 'Đăng Sự Kiện' : 'Publish Event')}
                 </button>
               </div>
             </form>
@@ -556,7 +652,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           {activeTab === 'manage-events' && (
             <div className="space-y-3 max-w-2xl mx-auto">
               {events.length === 0 ? (
-                <p className="text-stone-500 text-sm py-8 text-center">No events in database.</p>
+                <p className="text-stone-500 text-sm py-8 text-center">{language === 'vi' ? 'Chưa có sự kiện nào trong cơ sở dữ liệu.' : 'No events in database.'}</p>
               ) : (
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
                   {events.map((evt) => (
@@ -602,7 +698,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <form onSubmit={handleSaveVerse} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5">
                 <div className="flex items-center justify-between pb-2 border-b border-stone-200">
                   <h3 className="font-serif font-bold text-stone-900 text-sm">
-                    Post Scripture & Devotional
+                    {language === 'vi' ? 'Đăng Lời Chúa & Suy Gẫm Hôm Nay' : 'Post Scripture & Devotional'}
                   </h3>
                   <button
                     type="button"
@@ -611,13 +707,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     className="flex items-center gap-1 px-2.5 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-medium transition-colors"
                   >
                     <Sparkles className="w-3 h-3 text-amber-300" />
-                    <span>{generatingAi ? 'Drafting...' : 'AI Devotional Assistant'}</span>
+                    <span>{generatingAi ? (language === 'vi' ? 'Đang soạn thảo...' : 'Drafting...') : (language === 'vi' ? 'AI Soạn Thảo Suy Gẫm' : 'AI Devotional Assistant')}</span>
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">Date *</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Ngày *' : 'Date *'}</label>
                     <input
                       type="date"
                       required
@@ -627,11 +723,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">Scripture Reference *</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh *' : 'Scripture Reference *'}</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. 2 Chronicles 7:14 or John 3:16"
+                      placeholder="e.g. 2 Sử Ký 7:14 / 2 Chronicles 7:14"
                       value={verseReference}
                       onChange={(e) => setVerseReference(e.target.value)}
                       className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
@@ -640,11 +736,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">Scripture Text *</label>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa *' : 'Scripture Text *'}</label>
                   <textarea
                     rows={2}
                     required
-                    placeholder="Enter the full verse text..."
+                    placeholder={language === 'vi' ? 'Nhập câu gốc Lời Chúa...' : 'Enter the scripture verse text...'}
                     value={verseText}
                     onChange={(e) => setVerseText(e.target.value)}
                     className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
@@ -652,11 +748,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">Pastoral Reflection *</label>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm Mục Vụ *' : 'Pastoral Reflection *'}</label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="Thoughtful pastoral reflection..."
+                    placeholder={language === 'vi' ? 'Nội dung suy gẫm và khích lệ đức tin...' : 'Thoughtful pastoral reflection...'}
                     value={verseReflection}
                     onChange={(e) => setVerseReflection(e.target.value)}
                     className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
@@ -664,10 +760,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">Prayer (Optional)</label>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện' : 'Prayer (Optional)'}</label>
                   <input
                     type="text"
-                    placeholder="Short prayer (e.g. Chúa ôi, xin ban bình an...)"
+                    placeholder="Lạy Chúa, xin dẫn dắt từng bước đi của chúng con..."
                     value={versePrayer}
                     onChange={(e) => setVersePrayer(e.target.value)}
                     className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
@@ -680,7 +776,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     disabled={submitting}
                     className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold"
                   >
-                    {submitting ? 'Saving...' : 'Save Daily Scripture'}
+                    {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : (language === 'vi' ? 'Lưu Lời Chúa' : 'Save Daily Scripture')}
                   </button>
                 </div>
               </form>
@@ -688,7 +784,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               {/* Published verses list */}
               <div className="space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                  Published Daily Verses ({allVerses.length})
+                  {language === 'vi' ? 'Lời Chúa Đã Đăng' : 'Published Daily Verses'} ({allVerses.length})
                 </h4>
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl overflow-hidden bg-white">
                   {allVerses.map((v) => (
@@ -712,58 +808,180 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: ANNOUNCEMENTS */}
-          {activeTab === 'announcements' && (
-            <div className="space-y-4 max-w-2xl mx-auto">
-              <form onSubmit={handleSaveAnnouncement} className="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
-                <h3 className="text-sm font-bold text-stone-900">Publish Notice Banner</h3>
+          {/* TAB 4: ADMIN ACCOUNTS MANAGEMENT (Requested feature) */}
+          {activeTab === 'admin-accounts' && (
+            <div className="space-y-6 max-w-2xl mx-auto">
+              {/* Provision New Admin Account Form */}
+              <form onSubmit={handleCreateAdmin} className="p-5 bg-amber-50/50 rounded-2xl border border-amber-200/80 space-y-4">
                 <div>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Notice Title (e.g. Special Revival Service)"
-                    value={announceTitle}
-                    onChange={(e) => setAnnounceTitle(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
-                  />
+                  <h3 className="font-serif font-bold text-stone-900 text-base flex items-center gap-2">
+                    <UserPlus className="w-4 h-4 text-amber-700" />
+                    {t('newAdminTitle')}
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    {t('newAdminDesc')}
+                  </p>
                 </div>
-                <div>
-                  <textarea
-                    rows={2}
-                    required
-                    placeholder="Short notice text..."
-                    value={announceContent}
-                    onChange={(e) => setAnnounceContent(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      {t('usernameLabel')} *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. pastor_david"
+                      value={newAdminUsername}
+                      onChange={(e) => setNewAdminUsername(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      {t('passwordLabel')} *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={newAdminPassword}
+                      onChange={(e) => setNewAdminPassword(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      {t('displayNameLabel')} *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Mục sư David Nguyễn"
+                      value={newAdminDisplayName}
+                      onChange={(e) => setNewAdminDisplayName(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      {t('emailLabel')} (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="pastor@vnrevivalchurch.org"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs bg-white"
+                    />
+                  </div>
                 </div>
-                <div className="text-right">
+
+                <div className="pt-1 text-right">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-medium"
+                    className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
                   >
-                    Publish
+                    {submitting ? (language === 'vi' ? 'Đang tạo...' : 'Creating...') : t('createAdminBtn')}
                   </button>
                 </div>
               </form>
 
-              <div className="space-y-2">
-                {announcements.map((a) => (
-                  <div key={a.id} className="p-3 bg-white border border-stone-200 rounded-xl flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-stone-900">{a.title}</p>
-                      <p className="text-xs text-stone-600">{a.content}</p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteAnnouncement(a.id)}
-                      className="p-1 text-stone-400 hover:text-rose-600"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+              {/* Existing Admin Accounts List */}
+              <div className="space-y-3">
+                <h4 className="font-serif font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-stone-700" />
+                  {t('existingAdminsTitle')} ({adminList.length})
+                </h4>
+
+                <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
+                  {adminList.map((adm) => {
+                    const isSelf = adminUser?.id === adm.id;
+                    return (
+                      <div key={adm.id} className="p-4 flex items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-stone-900 text-xs sm:text-sm">
+                              {adm.displayName}
+                            </span>
+                            <span className="text-[10px] font-mono bg-stone-100 text-stone-600 px-2 py-0.5 rounded">
+                              @{adm.username}
+                            </span>
+                            {isSelf && (
+                              <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
+                                {language === 'vi' ? 'Tài khoản của bạn' : 'Your Account'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-stone-500 mt-0.5">{adm.email}</p>
+                        </div>
+
+                        {!isSelf && (
+                          <button
+                            onClick={() => handleDeleteAdmin(adm.id, adm.username)}
+                            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            title={t('deleteAdminBtn')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Change Password for Currently Logged-in Admin */}
+              <form onSubmit={handleChangePassword} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+                <h4 className="font-serif font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-stone-600" />
+                  {t('changePasswordTitle')} ({adminUser?.username})
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      {t('oldPasswordLabel')} *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                      {t('newPasswordLabel')} *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-right pt-1">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    {t('updatePasswordBtn')}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
         </div>

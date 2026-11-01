@@ -8,14 +8,26 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 
-// Users table linked to Firebase Authentication
+// Users table
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  uid: text('uid').notNull().unique(), // Firebase Auth UID
+  uid: text('uid').notNull().unique(),
   email: text('email').notNull(),
   displayName: text('display_name'),
   photoUrl: text('photo_url'),
-  role: text('role').notNull().default('member'), // 'admin' | 'pastor' | 'member'
+  role: text('role').notNull().default('member'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Dedicated Administrator Accounts (Direct username/password login, no Google login)
+export const adminUsers = pgTable('admin_users', {
+  id: serial('id').primaryKey(),
+  username: text('username').notNull().unique(),
+  email: text('email').notNull(),
+  displayName: text('display_name').notNull(),
+  passwordHash: text('password_hash').notNull(),
+  passwordSalt: text('password_salt').notNull(),
+  role: text('role').notNull().default('admin'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

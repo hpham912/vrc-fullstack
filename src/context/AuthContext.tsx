@@ -1,113 +1,107 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  User,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { auth, googleAuthProvider } from '../lib/firebase.ts';
 
-export interface DbUser {
-  uid: string;
+export interface AdminUser {
+  id: number;
+  username: string;
+  displayName: string;
   email: string;
-  displayName: string | null;
-  photoUrl: string | null;
   role: string;
 }
 
 interface AuthContextType {
-  user: User | null;
-  dbUser: DbUser | null;
+  adminUser: AdminUser | null;
   isAdmin: boolean;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
-  getToken: () => Promise<string | null>;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => void;
+  getToken: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  dbUser: null,
+  adminUser: null,
   isAdmin: false,
   loading: true,
-  signInWithGoogle: async () => {},
-  signOut: async () => {},
-  getToken: async () => null,
+  login: async () => {},
+  logout: () => {},
+  getToken: () => null,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [dbUser, setDbUser] = useState<DbUser | null>(null);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const getToken = async (): Promise<string | null> => {
-    if (!auth.currentUser) return null;
-    return await auth.currentUser.getIdToken();
+  const getToken = (): string | null => {
+    return localStorage.getItem('vrc_admin_token');
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        try {
-          const token = await currentUser.getIdToken();
-          const res = await fetch('/api/auth/sync', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setDbUser(data.user);
-          }
-        } catch (err) {
-          console.error('Error syncing user profile:', err);
-        }
-      } else {
-        setDbUser(null);
-      }
+  const logout = () => {
+    localStorage.removeItem('vrc_admin_token');
+    setAdminUser(null);
+  };
+
+  const checkCurrentSession = async () => {
+    const token = getToken();
+    if (!token) {
       setLoading(false);
-    });
+      return;
+    }
 
-    return () => unsubscribe();
-  }, []);
-
-  const signInWithGoogle = async () => {
     try {
-      setLoading(true);
-      await signInWithPopup(auth, googleAuthProvider);
-    } catch (err: any) {
-      console.error('Error signing in with Google:', err);
-      throw err;
+      const res = await fetch('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAdminUser(data.user);
+      } else {
+        logout();
+      }
+    } catch (err) {
+      console.error('Session verification error:', err);
+      logout();
     } finally {
       setLoading(false);
     }
   };
 
-  const signOut = async () => {
+  useEffect(() => {
+    checkCurrentSession();
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    setLoading(true);
     try {
-      await firebaseSignOut(auth);
-      setUser(null);
-      setDbUser(null);
-    } catch (err) {
-      console.error('Error signing out:', err);
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      localStorage.setItem('vrc_admin_token', data.token);
+      setAdminUser(data.user);
+    } finally {
+      setLoading(false);
     }
   };
-
-  // If logged in via Google sign-in in this church admin demo, they have admin privileges
-  const isAdmin = Boolean(user);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        dbUser,
-        isAdmin,
+        adminUser,
+        isAdmin: Boolean(adminUser),
         loading,
-        signInWithGoogle,
-        signOut,
+        login,
+        logout,
         getToken,
       }}
     >

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChurchEvent } from '../types.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   Calendar,
   Clock,
@@ -8,8 +9,6 @@ import {
   Plus,
   CalendarPlus,
   Download,
-  Share2,
-  Sparkles,
 } from 'lucide-react';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../utils/calendar.ts';
 
@@ -26,6 +25,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
   isAdmin,
   onOpenAdminPortal,
 }) => {
+  const { language, t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,19 +40,36 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
     return matchesCat && matchesSearch;
   });
 
+  const getCategoryLabel = (cat: string) => {
+    switch (cat) {
+      case 'All':
+        return t('catAll');
+      case 'Worship':
+        return t('catWorship');
+      case 'Bible Study':
+        return t('catBibleStudy');
+      case 'Youth':
+        return t('catYouth');
+      case 'Special Gathering':
+        return t('catSpecial');
+      default:
+        return cat;
+    }
+  };
+
   return (
     <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 pb-6 border-b border-stone-200/80">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1">
-            Vietnamese Revival Church • Tempe, Arizona
+            Hội Thánh Phục Hưng Việt Nam • Tempe, Arizona
           </span>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-stone-900 tracking-tight">
-            Upcoming Events & Gatherings
+            {t('eventsTitle')}
           </h2>
           <p className="text-stone-500 text-sm mt-1 max-w-xl">
-            Join our church family in Tempe, Arizona for worship services, bible studies, and fellowship.
+            {t('eventsSubtitle')}
           </p>
         </div>
 
@@ -62,7 +79,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
-            Add New Event
+            <span>{t('heroAddEvent')}</span>
           </button>
         )}
       </div>
@@ -80,13 +97,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200 hover:border-stone-300'
               }`}
             >
-              {{
-                'All': 'All Events',
-                'Worship': 'Worship (Thờ Phượng)',
-                'Bible Study': 'Bible Study (Kinh Thánh)',
-                'Youth': 'Youth (Giới Trẻ)',
-                'Special Gathering': 'Special Events',
-              }[cat] || cat}
+              {getCategoryLabel(cat)}
             </button>
           ))}
         </div>
@@ -95,7 +106,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
           <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 bg-white border border-stone-200 rounded-lg text-xs focus:outline-none focus:border-stone-400 transition-colors"
@@ -107,14 +118,14 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       {filteredEvents.length === 0 ? (
         <div className="py-20 text-center bg-white rounded-2xl border border-stone-200/60 p-8">
           <Calendar className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-          <p className="font-serif font-bold text-stone-800 text-base">No scheduled events found</p>
-          <p className="text-stone-500 text-xs mt-1">Check back soon or adjust your search filter.</p>
+          <p className="font-serif font-bold text-stone-800 text-base">{t('noEvents')}</p>
+          <p className="text-stone-500 text-xs mt-1">{t('noEventsSub')}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {filteredEvents.map((evt) => {
             const eventDate = new Date(evt.date + 'T00:00:00');
-            const dateFormatted = eventDate.toLocaleDateString(undefined, {
+            const dateFormatted = eventDate.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
               weekday: 'short',
               month: 'short',
               day: 'numeric',
@@ -131,11 +142,11 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   <div className="space-y-2.5 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/60">
-                        {evt.category}
+                        {getCategoryLabel(evt.category)}
                       </span>
                       {evt.isFeatured && (
                         <span className="text-[11px] font-semibold text-stone-800 bg-stone-100 px-2.5 py-0.5 rounded-md">
-                          Featured
+                          {t('featuredBadge')}
                         </span>
                       )}
                     </div>
@@ -166,7 +177,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                     {evt.organizerName && (
                       <p className="text-xs text-stone-400">
-                        Contact: <span className="text-stone-600 font-medium">{evt.organizerName}</span>
+                        {t('contactLead')}: <span className="text-stone-600 font-medium">{evt.organizerName}</span>
                         {evt.organizerEmail ? ` • ${evt.organizerEmail}` : ''}
                       </p>
                     )}
@@ -182,7 +193,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                       title="Add to Google Calendar"
                     >
                       <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
-                      <span>Google Calendar</span>
+                      <span>{t('addToGoogle')}</span>
                     </a>
                     <button
                       onClick={() => downloadIcsFile(evt)}
@@ -190,7 +201,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                       title="Download .ics file"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>iCal / Apple</span>
+                      <span>{t('addToApple')}</span>
                     </button>
                   </div>
                 </div>

@@ -1,46 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
-import { adminAuth } from '../lib/firebase-admin.ts';
-import { DecodedIdToken } from 'firebase-admin/auth';
+import { verifyToken, AuthPayload } from '../lib/auth-util.ts';
 
 export interface AuthRequest extends Request {
-  user?: DecodedIdToken;
+  adminUser?: AuthPayload;
 }
 
-export const requireAuth = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: Missing or invalid token' });
+    return res.status(401).json({ error: 'Unauthorized: Please log in as an administrator.' });
   }
 
   const token = authHeader.split('Bearer ')[1];
-  try {
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    req.user = decodedToken;
-    next();
-  } catch (error) {
-    console.error('Error verifying Firebase ID token:', error);
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  const payload = verifyToken(token);
+  if (!payload) {
+    return res.status(401).json({ error: 'Session expired or invalid. Please sign in again.' });
   }
-};
 
-export const optionalAuth = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split('Bearer ')[1];
-    try {
-      const decodedToken = await adminAuth.verifyIdToken(token);
-      req.user = decodedToken;
-    } catch (error) {
-      // Ignore token verification errors for optional routes
-    }
-  }
+  req.adminUser = payload;
   next();
 };
+
+export const requireAuth = requireAdmin;

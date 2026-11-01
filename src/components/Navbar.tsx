@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   Calendar,
   BookOpen,
@@ -9,27 +10,30 @@ import {
   LogOut,
   Menu,
   X,
-  Cross,
+  Globe,
 } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   openAdminPortal: () => void;
+  openLoginModal: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   openAdminPortal,
+  openLoginModal,
 }) => {
-  const { user, isAdmin, signInWithGoogle, signOut } = useAuth();
+  const { adminUser, isAdmin, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { id: 'events', label: 'Events Calendar', icon: Calendar },
-    { id: 'verse', label: 'Daily Verse', icon: BookOpen },
-    { id: 'about', label: 'Service & Location', icon: Clock },
+    { id: 'events', label: t('navEvents'), icon: Calendar },
+    { id: 'verse', label: t('navVerse'), icon: BookOpen },
+    { id: 'about', label: t('navAbout'), icon: Clock },
   ];
 
   const handleNavClick = (id: string) => {
@@ -38,10 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200/80 transition-all">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo & Church Name */}
+          {/* Logo & Church Name - Keeps BOTH languages in title as requested */}
           <button
             onClick={() => handleNavClick('events')}
             className="flex items-center gap-3.5 text-left group"
@@ -50,17 +54,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               ✝
             </div>
             <div>
-              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-stone-900 block leading-tight">
-                Vietnamese Revival Church
+              <span className="font-serif text-base sm:text-lg font-bold tracking-tight text-stone-900 block leading-tight">
+                Hội Thánh Phục Hưng Việt Nam
               </span>
-              <span className="text-[11px] font-medium tracking-wider text-amber-700 uppercase block">
-                Hội Thánh Phục Hưng
+              <span className="text-[11px] font-semibold tracking-wider text-amber-800 uppercase block">
+                Vietnamese Revival Church
               </span>
             </div>
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1.5">
+          <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -68,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-stone-900 text-white shadow-xs'
                       : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
@@ -81,33 +85,54 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Admin / Login Actions */}
+          {/* Right actions: Language Flip & Admin Login */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Language Switcher Pill */}
+            <div className="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 text-xs font-semibold">
+              <button
+                onClick={() => setLanguage('vi')}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                  language === 'vi'
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+                title="Tiếng Việt"
+              >
+                <span>🇻🇳</span>
+                <span>VI</span>
+              </button>
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                  language === 'en'
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+                title="English"
+              >
+                <span>🇺🇸</span>
+                <span>EN</span>
+              </button>
+            </div>
+
+            {/* Admin Controls */}
             {isAdmin ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 pl-2 border-l border-stone-200">
                 <button
                   onClick={openAdminPortal}
-                  className="flex items-center gap-2 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs rounded-xl shadow-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs rounded-xl shadow-xs transition-all"
                 >
-                  <ShieldCheck className="w-4 h-4" />
-                  Admin Dashboard
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{t('navAdmin')}</span>
                 </button>
 
-                <div className="flex items-center gap-2 pl-2 border-l border-stone-200">
-                  {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName || 'Admin'}
-                      className="w-7 h-7 rounded-full border border-stone-300"
-                    />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full bg-stone-100 text-stone-800 flex items-center justify-center text-xs font-bold">
-                      {user?.email?.charAt(0).toUpperCase() || 'A'}
-                    </div>
-                  )}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-7 h-7 rounded-full bg-stone-900 text-amber-400 flex items-center justify-center text-xs font-bold">
+                    {adminUser?.displayName.charAt(0).toUpperCase() || 'A'}
+                  </div>
                   <button
-                    onClick={signOut}
-                    title="Sign Out"
+                    onClick={logout}
+                    title={t('navLogout')}
                     className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
@@ -116,17 +141,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             ) : (
               <button
-                onClick={signInWithGoogle}
+                onClick={openLoginModal}
                 className="flex items-center gap-1.5 px-3.5 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100/80 rounded-xl text-xs font-medium transition-all border border-stone-200"
               >
-                <LogIn className="w-3.5 h-3.5 text-amber-600" />
-                Admin Login
+                <LogIn className="w-3.5 h-3.5 text-amber-700" />
+                <span>{t('navLogin')}</span>
               </button>
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu and language toggle */}
           <div className="md:hidden flex items-center gap-2">
+            {/* Quick mobile language toggle */}
+            <button
+              onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
+              className="px-2 py-1 bg-stone-100 rounded-lg text-xs font-bold flex items-center gap-1 border border-stone-200"
+            >
+              <span>{language === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}</span>
+            </button>
+
             {isAdmin && (
               <button
                 onClick={openAdminPortal}
@@ -136,6 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Admin
               </button>
             )}
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg"
@@ -180,22 +214,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-amber-600 text-white font-medium rounded-xl text-sm"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  Admin Dashboard (Manage Events & Verses)
+                  {t('adminDashboardTitle')}
                 </button>
                 <button
-                  onClick={signOut}
-                  className="text-center py-2 text-stone-500 hover:text-rose-600 text-xs"
+                  onClick={logout}
+                  className="text-center py-2 text-stone-500 hover:text-rose-600 text-xs font-medium"
                 >
-                  Sign Out ({user?.displayName || user?.email})
+                  {t('navLogout')} ({adminUser?.displayName || adminUser?.username})
                 </button>
               </>
             ) : (
               <button
-                onClick={signInWithGoogle}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openLoginModal();
+                }}
                 className="flex items-center justify-center gap-2 w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-medium rounded-xl text-xs"
               >
-                <LogIn className="w-4 h-4 text-amber-600" />
-                Admin Login (Google Sign-In)
+                <LogIn className="w-4 h-4 text-amber-700" />
+                {t('navLogin')}
               </button>
             )}
           </div>

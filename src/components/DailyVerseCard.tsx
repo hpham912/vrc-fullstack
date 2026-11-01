@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DailyVerse } from '../types.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   Volume2,
   VolumeX,
@@ -7,7 +8,6 @@ import {
   Copy,
   Check,
   Calendar,
-  Sparkles,
   BookOpen,
   ChevronDown,
   ChevronUp,
@@ -27,6 +27,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   isAdmin,
   onOpenAdminPortal,
 }) => {
+  const { language, t } = useLanguage();
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(todayVerse);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -50,8 +51,9 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const textToRead = `${verse.reference}. ${verse.verseText}. Reflection: ${verse.reflection}`;
+      const textToRead = `${verse.reference}. ${verse.verseText}. ${verse.reflection}`;
       const utterance = new SpeechSynthesisUtterance(textToRead);
+      utterance.lang = language === 'vi' ? 'vi-VN' : 'en-US';
       utterance.rate = 0.9;
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
@@ -62,7 +64,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   const copyToClipboard = () => {
     if (!verse) return;
-    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\nVietnamese Revival Church Daily Verse`;
+    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\nHội Thánh Phục Hưng Việt Nam / Vietnamese Revival Church`;
     navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -85,12 +87,12 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     return (
       <div className="py-20 text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-stone-800"></div>
-        <p className="mt-3 text-stone-500 text-sm">Loading scripture...</p>
+        <p className="mt-3 text-stone-500 text-sm">{t('loadingScripture')}</p>
       </div>
     );
   }
 
-  const verseDateFormatted = new Date(verse.date + 'T00:00:00').toLocaleDateString(undefined, {
+  const verseDateFormatted = new Date(verse.date + 'T00:00:00').toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -103,10 +105,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1">
-            Lời Chúa Mỗi Ngày • Daily Bread
+            {t('verseTag')}
           </span>
           <h2 className="text-3xl font-serif font-bold text-stone-900">
-            Scripture & Devotional
+            {t('verseTitle')}
           </h2>
         </div>
 
@@ -122,7 +124,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             title={isSpeaking ? 'Stop audio' : 'Listen to scripture'}
           >
             {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-700" />}
-            <span>{isSpeaking ? 'Pause' : 'Listen'}</span>
+            <span>{isSpeaking ? t('pauseAudio') : t('listenAudio')}</span>
           </button>
 
           <button
@@ -130,7 +132,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            <span>{copied ? t('copied') : t('copyVerse')}</span>
           </button>
 
           <button
@@ -138,7 +140,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors"
           >
             <Share2 className="w-3.5 h-3.5 text-stone-400" />
-            <span>Share</span>
+            <span>{t('shareVerse')}</span>
           </button>
 
           {isAdmin && onOpenAdminPortal && (
@@ -147,7 +149,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-medium shadow-xs"
             >
               <PenTool className="w-3.5 h-3.5 text-amber-400" />
-              <span>Edit Verse</span>
+              <span>{t('editVerseBtn')}</span>
             </button>
           )}
         </div>
@@ -181,7 +183,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
         {/* Reflection */}
         <div className="pt-6 border-t border-stone-100 space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-            Pastoral Reflection
+            {t('reflectionTitle')}
           </h3>
           <p className="text-stone-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
             {verse.reflection}
@@ -190,7 +192,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           {verse.prayer && (
             <div className="mt-6 p-5 rounded-2xl bg-amber-50/70 border border-amber-200/60">
               <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 block mb-1">
-                Lời Cầu Nguyện • Today's Prayer
+                {t('prayerTitle')}
               </span>
               <p className="font-serif italic text-stone-800 text-sm leading-relaxed">
                 "{verse.prayer}"
@@ -209,7 +211,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           >
             <span className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-amber-700" />
-              Browse Past Scripture Readings ({allVerses.length} available)
+              <span>{t('browseArchive')} ({allVerses.length})</span>
             </span>
             {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
