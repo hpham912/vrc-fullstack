@@ -58,17 +58,34 @@ export const ChurchInfoSection: React.FC<ChurchInfoSectionProps> = ({
 
           <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm divide-y divide-stone-100">
             {churchInfo?.services && churchInfo.services.length > 0 ? (
-              churchInfo.services.map((svc, idx) => (
-                <div key={svc.id || idx} className="pt-3 first:pt-0">
-                  <span className="font-semibold text-stone-900 block">
-                    {language === 'vi' ? svc.titleVi : svc.titleEn}
-                  </span>
-                  <p className="text-amber-700 text-xs font-bold">{svc.time}</p>
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    {language === 'vi' ? svc.descVi : svc.descEn}
-                  </p>
-                </div>
-              ))
+              churchInfo.services.map((svc, idx) => {
+                let displayTime = svc.time;
+                if (language === 'en') {
+                  if (svc.timeEn && svc.timeEn.trim()) {
+                    displayTime = svc.timeEn;
+                  } else {
+                    displayTime = displayTime
+                      .replace(/chúa nhật|chua nhat|cn/gi, 'Sunday')
+                      .replace(/thứ sáu|thu sau|thứ 6|thu 6/gi, 'Friday')
+                      .replace(/thứ tư|thu tu|thứ 4|thu 4/gi, 'Wednesday')
+                      .replace(/thứ hai|thu hai|thứ 2|thu 2/gi, 'Monday')
+                      .replace(/thứ ba|thu ba|thứ 3|thu 3/gi, 'Tuesday')
+                      .replace(/thứ năm|thu nam|thứ 5|thu 5/gi, 'Thursday')
+                      .replace(/thứ bảy|thu bay|thứ 7|thu 7/gi, 'Saturday');
+                  }
+                }
+                return (
+                  <div key={svc.id || idx} className="pt-3 first:pt-0">
+                    <span className="font-semibold text-stone-900 block">
+                      {language === 'vi' ? svc.titleVi : (svc.titleEn || svc.titleVi)}
+                    </span>
+                    <p className="text-amber-700 text-xs font-bold">{displayTime}</p>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      {language === 'vi' ? svc.descVi : (svc.descEn || svc.descVi)}
+                    </p>
+                  </div>
+                );
+              })
             ) : (
               <>
                 <div className="pt-2">

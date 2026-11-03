@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onRequestNotificationPermission();
                 }
               }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all relative border ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all relative z-[95] border ${
                 showNotifModal
                   ? 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
                   : 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70'

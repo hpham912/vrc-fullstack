@@ -1,0 +1,40 @@
+{
+  "sanctuaryName": "Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary",
+  "address": "Tempe, Arizona",
+  "googleMapsUrl": "https://maps.google.com/?q=Tempe+Arizona",
+  "phone": "(480) 555-0199",
+  "email": "contact@vnrevivalchurch.org",
+  "regionDescVi": "Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert",
+  "regionDescEn": "Serving Vietnamese communities across Phoenix East Valley",
+  "services": [
+    {
+      "descVi": "Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.",
+      "timeEn": "Sunday • 3:00 PM – 5:00 PM",
+      "descEn": "Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.",
+      "titleEn": "Sunday Worship Service",
+      "titleVi": "Lễ Thờ Phượng Chúa Nhật",
+      "id": "sunday-worship",
+      "time": "Chúa Nhật • 3:00 PM – 5:00 PM"
+    },
+    {
+      "time": "Thứ Sáu • 6:30 PM – 8:30 PM",
+      "id": "friday-youth",
+      "titleVi": "Sinh Hoạt Giới Trẻ VRC Youth",
+      "titleEn": "VRC Youth & Young Adults",
+      "descEn": "Dynamic youth fellowship, contemporary praise, real-life discussion, games and snacks.",
+      "descVi": "Sinh hoạt kết nối thanh thiếu niên, âm nhạc thờ phượng sôi động, thảo luận thực tế và thể thao.",
+      "timeEn": "Friday • 6:30 PM – 8:30 PM"
+    },
+    {
+      "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings.",
+      "titleEn": "Midweek Bible Study & Prayer",
+      "titleVi": "Học Kinh Thánh & Cầu Nguyện",
+      "descVi": "Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.",
+      "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
+      "time": "Thứ Tư • 7:00 PM – 8:30 PM",
+      "id": "wednesday-prayer"
+    }
+  ],
+  "updatedAt": "2026-11-03T18:49:25.719Z",
+  "test": true
+}

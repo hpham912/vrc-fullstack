@@ -30,66 +30,16 @@ interface ThemeOption {
   labelVi: string;
   labelEn: string;
   icon: string;
-  descVi: string;
-  descEn: string;
-  swatchClasses: string;
+  colorDot: string;
 }
 
 const THEME_OPTIONS: ThemeOption[] = [
-  {
-    key: 'thanksgiving',
-    labelVi: 'Lễ Tạ Ơn (Thanksgiving)',
-    labelEn: 'Thanksgiving',
-    icon: '🍂',
-    descVi: 'Sắc vàng hổ phách ấm áp & tri ân',
-    descEn: 'Warm amber & golden glow',
-    swatchClasses: 'from-amber-600 via-orange-600 to-amber-900 border-amber-400',
-  },
-  {
-    key: 'christmas',
-    labelVi: 'Lễ Giáng Sinh (Christmas)',
-    labelEn: 'Christmas',
-    icon: '🎄',
-    descVi: 'Đỏ thẫm, xanh thông & ánh sáng Giáng Sinh',
-    descEn: 'Crimson, pine emerald & golden light',
-    swatchClasses: 'from-red-600 via-rose-700 to-emerald-900 border-red-400',
-  },
-  {
-    key: 'easter',
-    labelVi: 'Đại Lễ Phục Sinh (Easter)',
-    labelEn: 'Easter',
-    icon: '✝️',
-    descVi: 'Tím hoàng gia & ánh bình minh vinh hiển',
-    descEn: 'Royal purple & dawn radiance',
-    swatchClasses: 'from-purple-700 via-indigo-800 to-amber-700 border-purple-400',
-  },
-  {
-    key: 'revival',
-    labelVi: 'Đại Hội Bồi Linh (Revival)',
-    labelEn: 'Revival',
-    icon: '🔥',
-    descVi: 'Ngọn lửa Thánh Linh & xanh thẳm quyền năng',
-    descEn: 'Holy Spirit flame & deep cobalt',
-    swatchClasses: 'from-blue-700 via-indigo-900 to-rose-600 border-blue-400',
-  },
-  {
-    key: 'special',
-    labelVi: 'Giới Trẻ (Youth & Young Adults)',
-    labelEn: 'Youth',
-    icon: '🌿',
-    descVi: 'Xanh ngọc lục bảo trẻ trung & năng động',
-    descEn: 'Vibrant emerald & youthful energy',
-    swatchClasses: 'from-emerald-600 via-teal-800 to-amber-700 border-emerald-400',
-  },
-  {
-    key: 'default',
-    labelVi: 'Cổ Điển Hội Thánh (Classic)',
-    labelEn: 'Classic',
-    icon: '🏛️',
-    descVi: 'Phong cách tối giản sang trọng, truyền thống',
-    descEn: 'Timeless dark slate & warm amber',
-    swatchClasses: 'from-stone-900 via-stone-800 to-amber-900 border-stone-600',
-  },
+  { key: 'thanksgiving', labelVi: 'Lễ Tạ Ơn (Thanksgiving)', labelEn: 'Thanksgiving', icon: '🍂', colorDot: 'bg-amber-500' },
+  { key: 'christmas', labelVi: 'Lễ Giáng Sinh (Christmas)', labelEn: 'Christmas', icon: '🎄', colorDot: 'bg-red-600' },
+  { key: 'easter', labelVi: 'Đại Lễ Phục Sinh (Easter)', labelEn: 'Easter', icon: '✝️', colorDot: 'bg-purple-600' },
+  { key: 'revival', labelVi: 'Đại Hội Bồi Linh (Revival)', labelEn: 'Revival', icon: '🔥', colorDot: 'bg-blue-600' },
+  { key: 'special', labelVi: 'Giới Trẻ (Youth)', labelEn: 'Youth', icon: '✨', colorDot: 'bg-emerald-600' },
+  { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: '🏛️', colorDot: 'bg-stone-700' },
 ];
 
 export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
@@ -113,6 +63,15 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Sync state with incoming props on modal open or config update
+  React.useEffect(() => {
+    if (isOpen) {
+      setTheme(initialConfig?.theme || 'thanksgiving');
+      setSelectedEventId(initialConfig?.selectedEventId ?? null);
+      setSubtitle(initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"');
+    }
+  }, [isOpen, initialConfig]);
+
   if (!isOpen) return null;
 
   const handleSave = async (e: React.FormEvent) => {
@@ -128,40 +87,74 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         ? events.find((e) => e.id === selectedEventId)
         : null;
 
-      const payload: Partial<SpotlightBannerConfig> = {
+      const cleanAddress = pickedEvt?.address || pickedEvt?.location || initialConfig?.customAddress || 'Tempe, Arizona';
+      const cleanDirectionsUrl = `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
+
+      const themeBadge = {
+        christmas: 'Giáng Sinh',
+        thanksgiving: 'Lễ Tạ Ơn',
+        easter: 'Phục Sinh',
+        revival: 'Bồi Linh Phục Hưng',
+        special: 'Đặc Biệt',
+        default: 'Sự Kiện Trọng Tâm',
+      }[theme] || 'Sự Kiện Nổi Bật';
+
+      const payload: SpotlightBannerConfig = {
         mode: selectedEventId ? 'event' : 'auto',
         selectedEventId: selectedEventId || null,
         isActive: true,
         theme,
-        subtitle: subtitle.trim(),
+        badge: themeBadge,
+        subtitle: (subtitle || '').trim(),
         title: pickedEvt ? pickedEvt.title : (initialConfig?.title || 'Hội Thánh Phục Hưng Việt Nam'),
         description: pickedEvt ? pickedEvt.description : (initialConfig?.description || 'Thân mời quý tôi con Chúa cùng gia quyến đến thờ phượng Chúa.'),
         dateTag: pickedEvt ? `${pickedEvt.date} • ${pickedEvt.startTime}` : (initialConfig?.dateTag || 'Chúa Nhật Hàng Tuần • 3:00 PM'),
         locationTag: pickedEvt ? (pickedEvt.location || 'Tempe, Arizona') : (initialConfig?.locationTag || 'Tempe, Arizona • Main Sanctuary'),
-        customAddress: pickedEvt ? (pickedEvt.address || pickedEvt.location || 'Tempe, Arizona') : (initialConfig?.customAddress || 'Tempe, Arizona'),
+        customAddress: cleanAddress,
         primaryBtnText: 'Xem Sự Kiện',
         primaryBtnAction: 'events',
         secondaryBtnText: 'Chỉ Đường',
-        secondaryBtnUrl: `https://maps.google.com/?q=${encodeURIComponent(
-          pickedEvt?.address || pickedEvt?.location || initialConfig?.customAddress || 'Tempe Arizona'
-        )}`,
+        secondaryBtnUrl: cleanDirectionsUrl,
+        updatedAt: new Date().toISOString(),
       };
+
+      // Always save optimistically to localStorage immediately so choice is never lost
+      try {
+        localStorage.setItem('vrc_cached_spotlight', JSON.stringify(payload));
+      } catch (cacheErr) {
+        console.warn('Local cache warning:', cacheErr);
+      }
+
+      if (!token) {
+        setFeedback({
+          type: 'error',
+          message: language === 'vi'
+            ? 'Vui lòng đăng nhập tài khoản quản trị (Admin) để lưu banner lên máy chủ.'
+            : 'Please log in as an administrator first to sync banner to server.',
+        });
+        onSaved(payload);
+        return;
+      }
 
       const res = await fetch(apiUrl('/api/spotlight'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to update spotlight banner');
+        throw new Error(errData.error || (language === 'vi' ? 'Không thể cập nhật banner' : 'Failed to update spotlight banner'));
       }
 
       const updated: SpotlightBannerConfig = await res.json();
+      try {
+        localStorage.setItem('vrc_cached_spotlight', JSON.stringify(updated));
+      } catch (e) {}
+
       setFeedback({
         type: 'success',
         message: language === 'vi' ? 'Đã lưu cấu hình banner thành công!' : 'Banner updated successfully!',
@@ -169,12 +162,17 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       onSaved(updated);
       setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 900);
     } catch (err: any) {
       console.error('Error saving spotlight:', err);
+      const isNetworkLoadFailed = String(err?.message || '').toLowerCase().includes('load failed') || String(err?.message || '').toLowerCase().includes('failed to fetch');
+      const friendlyMsg = isNetworkLoadFailed
+        ? (language === 'vi' ? 'Không thể kết nối máy chủ. Thay đổi đã được lưu tạm trên thiết bị này.' : 'Network connection issue. Changes saved locally on this device.')
+        : (err.message || (language === 'vi' ? 'Lỗi khi lưu banner' : 'Failed to save banner'));
+
       setFeedback({
         type: 'error',
-        message: err.message || (language === 'vi' ? 'Lỗi khi lưu banner' : 'Failed to save banner'),
+        message: friendlyMsg,
       });
     } finally {
       setSaving(false);
@@ -227,16 +225,17 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 space-y-5 text-xs text-stone-700">
-          {/* STEP 1: Select Theme / Visual Style (Combined Theme & Gradient) */}
+          {/* STEP 1: Select Theme - Simplified, Clean Buttons */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="font-serif font-bold text-xs sm:text-sm text-stone-900 flex items-center gap-1.5">
                 <Palette className="w-4 h-4 text-amber-700" />
-                <span>{language === 'vi' ? '1. Chọn Giao Diện Màu Sắc (Theme):' : '1. Select Visual Theme:'}</span>
+                <span>{language === 'vi' ? '1. Chọn Giao Diện Màu Sắc (Theme):' : '1. Select Theme:'}</span>
               </label>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-0.5">
+            {/* Simpler, compact theme buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
               {THEME_OPTIONS.map((opt) => {
                 const isSelected = theme === opt.key;
                 return (
@@ -244,24 +243,23 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                     key={opt.key}
                     type="button"
                     onClick={() => setTheme(opt.key)}
-                    className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden active:scale-95 cursor-pointer ${
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all flex items-center justify-between gap-2 active:scale-95 cursor-pointer ${
                       isSelected
-                        ? 'border-amber-600 ring-2 ring-amber-500 bg-amber-50/80 shadow-xs'
-                        : 'border-stone-200 bg-white hover:bg-stone-50'
+                        ? 'border-amber-600 ring-2 ring-amber-500 bg-amber-50/90 text-amber-950 font-bold shadow-xs'
+                        : 'border-stone-200 bg-stone-50/80 hover:bg-white text-stone-800 hover:border-stone-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xl">{opt.icon}</span>
-                      <div
-                        className={`w-4 h-4 rounded-full bg-gradient-to-br ${opt.swatchClasses} border shadow-2xs`}
-                      />
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-base flex-shrink-0">{opt.icon}</span>
+                      <span className="text-xs truncate">
+                        {language === 'vi' ? opt.labelVi : opt.labelEn}
+                      </span>
                     </div>
-                    <p className={`font-bold text-xs leading-snug ${isSelected ? 'text-amber-950' : 'text-stone-900'}`}>
-                      {language === 'vi' ? opt.labelVi : opt.labelEn}
-                    </p>
-                    <p className="text-[10px] text-stone-500 mt-0.5 line-clamp-1">
-                      {language === 'vi' ? opt.descVi : opt.descEn}
-                    </p>
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${opt.colorDot} ${
+                        isSelected ? 'ring-2 ring-white shadow-xs' : 'opacity-60'
+                      }`}
+                    />
                   </button>
                 );
               })}

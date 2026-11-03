@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
+import { FirestoreChurchService } from '../services/firestoreService.ts';
 
 const router = Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_DIR = path.join(__dirname, '../../..', 'data');
+const DATA_DIR = path.join(process.cwd(), 'data');
 const CHURCH_INFO_FILE = path.join(DATA_DIR, 'church-info.json');
 
 export interface WeeklyService {
@@ -16,6 +14,7 @@ export interface WeeklyService {
   titleVi: string;
   titleEn: string;
   time: string;
+  timeEn?: string;
   descVi: string;
   descEn: string;
 }
@@ -32,7 +31,7 @@ export interface ChurchInfoData {
   updatedAt: string;
 }
 
-const DEFAULT_CHURCH_INFO: ChurchInfoData = {
+export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
   sanctuaryName: 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary',
   address: 'Tempe, Arizona',
   googleMapsUrl: 'https://maps.google.com/?q=Tempe+Arizona',
@@ -46,6 +45,7 @@ const DEFAULT_CHURCH_INFO: ChurchInfoData = {
       titleVi: 'Lễ Thờ Phượng Chúa Nhật',
       titleEn: 'Sunday Worship Service',
       time: 'Chúa Nhật • 3:00 PM – 5:00 PM',
+      timeEn: 'Sunday • 3:00 PM – 5:00 PM',
       descVi: 'Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.',
       descEn: 'Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.',
     },
@@ -54,6 +54,7 @@ const DEFAULT_CHURCH_INFO: ChurchInfoData = {
       titleVi: 'Sinh Hoạt Giới Trẻ VRC Youth',
       titleEn: 'VRC Youth & Young Adults',
       time: 'Thứ Sáu • 6:30 PM – 8:30 PM',
+      timeEn: 'Friday • 6:30 PM – 8:30 PM',
       descVi: 'Sinh hoạt kết nối thanh thiếu niên, âm nhạc thờ phượng sôi động, thảo luận thực tế và thể thao.',
       descEn: 'Dynamic youth fellowship, contemporary praise, real-life discussion, games and snacks.',
     },
@@ -62,6 +63,7 @@ const DEFAULT_CHURCH_INFO: ChurchInfoData = {
       titleVi: 'Học Kinh Thánh & Cầu Nguyện',
       titleEn: 'Midweek Bible Study & Prayer',
       time: 'Thứ Tư • 7:00 PM – 8:30 PM',
+      timeEn: 'Wednesday • 7:00 PM – 8:30 PM',
       descVi: 'Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.',
       descEn: 'In-depth scripture study and united intercessory prayer for revival, families, and healings.',
     },
@@ -71,43 +73,77 @@ const DEFAULT_CHURCH_INFO: ChurchInfoData = {
 
 let inMemoryChurchInfo: ChurchInfoData = { ...DEFAULT_CHURCH_INFO };
 
-function loadChurchInfo(): ChurchInfoData {
+// Fallback local storage file
+function loadLocalChurchInfo(): ChurchInfoData {
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
     if (fs.existsSync(CHURCH_INFO_FILE)) {
       const content = fs.readFileSync(CHURCH_INFO_FILE, 'utf-8');
       inMemoryChurchInfo = JSON.parse(content);
       return inMemoryChurchInfo;
     }
-    fs.writeFileSync(CHURCH_INFO_FILE, JSON.stringify(DEFAULT_CHURCH_INFO, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error accessing church-info file:', err);
+    console.warn('Local church-info file read failed:', err);
   }
   return inMemoryChurchInfo;
 }
 
-function saveChurchInfo(data: ChurchInfoData): void {
-  inMemoryChurchInfo = { ...data, updatedAt: new Date().toISOString() };
+function saveLocalChurchInfo(data: ChurchInfoData): void {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(CHURCH_INFO_FILE, JSON.stringify(inMemoryChurchInfo, null, 2), 'utf-8');
+    fs.writeFileSync(CHURCH_INFO_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error saving church-info file:', err);
+    console.warn('Local church-info file save failed:', err);
   }
 }
 
-// Initialize on startup
-loadChurchInfo();
+// Initial warm-up from Firestore
+(async () => {
+  try {
+    const firestoreData = await FirestoreChurchService.getChurchInfo();
+    if (firestoreData && firestoreData.sanctuaryName) {
+      inMemoryChurchInfo = {
+        ...DEFAULT_CHURCH_INFO,
+        ...firestoreData,
+        services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
+          ? firestoreData.services
+          : DEFAULT_CHURCH_INFO.services,
+      };
+      saveLocalChurchInfo(inMemoryChurchInfo);
+      // Persist full schema to Firestore
+      await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
+      console.log('Church info loaded from Firestore:', inMemoryChurchInfo.sanctuaryName, 'services:', inMemoryChurchInfo.services.length);
+    } else {
+      loadLocalChurchInfo();
+      await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
+    }
+  } catch (e) {
+    console.warn('Error during church info initial sync:', e);
+    loadLocalChurchInfo();
+  }
+})();
 
 // GET /api/church-info - Get sanctuary address & weekly worship schedules
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const data = loadChurchInfo();
-    res.json(data);
+    // Query Firestore for latest persistent cloud state
+    const firestoreData = await FirestoreChurchService.getChurchInfo();
+    if (firestoreData && firestoreData.sanctuaryName) {
+      inMemoryChurchInfo = {
+        ...DEFAULT_CHURCH_INFO,
+        ...firestoreData,
+        services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
+          ? firestoreData.services
+          : inMemoryChurchInfo.services,
+      };
+      saveLocalChurchInfo(inMemoryChurchInfo);
+      return res.json(inMemoryChurchInfo);
+    }
+
+    // Fallback to in-memory/local
+    const local = loadLocalChurchInfo();
+    res.json(local);
   } catch (err: any) {
     console.error('Failed to get church info:', err);
     res.json(inMemoryChurchInfo);
@@ -115,13 +151,26 @@ router.get('/', (req, res) => {
 });
 
 // PUT /api/church-info - Update sanctuary address & worship schedules (Admin only)
-router.put('/', requireAdmin, (req: AuthRequest, res) => {
+router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services } = req.body;
 
     if (!address || !sanctuaryName) {
       return res.status(400).json({ error: 'Sanctuary name and address are required.' });
     }
+
+    // Clean and validate services list
+    const cleanedServices: WeeklyService[] = Array.isArray(services)
+      ? services.map((s: any, idx: number) => ({
+          id: s.id || `service-${idx + 1}-${Date.now()}`,
+          titleVi: String(s.titleVi || '').trim(),
+          titleEn: String(s.titleEn || s.titleVi || '').trim(),
+          time: String(s.time || '').trim(),
+          timeEn: s.timeEn ? String(s.timeEn).trim() : undefined,
+          descVi: String(s.descVi || '').trim(),
+          descEn: String(s.descEn || s.descVi || '').trim(),
+        }))
+      : inMemoryChurchInfo.services;
 
     const updated: ChurchInfoData = {
       sanctuaryName: String(sanctuaryName).trim(),
@@ -131,11 +180,16 @@ router.put('/', requireAdmin, (req: AuthRequest, res) => {
       email: email ? String(email).trim() : inMemoryChurchInfo.email,
       regionDescVi: regionDescVi ? String(regionDescVi).trim() : inMemoryChurchInfo.regionDescVi,
       regionDescEn: regionDescEn ? String(regionDescEn).trim() : inMemoryChurchInfo.regionDescEn,
-      services: Array.isArray(services) && services.length > 0 ? services : inMemoryChurchInfo.services,
+      services: cleanedServices,
       updatedAt: new Date().toISOString(),
     };
 
-    saveChurchInfo(updated);
+    inMemoryChurchInfo = updated;
+    saveLocalChurchInfo(updated);
+
+    // Save to Firestore for permanent cross-instance cloud persistence
+    await FirestoreChurchService.saveChurchInfo(updated);
+
     res.json(updated);
   } catch (err: any) {
     console.error('Failed to update church info:', err);

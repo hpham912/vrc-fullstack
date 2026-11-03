@@ -58,6 +58,21 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Sync state whenever modal is opened or churchInfo prop changes
+  React.useEffect(() => {
+    if (isOpen) {
+      const current = churchInfo || DEFAULT_CHURCH_INFO;
+      setSanctuaryName(current.sanctuaryName || 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary');
+      setAddress(current.address || 'Tempe, Arizona');
+      setGoogleMapsUrl(current.googleMapsUrl || 'https://maps.google.com/?q=Tempe+Arizona');
+      setPhone(current.phone || '(480) 555-0199');
+      setEmail(current.email || 'contact@vnrevivalchurch.org');
+      setRegionDescVi(current.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert');
+      setRegionDescEn(current.regionDescEn || 'Serving Vietnamese communities across Phoenix East Valley');
+      setServices(current.services ? JSON.parse(JSON.stringify(current.services)) : [...DEFAULT_CHURCH_INFO.services]);
+    }
+  }, [isOpen, churchInfo]);
+
   if (!isOpen) return null;
 
   const handleAddressChange = (newAddress: string) => {
@@ -73,6 +88,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
         titleVi: '',
         titleEn: '',
         time: '',
+        timeEn: '',
         descVi: '',
         descEn: '',
       },
@@ -83,10 +99,31 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
     setServices((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  // Convert Vietnamese day string to English
+  const translateVietnameseDayToEnglish = (timeStr: string) => {
+    const parts = timeStr.split('•');
+    const day = (parts[0] || '').trim();
+    const time = parts.slice(1).join('•').trim();
+    let engDay = day;
+    const lower = day.toLowerCase();
+    if (lower.includes('chúa nhật') || lower.includes('chua nhat')) engDay = 'Sunday';
+    else if (lower.includes('thứ hai') || lower.includes('thu hai')) engDay = 'Monday';
+    else if (lower.includes('thứ ba') || lower.includes('thu ba')) engDay = 'Tuesday';
+    else if (lower.includes('thứ tư') || lower.includes('thu tu')) engDay = 'Wednesday';
+    else if (lower.includes('thứ năm') || lower.includes('thu nam')) engDay = 'Thursday';
+    else if (lower.includes('thứ sáu') || lower.includes('thu sau')) engDay = 'Friday';
+    else if (lower.includes('thứ bảy') || lower.includes('thu bay')) engDay = 'Saturday';
+    return time ? `${engDay} • ${time}` : engDay;
+  };
+
   const updateServiceField = (index: number, field: keyof WeeklyService, value: string) => {
     setServices((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
+      // If updating 'time' in Vietnamese and 'timeEn' is empty, auto-populate timeEn with English day
+      if (field === 'time' && !updated[index].timeEn) {
+        updated[index].timeEn = translateVietnameseDayToEnglish(value);
+      }
       return updated;
     });
   };
@@ -107,6 +144,16 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       setFeedback(null);
       const token = getToken();
 
+      // Ensure all services have valid English day/times populated
+      const processedServices = services.map((s) => ({
+        ...s,
+        titleEn: s.titleEn?.trim() || s.titleVi.trim(),
+        timeEn: (s.timeEn && s.timeEn.trim() && !s.timeEn.toLowerCase().includes('thứ') && !s.timeEn.toLowerCase().includes('chúa nhật'))
+          ? s.timeEn.trim()
+          : translateVietnameseDayToEnglish(s.time),
+        descEn: s.descEn?.trim() || s.descVi.trim(),
+      }));
+
       const payload: Partial<ChurchInfo> = {
         sanctuaryName: sanctuaryName.trim(),
         address: address.trim(),
@@ -115,7 +162,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
         email: email.trim(),
         regionDescVi: regionDescVi.trim(),
         regionDescEn: regionDescEn.trim(),
-        services,
+        services: processedServices,
       };
 
       const res = await fetch(apiUrl('/api/church-info'), {
@@ -133,6 +180,11 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       }
 
       const savedData: ChurchInfo = await res.json();
+      try {
+        localStorage.setItem('vrc_cached_church_info', JSON.stringify(savedData));
+      } catch (e) {
+        console.warn('Could not write church info to localStorage:', e);
+      }
       setFeedback({
         type: 'success',
         message: language === 'vi' ? 'Đã lưu thông tin nhà nguyện & lịch nhóm thành công!' : 'Sanctuary & worship schedule saved successfully!',
@@ -348,15 +400,46 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                     </div>
 
                     <div className="space-y-0.5">
-                      <label className="text-[10px] font-bold text-stone-500">
-                        {language === 'vi' ? 'Thời gian (Ví dụ: Chúa Nhật • 3:00 PM – 5:00 PM)' : 'Day & Time'}
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-stone-500">
+                          {language === 'vi' ? 'Thời gian (Ví dụ: Chúa Nhật • 3:00 PM – 5:00 PM)' : 'Day & Time (Vietnamese)'}
+                        </label>
+                      </div>
                       <input
                         type="text"
                         value={svc.time}
                         onChange={(e) => updateServiceField(idx, 'time', e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs font-semibold text-amber-800"
                         placeholder="Chúa Nhật • 3:00 PM – 5:00 PM"
+                      />
+                    </div>
+                  </div>
+
+                  {/* English Translation row for Service */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-stone-500">
+                        {language === 'vi' ? 'Tên buổi nhóm (Tiếng Anh - English)' : 'Service Name (English)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={svc.titleEn || ''}
+                        onChange={(e) => updateServiceField(idx, 'titleEn', e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs"
+                        placeholder="Sunday Worship Service"
+                      />
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-stone-500">
+                        {language === 'vi' ? 'Thời gian Tiếng Anh (English Day & Time)' : 'Day & Time in English'}
+                      </label>
+                      <input
+                        type="text"
+                        value={svc.timeEn || ''}
+                        onChange={(e) => updateServiceField(idx, 'timeEn', e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs font-semibold text-indigo-700"
+                        placeholder="Sunday • 3:00 PM – 5:00 PM"
                       />
                     </div>
                   </div>

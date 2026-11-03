@@ -69,62 +69,135 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       ? pinnedEvent
       : (safeConfig.mode === 'auto' ? nextUpcomingEvent : null);
 
-  // Compute theme background styling for the spotlight / holiday banner
+  // Helper function to format service day & hours bilingually
+  const getServiceTimeParts = (svc: { time: string; timeEn?: string; titleVi: string; titleEn?: string }, lang: 'vi' | 'en') => {
+    let rawTime = (lang === 'en' && svc.timeEn?.trim()) ? svc.timeEn : svc.time;
+    if (!rawTime) return { dayPart: '', hourPart: '' };
+
+    let dayPart = '';
+    let hourPart = '';
+
+    if (rawTime.includes('•')) {
+      const parts = rawTime.split('•');
+      dayPart = (parts[0] || '').trim();
+      hourPart = (parts.slice(1).join('•') || '').trim();
+    } else if (rawTime.includes(' - ') && (rawTime.includes('AM') || rawTime.includes('PM'))) {
+      // Split on day vs time range
+      const match = rawTime.match(/^([^\d]+)([\d\s:–\-APMapm]+)$/);
+      if (match) {
+        dayPart = match[1].trim();
+        hourPart = match[2].trim();
+      } else {
+        dayPart = rawTime.trim();
+        hourPart = '';
+      }
+    } else {
+      dayPart = rawTime.trim();
+      hourPart = '';
+    }
+
+    if (lang === 'en') {
+      const dayLower = dayPart.toLowerCase();
+      if (dayLower.includes('chúa nhật') || dayLower.includes('chua nhat') || dayLower.includes('cn')) {
+        dayPart = 'Sunday';
+      } else if (dayLower.includes('thứ sáu') || dayLower.includes('thu sau') || dayLower.includes('thứ 6') || dayLower.includes('thu 6') || dayLower.includes('friday')) {
+        dayPart = 'Friday';
+      } else if (dayLower.includes('thứ tư') || dayLower.includes('thu tu') || dayLower.includes('thứ 4') || dayLower.includes('thu 4') || dayLower.includes('wednesday')) {
+        dayPart = 'Wednesday';
+      } else if (dayLower.includes('thứ hai') || dayLower.includes('thu hai') || dayLower.includes('thứ 2') || dayLower.includes('thu 2') || dayLower.includes('monday')) {
+        dayPart = 'Monday';
+      } else if (dayLower.includes('thứ ba') || dayLower.includes('thu ba') || dayLower.includes('thứ 3') || dayLower.includes('thu 3') || dayLower.includes('tuesday')) {
+        dayPart = 'Tuesday';
+      } else if (dayLower.includes('thứ năm') || dayLower.includes('thu nam') || dayLower.includes('thứ 5') || dayLower.includes('thu 5') || dayLower.includes('thursday')) {
+        dayPart = 'Thursday';
+      } else if (dayLower.includes('thứ bảy') || dayLower.includes('thu bay') || dayLower.includes('thứ 7') || dayLower.includes('thu 7') || dayLower.includes('saturday')) {
+        dayPart = 'Saturday';
+      }
+    } else {
+      const dayLower = dayPart.toLowerCase();
+      if (dayLower.includes('sunday')) dayPart = 'Chúa Nhật';
+      else if (dayLower.includes('friday')) dayPart = 'Thứ Sáu';
+      else if (dayLower.includes('wednesday')) dayPart = 'Thứ Tư';
+      else if (dayLower.includes('monday')) dayPart = 'Thứ Hai';
+      else if (dayLower.includes('tuesday')) dayPart = 'Thứ Ba';
+      else if (dayLower.includes('thursday')) dayPart = 'Thứ Năm';
+      else if (dayLower.includes('saturday')) dayPart = 'Thứ Bảy';
+    }
+
+    return {
+      dayPart: dayPart || (lang === 'vi' ? svc.titleVi : (svc.titleEn || svc.titleVi)),
+      hourPart: hourPart || rawTime,
+    };
+  };
+
+  // Compute theme background styling and iconic motifs for the spotlight / holiday banner
   const getBannerThemeClasses = (theme: SpotlightTheme = 'thanksgiving') => {
     switch (theme) {
       case 'thanksgiving':
         return {
-          wrapper: 'bg-gradient-to-br from-amber-950 via-stone-900 to-orange-950 border-amber-700/80 shadow-xl',
-          glow1: 'bg-amber-500/30',
-          glow2: 'bg-orange-500/20',
-          badgeText: 'text-amber-200 border-amber-400/40 bg-amber-950/60',
-          btnPrimary: 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md',
+          wrapper: 'bg-gradient-to-br from-[#2a1306] via-[#1c120c] to-[#3a1a08] border-amber-500/70 shadow-2xl ring-1 ring-amber-400/20',
+          glow1: 'bg-amber-500/35',
+          glow2: 'bg-orange-500/25',
+          badgeText: 'text-amber-200 border-amber-400/50 bg-amber-950/70',
+          btnPrimary: 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold shadow-lg shadow-amber-500/20',
           highlightTag: 'text-amber-300',
+          themeIcon: '🍂',
+          themeLabel: language === 'vi' ? 'Mùa Lễ Tạ Ơn & Tri Ân' : 'Thanksgiving Season of Gratitude',
         };
       case 'christmas':
         return {
-          wrapper: 'bg-gradient-to-br from-red-950 via-stone-900 to-emerald-950 border-red-700/80 shadow-xl',
-          glow1: 'bg-red-500/25',
-          glow2: 'bg-emerald-500/20',
-          badgeText: 'text-amber-200 border-red-400/40 bg-red-950/60',
-          btnPrimary: 'bg-amber-400 hover:bg-amber-300 text-stone-950 shadow-md',
+          wrapper: 'bg-gradient-to-br from-[#2b080c] via-[#0e1d14] to-[#1a0a10] border-emerald-500/80 shadow-2xl ring-1 ring-red-400/40 shadow-[0_0_40px_rgba(220,38,38,0.2)]',
+          glow1: 'bg-red-600/30',
+          glow2: 'bg-emerald-600/30',
+          badgeText: 'text-amber-200 border-amber-300/50 bg-red-950/75',
+          btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-stone-950 font-bold shadow-lg shadow-amber-400/25',
           highlightTag: 'text-red-300',
+          themeIcon: '🎄',
+          themeLabel: language === 'vi' ? 'Đại Lễ Giáng Sinh Bình An' : 'Holy Christmas Celebration',
         };
       case 'easter':
         return {
-          wrapper: 'bg-gradient-to-br from-purple-950 via-stone-900 to-amber-950 border-purple-700/80 shadow-xl',
-          glow1: 'bg-purple-500/25',
-          glow2: 'bg-amber-500/20',
-          badgeText: 'text-amber-200 border-purple-400/40 bg-purple-950/60',
-          btnPrimary: 'bg-amber-400 hover:bg-amber-300 text-stone-950 shadow-md',
+          wrapper: 'bg-gradient-to-br from-[#200d33] via-[#181124] to-[#2c131a] border-purple-500/70 shadow-2xl ring-1 ring-amber-400/25',
+          glow1: 'bg-purple-500/30',
+          glow2: 'bg-amber-500/25',
+          badgeText: 'text-amber-200 border-purple-400/50 bg-purple-950/70',
+          btnPrimary: 'bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-stone-950 font-bold shadow-lg shadow-amber-400/20',
           highlightTag: 'text-purple-300',
+          themeIcon: '✝️',
+          themeLabel: language === 'vi' ? 'Đại Lễ Phục Sinh Vinh Hiển' : 'Glorious Easter Resurrection',
         };
       case 'revival':
         return {
-          wrapper: 'bg-gradient-to-br from-blue-950 via-stone-900 to-rose-950 border-blue-700/80 shadow-xl',
-          glow1: 'bg-blue-500/25',
-          glow2: 'bg-rose-500/20',
-          badgeText: 'text-cyan-200 border-blue-400/40 bg-blue-950/60',
-          btnPrimary: 'bg-cyan-400 hover:bg-cyan-300 text-stone-950 shadow-md',
+          wrapper: 'bg-gradient-to-br from-[#0c1833] via-[#131124] to-[#360e15] border-cyan-400/70 shadow-2xl ring-1 ring-rose-400/30',
+          glow1: 'bg-cyan-500/30',
+          glow2: 'bg-rose-500/30',
+          badgeText: 'text-cyan-200 border-cyan-400/50 bg-blue-950/70',
+          btnPrimary: 'bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-300 hover:to-blue-300 text-stone-950 font-bold shadow-lg shadow-cyan-400/20',
           highlightTag: 'text-cyan-300',
+          themeIcon: '🔥',
+          themeLabel: language === 'vi' ? 'Đại Hội Bồi Linh Phục Hưng' : 'Revival & Holy Spirit Awakening',
         };
       case 'special':
         return {
-          wrapper: 'bg-gradient-to-br from-emerald-950 via-stone-900 to-amber-950 border-emerald-700/80 shadow-xl',
-          glow1: 'bg-emerald-500/25',
-          glow2: 'bg-amber-500/20',
-          badgeText: 'text-emerald-200 border-emerald-400/40 bg-emerald-950/60',
-          btnPrimary: 'bg-amber-400 hover:bg-amber-300 text-stone-950 shadow-md',
-          highlightTag: 'text-emerald-300',
+          wrapper: 'bg-gradient-to-br from-[#092b23] via-[#101e2b] to-[#2a0e36] border-teal-400/70 shadow-2xl ring-1 ring-teal-400/25',
+          glow1: 'bg-teal-500/35',
+          glow2: 'bg-purple-500/30',
+          badgeText: 'text-teal-200 border-teal-400/50 bg-teal-950/70',
+          btnPrimary: 'bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-stone-950 font-bold shadow-lg shadow-teal-400/20',
+          highlightTag: 'text-teal-300',
+          themeIcon: '✨',
+          themeLabel: language === 'vi' ? 'Giới Trẻ & Sinh Hoạt Trẻ' : 'VRC Youth & Young Adults',
         };
       default:
         return {
-          wrapper: 'bg-gradient-to-br from-stone-950 via-stone-900 to-amber-950 border-stone-800 shadow-lg',
-          glow1: 'bg-amber-500/15',
-          glow2: 'bg-stone-500/10',
+          wrapper: 'bg-gradient-to-br from-[#1c1917] via-[#141210] to-[#241a12] border-stone-700/80 shadow-xl ring-1 ring-amber-500/10',
+          glow1: 'bg-amber-500/20',
+          glow2: 'bg-stone-500/15',
           badgeText: 'text-amber-200 border-white/20 bg-white/10',
-          btnPrimary: 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md',
+          btnPrimary: 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold shadow-md shadow-amber-500/20',
           highlightTag: 'text-amber-300',
+          themeIcon: '🏛️',
+          themeLabel: language === 'vi' ? 'Hội Thánh Phục Hưng Việt Nam' : 'Vietnamese Revival Church',
         };
     }
   };
@@ -187,15 +260,17 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       {/* Customizable High-Impact Holiday / Featured Hero Card */}
       <div className={`relative overflow-hidden text-white rounded-3xl p-5 sm:p-8 transition-all ${bannerTheme.wrapper}`}>
         {/* Ambient Glows */}
-        <div className={`absolute top-0 right-0 -mt-8 -mr-8 w-44 h-44 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow1}`} />
-        <div className={`absolute bottom-0 left-0 -mb-8 -ml-8 w-44 h-44 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow2}`} />
+        <div className={`absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow1}`} />
+        <div className={`absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow2}`} />
+
+
 
         <div className="relative z-10 space-y-3.5">
-          {/* Top Row: Themed Badge Pill + Admin Customizer Button */}
+          {/* Top Row: Exactly ONE Clean Themed Badge Pill + Admin Customizer Button */}
           <div className="flex items-center justify-between gap-2">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md border text-[11px] font-medium ${bannerTheme.badgeText}`}>
-              <CrossIcon className="w-3.5 h-3.5 text-amber-400" />
-              <span>{displayBadge}</span>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md border text-[11px] font-medium max-w-[calc(100%-80px)] sm:max-w-none truncate ${bannerTheme.badgeText}`}>
+              <span className="text-xs flex-shrink-0">{bannerTheme.themeIcon}</span>
+              <span className="truncate">{displayBadge}</span>
             </div>
 
             {isAdmin && onOpenSpotlightEditor && (
@@ -385,24 +460,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {safeChurch.services.map((svc, idx) => (
-              <div key={svc.id || idx} className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/80 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
-                    {svc.time.split('•')[0] || svc.titleVi}
-                  </span>
-                  <span className="text-[11px] font-bold text-stone-800">
-                    {svc.time.split('•')[1] || svc.time}
-                  </span>
+            {safeChurch.services.map((svc, idx) => {
+              const { dayPart, hourPart } = getServiceTimeParts(svc, language);
+              return (
+                <div key={svc.id || idx} className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/80 space-y-1.5">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
+                      {dayPart}
+                    </span>
+                    <span className="text-[11px] font-bold text-stone-800 text-right">
+                      {hourPart}
+                    </span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-stone-900">
+                    {language === 'vi' ? svc.titleVi : (svc.titleEn || svc.titleVi)}
+                  </h3>
+                  <p className="text-[11px] text-stone-600 leading-relaxed">
+                    {language === 'vi' ? svc.descVi : (svc.descEn || svc.descVi)}
+                  </p>
                 </div>
-                <h3 className="text-xs sm:text-sm font-bold text-stone-900">
-                  {language === 'vi' ? svc.titleVi : (svc.titleEn || svc.titleVi)}
-                </h3>
-                <p className="text-[11px] text-stone-600 leading-relaxed">
-                  {language === 'vi' ? svc.descVi : (svc.descEn || svc.descVi)}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Location pill */}

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AppNotification } from '../types/index.ts';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { CrossIcon } from './CrossIcon.tsx';
@@ -30,7 +31,17 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 }) => {
   const { language } = useLanguage();
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+  if (typeof document === 'undefined') return null;
 
   const getIconForType = (type: string) => {
     switch (type) {
@@ -63,16 +74,21 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop below topbar (Click to dismiss) */}
       <div
         onClick={onClose}
-        className="fixed inset-0 top-14 sm:top-20 z-40 bg-stone-950/40 backdrop-blur-xs animate-in fade-in duration-150"
+        className="fixed inset-0 top-14 sm:top-20 z-[90] bg-stone-950/45 backdrop-blur-xs animate-in fade-in duration-150"
       />
 
-      {/* Popup Dialog directly below topbar */}
-      <div className="fixed top-15 sm:top-22 right-2 sm:right-6 w-[calc(100vw-16px)] sm:w-[420px] max-w-lg z-50 bg-white rounded-3xl shadow-2xl border border-stone-200/90 overflow-hidden flex flex-col max-h-[82vh] animate-in fade-in slide-in-from-top-2 duration-200">
+      {/* Popup Dialog stretching from below topbar down to above bottom tab bar */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={language === 'vi' ? 'Thông Báo Hội Thánh' : 'Church Notifications'}
+        className="fixed top-[60px] sm:top-[86px] inset-x-2.5 sm:left-auto sm:right-6 sm:w-[420px] bottom-[72px] md:bottom-auto md:max-h-[min(650px,calc(100vh-110px))] z-[100] bg-white rounded-3xl shadow-2xl border border-stone-200/90 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200"
+      >
         {/* Header */}
         <div className="px-5 py-3.5 border-b border-stone-200 bg-stone-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -189,6 +205,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };

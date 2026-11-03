@@ -43,7 +43,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/65 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden animate-in fade-in duration-150">
         {/* Header */}
         <div className="p-6 bg-stone-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -87,11 +87,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <input
                 type="text"
                 required
-                autoFocus
                 placeholder="vrcadmin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all font-medium text-stone-900"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all font-medium text-stone-900"
               />
             </div>
           </div>
@@ -108,7 +107,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all text-stone-900"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all text-stone-900"
               />
             </div>
           </div>

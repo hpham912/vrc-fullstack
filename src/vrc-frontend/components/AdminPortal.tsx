@@ -21,6 +21,12 @@ import {
   UserPlus,
   ShieldCheck,
   Sliders,
+  Languages,
+  Clock,
+  MapPin,
+  Eye,
+  Flame,
+  Star,
 } from 'lucide-react';
 
 interface AdminAccount {
@@ -81,6 +87,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [versePrayer, setVersePrayer] = useState('');
   const [verseTheme, setVerseTheme] = useState('Revival & Faith');
   const [generatingAi, setGeneratingAi] = useState(false);
+  const [translatingEvent, setTranslatingEvent] = useState(false);
+  const [translatingVerse, setTranslatingVerse] = useState(false);
 
   // Admin Accounts Management State
   const [adminList, setAdminList] = useState<AdminAccount[]>([]);
@@ -257,6 +265,97 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       showFeedback('error', err.message || 'Error generating reflection');
     } finally {
       setGeneratingAi(false);
+    }
+  };
+
+  const handleTranslateEvent = async (mode: 'bilingual' | 'en' | 'vi') => {
+    if (!eventTitle.trim() && !eventDescription.trim()) {
+      showFeedback('error', language === 'vi' ? 'Vui lòng nhập tên hoặc mô tả sự kiện trước khi dịch' : 'Please enter event title or description before translating');
+      return;
+    }
+    try {
+      setTranslatingEvent(true);
+      const token = getToken();
+
+      if (eventTitle.trim()) {
+        const res = await fetch(apiUrl('/api/ai/translate'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            text: eventTitle.trim(),
+            targetLang: mode === 'vi' ? 'vi' : 'en',
+            context: 'event',
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (mode === 'bilingual') {
+            setEventTitle(data.bilingual || `${eventTitle.trim()} • ${data.translated}`);
+          } else {
+            setEventTitle(data.translated);
+          }
+        }
+      }
+
+      if (eventDescription.trim()) {
+        const res = await fetch(apiUrl('/api/ai/translate'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            text: eventDescription.trim(),
+            targetLang: mode === 'vi' ? 'vi' : 'en',
+            context: 'event',
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (mode === 'bilingual') {
+            setEventDescription(`${eventDescription.trim()}\n\n---\n${data.translated}`);
+          } else {
+            setEventDescription(data.translated);
+          }
+        }
+      }
+
+      showFeedback('success', language === 'vi' ? 'Đã dịch sự kiện thành công!' : 'Event translated successfully!');
+    } catch (err: any) {
+      showFeedback('error', err.message || 'Translation error');
+    } finally {
+      setTranslatingEvent(false);
+    }
+  };
+
+  const handleTranslateScripture = async (targetLang: 'vi' | 'en') => {
+    if (!verseText.trim() && !verseReflection.trim() && !verseReference.trim()) {
+      showFeedback('error', language === 'vi' ? 'Vui lòng nhập câu gốc hoặc suy gẫm trước khi dịch' : 'Please enter scripture or reflection first');
+      return;
+    }
+    try {
+      setTranslatingVerse(true);
+      const token = getToken();
+      const fields = {
+        reference: verseReference.trim(),
+        verseText: verseText.trim(),
+        reflection: verseReflection.trim(),
+        prayer: versePrayer.trim(),
+      };
+      const res = await fetch(apiUrl('/api/ai/translate-devotional'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ fields, targetLang }),
+      });
+      if (!res.ok) throw new Error('Translation failed');
+      const data = await res.json();
+      if (data.reference) setVerseReference(data.reference);
+      if (data.verseText) setVerseText(data.verseText);
+      if (data.reflection) setVerseReflection(data.reflection);
+      if (data.prayer) setVersePrayer(data.prayer);
+
+      showFeedback('success', language === 'vi' ? 'Đã dịch Lời Chúa & suy gẫm thành công!' : 'Scripture translated successfully!');
+    } catch (err: any) {
+      showFeedback('error', err.message || 'Translation error');
+    } finally {
+      setTranslatingVerse(false);
     }
   };
 
@@ -459,8 +558,79 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         )}
 
-        {/* Tab Controls */}
-        <div className="flex items-center gap-2 px-4 sm:px-6 pt-3 border-b border-stone-200 bg-stone-50/50 flex-shrink-0 overflow-x-auto scrollbar-none">
+        {/* Tab Controls - Mobile Grid (no horizontal scroll needed) */}
+        <div className="sm:hidden p-3 bg-stone-50 border-b border-stone-200 space-y-2 flex-shrink-0">
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('create-event');
+                if (!editingEventId) resetEventForm();
+              }}
+              className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'create-event'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="truncate">{editingEventId ? (language === 'vi' ? 'Sửa Sự Kiện' : 'Edit Event') : t('tabAddEvent')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('manage-events')}
+              className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'manage-events'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span className="truncate">{t('tabManageEvents')} ({events.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('verses')}
+              className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'verses'
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span className="truncate">{t('tabVerses')} ({allVerses.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('admin-accounts')}
+              className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'admin-accounts'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-amber-500" />
+              <span className="truncate">{t('tabAdminAccounts')}</span>
+            </button>
+          </div>
+
+          {onOpenSpotlightEditor && (
+            <button
+              type="button"
+              onClick={onOpenSpotlightEditor}
+              className="w-full py-2 px-3 bg-amber-500 hover:bg-amber-400 active:scale-98 text-stone-950 font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner Trang Chủ' : 'Customize Home Banner'}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Tab Controls - Desktop Horizontal Bar */}
+        <div className="hidden sm:flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 flex-shrink-0">
           <button
             onClick={() => {
               setActiveTab('create-event');
@@ -520,156 +690,349 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               title="Tuỳ chỉnh banner trang chủ"
             >
               <Sliders className="w-3.5 h-3.5" />
-              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner (Make It Pop)' : 'Customize Banner'}</span>
+              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner' : 'Customize Banner'}</span>
             </button>
           )}
         </div>
 
         {/* Content Body */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-          {/* TAB 1: ADD / EDIT EVENT */}
+          {/* TAB 1: ADD / EDIT EVENT WITH LIVE CARD PREVIEW */}
           {activeTab === 'create-event' && (
-            <form onSubmit={handleSaveEvent} className="space-y-4 max-w-2xl mx-auto">
-              <div className="flex items-center justify-between pb-2 border-b border-stone-200">
-                <h3 className="text-base font-serif font-bold text-stone-900">
-                  {editingEventId ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event') : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
-                </h3>
-                {editingEventId && (
-                  <button
-                    type="button"
-                    onClick={resetEventForm}
-                    className="text-xs text-stone-500 hover:text-stone-800 underline"
-                  >
-                    {language === 'vi' ? 'Hủy Sửa' : 'Cancel Editing'}
-                  </button>
-                )}
-              </div>
+            (() => {
+              const previewTheme = (() => {
+                const lower = (eventCategory || '').toLowerCase();
+                if (lower.includes('youth') || lower.includes('giới trẻ')) {
+                  return {
+                    cardBg: 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/35 border-emerald-200/90 shadow-xs',
+                    dateBox: 'bg-emerald-100/90 text-emerald-950 border-emerald-200/90',
+                    monthText: 'text-emerald-800',
+                    badge: 'bg-emerald-100/80 text-emerald-900 border-emerald-200/80',
+                    icon: Users,
+                  };
+                }
+                if (lower.includes('worship') || lower.includes('thờ phượng')) {
+                  return {
+                    cardBg: 'bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/35 border-indigo-200/90 shadow-xs',
+                    dateBox: 'bg-indigo-100/90 text-indigo-950 border-indigo-200/90',
+                    monthText: 'text-indigo-800',
+                    badge: 'bg-indigo-100/80 text-indigo-900 border-indigo-200/80',
+                    icon: Flame,
+                  };
+                }
+                if (lower.includes('bible') || lower.includes('kinh thánh')) {
+                  return {
+                    cardBg: 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/35 border-amber-200/90 shadow-xs',
+                    dateBox: 'bg-amber-100/90 text-amber-950 border-amber-200/90',
+                    monthText: 'text-amber-800',
+                    badge: 'bg-amber-100/80 text-amber-900 border-amber-200/80',
+                    icon: BookOpen,
+                  };
+                }
+                return {
+                  cardBg: 'bg-gradient-to-br from-purple-50/90 via-white to-purple-50/35 border-purple-200/90 shadow-xs',
+                  dateBox: 'bg-purple-100/90 text-purple-950 border-purple-200/90',
+                  monthText: 'text-purple-800',
+                  badge: 'bg-purple-100/80 text-purple-900 border-purple-200/80',
+                  icon: Star,
+                };
+              })();
+              const PreviewCategoryIcon = previewTheme.icon;
 
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Sunday Worship Celebration"
-                  value={eventTitle}
-                  onChange={(e) => setEventTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
-                />
-              </div>
+              const previewDateObj = eventDate ? new Date(eventDate + 'T00:00:00') : new Date();
+              const previewMonth = isNaN(previewDateObj.getTime())
+                ? 'VRC'
+                : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' });
+              const previewDay = isNaN(previewDateObj.getTime())
+                ? '01'
+                : previewDateObj.getDate();
+              const previewWeekday = isNaN(previewDateObj.getTime())
+                ? (language === 'vi' ? 'Chúa Nhật' : 'Sunday')
+                : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
 
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
-                  value={eventDescription}
-                  onChange={(e) => setEventDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
-                />
-              </div>
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start max-w-5xl mx-auto">
+                  {/* Left Column: Event Form */}
+                  <div className="lg:col-span-7">
+                    <form onSubmit={handleSaveEvent} className="space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-stone-200">
+                        <h3 className="text-base font-serif font-bold text-stone-900">
+                          {editingEventId ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event') : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
+                        </h3>
+                        {editingEventId && (
+                          <button
+                            type="button"
+                            onClick={resetEventForm}
+                            className="text-xs text-stone-500 hover:text-stone-800 underline"
+                          >
+                            {language === 'vi' ? 'Hủy Sửa' : 'Cancel Editing'}
+                          </button>
+                        )}
+                      </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Phân Loại' : 'Category'}
-                  </label>
-                  <select
-                    value={eventCategory}
-                    onChange={(e) => setEventCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
-                  >
-                    <option value="Worship">Worship (Thờ Phượng)</option>
-                    <option value="Bible Study">Bible Study (Kinh Thánh)</option>
-                    <option value="Youth">Youth (Giới Trẻ)</option>
-                    <option value="Special Gathering">Special Gathering</option>
-                  </select>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-xs font-bold text-stone-700">
+                            {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleTranslateEvent('bilingual')}
+                              disabled={translatingEvent}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 transition-all active:scale-95"
+                              title="Tạo tiêu đề song ngữ Anh - Việt"
+                            >
+                              <Languages className="w-3 h-3 text-amber-700" />
+                              <span>{translatingEvent ? '...' : (language === 'vi' ? '⚡ Dịch Song Ngữ' : '⚡ Bilingual')}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleTranslateEvent('en')}
+                              disabled={translatingEvent}
+                              className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-1.5 py-0.5 rounded transition-all active:scale-95"
+                              title="Dịch sang tiếng Anh"
+                            >
+                              EN
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleTranslateEvent('vi')}
+                              disabled={translatingEvent}
+                              className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-1.5 py-0.5 rounded transition-all active:scale-95"
+                              title="Dịch sang tiếng Việt"
+                            >
+                              VI
+                            </button>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Sunday Worship Celebration"
+                          value={eventTitle}
+                          onChange={(e) => setEventTitle(e.target.value)}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-xs font-bold text-stone-700">
+                            {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleTranslateEvent('bilingual')}
+                            disabled={translatingEvent}
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-2 py-0.5 rounded transition-all active:scale-95"
+                          >
+                            <Languages className="w-3 h-3 text-stone-500" />
+                            <span>{translatingEvent ? '...' : (language === 'vi' ? 'Dịch song ngữ mô tả' : 'Translate description')}</span>
+                          </button>
+                        </div>
+                        <textarea
+                          rows={3}
+                          required
+                          placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
+                          value={eventDescription}
+                          onChange={(e) => setEventDescription(e.target.value)}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-stone-700 mb-1">
+                            {language === 'vi' ? 'Phân Loại' : 'Category'}
+                          </label>
+                          <select
+                            value={eventCategory}
+                            onChange={(e) => setEventCategory(e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
+                          >
+                            <option value="Worship">Worship (Thờ Phượng)</option>
+                            <option value="Bible Study">Bible Study (Kinh Thánh)</option>
+                            <option value="Youth">Youth (Giới Trẻ)</option>
+                            <option value="Special Gathering">Special Gathering</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-stone-700 mb-1">
+                            {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
+                          </label>
+                          <input
+                            type="date"
+                            required
+                            value={eventDate}
+                            onChange={(e) => setEventDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-stone-700 mb-1">
+                            {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="03:00 PM"
+                            value={eventStartTime}
+                            onChange={(e) => setEventStartTime(e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-stone-700 mb-1">
+                            {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="05:00 PM"
+                            value={eventEndTime}
+                            onChange={(e) => setEventEndTime(e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-stone-700 mb-1">
+                            {language === 'vi' ? 'Địa Điểm / Phòng Nhóm *' : 'Location *'}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Main Sanctuary, Tempe, Arizona"
+                            value={eventLocation}
+                            onChange={(e) => setEventLocation(e.target.value)}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center pt-2">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700">
+                          <input
+                            type="checkbox"
+                            checked={eventIsFeatured}
+                            onChange={(e) => setEventIsFeatured(e.target.checked)}
+                            className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
+                          />
+                          {language === 'vi' ? 'Đánh dấu là sự kiện nổi bật (Featured)' : 'Mark as Featured Event'}
+                        </label>
+                      </div>
+
+                      <div className="pt-3 border-t border-stone-200 flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : editingEventId ? (language === 'vi' ? 'Cập Nhật' : 'Update Event') : (language === 'vi' ? 'Đăng Sự Kiện' : 'Publish Event')}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Right Column: Live Event Preview Card */}
+                  <div className="lg:col-span-5 space-y-3 lg:sticky lg:top-4 bg-stone-50/70 p-4 rounded-3xl border border-stone-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-stone-800 uppercase tracking-wider">
+                        <Eye className="w-3.5 h-3.5 text-amber-600" />
+                        <span>{language === 'vi' ? 'Xem Trước Trực Tiếp' : 'Live Card Preview'}</span>
+                      </div>
+                      <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                        {language === 'vi' ? 'Hiển thị thực tế' : 'Real-time card'}
+                      </span>
+                    </div>
+
+                    {/* The Rendered Event Card exactly matching EventsSection */}
+                    <div className={`rounded-3xl border p-4 sm:p-5 transition-all duration-200 space-y-3 ${previewTheme.cardBg}`}>
+                      {/* Top Row: Category Pill + Featured Pill + Date */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${previewTheme.badge}`}
+                          >
+                            <PreviewCategoryIcon className="w-3 h-3" />
+                            <span>{eventCategory || 'Worship'}</span>
+                          </span>
+                          {eventIsFeatured && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                              <span>{language === 'vi' ? 'NỔI BẬT' : 'FEATURED'}</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-[11px] font-semibold text-stone-500">
+                          {previewWeekday}{eventDate ? `, ${eventDate}` : ''}
+                        </span>
+                      </div>
+
+                      {/* Main Content Area */}
+                      <div className="flex items-start gap-3.5">
+                        {/* Distinct Calendar Date Card */}
+                        <div className={`flex-shrink-0 w-14 text-center rounded-2xl border p-2 shadow-2xs ${previewTheme.dateBox}`}>
+                          <span className={`block text-[10px] font-bold uppercase tracking-wider ${previewTheme.monthText}`}>
+                            {previewMonth}
+                          </span>
+                          <span className="block text-xl font-serif font-bold text-stone-950 leading-tight">
+                            {previewDay}
+                          </span>
+                        </div>
+
+                        {/* Title, Time, Location */}
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <h4 className="text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2">
+                            {eventTitle || (language === 'vi' ? 'Tiêu Đề Sự Kiện (Đang nhập...)' : 'Event Title (Type in form...)')}
+                          </h4>
+
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-600">
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-stone-400" />
+                              <span>{eventStartTime || '03:00 PM'}{eventEndTime ? ` - ${eventEndTime}` : ''}</span>
+                            </span>
+
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-stone-400" />
+                              <span className="truncate max-w-[140px]">{eventLocation || 'Main Sanctuary, Tempe, AZ'}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description Preview */}
+                      <p className="text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 line-clamp-3">
+                        {eventDescription || (language === 'vi' ? 'Mô tả sự kiện, chủ đề bài giảng, hoạt động sinh hoạt sẽ hiển thị ở đây...' : 'Event details, sermon theme, and activities will be displayed here...')}
+                      </p>
+
+                      {/* Buttons Mock Preview */}
+                      <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-xs text-stone-400">
+                        <span className="text-[10px] italic text-stone-500">
+                          {language === 'vi' ? 'Tích hợp bản đồ & thông báo' : 'Maps & notifications enabled'}
+                        </span>
+                        <span className="px-2.5 py-1 bg-stone-900 text-white rounded-lg text-[10px] font-semibold">
+                          {language === 'vi' ? 'Xem Chi Tiết' : 'View Details'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-stone-500 text-center">
+                      {language === 'vi'
+                        ? '💡 Thẻ xem trước tự động đổi màu theo phân loại và cập nhật theo từng chữ bạn nhập'
+                        : '💡 Live preview card auto-updates colors and content as you edit'}
+                    </p>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="03:00 PM"
-                    value={eventStartTime}
-                    onChange={(e) => setEventStartTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="05:00 PM"
-                    value={eventEndTime}
-                    onChange={(e) => setEventEndTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Địa Điểm / Phòng Nhóm *' : 'Location *'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Main Sanctuary, Tempe, Arizona"
-                    value={eventLocation}
-                    onChange={(e) => setEventLocation(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center pt-2">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700">
-                  <input
-                    type="checkbox"
-                    checked={eventIsFeatured}
-                    onChange={(e) => setEventIsFeatured(e.target.checked)}
-                    className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
-                  />
-                  {language === 'vi' ? 'Đánh dấu là sự kiện nổi bật' : 'Mark as Featured Event'}
-                </label>
-              </div>
-
-              <div className="pt-3 border-t border-stone-200 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : editingEventId ? (language === 'vi' ? 'Cập Nhật' : 'Update Event') : (language === 'vi' ? 'Đăng Sự Kiện' : 'Publish Event')}
-                </button>
-              </div>
-            </form>
+              );
+            })()
           )}
 
           {/* TAB 2: MANAGE EVENTS */}
@@ -720,19 +1083,31 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           {activeTab === 'verses' && (
             <div className="space-y-6 max-w-2xl mx-auto">
               <form onSubmit={handleSaveVerse} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5">
-                <div className="flex items-center justify-between pb-2 border-b border-stone-200">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-200">
                   <h3 className="font-serif font-bold text-stone-900 text-sm">
                     {language === 'vi' ? 'Đăng Lời Chúa & Suy Gẫm Hôm Nay' : 'Post Scripture & Devotional'}
                   </h3>
-                  <button
-                    type="button"
-                    onClick={handleAiDraftDevotional}
-                    disabled={generatingAi}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-medium transition-colors"
-                  >
-                    <Sparkles className="w-3 h-3 text-amber-300" />
-                    <span>{generatingAi ? (language === 'vi' ? 'Đang soạn thảo...' : 'Drafting...') : (language === 'vi' ? 'AI Soạn Thảo Suy Gẫm' : 'AI Devotional Assistant')}</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleTranslateScripture(language === 'vi' ? 'en' : 'vi')}
+                      disabled={translatingVerse}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                      title="Dịch câu gốc và bài suy gẫm"
+                    >
+                      <Languages className="w-3.5 h-3.5 text-amber-700" />
+                      <span>{translatingVerse ? '...' : (language === 'vi' ? 'Dịch (VI ↔ EN)' : 'Translate')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAiDraftDevotional}
+                      disabled={generatingAi}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-medium transition-colors active:scale-95 shadow-2xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                      <span>{generatingAi ? (language === 'vi' ? 'Đang soạn...' : 'Drafting...') : (language === 'vi' ? 'AI Soạn Thảo' : 'AI Assistant')}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "ChurchInfo": {
+      "title": "ChurchInfo",
+      "description": "Church sanctuary details, location, contacts, and weekly service schedule",
+      "type": "object",
+      "properties": {
+        "sanctuaryName": { "type": "string", "maxLength": 300 },
+        "address": { "type": "string", "maxLength": 500 },
+        "googleMapsUrl": { "type": "string", "maxLength": 500 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 100 },
+        "regionDescVi": { "type": "string", "maxLength": 500 },
+        "regionDescEn": { "type": "string", "maxLength": 500 },
+        "services": { "type": "array" },
+        "updatedAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["sanctuaryName", "address", "updatedAt"]
+    },
+    "SpotlightBanner": {
+      "title": "SpotlightBanner",
+      "description": "Customizable homepage hero feature banner configuration",
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "maxLength": 50 },
+        "selectedEventId": { "type": "integer" },
+        "isActive": { "type": "boolean" },
+        "theme": { "type": "string", "maxLength": 50 },
+        "badge": { "type": "string", "maxLength": 200 },
+        "title": { "type": "string", "maxLength": 300 },
+        "subtitle": { "type": "string", "maxLength": 500 },
+        "description": { "type": "string", "maxLength": 1500 },
+        "dateTag": { "type": "string", "maxLength": 200 },
+        "locationTag": { "type": "string", "maxLength": 300 },
+        "customAddress": { "type": "string", "maxLength": 500 },
+        "primaryBtnText": { "type": "string", "maxLength": 100 },
+        "primaryBtnAction": { "type": "string", "maxLength": 50 },
+        "secondaryBtnText": { "type": "string", "maxLength": 100 },
+        "secondaryBtnUrl": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["title", "description", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/church_info/{id}": {
+      "schema": "ChurchInfo",
+      "description": "Sanctuary details and weekly worship services"
+    },
+    "/spotlight/{id}": {
+      "schema": "SpotlightBanner",
+      "description": "Featured home hero banner configuration"
+    }
+  }
+}

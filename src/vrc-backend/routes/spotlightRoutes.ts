@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
+import { FirestoreChurchService } from '../services/firestoreService.ts';
 
 const router = Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_DIR = path.join(__dirname, '../../..', 'data');
+const DATA_DIR = path.join(process.cwd(), 'data');
 const SPOTLIGHT_FILE = path.join(DATA_DIR, 'spotlight.json');
 
 export interface SpotlightData {
@@ -30,11 +28,11 @@ export interface SpotlightData {
   updatedAt: string;
 }
 
-const DEFAULT_SPOTLIGHT: SpotlightData = {
+export const DEFAULT_SPOTLIGHT: SpotlightData = {
   mode: 'auto',
   selectedEventId: null,
   isActive: true,
-  theme: 'default',
+  theme: 'thanksgiving',
   badge: 'Tempe, Arizona • Chúa Nhật 3:00 PM – 5:00 PM',
   title: 'Hội Thánh Phục Hưng Việt Nam',
   subtitle: 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"',
@@ -49,46 +47,64 @@ const DEFAULT_SPOTLIGHT: SpotlightData = {
   updatedAt: new Date().toISOString(),
 };
 
-
 let inMemorySpotlight: SpotlightData = { ...DEFAULT_SPOTLIGHT };
 
-function loadSpotlight(): SpotlightData {
+// Fallback local file caching
+function loadLocalSpotlight(): SpotlightData {
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
     if (fs.existsSync(SPOTLIGHT_FILE)) {
       const content = fs.readFileSync(SPOTLIGHT_FILE, 'utf-8');
       inMemorySpotlight = JSON.parse(content);
       return inMemorySpotlight;
     }
-    fs.writeFileSync(SPOTLIGHT_FILE, JSON.stringify(DEFAULT_SPOTLIGHT, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error accessing spotlight storage file:', err);
+    console.warn('Local spotlight file read failed:', err);
   }
   return inMemorySpotlight;
 }
 
-function saveSpotlight(data: SpotlightData): void {
-  inMemorySpotlight = { ...data, updatedAt: new Date().toISOString() };
+function saveLocalSpotlight(data: SpotlightData): void {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(SPOTLIGHT_FILE, JSON.stringify(inMemorySpotlight, null, 2), 'utf-8');
+    fs.writeFileSync(SPOTLIGHT_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error writing spotlight storage file:', err);
+    console.warn('Local spotlight file save failed:', err);
   }
 }
 
-// Initialize on startup
-loadSpotlight();
+// Initial warm-up from Firestore
+(async () => {
+  try {
+    const firestoreData = await FirestoreChurchService.getSpotlight();
+    if (firestoreData && firestoreData.title) {
+      inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...firestoreData };
+      saveLocalSpotlight(inMemorySpotlight);
+      console.log('Spotlight loaded from Firestore:', inMemorySpotlight.theme, inMemorySpotlight.title);
+    } else {
+      loadLocalSpotlight();
+      await FirestoreChurchService.saveSpotlight(inMemorySpotlight);
+    }
+  } catch (e) {
+    console.warn('Error during spotlight initial sync:', e);
+    loadLocalSpotlight();
+  }
+})();
 
 // GET /api/spotlight - Get current hero banner configuration
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const data = loadSpotlight();
-    res.json(data);
+    // Read from Firestore for latest persistent cloud state
+    const firestoreData = await FirestoreChurchService.getSpotlight();
+    if (firestoreData && firestoreData.title) {
+      inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...firestoreData };
+      saveLocalSpotlight(inMemorySpotlight);
+      return res.json(inMemorySpotlight);
+    }
+
+    const local = loadLocalSpotlight();
+    res.json(local);
   } catch (err: any) {
     console.error('Failed to get spotlight:', err);
     res.json(inMemorySpotlight);
@@ -96,7 +112,7 @@ router.get('/', (req, res) => {
 });
 
 // PUT /api/spotlight - Update hero banner configuration (Admin only)
-router.put('/', requireAdmin, (req: AuthRequest, res) => {
+router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const {
       mode,
@@ -116,9 +132,8 @@ router.put('/', requireAdmin, (req: AuthRequest, res) => {
       secondaryBtnUrl,
     } = req.body;
 
-    if (!title || !description) {
-      return res.status(400).json({ error: 'Title and description are required.' });
-    }
+    const finalTitle = title ? String(title).trim() : (inMemorySpotlight.title || 'Hội Thánh Phục Hưng Việt Nam');
+    const finalDesc = description ? String(description).trim() : (inMemorySpotlight.description || 'Thân mời quý tôi con Chúa cùng tham dự.');
 
     const cleanAddress = customAddress ? String(customAddress).trim() : 'Tempe, Arizona';
     const computedDirectionsUrl = secondaryBtnUrl
@@ -129,11 +144,11 @@ router.put('/', requireAdmin, (req: AuthRequest, res) => {
       mode: mode || 'auto',
       selectedEventId: selectedEventId ? Number(selectedEventId) : null,
       isActive: isActive !== undefined ? Boolean(isActive) : true,
-      theme: theme || 'default',
+      theme: theme || 'thanksgiving',
       badge: badge ? String(badge).trim() : 'Vietnamese Revival Church',
-      title: String(title).trim(),
+      title: finalTitle,
       subtitle: subtitle ? String(subtitle).trim() : '',
-      description: String(description).trim(),
+      description: finalDesc,
       dateTag: dateTag ? String(dateTag).trim() : '',
       locationTag: locationTag ? String(locationTag).trim() : 'Tempe, Arizona',
       customAddress: cleanAddress,
@@ -144,13 +159,17 @@ router.put('/', requireAdmin, (req: AuthRequest, res) => {
       updatedAt: new Date().toISOString(),
     };
 
-    saveSpotlight(updated);
+    inMemorySpotlight = updated;
+    saveLocalSpotlight(updated);
+
+    // Save to Firestore for permanent cross-instance cloud persistence
+    await FirestoreChurchService.saveSpotlight(updated);
+
     res.json(updated);
   } catch (err: any) {
     console.error('Failed to update spotlight:', err);
-    res.status(500).json({ error: 'Failed to update spotlight banner' });
+    res.status(500).json({ error: err.message || 'Failed to update spotlight banner' });
   }
 });
-
 
 export default router;

@@ -29,8 +29,24 @@ function ChurchAppContent() {
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [spotlightConfig, setSpotlightConfig] = useState<SpotlightBannerConfig | null>(DEFAULT_SPOTLIGHT);
-  const [churchInfo, setChurchInfo] = useState<ChurchInfo | null>(DEFAULT_CHURCH_INFO);
+
+  // Hydrate spotlightConfig and churchInfo immediately from localStorage so edits never revert on refresh
+  const [spotlightConfig, setSpotlightConfig] = useState<SpotlightBannerConfig | null>(() => {
+    try {
+      const cached = localStorage.getItem('vrc_cached_spotlight');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return DEFAULT_SPOTLIGHT;
+  });
+
+  const [churchInfo, setChurchInfo] = useState<ChurchInfo | null>(() => {
+    try {
+      const cached = localStorage.getItem('vrc_cached_church_info');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return DEFAULT_CHURCH_INFO;
+  });
+
   const [loading, setLoading] = useState(true);
 
   // Modals
@@ -45,12 +61,12 @@ function ChurchAppContent() {
       setLoading(true);
       const [eventsRes, todayVerseRes, versesRes, announcementsRes, spotlightRes, churchInfoRes, notifs] =
         await Promise.all([
-          fetch(apiUrl('/api/events')),
-          fetch(apiUrl('/api/verses/today')),
-          fetch(apiUrl('/api/verses')),
-          fetch(apiUrl('/api/announcements')),
-          fetch(apiUrl('/api/spotlight')),
-          fetch(apiUrl('/api/church-info')),
+          fetch(apiUrl('/api/events'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/verses/today'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/verses'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/announcements'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/spotlight'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/church-info'), { cache: 'no-store' }),
           NotificationClient.fetchRecent(),
         ]);
 
@@ -67,8 +83,16 @@ function ChurchAppContent() {
         setAllVerses(rawVerses.slice(0, 10));
       }
       if (announcementsRes.ok) setAnnouncements(await announcementsRes.json());
-      if (spotlightRes.ok) setSpotlightConfig(await spotlightRes.json());
-      if (churchInfoRes.ok) setChurchInfo(await churchInfoRes.json());
+      if (spotlightRes.ok) {
+        const data = await spotlightRes.json();
+        setSpotlightConfig(data);
+        try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(data)); } catch {}
+      }
+      if (churchInfoRes.ok) {
+        const data = await churchInfoRes.json();
+        setChurchInfo(data);
+        try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(data)); } catch {}
+      }
       setNotifications(notifs);
     } catch (err) {
       console.error('Error fetching church data:', err);
@@ -270,7 +294,10 @@ function ChurchAppContent() {
           onClose={() => setSpotlightModalOpen(false)}
           initialConfig={spotlightConfig}
           events={events}
-          onSaved={(updated) => setSpotlightConfig(updated)}
+          onSaved={(updated) => {
+            setSpotlightConfig(updated);
+            try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(updated)); } catch {}
+          }}
         />
       )}
 
@@ -280,7 +307,10 @@ function ChurchAppContent() {
           isOpen={churchInfoModalOpen}
           onClose={() => setChurchInfoModalOpen(false)}
           churchInfo={churchInfo || DEFAULT_CHURCH_INFO}
-          onSaved={(updated) => setChurchInfo(updated)}
+          onSaved={(updated) => {
+            setChurchInfo(updated);
+            try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(updated)); } catch {}
+          }}
         />
       )}
 

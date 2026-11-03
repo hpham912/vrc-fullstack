@@ -65,7 +65,7 @@ export interface SpotlightBannerConfig {
   selectedEventId?: number | null; // ID of pinned church event if mode is 'event'
   isActive: boolean; // whether holiday/spotlight mode is active
   theme: SpotlightTheme;
-  badge: string; // e.g. "🎄 Giáng Sinh 2026", "🍁 Lễ Tạ Ơn & Tri Ân", "🔥 Đại Hội Bồi Linh"
+  badge?: string; // e.g. "🎄 Giáng Sinh 2026", "🍁 Lễ Tạ Ơn & Tri Ân", "🔥 Đại Hội Bồi Linh"
   title: string; // e.g. "Đại Lễ Mừng Chúa Giáng Sinh & Thánh Nhạc"
   subtitle?: string; // Scripture quote or pastoral message
   description: string; // Event invitation & details
@@ -84,6 +84,7 @@ export interface WeeklyService {
   titleVi: string;
   titleEn: string;
   time: string;
+  timeEn?: string;
   descVi: string;
   descEn: string;
 }
@@ -114,6 +115,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfo = {
       titleVi: 'Lễ Thờ Phượng Chúa Nhật',
       titleEn: 'Sunday Worship Service',
       time: 'Chúa Nhật • 3:00 PM – 5:00 PM',
+      timeEn: 'Sunday • 3:00 PM – 5:00 PM',
       descVi: 'Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.',
       descEn: 'Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.',
     },
@@ -122,6 +124,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfo = {
       titleVi: 'Sinh Hoạt Giới Trẻ VRC Youth',
       titleEn: 'VRC Youth & Young Adults',
       time: 'Thứ Sáu • 6:30 PM – 8:30 PM',
+      timeEn: 'Friday • 6:30 PM – 8:30 PM',
       descVi: 'Sinh hoạt kết nối thanh thiếu niên, âm nhạc thờ phượng sôi động, thảo luận thực tế và thể thao.',
       descEn: 'Dynamic youth fellowship, contemporary praise, real-life discussion, games and snacks.',
     },
@@ -130,6 +133,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfo = {
       titleVi: 'Học Kinh Thánh & Cầu Nguyện',
       titleEn: 'Midweek Bible Study & Prayer',
       time: 'Thứ Tư • 7:00 PM – 8:30 PM',
+      timeEn: 'Wednesday • 7:00 PM – 8:30 PM',
       descVi: 'Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.',
       descEn: 'In-depth scripture study and united intercessory prayer for revival, families, and healings.',
     },

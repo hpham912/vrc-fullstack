@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     // Directly wraps the church webpage inside the iOS app shell
-    url: 'https://vietnamese-revival-church.ai.studio',
+    url: 'https://vrcfamily.ai.studio',
     cleartext: false,
     androidScheme: 'https',
     iosScheme: 'https',
