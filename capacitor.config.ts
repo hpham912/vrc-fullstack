@@ -5,11 +5,17 @@ const config: CapacitorConfig = {
   appName: 'Vietnamese Revival Church',
   webDir: 'dist',
   server: {
-    // Directly wraps the live web app so the iOS app immediately connects to the database
-    url: 'https://ais-pre-fercpswbhnqtm3nrhczvka-277174947415.us-west2.run.app',
+    // Directly wraps the church webpage inside the iOS app shell
+    url: 'https://vietnamese-revival-church.ai.studio',
     cleartext: false,
     androidScheme: 'https',
     iosScheme: 'https',
+    allowNavigation: [
+      'vietnamese-revival-church.ai.studio',
+      '*.ai.studio',
+      '*.run.app',
+      '*.google.com',
+    ],
   },
   ios: {
     contentInset: 'always',

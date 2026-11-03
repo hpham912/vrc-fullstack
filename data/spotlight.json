@@ -1,0 +1,18 @@
+{
+  "mode": "custom",
+  "selectedEventId": null,
+  "isActive": true,
+  "theme": "thanksgiving",
+  "badge": "🍂 Lễ Tạ Ơn & Tri Ân Chúa • Thanksgiving Celebration",
+  "title": "Đại Lễ Cảm Tạ Ơn Chúa & Thông Công Hội Thánh",
+  "subtitle": "Thi Thiên 100:4 - \"Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!\"",
+  "description": "Hội Thánh Phục Hưng Việt Nam trân trọng kính mời quý tôi con Chúa cùng gia quyến đến hiệp lòng tạ ơn Chúa, chia sẻ bữa tiệc thông công ấm áp và cùng nhau cầu nguyện phục hưng.",
+  "dateTag": "Chúa Nhật, 22 Tháng 11 • 3:00 PM – 6:30 PM",
+  "locationTag": "Tempe, Arizona • Main Sanctuary",
+  "customAddress": "Tempe, Arizona",
+  "primaryBtnText": "Xem Sự Kiện • View Events",
+  "primaryBtnAction": "events",
+  "secondaryBtnText": "Chỉ Đường • Directions",
+  "secondaryBtnUrl": "https://maps.google.com/?q=Tempe+Arizona",
+  "updatedAt": "2026-11-03T03:40:00.000Z"
+}

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { CrossIcon } from './CrossIcon.tsx';
 import {
+  Home,
   Calendar,
   BookOpen,
+  Flame,
   Clock,
   ShieldCheck,
   LogIn,
@@ -11,6 +14,7 @@ import {
   Bell,
   X,
 } from 'lucide-react';
+import { NotificationModal } from './NotificationModal.tsx';
 import { AppNotification } from '../types/index.ts';
 
 interface NavbarProps {
@@ -32,27 +36,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
-  const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
 
-  const navItems = [
+  const desktopNavItems = [
+    { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
+    { id: 'youth', label: t('navYouth'), icon: Flame },
     { id: 'about', label: t('navAbout'), icon: Clock },
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-stone-200/60 transition-all pt-safe">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-stone-200/60 transition-all pt-safe">
       <div className="max-w-4xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between h-14 sm:h-20">
-          {/* Logo & Title: Mobile uses VRC / HTTLVN, Desktop uses full name */}
+          {/* Logo & Title with SVG Cross (never shows as iOS emoji) */}
           <button
-            onClick={() => setActiveTab('events')}
+            onClick={() => setActiveTab('home')}
             className="flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-95 flex-shrink-0"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-stone-950 text-amber-400 flex items-center justify-center font-serif text-sm sm:text-lg font-bold shadow-xs group-hover:bg-amber-600 group-hover:text-white transition-all flex-shrink-0">
-              ✝
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-stone-950 text-amber-400 flex items-center justify-center font-bold shadow-xs group-hover:bg-amber-600 group-hover:text-white transition-all flex-shrink-0">
+              <CrossIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            
+
             {/* Mobile View: VRC on top, HTTLVN on bottom */}
             <div className="flex flex-col sm:hidden">
               <span className="font-serif text-sm font-bold tracking-tight text-stone-950 leading-tight">
@@ -76,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop Nav Pills */}
           <nav className="hidden md:flex items-center bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60">
-            {navItems.map((item) => {
+            {desktopNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
@@ -96,85 +102,57 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Controls: Notifications, Compact Mobile Lang Toggle, Admin */}
+          {/* Right Header Controls: Notification, Language Toggle, and Admin */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Notification Bell Button */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setShowNotifMenu(!showNotifMenu);
+            {/* Notification Bell Button (Click to Open/Close Popup) */}
+            <button
+              onClick={() => {
+                setShowNotifModal((prev) => !prev);
+                if (!showNotifModal) {
                   onRequestNotificationPermission();
-                }}
-                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 active:scale-95 transition-all relative border border-stone-200/70"
-                title="Notifications"
-                aria-label="View notifications"
-              >
-                <Bell className="w-4 h-4 text-stone-700" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse" />
-                )}
-              </button>
-
-              {/* Notification Dropdown Drawer */}
-              {showNotifMenu && (
-                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-stone-200 p-3 z-50 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between pb-2 border-b border-stone-100 mb-2">
-                    <span className="text-xs font-bold text-stone-900">
-                      {language === 'vi' ? 'Thông Báo Mới' : 'Recent Notifications'}
-                    </span>
-                    <button
-                      onClick={() => setShowNotifMenu(false)}
-                      className="p-1 text-stone-400 hover:text-stone-600 rounded-lg"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="max-h-60 overflow-y-auto space-y-2">
-                    {notifications.length === 0 ? (
-                      <p className="text-xs text-stone-400 text-center py-4">
-                        {language === 'vi' ? 'Chưa có thông báo nào mới' : 'No new notifications'}
-                      </p>
-                    ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-left space-y-0.5"
-                        >
-                          <p className="text-xs font-bold text-stone-900 leading-tight">{n.title}</p>
-                          <p className="text-[11px] text-stone-600 leading-relaxed">{n.body}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                }
+              }}
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all relative border ${
+                showNotifModal
+                  ? 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
+                  : 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70'
+              }`}
+              title="Notifications"
+              aria-label="Toggle notifications"
+            >
+              <Bell className="w-4 h-4" />
+              {notifications.length > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse" />
               )}
-            </div>
+            </button>
 
-            {/* Mobile View: Redesigned Ultra-Compact Language Flip Button */}
+
+            {/* Notification Modal Covering Whole Page */}
+            <NotificationModal
+              isOpen={showNotifModal}
+              onClose={() => setShowNotifModal(false)}
+              notifications={notifications}
+              onRequestPermission={onRequestNotificationPermission}
+              onSelectNotification={(notif) => {
+                setShowNotifModal(false);
+                if (notif.type === 'event') setActiveTab('events');
+                else if (notif.type === 'verse') setActiveTab('verse');
+              }}
+            />
+
+
+            {/* Language Switcher: Mobile Compact Toggle */}
             <button
               onClick={toggleLanguage}
               className="sm:hidden px-2 py-1.5 rounded-xl bg-stone-100/90 hover:bg-stone-200/80 active:scale-95 border border-stone-200/80 text-xs font-bold text-stone-800 flex items-center gap-1 shadow-2xs"
               title="Switch language"
             >
-              <span className="text-sm">{language === 'en' ? '🇺🇸' : '🇻🇳'}</span>
-              <span className="text-[11px] font-mono">{language === 'en' ? 'EN' : 'VI'}</span>
+              <span className="text-sm">{language === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
+              <span className="text-[11px] font-mono">{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
-            {/* Desktop View: Full segmented switcher pill */}
+            {/* Language Switcher: Desktop Pill */}
             <div className="hidden sm:flex items-center bg-stone-100/90 p-1 rounded-xl border border-stone-200 text-xs font-bold shadow-2xs">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] ${
-                  language === 'en'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-800'
-                }`}
-                title="English"
-              >
-                <span>🇺🇸</span>
-                <span>EN</span>
-              </button>
               <button
                 onClick={() => setLanguage('vi')}
                 className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] ${
@@ -187,9 +165,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>🇻🇳</span>
                 <span>VI</span>
               </button>
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] ${
+                  language === 'en'
+                    ? 'bg-white text-stone-950 shadow-xs'
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+                title="English"
+              >
+                <span>🇺🇸</span>
+                <span>EN</span>
+              </button>
             </div>
 
-            {/* Admin status / Login button */}
+            {/* Admin Management / Login */}
             {isAdmin ? (
               <div className="flex items-center gap-1">
                 <button

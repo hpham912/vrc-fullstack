@@ -7,9 +7,41 @@ import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
 
-// GET /api/events - List all events
+// Helper function to auto-delete events that passed by more than 1 week (7 days)
+async function cleanupOldEvents() {
+  try {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const cutoffDate = oneWeekAgo.toISOString().split('T')[0];
+
+    // Delete events where date < cutoffDate (YYYY-MM-DD chronological comparison)
+    const deleted = await db.delete(events).where(sql`${events.date} < ${cutoffDate}`).returning();
+    if (deleted.length > 0) {
+      console.log(`Auto-cleaned ${deleted.length} expired event(s) older than 1 week (before ${cutoffDate})`);
+    }
+    return deleted.length;
+  } catch (err) {
+    console.warn('Expired events cleanup warning:', err);
+    return 0;
+  }
+}
+
+// POST /api/events/cleanup-expired - Explicit trigger to clean up events older than 7 days
+router.post('/cleanup-expired', async (req, res) => {
+  try {
+    const removedCount = await cleanupOldEvents();
+    res.json({ message: 'Expired events cleaned successfully', removedCount });
+  } catch (err: any) {
+    console.error('Failed to run events cleanup:', err);
+    res.status(500).json({ error: 'Failed to run events cleanup' });
+  }
+});
+
+// GET /api/events - List all events (automatically purges events older than 7 days)
 router.get('/', async (req, res) => {
   try {
+    // Purge expired events older than 7 days first
+    await cleanupOldEvents();
+
     const category = req.query.category as string;
     const search = req.query.search as string;
 
@@ -36,6 +68,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve church events' });
   }
 });
+
 
 // GET /api/events/:id - Get single event with RSVPs
 router.get('/:id', async (req, res) => {

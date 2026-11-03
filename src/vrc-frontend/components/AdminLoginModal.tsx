@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
-import { Lock, User, X, AlertCircle, ShieldCheck, KeyRound } from 'lucide-react';
+import { Lock, User, X, AlertCircle, ShieldCheck, KeyRound, Sparkles } from 'lucide-react';
 
 interface AdminLoginModalProps {
   isOpen: boolean;
@@ -43,7 +43,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/65 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="p-6 bg-stone-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -88,10 +88,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 type="text"
                 required
                 autoFocus
-                placeholder="admin"
+                placeholder="vrcadmin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all font-medium text-stone-900"
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all text-stone-900"
               />
             </div>
           </div>
@@ -124,7 +124,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-stone-950 hover:bg-stone-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 bg-stone-950 hover:bg-stone-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors disabled:opacity-50 active:scale-95"
             >
               {loading ? (language === 'vi' ? 'Đang xác thực...' : 'Authenticating...') : t('loginBtn')}
             </button>

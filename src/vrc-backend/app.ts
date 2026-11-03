@@ -7,6 +7,8 @@ import eventRoutes from './routes/eventRoutes.ts';
 import verseRoutes from './routes/verseRoutes.ts';
 import notifRoutes from './routes/notifRoutes.ts';
 import devotionalRoutes from './routes/devotionalRoutes.ts';
+import spotlightRoutes from './routes/spotlightRoutes.ts';
+import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 
 export const createApp = () => {
   const app = express();
@@ -30,6 +32,9 @@ export const createApp = () => {
   app.use('/api/verses', verseRoutes);
   app.use('/api/notifications', notifRoutes);
   app.use('/api/ai', devotionalRoutes);
+  app.use('/api/spotlight', spotlightRoutes);
+  app.use('/api/church-info', churchInfoRoutes);
+
 
   // Centralized Error Handler
   app.use(errorHandler);

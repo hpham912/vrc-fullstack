@@ -37,16 +37,38 @@ router.get('/today', async (req, res) => {
   }
 });
 
-// GET /api/verses - List all verses
+// Helper function to keep strictly the 10 most recent scriptures
+async function enforceMaxTenVerses() {
+  try {
+    const allVerses = await db
+      .select({ id: dailyVerses.id, date: dailyVerses.date })
+      .from(dailyVerses)
+      .orderBy(desc(dailyVerses.date));
+
+    if (allVerses.length > 10) {
+      const surplus = allVerses.slice(10);
+      for (const item of surplus) {
+        await db.delete(dailyVerses).where(eq(dailyVerses.id, item.id));
+      }
+      console.log(`Pruned ${surplus.length} older scripture entries to keep exactly 10 most recent.`);
+    }
+  } catch (err) {
+    console.warn('Scripture pruning warning:', err);
+  }
+}
+
+// GET /api/verses - List 10 most recent scriptures
 router.get('/', async (req, res) => {
   try {
-    const list = await db.select().from(dailyVerses).orderBy(desc(dailyVerses.date));
+    await enforceMaxTenVerses();
+    const list = await db.select().from(dailyVerses).orderBy(desc(dailyVerses.date)).limit(10);
     res.json(list);
   } catch (error: any) {
     console.error('Failed to fetch verses:', error);
     res.status(500).json({ error: 'Failed to fetch scripture verses' });
   }
 });
+
 
 // POST /api/verses - Create or update daily verse (Admin only)
 router.post('/', requireAdmin, async (req: AuthRequest, res) => {

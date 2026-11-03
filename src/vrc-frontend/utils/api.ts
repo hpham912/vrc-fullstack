@@ -1,21 +1,9 @@
-// Robust native iOS / Capacitor app detection
-const isNativeApp = (): boolean => {
-  if (typeof window === 'undefined') return false;
+// Vite substitutes this value at build time.  Keep it empty for the web app,
+// where relative /api requests are served by the same Express origin.
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
 
-  const cap = (window as any).Capacitor;
-  if (cap?.isNativePlatform?.() || cap?.platform === 'ios' || cap?.platform === 'android') {
-    return true;
-  }
-
-  return (
-    window.location.protocol === 'capacitor:' ||
-    window.location.protocol === 'ionic:' ||
-    (window.location.hostname === 'localhost' && !window.location.port)
-  );
-};
-
-export const API_BASE = (isNativeApp() && !window.location.host.includes('run.app'))
-  ? 'https://ais-pre-fercpswbhnqtm3nrhczvka-277174947415.us-west2.run.app'
+export const API_BASE = configuredApiBase
+  ? configuredApiBase.replace(/\/+$/, '')
   : '';
 
 export const apiUrl = (endpoint: string): string => {

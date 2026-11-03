@@ -20,6 +20,7 @@ import {
   KeyRound,
   UserPlus,
   ShieldCheck,
+  Sliders,
 } from 'lucide-react';
 
 interface AdminAccount {
@@ -38,6 +39,7 @@ interface AdminPortalProps {
   initialTab?: string;
   onClose: () => void;
   onRefreshData: () => void;
+  onOpenSpotlightEditor?: () => void;
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
@@ -47,6 +49,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   initialTab = 'create-event',
   onClose,
   onRefreshData,
+  onOpenSpotlightEditor,
 }) => {
   const { adminUser, getToken } = useAuth();
   const { language, t } = useLanguage();
@@ -508,6 +511,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <Users className="w-3.5 h-3.5 text-amber-600" />
             <span>{t('tabAdminAccounts')}</span>
           </button>
+
+          {onOpenSpotlightEditor && (
+            <button
+              type="button"
+              onClick={onOpenSpotlightEditor}
+              className="px-3.5 py-1.5 mb-1.5 ml-auto bg-amber-500 hover:bg-amber-400 active:scale-95 text-stone-950 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-2xs transition-all whitespace-nowrap flex-shrink-0"
+              title="Tuỳ chỉnh banner trang chủ"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner (Make It Pop)' : 'Customize Banner'}</span>
+            </button>
+          )}
         </div>
 
         {/* Content Body */}
