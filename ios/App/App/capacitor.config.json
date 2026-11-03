@@ -3,7 +3,7 @@
 	"appName": "Vietnamese Revival Church",
 	"webDir": "dist",
 	"server": {
-		"url": "https://ais-pre-fercpswbhnqtm3nrhczvka-277174947415.us-west2.run.app",
+		"url": "https://vietnamese-revival-church.ai.studio",
 		"cleartext": false,
 		"androidScheme": "https",
 		"iosScheme": "https"
