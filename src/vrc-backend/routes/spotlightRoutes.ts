@@ -132,24 +132,22 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       secondaryBtnUrl,
     } = req.body;
 
-    const finalTitle = title ? String(title).trim() : (inMemorySpotlight.title || 'Hội Thánh Phục Hưng Việt Nam');
-    const finalDesc = description ? String(description).trim() : (inMemorySpotlight.description || 'Thân mời quý tôi con Chúa cùng tham dự.');
-
+    const isAuto = mode === 'auto' || !selectedEventId;
     const cleanAddress = customAddress ? String(customAddress).trim() : 'Tempe, Arizona';
     const computedDirectionsUrl = secondaryBtnUrl
       ? String(secondaryBtnUrl).trim()
       : `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
 
     const updated: SpotlightData = {
-      mode: mode || 'auto',
-      selectedEventId: selectedEventId ? Number(selectedEventId) : null,
+      mode: isAuto ? 'auto' : 'event',
+      selectedEventId: isAuto ? null : Number(selectedEventId),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       theme: theme || 'thanksgiving',
-      badge: badge ? String(badge).trim() : 'Vietnamese Revival Church',
-      title: finalTitle,
+      badge: badge ? String(badge).trim() : '',
+      title: isAuto ? '' : (title ? String(title).trim() : ''),
       subtitle: subtitle ? String(subtitle).trim() : '',
-      description: finalDesc,
-      dateTag: dateTag ? String(dateTag).trim() : '',
+      description: isAuto ? '' : (description ? String(description).trim() : ''),
+      dateTag: isAuto ? '' : (dateTag ? String(dateTag).trim() : ''),
       locationTag: locationTag ? String(locationTag).trim() : 'Tempe, Arizona',
       customAddress: cleanAddress,
       primaryBtnText: primaryBtnText ? String(primaryBtnText).trim() : 'Xem Tất Cả Sự Kiện',

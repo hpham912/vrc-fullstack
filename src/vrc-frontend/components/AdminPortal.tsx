@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChurchEvent, DailyVerse, Announcement } from '../types/index.ts';
+import { ChurchEvent, ChurchInfo, DailyVerse, Announcement } from '../types/index.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { apiUrl } from '../utils/api.ts';
@@ -42,6 +42,7 @@ interface AdminPortalProps {
   events: ChurchEvent[];
   allVerses: DailyVerse[];
   announcements: Announcement[];
+  churchInfo?: ChurchInfo | null;
   initialTab?: string;
   onClose: () => void;
   onRefreshData: () => void;
@@ -52,6 +53,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   events,
   allVerses,
   announcements,
+  churchInfo,
   initialTab = 'create-event',
   onClose,
   onRefreshData,
@@ -79,6 +81,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vnrevivalchurch.org');
 
   // Daily Verse Form State
+  const [editingVerseId, setEditingVerseId] = useState<number | null>(null);
   const [verseDate, setVerseDate] = useState(new Date().toISOString().split('T')[0]);
   const [verseReference, setVerseReference] = useState('');
   const [verseText, setVerseText] = useState('');
@@ -126,6 +129,28 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   }, [activeTab]);
 
+  const resetVerseForm = () => {
+    setEditingVerseId(null);
+    setVerseDate(new Date().toISOString().split('T')[0]);
+    setVerseReference('');
+    setVerseText('');
+    setVerseTranslation('NIV');
+    setVerseReflection('');
+    setVersePrayer('');
+    setVerseTheme('Revival & Faith');
+  };
+
+  const handleEditVerse = (v: DailyVerse) => {
+    setEditingVerseId(v.id);
+    setVerseDate(v.date);
+    setVerseReference(v.reference);
+    setVerseText(v.verseText);
+    setVerseTranslation(v.translation || 'NIV');
+    setVerseReflection(v.reflection);
+    setVersePrayer(v.prayer || '');
+    setVerseTheme(v.theme || 'Revival & Faith');
+  };
+
   const resetEventForm = () => {
     setEditingEventId(null);
     setEventTitle('');
@@ -135,7 +160,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventStartTime('03:00 PM');
     setEventEndTime('05:00 PM');
     setEventLocation('Main Sanctuary');
-    setEventAddress('Tempe, Arizona');
+    setEventAddress(churchInfo?.address || 'Tempe, Arizona');
     setEventIsFeatured(false);
   };
 
@@ -148,7 +173,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventStartTime(evt.startTime);
     setEventEndTime(evt.endTime || '');
     setEventLocation(evt.location);
-    setEventAddress(evt.address || 'Tempe, Arizona');
+    setEventAddress(evt.address || churchInfo?.address || 'Tempe, Arizona');
     setEventIsFeatured(evt.isFeatured);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');
@@ -165,6 +190,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
+      const defaultChurchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
       const payload = {
         title: eventTitle.trim(),
         description: eventDescription.trim(),
@@ -173,7 +199,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         startTime: eventStartTime,
         endTime: eventEndTime || null,
         location: eventLocation.trim(),
-        address: eventAddress.trim() || 'Tempe, Arizona',
+        address: eventAddress.trim() || defaultChurchAddr,
         isFeatured: eventIsFeatured,
         organizerName: eventOrganizer.trim(),
         organizerEmail: eventOrganizerEmail.trim(),
@@ -369,8 +395,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
-      const res = await fetch(apiUrl('/api/verses'), {
-        method: 'POST',
+      const endpoint = editingVerseId ? `/api/verses/${editingVerseId}` : '/api/verses';
+      const method = editingVerseId ? 'PUT' : 'POST';
+      const res = await fetch(apiUrl(endpoint), {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -387,13 +415,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       });
 
       if (!res.ok) throw new Error('Failed to save verse');
-      showFeedback('success', language === 'vi' ? 'Đã lưu Lời Chúa hằng ngày!' : 'Daily scripture saved successfully!');
+      showFeedback('success', language === 'vi'
+        ? (editingVerseId ? 'Đã cập nhật Lời Chúa!' : 'Đã lưu Lời Chúa hằng ngày!')
+        : (editingVerseId ? 'Daily scripture updated!' : 'Daily scripture saved successfully!'));
 
-      NotificationClient.triggerNotification(
-        `Scripture of the Day: ${verseReference.trim()}`,
-        `"${verseText.slice(0, 100)}..."`
-      );
+      if (!editingVerseId) {
+        NotificationClient.triggerNotification(
+          `Scripture of the Day: ${verseReference.trim()}`,
+          `"${verseText.slice(0, 100)}..."`
+        );
+      }
 
+      resetVerseForm();
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message || 'Error saving daily verse');
@@ -508,8 +541,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
-      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 w-full">
+      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800 flex-shrink-0">
           <div>
@@ -696,8 +729,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-          {/* TAB 1: ADD / EDIT EVENT WITH LIVE CARD PREVIEW */}
+        <div className="p-4 sm:p-6 overflow-y-auto overflow-x-hidden flex-1 w-full max-w-full min-w-0">
+          {/* TAB 1: ADD / EDIT EVENT - EXACT SAME DESIGN AS DAILY VERSES */}
           {activeTab === 'create-event' && (
             (() => {
               const previewTheme = (() => {
@@ -751,13 +784,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
 
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start max-w-5xl mx-auto">
-                  {/* Left Column: Event Form */}
-                  <div className="lg:col-span-7">
-                    <form onSubmit={handleSaveEvent} className="space-y-4">
-                      <div className="flex items-center justify-between pb-2 border-b border-stone-200">
-                        <h3 className="text-base font-serif font-bold text-stone-900">
-                          {editingEventId ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event') : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
+                <div className="space-y-6 max-w-2xl mx-auto w-full min-w-0">
+                  {/* Event Form Card (Exact same design as Daily Verses) */}
+                  <form onSubmit={handleSaveEvent} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5 w-full min-w-0 box-border">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-200">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-serif font-bold text-stone-900 text-sm">
+                          {editingEventId
+                            ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event')
+                            : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
                         </h3>
                         {editingEventId && (
                           <button
@@ -765,197 +800,224 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             onClick={resetEventForm}
                             className="text-xs text-stone-500 hover:text-stone-800 underline"
                           >
-                            {language === 'vi' ? 'Hủy Sửa' : 'Cancel Editing'}
+                            {language === 'vi' ? 'Hủy Sửa' : 'Cancel'}
                           </button>
                         )}
                       </div>
 
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block text-xs font-bold text-stone-700">
-                            {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
-                          </label>
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleTranslateEvent('bilingual')}
-                              disabled={translatingEvent}
-                              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-200 transition-all active:scale-95"
-                              title="Tạo tiêu đề song ngữ Anh - Việt"
-                            >
-                              <Languages className="w-3 h-3 text-amber-700" />
-                              <span>{translatingEvent ? '...' : (language === 'vi' ? '⚡ Dịch Song Ngữ' : '⚡ Bilingual')}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleTranslateEvent('en')}
-                              disabled={translatingEvent}
-                              className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-1.5 py-0.5 rounded transition-all active:scale-95"
-                              title="Dịch sang tiếng Anh"
-                            >
-                              EN
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleTranslateEvent('vi')}
-                              disabled={translatingEvent}
-                              className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-1.5 py-0.5 rounded transition-all active:scale-95"
-                              title="Dịch sang tiếng Việt"
-                            >
-                              VI
-                            </button>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => handleTranslateEvent('bilingual')}
+                          disabled={translatingEvent}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200 transition-all active:scale-95"
+                          title="Tạo tiêu đề song ngữ Anh - Việt"
+                        >
+                          <Languages className="w-3.5 h-3.5 text-amber-700" />
+                          <span>{translatingEvent ? '...' : (language === 'vi' ? '⚡ Song Ngữ' : '⚡ Bilingual')}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleTranslateEvent('en')}
+                          disabled={translatingEvent}
+                          className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg transition-all active:scale-95"
+                          title="Dịch sang tiếng Anh"
+                        >
+                          EN
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleTranslateEvent('vi')}
+                          disabled={translatingEvent}
+                          className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg transition-all active:scale-95"
+                          title="Dịch sang tiếng Việt"
+                        >
+                          VI
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="w-full min-w-0">
+                      <label className="block text-xs font-bold text-stone-700 mb-1">
+                        {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Sunday Worship Celebration"
+                        value={eventTitle}
+                        onChange={(e) => setEventTitle(e.target.value)}
+                        className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400"
+                      />
+                    </div>
+
+                    <div className="w-full min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-stone-700">
+                          {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleTranslateEvent('bilingual')}
+                          disabled={translatingEvent}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white border border-stone-200 px-2 py-0.5 rounded transition-all active:scale-95"
+                        >
+                          <Languages className="w-3 h-3 text-stone-500" />
+                          <span>{translatingEvent ? '...' : (language === 'vi' ? 'Dịch song ngữ mô tả' : 'Translate')}</span>
+                        </button>
+                      </div>
+                      <textarea
+                        rows={3}
+                        required
+                        placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
+                        value={eventDescription}
+                        onChange={(e) => setEventDescription(e.target.value)}
+                        className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Phân Loại' : 'Category'}
+                        </label>
+                        <select
+                          value={eventCategory}
+                          onChange={(e) => setEventCategory(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                        >
+                          <option value="Worship">Worship (Thờ Phượng)</option>
+                          <option value="Bible Study">Bible Study (Kinh Thánh)</option>
+                          <option value="Youth">Youth (Giới Trẻ)</option>
+                          <option value="Special Gathering">Special Gathering</option>
+                        </select>
+                      </div>
+
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
+                        </label>
+                        <input
+                          type="date"
+                          required
+                          value={eventDate}
+                          onChange={(e) => setEventDate(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
+                        </label>
                         <input
                           type="text"
                           required
-                          placeholder="e.g. Sunday Worship Celebration"
-                          value={eventTitle}
-                          onChange={(e) => setEventTitle(e.target.value)}
-                          className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                          placeholder="03:00 PM"
+                          value={eventStartTime}
+                          onChange={(e) => setEventStartTime(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                         />
                       </div>
+                    </div>
 
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="block text-xs font-bold text-stone-700">
-                            {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => handleTranslateEvent('bilingual')}
-                            disabled={translatingEvent}
-                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-2 py-0.5 rounded transition-all active:scale-95"
-                          >
-                            <Languages className="w-3 h-3 text-stone-500" />
-                            <span>{translatingEvent ? '...' : (language === 'vi' ? 'Dịch song ngữ mô tả' : 'Translate description')}</span>
-                          </button>
-                        </div>
-                        <textarea
-                          rows={3}
-                          required
-                          placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
-                          value={eventDescription}
-                          onChange={(e) => setEventDescription(e.target.value)}
-                          className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-stone-700 mb-1">
-                            {language === 'vi' ? 'Phân Loại' : 'Category'}
-                          </label>
-                          <select
-                            value={eventCategory}
-                            onChange={(e) => setEventCategory(e.target.value)}
-                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
-                          >
-                            <option value="Worship">Worship (Thờ Phượng)</option>
-                            <option value="Bible Study">Bible Study (Kinh Thánh)</option>
-                            <option value="Youth">Youth (Giới Trẻ)</option>
-                            <option value="Special Gathering">Special Gathering</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-stone-700 mb-1">
-                            {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={eventDate}
-                            onChange={(e) => setEventDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm bg-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-stone-700 mb-1">
-                            {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="03:00 PM"
-                            value={eventStartTime}
-                            onChange={(e) => setEventStartTime(e.target.value)}
-                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-stone-700 mb-1">
-                            {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="05:00 PM"
-                            value={eventEndTime}
-                            onChange={(e) => setEventEndTime(e.target.value)}
-                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-stone-700 mb-1">
-                            {language === 'vi' ? 'Địa Điểm / Phòng Nhóm *' : 'Location *'}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Main Sanctuary, Tempe, Arizona"
-                            value={eventLocation}
-                            onChange={(e) => setEventLocation(e.target.value)}
-                            className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center pt-2">
-                        <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700">
-                          <input
-                            type="checkbox"
-                            checked={eventIsFeatured}
-                            onChange={(e) => setEventIsFeatured(e.target.checked)}
-                            className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
-                          />
-                          {language === 'vi' ? 'Đánh dấu là sự kiện nổi bật (Featured)' : 'Mark as Featured Event'}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
                         </label>
+                        <input
+                          type="text"
+                          placeholder="05:00 PM"
+                          value={eventEndTime}
+                          onChange={(e) => setEventEndTime(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                        />
                       </div>
 
-                      <div className="pt-3 border-t border-stone-200 flex justify-end">
-                        <button
-                          type="submit"
-                          disabled={submitting}
-                          className="px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
-                        >
-                          <Save className="w-3.5 h-3.5" />
-                          {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : editingEventId ? (language === 'vi' ? 'Cập Nhật' : 'Update Event') : (language === 'vi' ? 'Đăng Sự Kiện' : 'Publish Event')}
-                        </button>
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Phòng Nhóm / Nơi Chốn *' : 'Location / Room *'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Main Sanctuary, Fellowship Hall..."
+                          value={eventLocation}
+                          onChange={(e) => setEventLocation(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                        />
                       </div>
-                    </form>
-                  </div>
+                    </div>
 
-                  {/* Right Column: Live Event Preview Card */}
-                  <div className="lg:col-span-5 space-y-3 lg:sticky lg:top-4 bg-stone-50/70 p-4 rounded-3xl border border-stone-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-stone-800 uppercase tracking-wider">
+                    <div className="w-full min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-stone-700">
+                          {language === 'vi' ? 'Địa Chỉ Cụ Thể (Chỉ Đường Google Maps)' : 'Venue Address (Google Maps Directions)'}
+                        </label>
+                        <span className="text-[10px] text-stone-400">
+                          {language === 'vi' ? 'Để trống = Địa chỉ Hội Thánh' : 'Blank = Church Address'}
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={churchInfo?.address || 'Tempe, Arizona'}
+                        value={eventAddress}
+                        onChange={(e) => setEventAddress(e.target.value)}
+                        className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                      />
+                      <p className="text-[11px] text-stone-500 mt-1">
+                        {language === 'vi'
+                          ? `Nếu để trống hoặc không đổi, nút Chỉ Đường sẽ dẫn tới địa chỉ Hội Thánh thiết lập trong Lịch Sinh Hoạt (${churchInfo?.address || 'Tempe, Arizona'}). Nếu là địa điểm dã ngoại hay ngoài nhà thờ, hãy nhập địa chỉ tại đây.`
+                          : `If left blank, the Directions button routes to the church sanctuary address (${churchInfo?.address || 'Tempe, Arizona'}). For retreats or offsite gatherings, enter the address here.`}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700">
+                        <input
+                          type="checkbox"
+                          checked={eventIsFeatured}
+                          onChange={(e) => setEventIsFeatured(e.target.checked)}
+                          className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
+                        />
+                        <span>{language === 'vi' ? 'Đánh dấu là sự kiện nổi bật (Featured)' : 'Mark as Featured Event'}</span>
+                      </label>
+                    </div>
+
+                    <div className="text-right pt-2 border-t border-stone-200">
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>
+                          {submitting
+                            ? (language === 'vi' ? 'Đang lưu...' : 'Saving...')
+                            : editingEventId
+                            ? (language === 'vi' ? 'Cập Nhật Sự Kiện' : 'Update Event')
+                            : (language === 'vi' ? 'Lưu Sự Kiện' : 'Save Event')}
+                        </span>
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Live Event Preview Card (Rendered cleanly directly below in same width) */}
+                  <div className="space-y-2 w-full min-w-0">
+                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-500">
+                      <span className="flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5 text-amber-600" />
-                        <span>{language === 'vi' ? 'Xem Trước Trực Tiếp' : 'Live Card Preview'}</span>
-                      </div>
-                      <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-full border border-amber-200">
-                        {language === 'vi' ? 'Hiển thị thực tế' : 'Real-time card'}
+                        <span>{language === 'vi' ? 'Xem Trước Thẻ Sự Kiện' : 'Event Card Preview'}</span>
+                      </span>
+                      <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+                        {language === 'vi' ? 'Tự động cập nhật' : 'Live preview'}
                       </span>
                     </div>
 
-                    {/* The Rendered Event Card exactly matching EventsSection */}
-                    <div className={`rounded-3xl border p-4 sm:p-5 transition-all duration-200 space-y-3 ${previewTheme.cardBg}`}>
+                    <div className={`rounded-2xl border p-4 sm:p-5 transition-all duration-200 space-y-3 w-full min-w-0 box-border ${previewTheme.cardBg}`}>
                       {/* Top Row: Category Pill + Featured Pill + Date */}
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span
                             className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${previewTheme.badge}`}
@@ -979,7 +1041,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       {/* Main Content Area */}
                       <div className="flex items-start gap-3.5">
                         {/* Distinct Calendar Date Card */}
-                        <div className={`flex-shrink-0 w-14 text-center rounded-2xl border p-2 shadow-2xs ${previewTheme.dateBox}`}>
+                        <div className={`flex-shrink-0 w-14 text-center rounded-xl border p-2 shadow-2xs ${previewTheme.dateBox}`}>
                           <span className={`block text-[10px] font-bold uppercase tracking-wider ${previewTheme.monthText}`}>
                             {previewMonth}
                           </span>
@@ -996,13 +1058,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-600">
                             <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-stone-400" />
+                              <Clock className="w-3 h-3 text-stone-400 flex-shrink-0" />
                               <span>{eventStartTime || '03:00 PM'}{eventEndTime ? ` - ${eventEndTime}` : ''}</span>
                             </span>
 
                             <span className="inline-flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-stone-400" />
-                              <span className="truncate max-w-[140px]">{eventLocation || 'Main Sanctuary, Tempe, AZ'}</span>
+                              <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
+                              <span className="truncate max-w-[240px]">
+                                {eventLocation || 'Main Sanctuary'} • {eventAddress.trim() || churchInfo?.address || 'Tempe, AZ'}
+                              </span>
                             </span>
                           </div>
                         </div>
@@ -1010,25 +1074,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       {/* Description Preview */}
                       <p className="text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 line-clamp-3">
-                        {eventDescription || (language === 'vi' ? 'Mô tả sự kiện, chủ đề bài giảng, hoạt động sinh hoạt sẽ hiển thị ở đây...' : 'Event details, sermon theme, and activities will be displayed here...')}
+                        {eventDescription || (language === 'vi' ? 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...' : 'Event details and description will appear here as you type in the form above...')}
                       </p>
-
-                      {/* Buttons Mock Preview */}
-                      <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-xs text-stone-400">
-                        <span className="text-[10px] italic text-stone-500">
-                          {language === 'vi' ? 'Tích hợp bản đồ & thông báo' : 'Maps & notifications enabled'}
-                        </span>
-                        <span className="px-2.5 py-1 bg-stone-900 text-white rounded-lg text-[10px] font-semibold">
-                          {language === 'vi' ? 'Xem Chi Tiết' : 'View Details'}
-                        </span>
-                      </div>
                     </div>
-
-                    <p className="text-[11px] text-stone-500 text-center">
-                      {language === 'vi'
-                        ? '💡 Thẻ xem trước tự động đổi màu theo phân loại và cập nhật theo từng chữ bạn nhập'
-                        : '💡 Live preview card auto-updates colors and content as you edit'}
-                    </p>
                   </div>
                 </div>
               );
@@ -1042,38 +1090,51 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <p className="text-stone-500 text-sm py-8 text-center">{language === 'vi' ? 'Chưa có sự kiện nào trong cơ sở dữ liệu.' : 'No events in database.'}</p>
               ) : (
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
-                  {events.map((evt) => (
-                    <div key={evt.id} className="p-4 flex items-center justify-between gap-4 hover:bg-stone-50/60 transition-colors">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-serif font-bold text-stone-900 text-sm">{evt.title}</span>
-                          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-stone-100 text-stone-700">
-                            {evt.category}
-                          </span>
+                  {events.map((evt) => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const isPast = evt.date < todayStr;
+                    return (
+                      <div key={evt.id} className="p-4 flex items-center justify-between gap-4 hover:bg-stone-50/60 transition-colors">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-serif font-bold text-stone-900 text-sm truncate">{evt.title}</span>
+                            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-stone-100 text-stone-700">
+                              {evt.category}
+                            </span>
+                            {isPast ? (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+                                {language === 'vi' ? 'Đã diễn ra' : 'Past (Archive)'}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                {language === 'vi' ? 'Sắp diễn ra' : 'Upcoming'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-stone-500 truncate">
+                            {evt.date} • {evt.startTime} • {evt.location}{evt.address && evt.address !== evt.location ? ` • ${evt.address}` : ''}
+                          </p>
                         </div>
-                        <p className="text-xs text-stone-500">
-                          {evt.date} • {evt.startTime} • {evt.location}
-                        </p>
-                      </div>
 
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleEditEvent(evt)}
-                          className="p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors"
-                          title="Edit"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEvent(evt.id)}
-                          className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => handleEditEvent(evt)}
+                            className="p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEvent(evt.id)}
+                            className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1081,13 +1142,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           {/* TAB 3: DAILY VERSES */}
           {activeTab === 'verses' && (
-            <div className="space-y-6 max-w-2xl mx-auto">
-              <form onSubmit={handleSaveVerse} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5">
+            <div className="space-y-6 max-w-2xl mx-auto w-full min-w-0">
+              <form onSubmit={handleSaveVerse} className="p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5 w-full min-w-0 box-border">
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-200">
-                  <h3 className="font-serif font-bold text-stone-900 text-sm">
-                    {language === 'vi' ? 'Đăng Lời Chúa & Suy Gẫm Hôm Nay' : 'Post Scripture & Devotional'}
-                  </h3>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif font-bold text-stone-900 text-sm">
+                      {editingVerseId
+                        ? (language === 'vi' ? 'Sửa Lời Chúa & Suy Gẫm' : 'Edit Scripture & Devotional')
+                        : (language === 'vi' ? 'Đăng Lời Chúa & Suy Gẫm Hôm Nay' : 'Post Scripture & Devotional')}
+                    </h3>
+                    {editingVerseId && (
+                      <button
+                        type="button"
+                        onClick={resetVerseForm}
+                        className="text-xs text-stone-500 hover:text-stone-800 underline"
+                      >
+                        {language === 'vi' ? 'Hủy Sửa' : 'Cancel'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <button
                       type="button"
                       onClick={() => handleTranslateScripture(language === 'vi' ? 'en' : 'vi')}
@@ -1110,18 +1184,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
                     <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Ngày *' : 'Date *'}</label>
                     <input
                       type="date"
                       required
                       value={verseDate}
                       onChange={(e) => setVerseDate(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                     />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-2 w-full min-w-0">
                     <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh *' : 'Scripture Reference *'}</label>
                     <input
                       type="text"
@@ -1129,12 +1203,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       placeholder="e.g. 2 Chronicles 7:14 / 2 Sử Ký 7:14"
                       value={verseReference}
                       onChange={(e) => setVerseReference(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                     />
                   </div>
                 </div>
 
-                <div>
+                <div className="w-full min-w-0">
                   <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa *' : 'Scripture Text *'}</label>
                   <textarea
                     rows={2}
@@ -1142,11 +1216,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     placeholder={language === 'vi' ? 'Nhập câu gốc Lời Chúa...' : 'Enter the scripture verse text...'}
                     value={verseText}
                     onChange={(e) => setVerseText(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
                   />
                 </div>
 
-                <div>
+                <div className="w-full min-w-0">
                   <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm Mục Vụ *' : 'Pastoral Reflection *'}</label>
                   <textarea
                     rows={3}
@@ -1154,52 +1228,70 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     placeholder={language === 'vi' ? 'Nội dung suy gẫm và khích lệ đức tin...' : 'Thoughtful pastoral reflection...'}
                     value={verseReflection}
                     onChange={(e) => setVerseReflection(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
                   />
                 </div>
 
-                <div>
+                <div className="w-full min-w-0">
                   <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện' : 'Prayer (Optional)'}</label>
                   <input
                     type="text"
                     placeholder="Lạy Chúa, xin dẫn dắt từng bước đi của chúng con..."
                     value={versePrayer}
                     onChange={(e) => setVersePrayer(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                   />
                 </div>
 
-                <div className="text-right pt-2">
+                <div className="text-right pt-2 border-t border-stone-200">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold"
+                    className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5"
                   >
-                    {submitting ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : (language === 'vi' ? 'Lưu Lời Chúa' : 'Save Daily Scripture')}
+                    <Save className="w-3.5 h-3.5" />
+                    <span>
+                      {submitting
+                        ? (language === 'vi' ? 'Đang lưu...' : 'Saving...')
+                        : editingVerseId
+                        ? (language === 'vi' ? 'Cập Nhật Lời Chúa' : 'Update Scripture')
+                        : (language === 'vi' ? 'Lưu Lời Chúa' : 'Save Daily Scripture')}
+                    </span>
                   </button>
                 </div>
               </form>
 
               {/* Published verses list */}
-              <div className="space-y-2">
+              <div className="space-y-2 w-full min-w-0">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
                   {language === 'vi' ? 'Lời Chúa Đã Đăng' : 'Published Daily Verses'} ({allVerses.length})
                 </h4>
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl overflow-hidden bg-white">
                   {allVerses.map((v) => (
                     <div key={v.id} className="p-3 flex items-center justify-between gap-3 text-xs">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <span className="font-serif font-bold text-stone-900">{v.reference}</span>
                         <span className="text-stone-400 ml-2">{v.date}</span>
                         <p className="text-stone-500 line-clamp-1 mt-0.5">"{v.verseText}"</p>
                       </div>
-                      <button
-                        onClick={() => handleDeleteVerse(v.id)}
-                        className="p-1 text-stone-400 hover:text-rose-600"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleEditVerse(v)}
+                          className="p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteVerse(v.id)}
+                          className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

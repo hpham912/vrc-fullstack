@@ -76,10 +76,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
   return createPortal(
     <>
-      {/* Backdrop below topbar (Click to dismiss) */}
+      {/* Full-screen backdrop preventing interaction with navbar, admin, or page content */}
       <div
         onClick={onClose}
-        className="fixed inset-0 top-14 sm:top-20 z-[90] bg-stone-950/45 backdrop-blur-xs animate-in fade-in duration-150"
+        className="fixed inset-0 z-[90] bg-stone-950/50 backdrop-blur-xs animate-in fade-in duration-150"
       />
 
       {/* Popup Dialog stretching from below topbar down to above bottom tab bar */}

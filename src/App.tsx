@@ -72,9 +72,7 @@ function ChurchAppContent() {
 
       if (eventsRes.ok) {
         const rawEvents: ChurchEvent[] = await eventsRes.json();
-        // Client-side auto-cleanup of events older than 1 week (7 days)
-        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        setEvents(rawEvents.filter((e) => e.date >= oneWeekAgo));
+        setEvents(rawEvents);
       }
       if (todayVerseRes.ok) setTodayVerse(await todayVerseRes.json());
       if (versesRes.ok) {
@@ -112,7 +110,7 @@ function ChurchAppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6">
+    <div className="min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* iOS App Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -213,7 +211,7 @@ function ChurchAppContent() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0">
         {activeTab === 'home' && (
           <HomeDashboard
             events={events}
@@ -294,6 +292,7 @@ function ChurchAppContent() {
           onClose={() => setSpotlightModalOpen(false)}
           initialConfig={spotlightConfig}
           events={events}
+          churchInfo={churchInfo}
           onSaved={(updated) => {
             setSpotlightConfig(updated);
             try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(updated)); } catch {}
@@ -314,13 +313,13 @@ function ChurchAppContent() {
         />
       )}
 
-
       {/* Admin Dashboard Modal */}
       {adminPortalOpen && (
         <AdminPortal
           events={events}
           allVerses={allVerses}
           announcements={announcements}
+          churchInfo={churchInfo}
           initialTab={adminPortalTab}
           onClose={() => setAdminPortalOpen(false)}
           onRefreshData={loadData}

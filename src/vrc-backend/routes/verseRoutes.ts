@@ -118,6 +118,35 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   }
 });
 
+// PUT /api/verses/:id - Update daily verse by ID (Admin only)
+router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { date, verseText, reference, translation, reflection, prayer, theme } = req.body;
+    const updated = await db
+      .update(dailyVerses)
+      .set({
+        date,
+        verseText: String(verseText).trim(),
+        reference: String(reference).trim(),
+        translation: translation || 'NIV',
+        reflection: String(reflection).trim(),
+        prayer: prayer ? String(prayer).trim() : null,
+        theme: theme ? String(theme).trim() : 'Daily Devotion',
+      })
+      .where(eq(dailyVerses.id, id))
+      .returning();
+
+    if (updated.length === 0) {
+      return res.status(404).json({ error: 'Verse not found' });
+    }
+    res.json(updated[0]);
+  } catch (error: any) {
+    console.error('Failed to update verse:', error);
+    res.status(500).json({ error: 'Failed to update daily scripture verse' });
+  }
+});
+
 // DELETE /api/verses/:id - Delete daily verse (Admin only)
 router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
   try {

@@ -48,26 +48,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const safeChurch = churchInfo || DEFAULT_CHURCH_INFO;
 
   // Current date in YYYY-MM-DD
-  const todayStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-  // 1. Find upcoming events that are today or future (date >= todayStr)
-  const upcomingEvents = events.filter((e) => e.date >= todayStr);
-  const nextUpcomingEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : (events.length > 0 ? events[0] : null);
+  // 1. Find upcoming events that are today or future (date >= todayStr), sorted chronologically
+  const upcomingEvents = [...events]
+    .filter((e) => e.date >= todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+  const nextUpcomingEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
 
   // 2. Check if a pinned event is chosen by admin
+  const isAutoMode = safeConfig.mode === 'auto' || !safeConfig.selectedEventId;
   const pinnedEvent =
-    safeConfig.mode === 'event' && safeConfig.selectedEventId
+    !isAutoMode && safeConfig.selectedEventId
       ? events.find((e) => e.id === safeConfig.selectedEventId)
       : null;
 
   // Has the pinned event ended? If so, system automatically advances to next upcoming event!
   const isPinnedEnded = pinnedEvent ? pinnedEvent.date < todayStr : true;
 
-  // Active event to display if mode is 'event' and still ongoing, or if mode is 'auto'
-  const activeEvent =
-    safeConfig.mode === 'event' && pinnedEvent && !isPinnedEnded
-      ? pinnedEvent
-      : (safeConfig.mode === 'auto' ? nextUpcomingEvent : null);
+  // Active event to display: if mode is 'event' and still ongoing, use pinnedEvent; otherwise dynamically use nextUpcomingEvent!
+  const activeEvent = (!isAutoMode && pinnedEvent && !isPinnedEnded) ? pinnedEvent : nextUpcomingEvent;
 
   // Helper function to format service day & hours bilingually
   const getServiceTimeParts = (svc: { time: string; timeEn?: string; titleVi: string; titleEn?: string }, lang: 'vi' | 'en') => {
@@ -141,8 +142,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-amber-200 border-amber-400/50 bg-amber-950/70',
           btnPrimary: 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold shadow-lg shadow-amber-500/20',
           highlightTag: 'text-amber-300',
-          themeIcon: '🍂',
-          themeLabel: language === 'vi' ? 'Mùa Lễ Tạ Ơn & Tri Ân' : 'Thanksgiving Season of Gratitude',
         };
       case 'christmas':
         return {
@@ -152,8 +151,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-amber-200 border-amber-300/50 bg-red-950/75',
           btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-stone-950 font-bold shadow-lg shadow-amber-400/25',
           highlightTag: 'text-red-300',
-          themeIcon: '🎄',
-          themeLabel: language === 'vi' ? 'Đại Lễ Giáng Sinh Bình An' : 'Holy Christmas Celebration',
         };
       case 'easter':
         return {
@@ -163,8 +160,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-amber-200 border-purple-400/50 bg-purple-950/70',
           btnPrimary: 'bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-stone-950 font-bold shadow-lg shadow-amber-400/20',
           highlightTag: 'text-purple-300',
-          themeIcon: '✝️',
-          themeLabel: language === 'vi' ? 'Đại Lễ Phục Sinh Vinh Hiển' : 'Glorious Easter Resurrection',
         };
       case 'revival':
         return {
@@ -174,8 +169,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-cyan-200 border-cyan-400/50 bg-blue-950/70',
           btnPrimary: 'bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-300 hover:to-blue-300 text-stone-950 font-bold shadow-lg shadow-cyan-400/20',
           highlightTag: 'text-cyan-300',
-          themeIcon: '🔥',
-          themeLabel: language === 'vi' ? 'Đại Hội Bồi Linh Phục Hưng' : 'Revival & Holy Spirit Awakening',
         };
       case 'special':
         return {
@@ -185,8 +178,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-teal-200 border-teal-400/50 bg-teal-950/70',
           btnPrimary: 'bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-stone-950 font-bold shadow-lg shadow-teal-400/20',
           highlightTag: 'text-teal-300',
-          themeIcon: '✨',
-          themeLabel: language === 'vi' ? 'Giới Trẻ & Sinh Hoạt Trẻ' : 'VRC Youth & Young Adults',
         };
       default:
         return {
@@ -196,8 +187,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           badgeText: 'text-amber-200 border-white/20 bg-white/10',
           btnPrimary: 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold shadow-md shadow-amber-500/20',
           highlightTag: 'text-amber-300',
-          themeIcon: '🏛️',
-          themeLabel: language === 'vi' ? 'Hội Thánh Phục Hưng Việt Nam' : 'Vietnamese Revival Church',
         };
     }
   };
@@ -218,42 +207,51 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   const bannerTheme = getBannerThemeClasses(currentThemeKey);
 
-  // Compute displayed banner content (honoring the admin's saved configuration)
-  const isAutoWithoutCustomTitle = safeConfig.mode === 'auto' && !safeConfig.title;
+  // Default Church Address and Maps URL set in Schedule
+  const defaultChurchAddress = (safeChurch.address || 'Tempe, Arizona').trim();
+  const defaultChurchMapsUrl = safeChurch.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(defaultChurchAddress)}`;
 
-  const displayBadge = !isAutoWithoutCustomTitle && safeConfig.badge
-    ? safeConfig.badge
+  // Check if active event specifies a custom address different from church schedule address
+  const activeEventAddress = (activeEvent?.address || '').trim();
+  const hasCustomEventAddress =
+    Boolean(activeEventAddress) &&
+    activeEventAddress.toLowerCase() !== defaultChurchAddress.toLowerCase();
+
+  const displayAddress = hasCustomEventAddress
+    ? activeEventAddress
+    : defaultChurchAddress;
+
+  // Directions button: fallback to church address set in Schedule unless event sets a custom different address
+  const displayDirectionsUrl = hasCustomEventAddress
+    ? `https://maps.google.com/?q=${encodeURIComponent(activeEventAddress)}`
+    : defaultChurchMapsUrl;
+
+  // Compute displayed banner content (auto mode always dynamically derives from next upcoming event)
+  const displayBadge = safeConfig.badge?.trim()
+    ? safeConfig.badge.trim()
     : (activeEvent
-        ? `✨ ${activeEvent.category} • ${activeEvent.date} ${activeEvent.startTime}`
-        : 'Tempe, Arizona • Chúa Nhật 3:00 PM');
+        ? `${activeEvent.category} • ${activeEvent.date}`
+        : (language === 'vi' ? 'Sự Kiện Nổi Bật' : 'Featured Event'));
 
-  const displayTitle = !isAutoWithoutCustomTitle && safeConfig.title
-    ? safeConfig.title
-    : (activeEvent ? activeEvent.title : 'Hội Thánh Phục Hưng Việt Nam');
+  const displayTitle = isAutoMode
+    ? (activeEvent ? activeEvent.title : 'Hội Thánh Phục Hưng Việt Nam')
+    : (activeEvent ? activeEvent.title : (safeConfig.title || 'Hội Thánh Phục Hưng Việt Nam'));
 
-  const displaySubtitle = !isAutoWithoutCustomTitle && safeConfig.subtitle
-    ? safeConfig.subtitle
+  const displaySubtitle = safeConfig.subtitle?.trim()
+    ? safeConfig.subtitle.trim()
     : (activeEvent ? `Sự kiện: ${activeEvent.category} tại ${activeEvent.location}` : undefined);
 
-  const displayDescription = !isAutoWithoutCustomTitle && safeConfig.description
-    ? safeConfig.description
-    : (activeEvent ? activeEvent.description : t('dashboardSub'));
+  const displayDescription = isAutoMode
+    ? (activeEvent ? activeEvent.description : (safeConfig.description || t('dashboardSub')))
+    : (activeEvent ? activeEvent.description : (safeConfig.description || t('dashboardSub')));
 
-  const displayDateTag = !isAutoWithoutCustomTitle && safeConfig.dateTag
-    ? safeConfig.dateTag
-    : (activeEvent ? `${activeEvent.date} • ${activeEvent.startTime}` : 'Chúa Nhật Hàng Tuần • 3:00 PM');
+  const displayDateTag = isAutoMode
+    ? (activeEvent ? `${activeEvent.date} • ${activeEvent.startTime}` : 'Chúa Nhật Hàng Tuần • 3:00 PM')
+    : (activeEvent ? `${activeEvent.date} • ${activeEvent.startTime}` : (safeConfig.dateTag || 'Chúa Nhật Hàng Tuần • 3:00 PM'));
 
-  const displayLocationTag = !isAutoWithoutCustomTitle && safeConfig.locationTag
-    ? safeConfig.locationTag
-    : (activeEvent ? (activeEvent.location || 'Tempe, Arizona') : (safeChurch.address || 'Tempe, Arizona'));
-
-  const displayAddress = safeConfig.customAddress
-    ? safeConfig.customAddress
-    : (activeEvent ? (activeEvent.address || activeEvent.location || 'Tempe, Arizona') : (safeChurch.address || 'Tempe, Arizona'));
-
-  const displayDirectionsUrl =
-    safeConfig.secondaryBtnUrl ||
-    `https://maps.google.com/?q=${encodeURIComponent(displayAddress)}`;
+  const displayLocationTag = isAutoMode
+    ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
+    : (activeEvent ? (activeEvent.location || displayAddress) : (safeConfig.locationTag || displayAddress));
 
   return (
     <div className="py-4 sm:py-8 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
@@ -263,13 +261,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <div className={`absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow1}`} />
         <div className={`absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 rounded-full blur-3xl pointer-events-none ${bannerTheme.glow2}`} />
 
-
-
         <div className="relative z-10 space-y-3.5">
-          {/* Top Row: Exactly ONE Clean Themed Badge Pill + Admin Customizer Button */}
+          {/* Top Row: Clean Themed Badge Pill + Admin Customizer Button */}
           <div className="flex items-center justify-between gap-2">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md border text-[11px] font-medium max-w-[calc(100%-80px)] sm:max-w-none truncate ${bannerTheme.badgeText}`}>
-              <span className="text-xs flex-shrink-0">{bannerTheme.themeIcon}</span>
+            <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-md border text-[11px] font-semibold max-w-[calc(100%-80px)] sm:max-w-none truncate ${bannerTheme.badgeText}`}>
               <span className="truncate">{displayBadge}</span>
             </div>
 

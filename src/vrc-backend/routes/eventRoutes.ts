@@ -7,40 +7,55 @@ import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
 
-// Helper function to auto-delete events that passed by more than 1 week (7 days)
-async function cleanupOldEvents() {
+// Helper function to maintain at most 3 past events in DB and prune older past events
+async function cleanupPastEvents() {
   try {
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const cutoffDate = oneWeekAgo.toISOString().split('T')[0];
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // Delete events where date < cutoffDate (YYYY-MM-DD chronological comparison)
-    const deleted = await db.delete(events).where(sql`${events.date} < ${cutoffDate}`).returning();
-    if (deleted.length > 0) {
-      console.log(`Auto-cleaned ${deleted.length} expired event(s) older than 1 week (before ${cutoffDate})`);
+    // Query past events (where date < todayStr), ordered by date desc (most recent first)
+    const past = await db
+      .select({ id: events.id, date: events.date })
+      .from(events)
+      .where(sql`${events.date} < ${todayStr}`)
+      .orderBy(desc(events.date), desc(events.startTime), desc(events.id));
+
+    // Keep top 3 recent past events; delete any beyond 3
+    if (past.length > 3) {
+      const surplusPast = past.slice(3);
+      const idsToDelete = surplusPast.map((e) => e.id);
+      if (idsToDelete.length > 0) {
+        for (const id of idsToDelete) {
+          await db.delete(eventRsvps).where(eq(eventRsvps.eventId, id));
+          await db.delete(events).where(eq(events.id, id));
+        }
+        console.log(`Pruned ${idsToDelete.length} past events, strictly keeping 3 recent past events in DB.`);
+        return idsToDelete.length;
+      }
     }
-    return deleted.length;
+    return 0;
   } catch (err) {
-    console.warn('Expired events cleanup warning:', err);
+    console.warn('Past events cleanup warning:', err);
     return 0;
   }
 }
 
-// POST /api/events/cleanup-expired - Explicit trigger to clean up events older than 7 days
+// POST /api/events/cleanup-expired - Explicit trigger to clean up past events older than the 3 most recent
 router.post('/cleanup-expired', async (req, res) => {
   try {
-    const removedCount = await cleanupOldEvents();
-    res.json({ message: 'Expired events cleaned successfully', removedCount });
+    const removedCount = await cleanupPastEvents();
+    res.json({ message: 'Past events pruned to max 3 successfully', removedCount });
   } catch (err: any) {
     console.error('Failed to run events cleanup:', err);
     res.status(500).json({ error: 'Failed to run events cleanup' });
   }
 });
 
-// GET /api/events - List all events (automatically purges events older than 7 days)
+// GET /api/events - List all events (maintains at most 3 past events in DB)
 router.get('/', async (req, res) => {
   try {
-    // Purge expired events older than 7 days first
-    await cleanupOldEvents();
+    // Prune surplus past events first
+    await cleanupPastEvents();
 
     const category = req.query.category as string;
     const search = req.query.search as string;

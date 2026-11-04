@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChurchEvent, SpotlightBannerConfig, SpotlightTheme } from '../types/index.ts';
+import React, { useState, useEffect } from 'react';
+import { ChurchEvent, ChurchInfo, SpotlightBannerConfig, SpotlightTheme } from '../types/index.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { apiUrl } from '../utils/api.ts';
@@ -22,6 +22,7 @@ interface SpotlightBannerModalProps {
   onClose: () => void;
   initialConfig?: SpotlightBannerConfig | null;
   events?: ChurchEvent[];
+  churchInfo?: ChurchInfo | null;
   onSaved: (updated: SpotlightBannerConfig) => void;
 }
 
@@ -47,6 +48,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   onClose,
   initialConfig,
   events = [],
+  churchInfo,
   onSaved,
 }) => {
   const { getToken } = useAuth();
@@ -56,6 +58,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     initialConfig?.selectedEventId ?? null
   );
+  const [badgeText, setBadgeText] = useState(initialConfig?.badge || '');
   const [subtitle, setSubtitle] = useState(
     initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
   );
@@ -63,14 +66,27 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Current local date in YYYY-MM-DD
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  // Upcoming events only: past events must NEVER show in the feature banner selector
+  const upcomingEvents = events
+    .filter((e) => e.date >= todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+
   // Sync state with incoming props on modal open or config update
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setTheme(initialConfig?.theme || 'thanksgiving');
-      setSelectedEventId(initialConfig?.selectedEventId ?? null);
+      const existingId = initialConfig?.selectedEventId ?? null;
+      // If previously selected event has passed, reset to auto-next
+      const isPast = existingId ? events.some((e) => e.id === existingId && e.date < todayStr) : false;
+      setSelectedEventId(isPast ? null : existingId);
+      setBadgeText(initialConfig?.badge || '');
       setSubtitle(initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"');
     }
-  }, [isOpen, initialConfig]);
+  }, [isOpen, initialConfig, events, todayStr]);
 
   if (!isOpen) return null;
 
@@ -82,34 +98,36 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       setFeedback(null);
       const token = getToken();
 
-      // Find selected event to pull details
-      const pickedEvt = selectedEventId
-        ? events.find((e) => e.id === selectedEventId)
+      const isAuto = selectedEventId === null;
+      // Find selected event to pull details (only valid if upcoming)
+      const pickedEvt = !isAuto
+        ? upcomingEvents.find((e) => e.id === selectedEventId)
         : null;
 
-      const cleanAddress = pickedEvt?.address || pickedEvt?.location || initialConfig?.customAddress || 'Tempe, Arizona';
-      const cleanDirectionsUrl = `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
+      const defaultChurchAddress = (churchInfo?.address || 'Tempe, Arizona').trim();
+      const defaultChurchMapsUrl = churchInfo?.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(defaultChurchAddress)}`;
 
-      const themeBadge = {
-        christmas: 'Giáng Sinh',
-        thanksgiving: 'Lễ Tạ Ơn',
-        easter: 'Phục Sinh',
-        revival: 'Bồi Linh Phục Hưng',
-        special: 'Đặc Biệt',
-        default: 'Sự Kiện Trọng Tâm',
-      }[theme] || 'Sự Kiện Nổi Bật';
+      const eventHasCustomAddress = Boolean(pickedEvt?.address?.trim()) &&
+        pickedEvt!.address!.trim().toLowerCase() !== defaultChurchAddress.toLowerCase();
+
+      const cleanAddress = eventHasCustomAddress ? pickedEvt!.address!.trim() : defaultChurchAddress;
+      const cleanDirectionsUrl = eventHasCustomAddress
+        ? `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`
+        : defaultChurchMapsUrl;
+
+      const cleanBadge = (badgeText || '').trim();
 
       const payload: SpotlightBannerConfig = {
-        mode: selectedEventId ? 'event' : 'auto',
-        selectedEventId: selectedEventId || null,
+        mode: isAuto ? 'auto' : 'event',
+        selectedEventId: isAuto ? null : selectedEventId,
         isActive: true,
         theme,
-        badge: themeBadge,
+        badge: cleanBadge,
         subtitle: (subtitle || '').trim(),
-        title: pickedEvt ? pickedEvt.title : (initialConfig?.title || 'Hội Thánh Phục Hưng Việt Nam'),
-        description: pickedEvt ? pickedEvt.description : (initialConfig?.description || 'Thân mời quý tôi con Chúa cùng gia quyến đến thờ phượng Chúa.'),
-        dateTag: pickedEvt ? `${pickedEvt.date} • ${pickedEvt.startTime}` : (initialConfig?.dateTag || 'Chúa Nhật Hàng Tuần • 3:00 PM'),
-        locationTag: pickedEvt ? (pickedEvt.location || 'Tempe, Arizona') : (initialConfig?.locationTag || 'Tempe, Arizona • Main Sanctuary'),
+        title: isAuto ? '' : (pickedEvt ? pickedEvt.title : ''),
+        description: isAuto ? '' : (pickedEvt ? pickedEvt.description : ''),
+        dateTag: isAuto ? '' : (pickedEvt ? `${pickedEvt.date} • ${pickedEvt.startTime}` : ''),
+        locationTag: isAuto ? '' : (pickedEvt ? (pickedEvt.location || defaultChurchAddress) : defaultChurchAddress),
         customAddress: cleanAddress,
         primaryBtnText: 'Xem Sự Kiện',
         primaryBtnAction: 'events',
@@ -317,58 +335,97 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 </div>
               </div>
 
-              {/* Church Events List */}
-              {events.map((evt) => {
-                const isSelected = selectedEventId === evt.id;
-                return (
-                  <div
-                    key={evt.id}
-                    onClick={() => setSelectedEventId(evt.id)}
-                    className={`p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center justify-between gap-3 ${
-                      isSelected
-                        ? 'border-amber-600 bg-amber-50/70 ring-1 ring-amber-400'
-                        : 'border-stone-200 bg-white hover:bg-stone-50'
-                    }`}
-                  >
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
-                          {evt.category}
-                        </span>
-                        <span className="text-[11px] font-bold text-stone-800">
-                          {evt.date} • {evt.startTime}
-                        </span>
-                      </div>
-                      <p className="font-serif font-bold text-xs sm:text-sm text-stone-950 truncate">
-                        {evt.title}
-                      </p>
-                      <p className="text-[11px] text-stone-500 truncate flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
-                        <span>{evt.location} {evt.address ? `• ${evt.address}` : ''}</span>
-                      </p>
-                    </div>
-
+              {/* Upcoming Church Events List (Excludes all past events) */}
+              {upcomingEvents.length === 0 ? (
+                <div className="p-3.5 rounded-2xl border border-stone-200 bg-stone-50 text-center space-y-1">
+                  <p className="text-xs font-semibold text-stone-700">
+                    {language === 'vi' ? 'Hiện chưa có sự kiện sắp tới nào' : 'No upcoming events currently scheduled'}
+                  </p>
+                  <p className="text-[11px] text-stone-400">
+                    {language === 'vi'
+                      ? 'Hệ thống dùng chế độ "Tự Động" để hiển thị giờ thờ phượng và sinh hoạt thường lệ.'
+                      : 'Auto-Next will display weekly Sunday worship and prayer services.'}
+                  </p>
+                </div>
+              ) : (
+                upcomingEvents.map((evt) => {
+                  const isSelected = selectedEventId === evt.id;
+                  return (
                     <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                      key={evt.id}
+                      onClick={() => setSelectedEventId(evt.id)}
+                      className={`p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center justify-between gap-3 ${
                         isSelected
-                          ? 'bg-amber-600 border-amber-600 text-white'
-                          : 'border-stone-300 bg-white'
+                          ? 'border-amber-600 bg-amber-50/70 ring-1 ring-amber-400'
+                          : 'border-stone-200 bg-white hover:bg-stone-50'
                       }`}
                     >
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                            {evt.category}
+                          </span>
+                          <span className="text-[11px] font-bold text-stone-800">
+                            {evt.date} • {evt.startTime}
+                          </span>
+                        </div>
+                        <p className="font-serif font-bold text-xs sm:text-sm text-stone-950 truncate">
+                          {evt.title}
+                        </p>
+                        <p className="text-[11px] text-stone-500 truncate flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
+                          <span>{evt.location} {evt.address ? `• ${evt.address}` : ''}</span>
+                        </p>
+                      </div>
+
+                      <div
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                          isSelected
+                            ? 'bg-amber-600 border-amber-600 text-white'
+                            : 'border-stone-300 bg-white'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
-          {/* STEP 3: Optional Scripture Quote / Subtitle */}
+          {/* STEP 3: Customizable Pill Tag Text */}
+          <div className="space-y-1.5 pt-1 border-t border-stone-100">
+            <div className="flex items-center justify-between">
+              <label className="block text-[11px] font-bold text-stone-700">
+                {language === 'vi'
+                  ? '3. Nội Dung Thẻ Tròn / Pill Badge Text (Tuỳ Chọn):'
+                  : '3. Custom Pill Badge Text (Optional):'}
+              </label>
+              <span className="text-[10px] text-stone-400">
+                {language === 'vi' ? 'Hiển thị ở góc trên banner' : 'Top badge on banner'}
+              </span>
+            </div>
+            <input
+              type="text"
+              value={badgeText}
+              onChange={(e) => setBadgeText(e.target.value)}
+              className="w-full px-3 py-2 bg-stone-50 rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+              placeholder={language === 'vi' ? 'e.g. Sự Kiện Nổi Bật, Sunday Worship, Lễ Nhóm Đặc Biệt...' : 'e.g. Featured Event, Sunday Worship, Special Service...'}
+            />
+            <p className="text-[10px] text-stone-400">
+              {language === 'vi'
+                ? 'Bạn có thể tuỳ ý kết hợp phong cách màu (theme) với bất kỳ chữ nào trong thẻ pill này.'
+                : 'You can freely combine the color theme with any custom pill text.'}
+            </p>
+          </div>
+
+          {/* STEP 4: Optional Scripture Quote / Subtitle */}
           <div className="space-y-1.5 pt-1 border-t border-stone-100">
             <label className="block text-[11px] font-bold text-stone-700">
               {language === 'vi'
-                ? '3. Câu Kinh Thánh Trích Dẫn / Lời Chúc (Tuỳ Chọn):'
-                : '3. Optional Scripture Quote or Greeting:'}
+                ? '4. Câu Kinh Thánh Trích Dẫn / Lời Chúc (Tuỳ Chọn):'
+                : '4. Optional Scripture Quote or Greeting:'}
             </label>
             <input
               type="text"
