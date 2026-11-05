@@ -7,11 +7,13 @@ import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
 
-// Helper function to maintain at most 3 past events in DB and prune older past events
+// Helper function to maintain at most 3 past events in PostgreSQL and prune older past events
 async function cleanupPastEvents() {
   try {
     const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+      now.getDate()
+    ).padStart(2, '0')}`;
 
     // Query past events (where date < todayStr), ordered by date desc (most recent first)
     const past = await db
@@ -29,7 +31,7 @@ async function cleanupPastEvents() {
           await db.delete(eventRsvps).where(eq(eventRsvps.eventId, id));
           await db.delete(events).where(eq(events.id, id));
         }
-        console.log(`Pruned ${idsToDelete.length} past events, strictly keeping 3 recent past events in DB.`);
+        console.log(`Pruned ${idsToDelete.length} past events in PostgreSQL, keeping 3 most recent.`);
         return idsToDelete.length;
       }
     }
@@ -41,20 +43,19 @@ async function cleanupPastEvents() {
 }
 
 // POST /api/events/cleanup-expired - Explicit trigger to clean up past events older than the 3 most recent
-router.post('/cleanup-expired', async (req, res) => {
+router.post('/cleanup-expired', async (_req, res) => {
   try {
     const removedCount = await cleanupPastEvents();
-    res.json({ message: 'Past events pruned to max 3 successfully', removedCount });
+    res.json({ message: 'Past events pruned to max 3 successfully in PostgreSQL', removedCount });
   } catch (err: any) {
     console.error('Failed to run events cleanup:', err);
     res.status(500).json({ error: 'Failed to run events cleanup' });
   }
 });
 
-// GET /api/events - List all events (maintains at most 3 past events in DB)
+// GET /api/events - List all events from PostgreSQL
 router.get('/', async (req, res) => {
   try {
-    // Prune surplus past events first
     await cleanupPastEvents();
 
     const category = req.query.category as string;
@@ -64,28 +65,31 @@ router.get('/', async (req, res) => {
 
     let filtered = allEvents;
     if (category && category !== 'All') {
-      filtered = filtered.filter((e) => e.category.toLowerCase() === category.toLowerCase());
+      filtered = filtered.filter((e) => String(e.category || '').toLowerCase() === category.toLowerCase());
     }
 
     if (search) {
       const q = search.toLowerCase();
       filtered = filtered.filter(
         (e) =>
-          e.title.toLowerCase().includes(q) ||
-          e.description.toLowerCase().includes(q) ||
-          e.location.toLowerCase().includes(q)
+          String(e.title || '').toLowerCase().includes(q) ||
+          String(e.titleVi || '').toLowerCase().includes(q) ||
+          String(e.titleEn || '').toLowerCase().includes(q) ||
+          String(e.description || '').toLowerCase().includes(q) ||
+          String(e.descriptionVi || '').toLowerCase().includes(q) ||
+          String(e.descriptionEn || '').toLowerCase().includes(q) ||
+          String(e.location || '').toLowerCase().includes(q)
       );
     }
 
     res.json(filtered);
   } catch (error: any) {
-    console.error('Failed to fetch events:', error);
-    res.status(500).json({ error: 'Failed to retrieve church events' });
+    console.error('Failed to fetch events from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to retrieve church events from database' });
   }
 });
 
-
-// GET /api/events/:id - Get single event with RSVPs
+// GET /api/events/:id - Get single event with RSVPs from PostgreSQL
 router.get('/:id', async (req, res) => {
   try {
     const eventId = Number(req.params.id);
@@ -110,12 +114,12 @@ router.get('/:id', async (req, res) => {
       rsvps,
     });
   } catch (error: any) {
-    console.error('Failed to fetch event:', error);
-    res.status(500).json({ error: 'Failed to fetch event details' });
+    console.error('Failed to fetch event from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to fetch event details' });
   }
 });
 
-// POST /api/events - Create new event (Admin only)
+// POST /api/events - Create new event in PostgreSQL (Admin only)
 router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const {
@@ -142,10 +146,15 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     const finalTitleVi = String(titleVi || title || titleEn || '').trim();
     const finalDescEn = String(descriptionEn || description || descriptionVi || '').trim();
     const finalDescVi = String(descriptionVi || description || descriptionEn || '').trim();
+    const finalLocation = String(location || '').trim();
 
-    if (!finalTitleEn || !finalTitleVi || !finalDescEn || !finalDescVi || !date || !startTime || !location) {
-      return res.status(400).json({ error: 'Vietnamese and English titles, descriptions, date, start time, and location are required.' });
+    if (!finalTitleEn || !finalTitleVi || !finalDescEn || !finalDescVi || !date || !startTime || !finalLocation) {
+      return res.status(400).json({
+        error: 'Vietnamese and English titles, descriptions, date, start time, and location are required.',
+      });
     }
+
+    const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
     const newEvent = await db
       .insert(events)
@@ -160,9 +169,9 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         date,
         startTime,
         endTime: endTime || null,
-        location: String(location).trim(),
-        locationVi: String(location).trim(),
-        locationEn: String(location).trim(),
+        location: finalLocation,
+        locationVi: finalLocation,
+        locationEn: finalLocation,
         address: address ? String(address).trim() : 'Tempe, Arizona',
         imageUrl: imageUrl || null,
         isFeatured: Boolean(isFeatured),
@@ -170,27 +179,27 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         organizerName: organizerName || req.adminUser?.displayName || 'Church Staff',
         organizerEmail: organizerEmail || req.adminUser?.username || null,
         createdByUid: null,
-        createdBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
-        updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
+        createdBy: actorName,
+        updatedBy: actorName,
       })
       .returning();
 
-    // Trigger push notification record
+    // Trigger notification record in PostgreSQL
     await BackendNotificationService.recordNotification(
-      `New Church Event: ${title.trim()}`,
-      `${date} • ${startTime} at ${location.trim()}`,
+      `New Church Event: ${finalTitleEn}`,
+      `${date} • ${startTime} at ${finalLocation}`,
       'event',
       newEvent[0].id
     );
 
     res.status(201).json(newEvent[0]);
   } catch (error: any) {
-    console.error('Failed to create event:', error);
-    res.status(500).json({ error: 'Failed to create church event' });
+    console.error('Failed to create event in PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to create church event in database' });
   }
 });
 
-// PUT /api/events/:id - Update event (Admin only)
+// PUT /api/events/:id - Update event in PostgreSQL (Admin only)
 router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const eventId = Number(req.params.id);
@@ -218,10 +227,23 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       organizerEmail,
     } = req.body;
 
-    const finalTitleEn = titleEn !== undefined ? String(titleEn).trim() : (title !== undefined ? String(title).trim() : undefined);
-    const finalTitleVi = titleVi !== undefined ? String(titleVi).trim() : (title !== undefined ? String(title).trim() : undefined);
-    const finalDescEn = descriptionEn !== undefined ? String(descriptionEn).trim() : (description !== undefined ? String(description).trim() : undefined);
-    const finalDescVi = descriptionVi !== undefined ? String(descriptionVi).trim() : (description !== undefined ? String(description).trim() : undefined);
+    const finalTitleEn =
+      titleEn !== undefined ? String(titleEn).trim() : title !== undefined ? String(title).trim() : undefined;
+    const finalTitleVi =
+      titleVi !== undefined ? String(titleVi).trim() : title !== undefined ? String(title).trim() : undefined;
+    const finalDescEn =
+      descriptionEn !== undefined
+        ? String(descriptionEn).trim()
+        : description !== undefined
+        ? String(description).trim()
+        : undefined;
+    const finalDescVi =
+      descriptionVi !== undefined
+        ? String(descriptionVi).trim()
+        : description !== undefined
+        ? String(description).trim()
+        : undefined;
+    const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
     const updated = await db
       .update(events)
@@ -245,7 +267,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         maxCapacity: maxCapacity !== undefined ? (maxCapacity ? Number(maxCapacity) : null) : undefined,
         organizerName,
         organizerEmail,
-        updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
+        updatedBy: actorName,
         updatedAt: new Date(),
       })
       .where(eq(events.id, eventId))
@@ -257,12 +279,12 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
 
     res.json(updated[0]);
   } catch (error: any) {
-    console.error('Failed to update event:', error);
-    res.status(500).json({ error: 'Failed to update church event' });
+    console.error('Failed to update event in PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to update church event in database' });
   }
 });
 
-// DELETE /api/events/:id - Delete event (Admin only)
+// DELETE /api/events/:id - Delete event from PostgreSQL (Admin only)
 router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const eventId = Number(req.params.id);
@@ -270,20 +292,21 @@ router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Invalid event ID' });
     }
 
+    await db.delete(eventRsvps).where(eq(eventRsvps.eventId, eventId));
     const deleted = await db.delete(events).where(eq(events.id, eventId)).returning();
 
     if (deleted.length === 0) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    res.json({ message: 'Event successfully removed', event: deleted[0] });
+    res.json({ message: 'Event successfully removed from database', event: deleted[0] });
   } catch (error: any) {
-    console.error('Failed to delete event:', error);
-    res.status(500).json({ error: 'Failed to delete event' });
+    console.error('Failed to delete event from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to delete event from database' });
   }
 });
 
-// POST /api/events/:id/rsvp - RSVP to event
+// POST /api/events/:id/rsvp - RSVP to event in PostgreSQL
 router.post('/:id/rsvp', async (req, res) => {
   try {
     const eventId = Number(req.params.id);
@@ -315,8 +338,8 @@ router.post('/:id/rsvp', async (req, res) => {
 
     res.status(201).json(newRsvp[0]);
   } catch (error: any) {
-    console.error('Failed to submit RSVP:', error);
-    res.status(500).json({ error: 'Failed to submit RSVP' });
+    console.error('Failed to submit RSVP to PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to submit RSVP' });
   }
 });
 

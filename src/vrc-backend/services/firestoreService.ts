@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import fs from 'fs';
-import path from 'path';
+import { getFirestore, doc, getDoc, getDocFromServer, setDoc } from 'firebase/firestore';
+import staticFirebaseConfig from '../../../firebase-applet-config.json';
 
 export const OperationType = {
   CREATE: 'create',
@@ -49,22 +48,27 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Load Firebase configuration
-const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
-let firebaseConfig: any = {};
-try {
-  if (fs.existsSync(configPath)) {
-    firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-  }
-} catch (e) {
-  console.warn('Failed to parse firebase-applet-config.json:', e);
-}
-
+const firebaseConfig: any = staticFirebaseConfig || {};
 const firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const firestoreDb = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
 
+// Validate connection to Firestore at boot
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(firestoreDb, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error('Please check your Firebase configuration.');
+    }
+  }
+}
+testConnection();
+
 export function sanitizeForFirestore(obj: any): any {
   if (obj === null || obj === undefined) return null;
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
   if (Array.isArray(obj)) {
     return obj.map(sanitizeForFirestore);
   }
@@ -73,6 +77,8 @@ export function sanitizeForFirestore(obj: any): any {
     for (const [key, val] of Object.entries(obj)) {
       if (val === undefined) {
         cleaned[key] = null;
+      } else if (val instanceof Date) {
+        cleaned[key] = val.toISOString();
       } else if (typeof val === 'object' && val !== null) {
         cleaned[key] = sanitizeForFirestore(val);
       } else {
@@ -87,7 +93,6 @@ export function sanitizeForFirestore(obj: any): any {
 export const FirestoreChurchService = {
   // Get Church Info from Firestore
   async getChurchInfo(): Promise<any | null> {
-    const docPath = 'church_info/main';
     try {
       const snap = await getDoc(doc(firestoreDb, 'church_info', 'main'));
       if (snap.exists()) {
@@ -109,12 +114,11 @@ export const FirestoreChurchService = {
         updatedAt: new Date().toISOString(),
       });
       await setDoc(doc(firestoreDb, 'church_info', 'main'), sanitized);
-      console.log('Saved church_info successfully to Firestore!');
     } catch (error) {
       console.error('Failed to save church_info to Firestore:', error);
       try {
         handleFirestoreError(error, OperationType.WRITE, docPath);
-      } catch (e) {
+      } catch {
         console.warn('Firestore write warning caught, continuing with local persistence');
       }
     }
@@ -122,7 +126,6 @@ export const FirestoreChurchService = {
 
   // Get Spotlight / Hero Banner config from Firestore
   async getSpotlight(): Promise<any | null> {
-    const docPath = 'spotlight/current';
     try {
       const snap = await getDoc(doc(firestoreDb, 'spotlight', 'current'));
       if (snap.exists()) {
@@ -144,12 +147,11 @@ export const FirestoreChurchService = {
         updatedAt: new Date().toISOString(),
       });
       await setDoc(doc(firestoreDb, 'spotlight', 'current'), sanitized);
-      console.log('Saved spotlight banner successfully to Firestore!');
     } catch (error) {
       console.error('Failed to save spotlight to Firestore:', error);
       try {
         handleFirestoreError(error, OperationType.WRITE, docPath);
-      } catch (e) {
+      } catch {
         console.warn('Firestore write warning caught, continuing with local persistence');
       }
     }

@@ -3,7 +3,12 @@ import { notifications } from '../../vrc-db/schema.ts';
 import { desc } from 'drizzle-orm';
 
 export const BackendNotificationService = {
-  async recordNotification(title: string, body: string, type: 'event' | 'verse' | 'announcement', targetId?: number) {
+  async recordNotification(
+    title: string,
+    body: string,
+    type: 'event' | 'verse' | 'announcement',
+    targetId?: number
+  ) {
     try {
       const inserted = await db
         .insert(notifications)
@@ -16,16 +21,21 @@ export const BackendNotificationService = {
         .returning();
       return inserted[0];
     } catch (err) {
-      console.error('Failed to log push notification:', err);
+      console.error('Failed to log push notification to PostgreSQL:', err);
       return null;
     }
   },
 
   async getRecent(limit = 20) {
-    return await db
-      .select()
-      .from(notifications)
-      .orderBy(desc(notifications.createdAt))
-      .limit(limit);
+    try {
+      return await db
+        .select()
+        .from(notifications)
+        .orderBy(desc(notifications.createdAt))
+        .limit(limit);
+    } catch (err) {
+      console.error('Failed to fetch notifications from PostgreSQL:', err);
+      return [];
+    }
   },
 };

@@ -76,7 +76,7 @@ function ChurchAppContent() {
         ]);
 
       const safeJson = async (res: Response) => {
-        if (!res.ok) return null;
+        if (!res || !res.ok) return null;
         const text = await res.text();
         if (!text) return null;
         try {
@@ -95,9 +95,15 @@ function ChurchAppContent() {
           safeJson(churchInfoRes),
         ]);
 
-      if (Array.isArray(rawEvents)) setEvents(rawEvents);
-      setTodayVerse(todayVerseData || null);
-      if (Array.isArray(rawVerses)) setAllVerses(rawVerses.slice(0, 10));
+      if (Array.isArray(rawEvents)) {
+        setEvents(rawEvents);
+      }
+
+      if (Array.isArray(rawVerses)) {
+        setAllVerses(rawVerses.slice(0, 10));
+      }
+      setTodayVerse(todayVerseData || (Array.isArray(rawVerses) ? rawVerses[0] : null));
+
       if (spotlightData) {
         setSpotlightConfig(spotlightData);
         try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData)); } catch {}
@@ -108,7 +114,7 @@ function ChurchAppContent() {
       }
       setNotifications(notifs);
     } catch (err) {
-      console.error('Error fetching church data:', err);
+      console.error('Error fetching church data from database:', err);
     } finally {
       setLoading(false);
     }

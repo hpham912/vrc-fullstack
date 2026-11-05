@@ -6,6 +6,10 @@ declare global {
   var _vrcPostgresPool: Pool | undefined;
 }
 
+export const isSqlConfigured = (): boolean => {
+  return Boolean(process.env.SQL_HOST && process.env.SQL_USER && process.env.SQL_DB_NAME);
+};
+
 export const createPool = () => {
   if (!global._vrcPostgresPool) {
     global._vrcPostgresPool = new Pool({

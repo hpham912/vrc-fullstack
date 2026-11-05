@@ -330,8 +330,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to save event');
+        let errData: any = {};
+        try { errData = await res.json(); } catch {}
+        throw new Error(errData?.error || `Failed to save event (HTTP ${res.status})`);
       }
 
       showFeedback('success', editingEventId 
@@ -362,7 +363,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to delete event');
+      if (!res.ok) {
+        let errData: any = {};
+        try { errData = await res.json(); } catch {}
+        throw new Error(errData?.error || `Failed to delete event (HTTP ${res.status})`);
+      }
       showFeedback('success', language === 'vi' ? 'Đã xóa sự kiện.' : 'Event removed.');
       onRefreshData();
     } catch (err: any) {
@@ -409,7 +414,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to save verse');
+      if (!res.ok) {
+        let errData: any = {};
+        try { errData = await res.json(); } catch {}
+        throw new Error(errData?.error || `Failed to save verse (HTTP ${res.status})`);
+      }
+
       showFeedback('success', language === 'vi'
         ? (editingVerseId ? 'Đã cập nhật Lời Chúa!' : 'Đã lưu Lời Chúa hằng ngày!')
         : (editingVerseId ? 'Daily scripture updated!' : 'Daily scripture saved successfully!'));
@@ -434,10 +444,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!window.confirm(language === 'vi' ? 'Xóa câu Lời Chúa này?' : 'Delete this daily devotional?')) return;
     try {
       const token = getToken();
-      await fetch(apiUrl(`/api/verses/${id}`), {
+      const res = await fetch(apiUrl(`/api/verses/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        let errData: any = {};
+        try { errData = await res.json(); } catch {}
+        throw new Error(errData?.error || `Failed to delete verse (HTTP ${res.status})`);
+      }
       showFeedback('success', language === 'vi' ? 'Đã xóa Lời Chúa.' : 'Verse deleted.');
       onRefreshData();
     } catch (err: any) {
