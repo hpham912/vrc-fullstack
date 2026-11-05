@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChurchEvent } from '../types/index.ts';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { useAutoTranslate } from '../hooks/useAutoTranslate.ts';
 import {
   Calendar,
   Clock,
@@ -19,13 +20,20 @@ import {
   ChevronUp,
   History,
   CheckCircle2,
+  Eye,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../utils/calendar.ts';
+import { ConfirmModal } from './ConfirmModal.tsx';
+import { apiUrl } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 interface EventsSectionProps {
   events: ChurchEvent[];
   isAdmin: boolean;
-  onOpenAdminPortal?: (tab?: string) => void;
+  onRefresh?: () => void;
+  onOpenAdminPortal?: (tab?: string, eventToEdit?: ChurchEvent | null) => void;
 }
 
 const CATEGORIES = [
@@ -39,12 +47,117 @@ const CATEGORIES = [
 export const EventsSection: React.FC<EventsSectionProps> = ({
   events,
   isAdmin,
+  onRefresh,
   onOpenAdminPortal,
 }) => {
   const { language, t } = useLanguage();
+  const { getToken } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDescId, setExpandedDescId] = useState<number | null>(null);
+  const [selectedDetailEvent, setSelectedDetailEvent] = useState<ChurchEvent | null>(null);
+  const [deleteTargetEvent, setDeleteTargetEvent] = useState<ChurchEvent | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState(false);
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
+  const [formTitle, setFormTitle] = useState('');
+  const [formDesc, setFormDesc] = useState('');
+  const [formCategory, setFormCategory] = useState('Worship');
+  const [formDate, setFormDate] = useState('');
+  const [formStartTime, setFormStartTime] = useState('03:00 PM');
+  const [formEndTime, setFormEndTime] = useState('05:00 PM');
+  const [formLocation, setFormLocation] = useState('Main Sanctuary');
+  const [formAddress, setFormAddress] = useState('Tempe, Arizona');
+  const [formFeatured, setFormFeatured] = useState(false);
+  const [savingEvent, setSavingEvent] = useState(false);
+
+  const openCreateModal = () => {
+    setEditingEvent(null);
+    setFormTitle('');
+    setFormDesc('');
+    setFormCategory('Worship');
+    setFormDate(new Date().toISOString().split('T')[0]);
+    setFormStartTime('03:00 PM');
+    setFormEndTime('05:00 PM');
+    setFormLocation('Main Sanctuary');
+    setFormAddress('Tempe, Arizona');
+    setFormFeatured(false);
+    setEditModalOpen(true);
+  };
+
+  const openEditModal = (evt: ChurchEvent) => {
+    setEditingEvent(evt);
+    setFormTitle(evt.title);
+    setFormDesc(evt.description);
+    setFormCategory(evt.category);
+    setFormDate(evt.date);
+    setFormStartTime(evt.startTime);
+    setFormEndTime(evt.endTime || '');
+    setFormLocation(evt.location);
+    setFormAddress(evt.address || 'Tempe, Arizona');
+    setFormFeatured(evt.isFeatured);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle.trim() || !formDesc.trim() || !formDate || !formStartTime || !formLocation.trim()) return;
+    try {
+      setSavingEvent(true);
+      const token = getToken();
+      const url = editingEvent ? apiUrl(`/api/events/${editingEvent.id}`) : apiUrl('/api/events');
+      const res = await fetch(url, {
+        method: editingEvent ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formTitle.trim(),
+          description: formDesc.trim(),
+          category: formCategory,
+          date: formDate,
+          startTime: formStartTime,
+          endTime: formEndTime || null,
+          location: formLocation.trim(),
+          address: formAddress.trim() || 'Tempe, Arizona',
+          isFeatured: formFeatured,
+        }),
+      });
+      if (res.ok) {
+        setEditModalOpen(false);
+        onRefresh?.();
+      }
+    } finally {
+      setSavingEvent(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetEvent) return;
+    try {
+      setDeletingEvent(true);
+      const token = getToken();
+      const res = await fetch(apiUrl(`/api/events/${deleteTargetEvent.id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const deletedId = deleteTargetEvent.id;
+        setDeletedIds((prev) => new Set(prev).add(deletedId));
+        setDeleteTargetEvent(null);
+        onRefresh?.();
+      }
+    } finally {
+      setDeletingEvent(false);
+    }
+  };
+
+  const { tr } = useAutoTranslate(
+    events.flatMap((e) => [e.title, e.description, e.location]),
+    language
+  );
 
   // Current local date in YYYY-MM-DD
   const now = new Date();
@@ -52,12 +165,12 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
   // Current & Upcoming events (today and future)
   const upcomingEvents = events
-    .filter((e) => e.date >= todayStr)
+    .filter((e) => !deletedIds.has(e.id) && e.date >= todayStr)
     .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   // Past events: strictly maintain the 3 most recent concluded events
   const pastEvents = events
-    .filter((e) => e.date < todayStr)
+    .filter((e) => !deletedIds.has(e.id) && e.date < todayStr)
     .sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime))
     .slice(0, 3);
 
@@ -171,10 +284,10 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         {isAdmin && onOpenAdminPortal && (
           <button
             onClick={() => onOpenAdminPortal('create-event')}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-stone-950 hover:bg-stone-800 active:scale-95 text-white rounded-xl sm:rounded-2xl text-xs font-semibold shadow-xs transition-all flex-shrink-0"
+            className="w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 active:scale-95 text-amber-400 flex items-center justify-center shadow-xs transition-all flex-shrink-0"
+            title={t('heroAddEvent')}
           >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>{t('heroAddEvent')}</span>
+            <Plus className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -233,103 +346,99 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             return (
               <div
                 key={evt.id}
-                className={`rounded-3xl border p-4 sm:p-6 transition-all duration-200 space-y-3.5 w-full min-w-0 max-w-full overflow-hidden box-border ${theme.cardBg}`}
+                className={`rounded-2xl border-2 p-3 sm:p-3.5 transition-all duration-200 space-y-2 w-full min-w-0 max-w-full overflow-hidden box-border shadow-xs hover:shadow-md ${theme.cardBg}`}
               >
                 {/* Top Row: Category Pill + Featured Pill + Date */}
-                <div className="flex flex-wrap items-center justify-between gap-2 min-w-0 w-full">
-                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${theme.badge}`}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${theme.badge}`}
                     >
                       <CategoryIcon className="w-3 h-3" />
                       <span>{getCategoryLabel(evt.category)}</span>
                     </span>
                     {evt.isFeatured && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/90 border border-amber-400 px-2 py-0.5 rounded-full">
                         {t('featuredBadge')}
                       </span>
                     )}
                   </div>
 
-                  <span className="text-xs font-semibold text-stone-500 whitespace-nowrap">
-                    {weekday}, {evt.date}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-stone-500 whitespace-nowrap">
+                      {weekday}, {evt.date}
+                    </span>
+                    {isAdmin && onOpenAdminPortal && (
+                      <button
+                        onClick={() => onOpenAdminPortal('create-event', evt)}
+                        className="p-1 rounded-lg bg-white/80 hover:bg-white text-stone-700 border border-stone-200/80 transition-colors"
+                        title={language === 'vi' ? 'Sửa' : 'Edit'}
+                      >
+                        <Pencil className="w-3 h-3 text-amber-700" />
+                      </button>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => setDeleteTargetEvent(evt)}
+                        className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 transition-colors"
+                        title={language === 'vi' ? 'Xóa' : 'Delete'}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex items-start gap-3 sm:gap-4 min-w-0 w-full max-w-full">
-                  {/* Distinct Calendar Date Card */}
-                  <div className={`flex-shrink-0 w-13 sm:w-16 text-center rounded-2xl border p-2 shadow-2xs ${theme.dateBox}`}>
-                    <span className={`block text-[10px] font-bold uppercase tracking-wider ${theme.monthText}`}>
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full max-w-full">
+                  {/* Compact Calendar Date Card */}
+                  <div className={`flex-shrink-0 w-11 sm:w-12 text-center rounded-xl border p-1.5 shadow-2xs ${theme.dateBox}`}>
+                    <span className={`block text-[9px] font-bold uppercase tracking-wider ${theme.monthText}`}>
                       {monthShort}
                     </span>
-                    <span className="block text-xl sm:text-2xl font-serif font-bold text-stone-950 leading-tight">
+                    <span className="block text-base sm:text-lg font-serif font-bold text-stone-950 leading-tight">
                       {dayNum}
                     </span>
                   </div>
 
                   {/* Title & Timing */}
-                  <div className="flex-1 min-w-0 space-y-1.5 max-w-full">
-                    <h3 className="text-base sm:text-lg font-serif font-bold text-stone-950 leading-snug break-words">
-                      {evt.title}
+                  <div className="flex-1 min-w-0 space-y-0.5 max-w-full">
+                    <h3 className="text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug break-words">
+                      {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                     </h3>
 
-                    {/* Time & Location Chips */}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-600 min-w-0 max-w-full">
-                      <div className="flex items-center gap-1.5 font-medium text-stone-800 flex-shrink-0">
-                        <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
-                        <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-stone-600 min-w-0 max-w-full">
-                        <MapPin className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
-                        <span className="truncate max-w-[200px] sm:max-w-none">{evt.location}{evt.address && evt.address !== evt.location ? ` • ${evt.address}` : ''}</span>
-                      </div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-800">
+                      <Clock className="w-3 h-3 text-amber-700 flex-shrink-0" />
+                      <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Description: Spacious, breathable, easily readable */}
-                <div className="text-stone-700 text-xs sm:text-sm leading-relaxed pt-1 bg-white/60 p-3.5 rounded-2xl border border-stone-200/50 min-w-0 max-w-full overflow-hidden">
-                  <p className={`break-words ${isDescExpanded ? '' : 'line-clamp-2'}`}>
-                    {evt.description}
-                  </p>
-                  {evt.description.length > 110 && (
-                    <button
-                      onClick={() => setExpandedDescId(isDescExpanded ? null : evt.id)}
-                      className="text-[11px] font-bold text-amber-800 hover:text-amber-950 inline-flex items-center gap-0.5 mt-1.5"
-                    >
-                      <span>{isDescExpanded ? (language === 'vi' ? 'Thu gọn' : 'Show less') : (language === 'vi' ? 'Xem thêm' : 'Read more')}</span>
-                      {isDescExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    </button>
-                  )}
-                </div>
-
-                {/* Footer Actions: Organizer + Calendar buttons */}
-                <div className="pt-2 border-t border-stone-200/60 flex flex-wrap items-center justify-between gap-2.5 min-w-0 w-full">
-                  {evt.organizerName ? (
-                    <p className="text-[11px] text-stone-500 truncate max-w-[220px]">
-                      {t('contactLead')}: <span className="text-stone-800 font-semibold">{evt.organizerName}</span>
-                    </p>
-                  ) : <div />}
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <a
-                      href={getGoogleCalendarUrl(evt)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-white hover:bg-stone-50 active:scale-95 text-stone-800 border border-stone-200 rounded-xl text-xs font-semibold transition-all shadow-2xs"
-                    >
-                      <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
-                      <span>{t('addToGoogle')}</span>
-                    </a>
-                    <button
-                      onClick={() => downloadIcsFile(evt)}
-                      className="inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 text-stone-600 hover:text-stone-900 bg-white/70 hover:bg-white active:scale-95 border border-stone-200 rounded-xl text-xs font-semibold transition-all shadow-2xs"
-                    >
-                      <Download className="w-3.5 h-3.5 text-stone-500" />
-                      <span>Apple</span>
-                    </button>
-                  </div>
+                {/* Footer Actions: Compact Calendar buttons + Details button on one line */}
+                <div className="pt-2 border-t border-stone-200/60 flex items-center justify-end gap-1.5 min-w-0 w-full">
+                  <a
+                    href={getGoogleCalendarUrl(evt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 active:scale-95 text-stone-800 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
+                  >
+                    <CalendarPlus className="w-3 h-3 text-amber-700" />
+                    <span>GCal</span>
+                  </a>
+                  <button
+                    onClick={() => downloadIcsFile(evt)}
+                    className="inline-flex items-center justify-center gap-1 px-2 py-1 text-stone-600 hover:text-stone-900 bg-white/70 hover:bg-white active:scale-95 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
+                  >
+                    <Download className="w-3 h-3 text-stone-500" />
+                    <span>iCal</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedDetailEvent(evt)}
+                    className="inline-flex items-center justify-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 active:scale-95 text-stone-800 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
+                  >
+                    <Eye className="w-3 h-3 text-amber-700" />
+                    <span>{language === 'vi' ? 'Chi Tiết' : 'Details'}</span>
+                  </button>
                 </div>
               </div>
             );
@@ -397,7 +506,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                     <div className="flex-1 min-w-0 space-y-1 max-w-full">
                       <h4 className="text-sm sm:text-base font-serif font-bold text-stone-800 leading-snug break-words">
-                        {evt.title}
+                        {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                       </h4>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-500 min-w-0 max-w-full">
                         <span className="inline-flex items-center gap-1">
@@ -406,7 +515,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                         </span>
                         <span className="inline-flex items-center gap-1 min-w-0 max-w-full">
                           <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
-                          <span className="truncate max-w-[200px] sm:max-w-none">{evt.location}</span>
+                          <span className="truncate max-w-[200px] sm:max-w-none">{language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}</span>
                         </span>
                       </div>
                     </div>
@@ -415,7 +524,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   {evt.description && (
                     <div className="text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 min-w-0 max-w-full overflow-hidden">
                       <p className={`break-words ${isDescExpanded ? '' : 'line-clamp-2'}`}>
-                        {evt.description}
+                        {language === 'vi' ? (evt.descriptionVi || tr(evt.description)) : (evt.descriptionEn || tr(evt.description))}
                       </p>
                       {evt.description.length > 100 && (
                         <button
@@ -432,6 +541,297 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
               );
             })}
           </div>
+        </div>
+      )}
+      {/* Event Details Popup Modal */}
+      {selectedDetailEvent && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs"
+          onClick={() => setSelectedDetailEvent(null)}
+        >
+          <div
+            className="bg-white rounded-3xl border border-stone-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900">
+                  {selectedDetailEvent.category}
+                </span>
+                <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-950 leading-snug">
+                  {language === 'vi'
+                    ? (selectedDetailEvent.titleVi || tr(selectedDetailEvent.title))
+                    : (selectedDetailEvent.titleEn || tr(selectedDetailEvent.title))}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedDetailEvent(null)}
+                className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2.5 text-xs sm:text-sm text-stone-700 bg-stone-50 p-4 rounded-2xl border border-stone-200/70">
+              <div className="flex items-center gap-2 font-semibold text-stone-900">
+                <Calendar className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                <span>{selectedDetailEvent.date}</span>
+              </div>
+              <div className="flex items-center gap-2 font-medium text-stone-800">
+                <Clock className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                <span>
+                  {selectedDetailEvent.startTime}
+                  {selectedDetailEvent.endTime ? ` – ${selectedDetailEvent.endTime}` : ''}
+                </span>
+              </div>
+              <div className="flex items-start gap-2 text-stone-700">
+                <MapPin className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-stone-900">
+                    {language === 'vi'
+                      ? (selectedDetailEvent.locationVi || tr(selectedDetailEvent.location))
+                      : (selectedDetailEvent.locationEn || tr(selectedDetailEvent.location))}
+                  </p>
+                  {selectedDetailEvent.address && (
+                    <p className="text-xs text-stone-500">{selectedDetailEvent.address}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
+                {language === 'vi' ? 'Chi Tiết Sự Kiện' : 'Event Details'}
+              </h4>
+              <p className="text-stone-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
+                {language === 'vi'
+                  ? (selectedDetailEvent.descriptionVi || tr(selectedDetailEvent.description))
+                  : (selectedDetailEvent.descriptionEn || tr(selectedDetailEvent.description))}
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-stone-200 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <a
+                  href={getGoogleCalendarUrl(selectedDetailEvent)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all"
+                >
+                  <CalendarPlus className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t('addToGoogle')}</span>
+                </a>
+                <button
+                  onClick={() => downloadIcsFile(selectedDetailEvent)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-semibold transition-all"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Apple</span>
+                </button>
+              </div>
+              <button
+                onClick={() => setSelectedDetailEvent(null)}
+                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900"
+              >
+                {language === 'vi' ? 'Đóng' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Common Confirmation Modal for Delete */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetEvent)}
+        title={language === 'vi' ? 'Xóa Sự Kiện?' : 'Delete Event?'}
+        message={
+          language === 'vi'
+            ? `Bạn có chắc chắn muốn xóa sự kiện "${deleteTargetEvent?.titleVi || deleteTargetEvent?.title}"? Hành động này không thể hoàn tác.`
+            : `Are you sure you want to delete "${deleteTargetEvent?.titleEn || deleteTargetEvent?.title}"? This action cannot be undone.`
+        }
+        confirmText={language === 'vi' ? 'Xóa' : 'Delete'}
+        loading={deletingEvent}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTargetEvent(null)}
+      />
+
+      {/* Event Create / Edit Modal */}
+      {editModalOpen && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs"
+          onClick={() => setEditModalOpen(false)}
+        >
+          <form
+            onSubmit={handleSaveEvent}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl border border-stone-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-950">
+                {editingEvent
+                  ? language === 'vi'
+                    ? 'Chỉnh Sửa Sự Kiện'
+                    : 'Edit Event'
+                  : language === 'vi'
+                  ? 'Thêm Sự Kiện Mới'
+                  : 'Add New Event'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="p-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs sm:text-sm">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">
+                  {language === 'vi' ? 'Tên Sự Kiện *' : 'Event Title *'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Danh Mục' : 'Category'}
+                  </label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    <option value="Worship">Worship</option>
+                    <option value="Bible Study">Bible Study</option>
+                    <option value="Youth">Youth</option>
+                    <option value="Prayer">Prayer</option>
+                    <option value="Fellowship">Fellowship</option>
+                    <option value="Special Gathering">Special Gathering</option>
+                  </select>
+                </div>
+
+                <div className="overflow-hidden">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Ngày *' : 'Date *'}
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="appearance-none min-w-0 w-full max-w-full box-border px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formStartTime}
+                    onChange={(e) => setFormStartTime(e.target.value)}
+                    placeholder="03:00 PM"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formEndTime}
+                    onChange={(e) => setFormEndTime(e.target.value)}
+                    placeholder="05:00 PM"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Địa Điểm *' : 'Location *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formLocation}
+                    onChange={(e) => setFormLocation(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    {language === 'vi' ? 'Địa Chỉ' : 'Address'}
+                  </label>
+                  <input
+                    type="text"
+                    value={formAddress}
+                    onChange={(e) => setFormAddress(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">
+                  {language === 'vi' ? 'Mô Tả *' : 'Description *'}
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={formDesc}
+                  onChange={(e) => setFormDesc(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-xs font-semibold text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formFeatured}
+                  onChange={(e) => setFormFeatured(e.target.checked)}
+                  className="rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                />
+                <span>{language === 'vi' ? 'Đánh dấu Sự Kiện Nổi Bật' : 'Mark as Featured Event'}</span>
+              </label>
+            </div>
+
+            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200"
+              >
+                {language === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                disabled={savingEvent}
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50"
+              >
+                {savingEvent
+                  ? language === 'vi'
+                    ? 'Đang lưu...'
+                    : 'Saving...'
+                  : language === 'vi'
+                  ? 'Lưu Sự Kiện'
+                  : 'Save Event'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </section>

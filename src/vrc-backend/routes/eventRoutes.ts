@@ -4,6 +4,7 @@ import { events, eventRsvps } from '../../vrc-db/schema.ts';
 import { eq, desc, asc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
+import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -138,16 +139,31 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Title, description, date, start time, and location are required.' });
     }
 
+    const bilingual = await TranslationService.translateBilingualFields(
+      {
+        title: String(title).trim(),
+        description: String(description).trim(),
+        location: String(location).trim(),
+      },
+      'event'
+    );
+
     const newEvent = await db
       .insert(events)
       .values({
         title: String(title).trim(),
+        titleVi: bilingual.title?.vi || String(title).trim(),
+        titleEn: bilingual.title?.en || String(title).trim(),
         description: String(description).trim(),
+        descriptionVi: bilingual.description?.vi || String(description).trim(),
+        descriptionEn: bilingual.description?.en || String(description).trim(),
         category: category || 'Worship',
         date,
         startTime,
         endTime: endTime || null,
         location: String(location).trim(),
+        locationVi: bilingual.location?.vi || String(location).trim(),
+        locationEn: bilingual.location?.en || String(location).trim(),
         address: address ? String(address).trim() : 'Tempe, Arizona',
         imageUrl: imageUrl || null,
         isFeatured: Boolean(isFeatured),
@@ -197,16 +213,31 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       organizerEmail,
     } = req.body;
 
+    const bilingual = await TranslationService.translateBilingualFields(
+      {
+        title: title ? String(title).trim() : null,
+        description: description ? String(description).trim() : null,
+        location: location ? String(location).trim() : null,
+      },
+      'event'
+    );
+
     const updated = await db
       .update(events)
       .set({
         title: title ? String(title).trim() : undefined,
+        titleVi: title ? (bilingual.title?.vi || String(title).trim()) : undefined,
+        titleEn: title ? (bilingual.title?.en || String(title).trim()) : undefined,
         description: description ? String(description).trim() : undefined,
+        descriptionVi: description ? (bilingual.description?.vi || String(description).trim()) : undefined,
+        descriptionEn: description ? (bilingual.description?.en || String(description).trim()) : undefined,
         category,
         date,
         startTime,
         endTime,
         location: location ? String(location).trim() : undefined,
+        locationVi: location ? (bilingual.location?.vi || String(location).trim()) : undefined,
+        locationEn: location ? (bilingual.location?.en || String(location).trim()) : undefined,
         address: address ? String(address).trim() : undefined,
         imageUrl,
         isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : undefined,

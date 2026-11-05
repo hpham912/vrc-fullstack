@@ -44,6 +44,8 @@ interface AdminPortalProps {
   announcements: Announcement[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
+  initialEvent?: ChurchEvent | null;
+  initialVerse?: DailyVerse | null;
   onClose: () => void;
   onRefreshData: () => void;
   onOpenSpotlightEditor?: () => void;
@@ -55,6 +57,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   announcements,
   churchInfo,
   initialTab = 'create-event',
+  initialEvent,
+  initialVerse,
   onClose,
   onRefreshData,
   onOpenSpotlightEditor,
@@ -180,6 +184,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setActiveTab('create-event');
   };
 
+  useEffect(() => {
+    if (initialEvent) {
+      handleEditEvent(initialEvent);
+    }
+  }, [initialEvent]);
+
+  useEffect(() => {
+    if (initialVerse) {
+      handleEditVerse(initialVerse);
+    }
+  }, [initialVerse]);
+
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventTitle.trim() || !eventDescription.trim() || !eventDate || !eventStartTime || !eventLocation) {
@@ -258,7 +274,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleAiDraftDevotional = async () => {
+  const handleFetchScripture = async () => {
     if (!verseReference.trim()) {
       showFeedback('error', language === 'vi' ? 'Vui lòng nhập đoạn Kinh Thánh (ví dụ: "2 Sử Ký 7:14" hoặc "Giăng 3:16")' : 'Please enter a Scripture reference (e.g. "2 Chronicles 7:14" or "John 3:16") first.');
       return;
@@ -267,7 +283,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     try {
       setGeneratingAi(true);
       const token = getToken();
-      const res = await fetch(apiUrl('/api/ai/generate-devotional'), {
+      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,20 +291,23 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         },
         body: JSON.stringify({
           passage: verseReference.trim(),
-          theme: verseTheme || 'Revival & Hope',
         }),
       });
 
-      if (!res.ok) throw new Error('AI generator failed');
-      const generated = await res.json();
-      if (generated.verseText) setVerseText(generated.verseText);
-      if (generated.reflection) setVerseReflection(generated.reflection);
-      if (generated.prayer) setVersePrayer(generated.prayer);
-      if (generated.theme) setVerseTheme(generated.theme);
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        throw new Error(res.ok ? 'Invalid response from scripture service' : `Server error (${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch scripture');
+      if (data.verseText) setVerseText(data.verseText);
+      if (data.translation) setVerseTranslation(data.translation);
 
-      showFeedback('success', language === 'vi' ? 'Bản thảo suy gẫm đã sẵn sàng!' : 'Devotional draft prepared! Review and save below.');
+      showFeedback('success', language === 'vi' ? 'Đã tải câu Kinh Thánh thành công!' : 'Scripture verse loaded!');
     } catch (err: any) {
-      showFeedback('error', err.message || 'Error generating reflection');
+      showFeedback('error', err.message || 'Error fetching scripture');
     } finally {
       setGeneratingAi(false);
     }
@@ -804,37 +823,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           </button>
                         )}
                       </div>
-
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <button
-                          type="button"
-                          onClick={() => handleTranslateEvent('bilingual')}
-                          disabled={translatingEvent}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 hover:text-amber-950 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200 transition-all active:scale-95"
-                          title="Tạo tiêu đề song ngữ Anh - Việt"
-                        >
-                          <Languages className="w-3.5 h-3.5 text-amber-700" />
-                          <span>{translatingEvent ? '...' : (language === 'vi' ? '⚡ Song Ngữ' : '⚡ Bilingual')}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleTranslateEvent('en')}
-                          disabled={translatingEvent}
-                          className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg transition-all active:scale-95"
-                          title="Dịch sang tiếng Anh"
-                        >
-                          EN
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleTranslateEvent('vi')}
-                          disabled={translatingEvent}
-                          className="inline-flex items-center text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg transition-all active:scale-95"
-                          title="Dịch sang tiếng Việt"
-                        >
-                          VI
-                        </button>
-                      </div>
                     </div>
 
                     <div className="w-full min-w-0">
@@ -852,20 +840,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </div>
 
                     <div className="w-full min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="block text-xs font-bold text-stone-700">
-                          {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => handleTranslateEvent('bilingual')}
-                          disabled={translatingEvent}
-                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 hover:text-stone-900 bg-white border border-stone-200 px-2 py-0.5 rounded transition-all active:scale-95"
-                        >
-                          <Languages className="w-3 h-3 text-stone-500" />
-                          <span>{translatingEvent ? '...' : (language === 'vi' ? 'Dịch song ngữ mô tả' : 'Translate')}</span>
-                        </button>
-                      </div>
+                      <label className="block text-xs font-bold text-stone-700 mb-1">
+                        {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
+                      </label>
                       <textarea
                         rows={3}
                         required
@@ -893,7 +870,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </select>
                       </div>
 
-                      <div className="w-full min-w-0">
+                      <div className="w-full min-w-0 overflow-hidden">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
                           {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
                         </label>
@@ -902,7 +879,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           required
                           value={eventDate}
                           onChange={(e) => setEventDate(e.target.value)}
-                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                          className="w-full max-w-full box-border min-w-0 appearance-none px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                         />
                       </div>
 
@@ -1164,22 +1141,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <button
                       type="button"
-                      onClick={() => handleTranslateScripture(language === 'vi' ? 'en' : 'vi')}
-                      disabled={translatingVerse}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-semibold transition-all active:scale-95"
-                      title="Dịch câu gốc và bài suy gẫm"
-                    >
-                      <Languages className="w-3.5 h-3.5 text-amber-700" />
-                      <span>{translatingVerse ? '...' : (language === 'vi' ? 'Dịch (VI ↔ EN)' : 'Translate')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAiDraftDevotional}
+                      onClick={handleFetchScripture}
                       disabled={generatingAi}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-medium transition-colors active:scale-95 shadow-2xs"
+                      className="flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-medium transition-colors active:scale-95 shadow-2xs"
                     >
-                      <Sparkles className="w-3 h-3 text-amber-300" />
-                      <span>{generatingAi ? (language === 'vi' ? 'Đang soạn...' : 'Drafting...') : (language === 'vi' ? 'AI Soạn Thảo' : 'AI Assistant')}</span>
+                      <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{generatingAi ? (language === 'vi' ? 'Đang tải...' : 'Fetching...') : (language === 'vi' ? 'Lấy Câu Kinh Thánh' : 'Fetch Scripture')}</span>
                     </button>
                   </div>
                 </div>

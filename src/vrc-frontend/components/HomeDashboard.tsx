@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChurchEvent, DailyVerse, SpotlightBannerConfig, SpotlightTheme, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from '../types/index.ts';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { useAutoTranslate } from '../hooks/useAutoTranslate.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
   Calendar,
@@ -253,6 +254,19 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
     : (activeEvent ? (activeEvent.location || displayAddress) : (safeConfig.locationTag || displayAddress));
 
+  const { tr } = useAutoTranslate(
+    [
+      displayBadge,
+      displayTitle,
+      displaySubtitle,
+      displayDescription,
+      displayLocationTag,
+      todayVerse?.verseText,
+      todayVerse?.reference,
+    ],
+    language
+  );
+
   return (
     <div className="py-4 sm:py-8 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Customizable High-Impact Holiday / Featured Hero Card */}
@@ -265,7 +279,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Top Row: Clean Themed Badge Pill + Admin Customizer Button */}
           <div className="flex items-center justify-between gap-2">
             <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-md border text-[11px] font-semibold max-w-[calc(100%-80px)] sm:max-w-none truncate ${bannerTheme.badgeText}`}>
-              <span className="truncate">{displayBadge}</span>
+              <span className="truncate">{language === 'vi' ? (spotlightConfig?.badgeVi || tr(displayBadge)) : (spotlightConfig?.badgeEn || tr(displayBadge))}</span>
             </div>
 
             {isAdmin && onOpenSpotlightEditor && (
@@ -289,17 +303,17 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Title & Subtitle */}
           <div className="space-y-1.5">
             <h1 className="text-xl sm:text-3xl font-serif font-bold tracking-tight text-white leading-tight">
-              {displayTitle}
+              {language === 'vi' ? (activeEvent?.titleVi || spotlightConfig?.titleVi || tr(displayTitle)) : (activeEvent?.titleEn || spotlightConfig?.titleEn || tr(displayTitle))}
             </h1>
 
             {displaySubtitle && (
               <div className="p-2.5 sm:p-3 rounded-2xl bg-black/30 border border-white/10 text-stone-200 text-xs sm:text-sm italic font-serif leading-relaxed max-w-2xl">
-                "{displaySubtitle}"
+                "{language === 'vi' ? (spotlightConfig?.subtitleVi || tr(displaySubtitle)) : (spotlightConfig?.subtitleEn || tr(displaySubtitle))}"
               </div>
             )}
 
             <p className="text-xs sm:text-sm text-stone-200 font-normal leading-relaxed max-w-xl pt-0.5">
-              {displayDescription}
+              {language === 'vi' ? (activeEvent?.descriptionVi || spotlightConfig?.descriptionVi || tr(displayDescription)) : (activeEvent?.descriptionEn || spotlightConfig?.descriptionEn || tr(displayDescription))}
             </p>
           </div>
 
@@ -313,7 +327,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             )}
             <span className="inline-flex items-center gap-1.5 bg-black/25 px-3 py-1 rounded-xl border border-white/10">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
-              <span>{displayLocationTag}</span>
+              <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || tr(displayLocationTag)) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || tr(displayLocationTag))}</span>
             </span>
           </div>
 
@@ -457,8 +471,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {safeChurch.services.map((svc, idx) => {
               const { dayPart, hourPart } = getServiceTimeParts(svc, language);
+              const cardColors = [
+                'bg-gradient-to-br from-amber-50/90 via-white to-orange-50/50 border-amber-200/90',
+                'bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/50 border-emerald-200/90',
+                'bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/50 border-indigo-200/90',
+              ][idx % 3];
               return (
-                <div key={svc.id || idx} className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200/80 space-y-1.5">
+                <div key={svc.id || idx} className={`p-3.5 rounded-2xl border space-y-1.5 shadow-2xs ${cardColors}`}>
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
                       {dayPart}

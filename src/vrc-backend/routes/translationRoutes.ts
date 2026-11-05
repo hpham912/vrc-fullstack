@@ -43,4 +43,24 @@ router.post('/translate-devotional', requireAdmin, aiRateLimiter, async (req: Au
   }
 });
 
+// POST /api/ai/translate-batch - Public batch translation for dynamic DB content when switching app language
+router.post('/translate-batch', aiRateLimiter, async (req, res) => {
+  try {
+    const { texts, targetLang } = req.body;
+    if (!Array.isArray(texts)) {
+      return res.status(400).json({ error: 'texts array is required' });
+    }
+
+    const safeTexts = texts.slice(0, 60).map((t) => String(t || ''));
+    const translations = await TranslationService.translateBatch(
+      safeTexts,
+      targetLang === 'vi' ? 'vi' : 'en'
+    );
+    res.json({ translations });
+  } catch (error: any) {
+    console.error('Batch translation error:', error);
+    res.status(500).json({ error: 'Batch translation failed' });
+  }
+});
+
 export default router;

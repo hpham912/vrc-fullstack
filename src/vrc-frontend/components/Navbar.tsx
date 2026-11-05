@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { CHURCH_NAME } from '../constants/church.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
   Home,
@@ -13,6 +14,7 @@ import {
   LogOut,
   Bell,
   X,
+  Settings,
 } from 'lucide-react';
 import { NotificationModal } from './NotificationModal.tsx';
 import { AppNotification } from '../types/index.ts';
@@ -37,6 +39,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
   const [showNotifModal, setShowNotifModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isLargeFont, setIsLargeFont] = useState(() => {
+    try {
+      return localStorage.getItem('vrc_large_font') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const desktopNavItems = [
     { id: 'home', label: t('navHome'), icon: Home },
@@ -47,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-stone-200/60 transition-all pt-safe">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-stone-200/60 transition-all pt-safe">
       <div className="max-w-4xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between h-14 sm:h-20">
           {/* Logo & Title with SVG Cross (never shows as iOS emoji) */}
@@ -59,23 +69,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               <CrossIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
 
-            {/* Mobile View: VRC on top, HTTLVN on bottom */}
+            {/* Mobile View: VRBC on top, HTTLBPH on bottom */}
             <div className="flex flex-col sm:hidden">
               <span className="font-serif text-sm font-bold tracking-tight text-stone-950 leading-tight">
-                VRC
+                {CHURCH_NAME.shortEn}
               </span>
               <span className="text-[10px] font-medium text-amber-800 tracking-normal leading-tight opacity-90">
-                HTTLVN
+                {CHURCH_NAME.shortVi}
               </span>
             </div>
 
             {/* Desktop View: Full name with English on top, Vietnamese on bottom */}
             <div className="hidden sm:flex flex-col">
               <span className="font-serif text-lg font-bold tracking-tight text-stone-950 leading-snug">
-                Vietnamese Revival Church
+                {CHURCH_NAME.en}
               </span>
               <span className="text-xs font-medium text-amber-800 tracking-normal leading-tight opacity-90">
-                Hội Thánh Phục Hưng Việt Nam
+                {CHURCH_NAME.vi}
               </span>
             </div>
           </button>
@@ -102,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Header Controls: Notification, Language Toggle, and Admin */}
+          {/* Right Header Controls: Notification, Language Toggle, Settings, and Admin */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Notification Bell Button (Click to Open/Close Popup) */}
             <button
@@ -179,32 +189,88 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* Admin Management / Login */}
-            {isAdmin ? (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={openAdminPortal}
-                  className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{t('navAdmin')}</span>
-                </button>
-                <button
-                  onClick={logout}
-                  title={t('navLogout')}
-                  className="p-1.5 text-stone-400 hover:text-rose-600 active:scale-95 transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
+            {/* Settings Dropdown (Font Size + Login/Logout) */}
+            <div className="relative">
               <button
-                onClick={openLoginModal}
-                className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 active:scale-95 text-stone-700 rounded-xl text-xs font-medium border border-stone-200/80 transition-all flex items-center gap-1"
-                title={t('navLogin')}
+                onClick={() => setShowSettings((prev) => !prev)}
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 ${
+                  showSettings
+                    ? 'bg-amber-100 text-amber-900 border-amber-300'
+                    : 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70'
+                }`}
+                title={language === 'vi' ? 'Cài đặt' : 'Settings'}
               >
-                <LogIn className="w-3.5 h-3.5 text-amber-800" />
-                <span className="hidden sm:inline">{t('navLogin')}</span>
+                <Settings className="w-4 h-4" />
+              </button>
+
+              {showSettings && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowSettings(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs">
+                    <button
+                      onClick={() => {
+                        const next = !isLargeFont;
+                        setIsLargeFont(next);
+                        document.documentElement.style.fontSize = next ? '18.5px' : '16px';
+                        try {
+                          localStorage.setItem('vrc_large_font', next ? '1' : '0');
+                        } catch {}
+                      }}
+                      className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold"
+                    >
+                      <span>{language === 'vi' ? 'Cỡ chữ lớn (A+)' : 'Larger Text (A+)'}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          isLargeFont
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-stone-100 text-stone-500'
+                        }`}
+                      >
+                        {isLargeFont ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    <div className="my-1 border-t border-stone-100" />
+
+                    {isAdmin ? (
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          logout();
+                        }}
+                        className="w-full px-3.5 py-2.5 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>{t('navLogout')}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          openLoginModal();
+                        }}
+                        className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center gap-2 text-stone-800 font-semibold"
+                      >
+                        <LogIn className="w-3.5 h-3.5 text-amber-700" />
+                        <span>{t('navLogin')}</span>
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Admin Button (when logged in) */}
+            {isAdmin && (
+              <button
+                onClick={openAdminPortal}
+                className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t('navAdmin')}</span>
               </button>
             )}
           </div>

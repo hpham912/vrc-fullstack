@@ -35,12 +35,18 @@ export const adminUsers = pgTable('admin_users', {
 export const events = pgTable('events', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
+  titleVi: text('title_vi'),
+  titleEn: text('title_en'),
   description: text('description').notNull(),
+  descriptionVi: text('description_vi'),
+  descriptionEn: text('description_en'),
   category: text('category').notNull().default('Worship'), // 'Worship', 'Bible Study', 'Youth', 'Special Gathering'
   date: text('date').notNull(), // YYYY-MM-DD
   startTime: text('start_time').notNull(), // e.g. "03:00 PM"
   endTime: text('end_time'), // e.g. "05:00 PM"
   location: text('location').notNull(), // e.g. "Main Sanctuary"
+  locationVi: text('location_vi'),
+  locationEn: text('location_en'),
   address: text('address').default('Tempe, Arizona'),
   imageUrl: text('image_url'),
   isFeatured: boolean('is_featured').notNull().default(false),
@@ -58,10 +64,18 @@ export const dailyVerses = pgTable('daily_verses', {
   id: serial('id').primaryKey(),
   date: text('date').notNull().unique(), // YYYY-MM-DD
   verseText: text('verse_text').notNull(),
+  verseTextVi: text('verse_text_vi'),
+  verseTextEn: text('verse_text_en'),
   reference: text('reference').notNull(), // e.g. "2 Chronicles 7:14"
+  referenceVi: text('reference_vi'),
+  referenceEn: text('reference_en'),
   translation: text('translation').notNull().default('NIV'),
   reflection: text('reflection').notNull(),
+  reflectionVi: text('reflection_vi'),
+  reflectionEn: text('reflection_en'),
   prayer: text('prayer'),
+  prayerVi: text('prayer_vi'),
+  prayerEn: text('prayer_en'),
   theme: text('theme').default('Faith & Encouragement'),
   publishedByUid: text('published_by_uid'),
   createdAt: timestamp('created_at').defaultNow(),

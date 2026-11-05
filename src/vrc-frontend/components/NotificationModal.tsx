@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppNotification } from '../types/index.ts';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { CHURCH_NAME } from '../constants/church.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
   Bell,
@@ -76,10 +77,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
   return createPortal(
     <>
-      {/* Full-screen backdrop preventing interaction with navbar, admin, or page content */}
+      {/* Transparent full-screen click catcher: no blur, closes notification modal when clicking outside (including navbar/admin) */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-[90] bg-stone-950/50 backdrop-blur-xs animate-in fade-in duration-150"
+        className="fixed inset-0 z-[90] bg-transparent"
       />
 
       {/* Popup Dialog stretching from below topbar down to above bottom tab bar */}
@@ -195,7 +196,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
         <div className="px-4 py-2.5 border-t border-stone-100 bg-stone-50 flex items-center justify-between text-[11px] text-stone-500">
           <span className="flex items-center gap-1 font-serif font-bold text-stone-700">
             <CrossIcon className="w-3 h-3 text-amber-600" />
-            <span>Vietnamese Revival Church</span>
+            <span>{CHURCH_NAME.en}</span>
           </span>
           <button
             onClick={onClose}

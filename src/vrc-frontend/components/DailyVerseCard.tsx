@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { DailyVerse } from '../types/index.ts';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { useAutoTranslate } from '../hooks/useAutoTranslate.ts';
+import { CHURCH_NAME } from '../constants/church.ts';
 import {
   Volume2,
   VolumeX,
@@ -11,35 +13,180 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  PenTool,
+  Pencil,
+  Trash2,
+  Plus,
+  Sparkles,
 } from 'lucide-react';
+import { ConfirmModal } from './ConfirmModal.tsx';
+import { apiUrl } from '../utils/api.ts';
+import { useAuth } from '../context/AuthContext.tsx';
 
 interface DailyVerseCardProps {
   todayVerse: DailyVerse | null;
   allVerses: DailyVerse[];
   isAdmin: boolean;
-  onOpenAdminPortal?: (tab?: string) => void;
+  onRefresh?: () => void;
+  onOpenAdminPortal?: (tab?: string, eventToEdit?: any, verseToEdit?: DailyVerse | null) => void;
 }
 
 export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   todayVerse,
   allVerses,
   isAdmin,
+  onRefresh,
   onOpenAdminPortal,
 }) => {
   const { language, t } = useLanguage();
+  const { getToken } = useAuth();
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(todayVerse);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [deleteTargetVerse, setDeleteTargetVerse] = useState<DailyVerse | null>(null);
+  const [deletingVerse, setDeletingVerse] = useState(false);
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [vDate, setVDate] = useState('');
+  const [vRef, setVRef] = useState('');
+  const [vText, setVText] = useState('');
+  const [vTrans, setVTrans] = useState('NIV');
+  const [vReflection, setVReflection] = useState('');
+  const [vPrayer, setVPrayer] = useState('');
+  const [fetchingScripture, setFetchingScripture] = useState(false);
+  const [savingVerse, setSavingVerse] = useState(false);
+
+  const openCreateVerseModal = () => {
+    setVDate(new Date().toISOString().split('T')[0]);
+    setVRef('');
+    setVText('');
+    setVTrans('NIV');
+    setVReflection('');
+    setVPrayer('');
+    setEditModalOpen(true);
+  };
+
+  const openEditVerseModal = (v: DailyVerse) => {
+    setVDate(v.date);
+    setVRef(v.reference);
+    setVText(v.verseText);
+    setVTrans(v.translation || 'NIV');
+    setVReflection(v.reflection);
+    setVPrayer(v.prayer || '');
+    setEditModalOpen(true);
+  };
+
+  const handleFetchScripture = async () => {
+    if (!vRef.trim()) return;
+    try {
+      setFetchingScripture(true);
+      const token = getToken();
+      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ passage: vRef.trim() }),
+      });
+      const raw = await res.text();
+      const data = raw ? JSON.parse(raw) : {};
+      if (res.ok && data.verseText) {
+        setVText(data.verseText);
+        if (data.translation) setVTrans(data.translation);
+      }
+    } catch {
+      // Ignore
+    } finally {
+      setFetchingScripture(false);
+    }
+  };
+
+  const handleSaveVerse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vDate || !vRef.trim() || !vText.trim() || !vReflection.trim()) return;
+    try {
+      setSavingVerse(true);
+      const token = getToken();
+      const res = await fetch(apiUrl('/api/verses'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          date: vDate,
+          reference: vRef.trim(),
+          verseText: vText.trim(),
+          translation: vTrans.trim() || 'NIV',
+          reflection: vReflection.trim(),
+          prayer: vPrayer.trim() || null,
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setSelectedVerse(saved);
+        setEditModalOpen(false);
+        onRefresh?.();
+      }
+    } finally {
+      setSavingVerse(false);
+    }
+  };
+
+  const handleConfirmDeleteVerse = async () => {
+    if (!deleteTargetVerse) return;
+    try {
+      setDeletingVerse(true);
+      const token = getToken();
+      const res = await fetch(apiUrl(`/api/verses/${deleteTargetVerse.id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const deletedId = deleteTargetVerse.id;
+        setDeletedIds((prev) => new Set(prev).add(deletedId));
+        if (selectedVerse?.id === deletedId) {
+          const nextVerse = allVerses.find((v) => v.id !== deletedId && !deletedIds.has(v.id)) || null;
+          setSelectedVerse(nextVerse);
+        }
+        setDeleteTargetVerse(null);
+        onRefresh?.();
+      }
+    } finally {
+      setDeletingVerse(false);
+    }
+  };
+
+  const verse = selectedVerse || todayVerse;
+
+  const pick = (vi?: string | null, en?: string | null, fallback?: string | null) => {
+    const direct = language === 'vi' ? vi : en;
+    if (direct && direct.trim()) return direct.trim();
+    return tr(fallback);
+  };
+
+  const { tr } = useAutoTranslate(
+    [
+      !(language === 'vi' ? verse?.referenceVi : verse?.referenceEn) ? verse?.reference : null,
+      !(language === 'vi' ? verse?.verseTextVi : verse?.verseTextEn) ? verse?.verseText : null,
+      !(language === 'vi' ? verse?.reflectionVi : verse?.reflectionEn) ? verse?.reflection : null,
+      !(language === 'vi' ? verse?.prayerVi : verse?.prayerEn) ? verse?.prayer : null,
+      ...(showArchive
+        ? allVerses.flatMap((v) => [
+            !(language === 'vi' ? v.referenceVi : v.referenceEn) ? v.reference : null,
+            !(language === 'vi' ? v.verseTextVi : v.verseTextEn) ? v.verseText : null,
+          ])
+        : []),
+    ],
+    language
+  );
 
   React.useEffect(() => {
     if (todayVerse && !selectedVerse) {
       setSelectedVerse(todayVerse);
     }
   }, [todayVerse, selectedVerse]);
-
-  const verse = selectedVerse || todayVerse;
 
   const toggleSpeech = () => {
     if (!verse) return;
@@ -64,7 +211,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   const copyToClipboard = () => {
     if (!verse) return;
-    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\nVietnamese Revival Church / Hội Thánh Phục Hưng Việt Nam`;
+    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\n${CHURCH_NAME.en} / ${CHURCH_NAME.vi}`;
     navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -103,13 +250,24 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     <section className="py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto">
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
-        <div>
-          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1">
-            {t('verseTag')}
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
-            {t('verseTitle')}
-          </h2>
+        <div className="flex items-center justify-between gap-3 w-full sm:w-auto">
+          <div>
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1">
+              {t('verseTag')}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
+              {t('verseTitle')}
+            </h2>
+          </div>
+          {isAdmin && onOpenAdminPortal && (
+            <button
+              onClick={() => onOpenAdminPortal('verses')}
+              className="sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0"
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Action icons */}
@@ -146,10 +304,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           {isAdmin && onOpenAdminPortal && (
             <button
               onClick={() => onOpenAdminPortal('verses')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-950 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs"
+              className="hidden sm:flex w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0"
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
             >
-              <PenTool className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t('editVerseBtn')}</span>
+              <Plus className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -162,18 +320,38 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             <Calendar className="w-4 h-4 text-amber-700" />
             <span>{verseDateFormatted}</span>
           </div>
-          <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-[11px]">
-            {verse.translation}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-[11px]">
+              {verse.translation}
+            </span>
+            {isAdmin && onOpenAdminPortal && (
+              <button
+                onClick={() => onOpenAdminPortal('verses', null, verse)}
+                className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors"
+                title={language === 'vi' ? 'Sửa' : 'Edit'}
+              >
+                <Pencil className="w-3.5 h-3.5 text-amber-700" />
+              </button>
+            )}
+            {isAdmin && verse.id > 0 && (
+              <button
+                onClick={() => setDeleteTargetVerse(verse)}
+                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
+                title={language === 'vi' ? 'Xóa' : 'Delete'}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         <blockquote className="my-4 sm:my-6">
           <p className="font-serif text-xl sm:text-3xl text-stone-900 leading-relaxed tracking-normal font-normal">
-            “{verse.verseText}”
+            “{pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}”
           </p>
           <footer className="mt-4 text-right">
             <cite className="font-serif text-base sm:text-lg font-bold text-amber-800 not-italic">
-              — {verse.reference}
+              — {pick(verse.referenceVi, verse.referenceEn, verse.reference)}
             </cite>
           </footer>
         </blockquote>
@@ -183,7 +361,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             {t('reflectionTitle')}
           </h3>
           <p className="text-stone-700 text-xs sm:text-base leading-relaxed whitespace-pre-line">
-            {verse.reflection}
+            {pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}
           </p>
 
           {verse.prayer && (
@@ -192,7 +370,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                 {t('prayerTitle')}
               </span>
               <p className="font-serif italic text-stone-800 text-xs sm:text-sm leading-relaxed">
-                "{verse.prayer}"
+                "{pick(verse.prayerVi, verse.prayerEn, verse.prayer)}"
               </p>
             </div>
           )}
@@ -237,8 +415,8 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                       <span>{item.date}</span>
                       <span className="font-medium text-amber-700">{item.translation}</span>
                     </div>
-                    <p className="font-serif font-bold text-stone-900 text-sm">{item.reference}</p>
-                    <p className="text-stone-600 text-xs line-clamp-2 mt-1">"{item.verseText}"</p>
+                    <p className="font-serif font-bold text-stone-900 text-sm">{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
+                    <p className="text-stone-600 text-xs line-clamp-2 mt-1">"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
                   </div>
                 );
               })}
@@ -246,6 +424,20 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           )}
         </div>
       )}
+      {/* Common Confirmation Modal for Delete */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetVerse)}
+        title={language === 'vi' ? 'Xóa Câu Kinh Thánh?' : 'Delete Scripture?'}
+        message={
+          language === 'vi'
+            ? `Bạn có chắc chắn muốn xóa câu Kinh Thánh "${deleteTargetVerse?.reference}"?`
+            : `Are you sure you want to delete "${deleteTargetVerse?.reference}"?`
+        }
+        confirmText={language === 'vi' ? 'Xóa' : 'Delete'}
+        loading={deletingVerse}
+        onConfirm={handleConfirmDeleteVerse}
+        onCancel={() => setDeleteTargetVerse(null)}
+      />
     </section>
   );
 };

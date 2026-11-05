@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
 import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
+import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
 import { Navbar } from './vrc-frontend/components/Navbar.tsx';
 import { IosTabBar } from './vrc-frontend/components/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/HomeDashboard.tsx';
@@ -55,6 +56,8 @@ function ChurchAppContent() {
   const [spotlightModalOpen, setSpotlightModalOpen] = useState(false);
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
+  const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
+  const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
 
   const loadData = async () => {
     try {
@@ -70,26 +73,38 @@ function ChurchAppContent() {
           NotificationClient.fetchRecent(),
         ]);
 
-      if (eventsRes.ok) {
-        const rawEvents: ChurchEvent[] = await eventsRes.json();
-        setEvents(rawEvents);
+      const safeJson = async (res: Response) => {
+        if (!res.ok) return null;
+        const text = await res.text();
+        if (!text) return null;
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      };
+
+      const [rawEvents, todayVerseData, rawVerses, announcementsData, spotlightData, churchInfoData] =
+        await Promise.all([
+          safeJson(eventsRes),
+          safeJson(todayVerseRes),
+          safeJson(versesRes),
+          safeJson(announcementsRes),
+          safeJson(spotlightRes),
+          safeJson(churchInfoRes),
+        ]);
+
+      if (Array.isArray(rawEvents)) setEvents(rawEvents);
+      if (todayVerseData) setTodayVerse(todayVerseData);
+      if (Array.isArray(rawVerses)) setAllVerses(rawVerses.slice(0, 10));
+      if (Array.isArray(announcementsData)) setAnnouncements(announcementsData);
+      if (spotlightData) {
+        setSpotlightConfig(spotlightData);
+        try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData)); } catch {}
       }
-      if (todayVerseRes.ok) setTodayVerse(await todayVerseRes.json());
-      if (versesRes.ok) {
-        const rawVerses: DailyVerse[] = await versesRes.json();
-        // Strictly keep the 10 most recent scriptures
-        setAllVerses(rawVerses.slice(0, 10));
-      }
-      if (announcementsRes.ok) setAnnouncements(await announcementsRes.json());
-      if (spotlightRes.ok) {
-        const data = await spotlightRes.json();
-        setSpotlightConfig(data);
-        try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(data)); } catch {}
-      }
-      if (churchInfoRes.ok) {
-        const data = await churchInfoRes.json();
-        setChurchInfo(data);
-        try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(data)); } catch {}
+      if (churchInfoData) {
+        setChurchInfo(churchInfoData);
+        try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData)); } catch {}
       }
       setNotifications(notifs);
     } catch (err) {
@@ -104,8 +119,10 @@ function ChurchAppContent() {
     NotificationClient.requestPermission();
   }, []);
 
-  const openAdminWithTab = (tab = 'create-event') => {
+  const openAdminWithTab = (tab = 'create-event', eventToEdit?: ChurchEvent | null, verseToEdit?: DailyVerse | null) => {
     setAdminPortalTab(tab);
+    setEditingEvent(eventToEdit || null);
+    setEditingVerse(verseToEdit || null);
     setAdminPortalOpen(true);
   };
 
@@ -131,10 +148,10 @@ function ChurchAppContent() {
 
           <div className="space-y-0.5 sm:space-y-1">
             <h1 className="text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 tracking-tight leading-tight">
-              Vietnamese Revival Church
+              {CHURCH_NAME.en}
             </h1>
             <p className="text-xs sm:text-base font-serif text-amber-800 font-medium tracking-normal opacity-90">
-              Hội Thánh Phục Hưng Việt Nam
+              {CHURCH_NAME.vi}
             </p>
           </div>
 
@@ -197,21 +214,12 @@ function ChurchAppContent() {
               </button>
             </div>
 
-            {isAdmin && (
-              <button
-                onClick={() => openAdminWithTab('create-event')}
-                className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-2xl text-xs font-semibold flex items-center gap-1 shadow-xs transition-all flex-shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('heroAddEvent')}</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0 pt-14 sm:pt-20">
         {activeTab === 'home' && (
           <HomeDashboard
             events={events}
@@ -240,6 +248,7 @@ function ChurchAppContent() {
               todayVerse={todayVerse}
               allVerses={allVerses}
               isAdmin={isAdmin}
+              onRefresh={loadData}
               onOpenAdminPortal={openAdminWithTab}
             />
 
@@ -321,7 +330,13 @@ function ChurchAppContent() {
           announcements={announcements}
           churchInfo={churchInfo}
           initialTab={adminPortalTab}
-          onClose={() => setAdminPortalOpen(false)}
+          initialEvent={editingEvent}
+          initialVerse={editingVerse}
+          onClose={() => {
+            setAdminPortalOpen(false);
+            setEditingEvent(null);
+            setEditingVerse(null);
+          }}
           onRefreshData={loadData}
           onOpenSpotlightEditor={() => {
             setAdminPortalOpen(false);
@@ -336,10 +351,10 @@ function ChurchAppContent() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span className="font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5">
               <CrossIcon className="w-3.5 h-3.5 text-amber-600" />
-              <span>Vietnamese Revival Church</span>
+              <span>{CHURCH_NAME.en}</span>
             </span>
             <span className="hidden sm:inline text-stone-300">|</span>
-            <span className="text-stone-500 text-xs">Hội Thánh Phục Hưng Việt Nam</span>
+            <span className="text-stone-500 text-xs">{CHURCH_NAME.vi}</span>
           </div>
 
           <div className="flex items-center gap-4 text-xs font-medium">
@@ -362,7 +377,7 @@ function ChurchAppContent() {
         </div>
 
         <div className="max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-400 text-[11px]">
-          <p>© {new Date().getFullYear()} Vietnamese Revival Church • Tempe, Arizona</p>
+          <p>© {new Date().getFullYear()} {CHURCH_NAME.en} • Tempe, Arizona</p>
           <p>{t('footerPlatform')}</p>
         </div>
       </footer>

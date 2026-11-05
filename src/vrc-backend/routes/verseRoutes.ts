@@ -4,6 +4,7 @@ import { dailyVerses } from '../../vrc-db/schema.ts';
 import { eq, desc } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
+import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -78,15 +79,33 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Date, verse text, reference, and reflection are required.' });
     }
 
+    const bilingual = await TranslationService.translateBilingualFields(
+      {
+        verseText: String(verseText).trim(),
+        reference: String(reference).trim(),
+        reflection: String(reflection).trim(),
+        prayer: prayer ? String(prayer).trim() : null,
+      },
+      'scripture'
+    );
+
     const inserted = await db
       .insert(dailyVerses)
       .values({
         date,
         verseText: String(verseText).trim(),
+        verseTextVi: bilingual.verseText?.vi || String(verseText).trim(),
+        verseTextEn: bilingual.verseText?.en || String(verseText).trim(),
         reference: String(reference).trim(),
+        referenceVi: bilingual.reference?.vi || String(reference).trim(),
+        referenceEn: bilingual.reference?.en || String(reference).trim(),
         translation: translation || 'NIV',
         reflection: String(reflection).trim(),
+        reflectionVi: bilingual.reflection?.vi || String(reflection).trim(),
+        reflectionEn: bilingual.reflection?.en || String(reflection).trim(),
         prayer: prayer ? String(prayer).trim() : null,
+        prayerVi: prayer ? (bilingual.prayer?.vi || String(prayer).trim()) : null,
+        prayerEn: prayer ? (bilingual.prayer?.en || String(prayer).trim()) : null,
         theme: theme ? String(theme).trim() : 'Daily Devotion',
         publishedByUid: null,
       })
@@ -94,10 +113,18 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         target: dailyVerses.date,
         set: {
           verseText: String(verseText).trim(),
+          verseTextVi: bilingual.verseText?.vi || String(verseText).trim(),
+          verseTextEn: bilingual.verseText?.en || String(verseText).trim(),
           reference: String(reference).trim(),
+          referenceVi: bilingual.reference?.vi || String(reference).trim(),
+          referenceEn: bilingual.reference?.en || String(reference).trim(),
           translation: translation || 'NIV',
           reflection: String(reflection).trim(),
+          reflectionVi: bilingual.reflection?.vi || String(reflection).trim(),
+          reflectionEn: bilingual.reflection?.en || String(reflection).trim(),
           prayer: prayer ? String(prayer).trim() : null,
+          prayerVi: prayer ? (bilingual.prayer?.vi || String(prayer).trim()) : null,
+          prayerEn: prayer ? (bilingual.prayer?.en || String(prayer).trim()) : null,
           theme: theme ? String(theme).trim() : 'Daily Devotion',
         },
       })

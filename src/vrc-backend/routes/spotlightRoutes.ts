@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { FirestoreChurchService } from '../services/firestoreService.ts';
+import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -15,11 +16,21 @@ export interface SpotlightData {
   isActive: boolean;
   theme: 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default';
   badge: string;
+  badgeVi?: string;
+  badgeEn?: string;
   title: string;
+  titleVi?: string;
+  titleEn?: string;
   subtitle: string;
+  subtitleVi?: string;
+  subtitleEn?: string;
   description: string;
+  descriptionVi?: string;
+  descriptionEn?: string;
   dateTag: string;
   locationTag: string;
+  locationTagVi?: string;
+  locationTagEn?: string;
   customAddress?: string;
   primaryBtnText: string;
   primaryBtnAction: 'events' | 'youth' | 'verse' | 'schedule';
@@ -138,17 +149,44 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       ? String(secondaryBtnUrl).trim()
       : `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
 
+    const rawBadge = badge ? String(badge).trim() : '';
+    const rawTitle = isAuto ? '' : (title ? String(title).trim() : '');
+    const rawSubtitle = subtitle ? String(subtitle).trim() : '';
+    const rawDescription = isAuto ? '' : (description ? String(description).trim() : '');
+    const rawLocationTag = locationTag ? String(locationTag).trim() : 'Tempe, Arizona';
+
+    const bilingual = await TranslationService.translateBilingualFields(
+      {
+        badge: rawBadge,
+        title: rawTitle,
+        subtitle: rawSubtitle,
+        description: rawDescription,
+        locationTag: rawLocationTag,
+      },
+      'church'
+    );
+
     const updated: SpotlightData = {
       mode: isAuto ? 'auto' : 'event',
       selectedEventId: isAuto ? null : Number(selectedEventId),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       theme: theme || 'thanksgiving',
-      badge: badge ? String(badge).trim() : '',
-      title: isAuto ? '' : (title ? String(title).trim() : ''),
-      subtitle: subtitle ? String(subtitle).trim() : '',
-      description: isAuto ? '' : (description ? String(description).trim() : ''),
+      badge: rawBadge,
+      badgeVi: bilingual.badge?.vi || rawBadge,
+      badgeEn: bilingual.badge?.en || rawBadge,
+      title: rawTitle,
+      titleVi: bilingual.title?.vi || rawTitle,
+      titleEn: bilingual.title?.en || rawTitle,
+      subtitle: rawSubtitle,
+      subtitleVi: bilingual.subtitle?.vi || rawSubtitle,
+      subtitleEn: bilingual.subtitle?.en || rawSubtitle,
+      description: rawDescription,
+      descriptionVi: bilingual.description?.vi || rawDescription,
+      descriptionEn: bilingual.description?.en || rawDescription,
       dateTag: isAuto ? '' : (dateTag ? String(dateTag).trim() : ''),
-      locationTag: locationTag ? String(locationTag).trim() : 'Tempe, Arizona',
+      locationTag: rawLocationTag,
+      locationTagVi: bilingual.locationTag?.vi || rawLocationTag,
+      locationTagEn: bilingual.locationTag?.en || rawLocationTag,
       customAddress: cleanAddress,
       primaryBtnText: primaryBtnText ? String(primaryBtnText).trim() : 'Xem Tất Cả Sự Kiện',
       primaryBtnAction: primaryBtnAction || 'events',

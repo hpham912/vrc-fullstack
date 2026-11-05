@@ -1,12 +1,18 @@
 export interface ChurchEvent {
   id: number;
   title: string;
+  titleVi?: string | null;
+  titleEn?: string | null;
   description: string;
+  descriptionVi?: string | null;
+  descriptionEn?: string | null;
   category: string;
   date: string; // YYYY-MM-DD
   startTime: string;
   endTime?: string | null;
   location: string;
+  locationVi?: string | null;
+  locationEn?: string | null;
   address?: string | null;
   imageUrl?: string | null;
   isFeatured: boolean;
@@ -21,10 +27,18 @@ export interface DailyVerse {
   id: number;
   date: string;
   verseText: string;
+  verseTextVi?: string | null;
+  verseTextEn?: string | null;
   reference: string;
+  referenceVi?: string | null;
+  referenceEn?: string | null;
   translation: string;
   reflection: string;
+  reflectionVi?: string | null;
+  reflectionEn?: string | null;
   prayer?: string | null;
+  prayerVi?: string | null;
+  prayerEn?: string | null;
   theme?: string | null;
   createdAt?: string;
 }
@@ -65,12 +79,22 @@ export interface SpotlightBannerConfig {
   selectedEventId?: number | null; // ID of pinned church event if mode is 'event'
   isActive: boolean; // whether holiday/spotlight mode is active
   theme: SpotlightTheme;
-  badge?: string; // e.g. "🎄 Giáng Sinh 2026", "🍁 Lễ Tạ Ơn & Tri Ân", "🔥 Đại Hội Bồi Linh"
-  title: string; // e.g. "Đại Lễ Mừng Chúa Giáng Sinh & Thánh Nhạc"
-  subtitle?: string; // Scripture quote or pastoral message
-  description: string; // Event invitation & details
-  dateTag?: string; // e.g. "Chúa Nhật, 20 Tháng 12 • 6:00 PM"
-  locationTag?: string; // e.g. "Tempe, AZ • Main Sanctuary"
+  badge?: string;
+  badgeVi?: string;
+  badgeEn?: string;
+  title: string;
+  titleVi?: string;
+  titleEn?: string;
+  subtitle?: string;
+  subtitleVi?: string;
+  subtitleEn?: string;
+  description: string;
+  descriptionVi?: string;
+  descriptionEn?: string;
+  dateTag?: string;
+  locationTag?: string;
+  locationTagVi?: string;
+  locationTagEn?: string;
   customAddress?: string; // e.g. "Tempe, Arizona"
   primaryBtnText: string; // e.g. "Xem Lịch Sự Kiện", "Đăng Ký Tham Gia"
   primaryBtnAction: 'events' | 'youth' | 'verse' | 'schedule';
