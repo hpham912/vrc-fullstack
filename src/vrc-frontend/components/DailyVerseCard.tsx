@@ -232,10 +232,34 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   if (!verse) {
     return (
-      <div className="py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-stone-800"></div>
-        <p className="mt-3 text-stone-500 text-sm">{t('loadingScripture')}</p>
-      </div>
+      <section className="py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto">
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-amber-700 block mb-1">
+              {t('verseTag')}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
+              {t('verseTitle')}
+            </h2>
+          </div>
+          {isAdmin && onOpenAdminPortal && (
+            <button
+              onClick={() => onOpenAdminPortal('verses')}
+              className="w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0"
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="py-12 sm:py-16 text-center bg-white rounded-3xl border border-stone-200/70 p-8 shadow-xs">
+          <BookOpen className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+          <p className="font-serif font-bold text-stone-900 text-base">
+            {language === 'vi' ? 'Chưa có Câu Kinh Thánh nào' : 'No Scripture Available'}
+          </p>
+        </div>
+      </section>
     );
   }
 

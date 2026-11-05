@@ -1,18 +1,18 @@
 {
-  "mode": "custom",
+  "mode": "auto",
   "selectedEventId": null,
   "isActive": true,
   "theme": "thanksgiving",
-  "badge": "🍂 Lễ Tạ Ơn & Tri Ân Chúa • Thanksgiving Celebration",
-  "title": "Đại Lễ Cảm Tạ Ơn Chúa & Thông Công Hội Thánh",
+  "badge": "Special Gathering",
+  "title": "Youth & Young Adults Fellowship Night",
   "subtitle": "Thi Thiên 100:4 - \"Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!\"",
-  "description": "Hội Thánh Phục Hưng Việt Nam trân trọng kính mời quý tôi con Chúa cùng gia quyến đến hiệp lòng tạ ơn Chúa, chia sẻ bữa tiệc thông công ấm áp và cùng nhau cầu nguyện phục hưng.",
-  "dateTag": "Chúa Nhật, 22 Tháng 11 • 3:00 PM – 6:30 PM",
-  "locationTag": "Tempe, Arizona • Main Sanctuary",
+  "description": "An uplifting evening for youth and college students with acoustic praise, interactive discussions on faith, fun team games, and dinner.",
+  "dateTag": "",
+  "locationTag": "Tempe, Arizona",
   "customAddress": "Tempe, Arizona",
-  "primaryBtnText": "Xem Sự Kiện • View Events",
+  "primaryBtnText": "Xem Sự Kiện",
   "primaryBtnAction": "events",
-  "secondaryBtnText": "Chỉ Đường • Directions",
+  "secondaryBtnText": "Chỉ Đường",
   "secondaryBtnUrl": "https://maps.google.com/?q=Tempe+Arizona",
-  "updatedAt": "2026-11-03T18:41:39.609Z"
+  "updatedAt": "2026-11-04T18:48:24.480Z"
 }

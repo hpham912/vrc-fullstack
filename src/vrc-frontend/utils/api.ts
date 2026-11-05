@@ -1,6 +1,13 @@
-// Vite substitutes this value at build time. Keep it empty for the web app,
-// where relative /api requests are served by the same Express origin.
-const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+// Only use VITE_API_BASE_URL when running inside a native Capacitor shell (capacitor://).
+// On web (http:// or https://), always use same-origin relative /api routes.
+const isNativeCapacitor =
+  typeof window !== 'undefined' &&
+  (window.location.protocol === 'capacitor:' ||
+    Boolean((window as any).Capacitor?.isNativePlatform?.()));
+
+const configuredApiBase = isNativeCapacitor
+  ? import.meta.env.VITE_API_BASE_URL?.trim()
+  : '';
 
 export const API_BASE = configuredApiBase
   ? configuredApiBase.replace(/\/+$/, '')

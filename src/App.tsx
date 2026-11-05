@@ -65,12 +65,11 @@ function ChurchAppContent() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [eventsRes, todayVerseRes, versesRes, announcementsRes, spotlightRes, churchInfoRes, notifs] =
+      const [eventsRes, todayVerseRes, versesRes, spotlightRes, churchInfoRes, notifs] =
         await Promise.all([
           fetch(apiUrl('/api/events'), { cache: 'no-store' }),
           fetch(apiUrl('/api/verses/today'), { cache: 'no-store' }),
           fetch(apiUrl('/api/verses'), { cache: 'no-store' }),
-          fetch(apiUrl('/api/announcements'), { cache: 'no-store' }),
           fetch(apiUrl('/api/spotlight'), { cache: 'no-store' }),
           fetch(apiUrl('/api/church-info'), { cache: 'no-store' }),
           NotificationClient.fetchRecent(),
@@ -87,20 +86,18 @@ function ChurchAppContent() {
         }
       };
 
-      const [rawEvents, todayVerseData, rawVerses, announcementsData, spotlightData, churchInfoData] =
+      const [rawEvents, todayVerseData, rawVerses, spotlightData, churchInfoData] =
         await Promise.all([
           safeJson(eventsRes),
           safeJson(todayVerseRes),
           safeJson(versesRes),
-          safeJson(announcementsRes),
           safeJson(spotlightRes),
           safeJson(churchInfoRes),
         ]);
 
       if (Array.isArray(rawEvents)) setEvents(rawEvents);
-      if (todayVerseData) setTodayVerse(todayVerseData);
+      setTodayVerse(todayVerseData || null);
       if (Array.isArray(rawVerses)) setAllVerses(rawVerses.slice(0, 10));
-      if (Array.isArray(announcementsData)) setAnnouncements(announcementsData);
       if (spotlightData) {
         setSpotlightConfig(spotlightData);
         try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData)); } catch {}
