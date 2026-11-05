@@ -55,6 +55,8 @@ export const events = pgTable('events', {
   organizerName: text('organizer_name'),
   organizerEmail: text('organizer_email'),
   createdByUid: text('created_by_uid'),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -70,6 +72,8 @@ export const dailyVerses = pgTable('daily_verses', {
   referenceVi: text('reference_vi'),
   referenceEn: text('reference_en'),
   translation: text('translation').notNull().default('NIV'),
+  translationVi: text('translation_vi'),
+  translationEn: text('translation_en'),
   reflection: text('reflection').notNull(),
   reflectionVi: text('reflection_vi'),
   reflectionEn: text('reflection_en'),
@@ -78,7 +82,10 @@ export const dailyVerses = pgTable('daily_verses', {
   prayerEn: text('prayer_en'),
   theme: text('theme').default('Faith & Encouragement'),
   publishedByUid: text('published_by_uid'),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
   createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Event RSVPs by attendees

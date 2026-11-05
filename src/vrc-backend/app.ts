@@ -6,10 +6,9 @@ import authRoutes from './routes/authRoutes.ts';
 import eventRoutes from './routes/eventRoutes.ts';
 import verseRoutes from './routes/verseRoutes.ts';
 import notifRoutes from './routes/notifRoutes.ts';
-import devotionalRoutes from './routes/devotionalRoutes.ts';
-import translationRoutes from './routes/translationRoutes.ts';
 import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
+import prayerRoutes from './routes/prayerRoutes.ts';
 
 export const createApp = () => {
   const app = express();
@@ -40,11 +39,20 @@ export const createApp = () => {
   app.use('/api/events', eventRoutes);
   app.use('/api/verses', verseRoutes);
   app.use('/api/notifications', notifRoutes);
-  app.use('/api/ai', devotionalRoutes);
-  app.use('/api/ai', translationRoutes);
   app.use('/api/spotlight', spotlightRoutes);
   app.use('/api/church-info', churchInfoRoutes);
+  app.use('/api/prayers', prayerRoutes);
 
+  // Structured 404 for unmatched API routes
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({
+      error: `API route not found: ${req.method} ${req.originalUrl}`,
+      status: 404,
+      method: req.method,
+      path: req.originalUrl,
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   // Centralized Error Handler
   app.use(errorHandler);

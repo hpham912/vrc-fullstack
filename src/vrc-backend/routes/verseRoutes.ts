@@ -4,7 +4,6 @@ import { dailyVerses } from '../../vrc-db/schema.ts';
 import { eq, desc } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
-import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -74,58 +73,86 @@ router.get('/', async (req, res) => {
 // POST /api/verses - Create or update daily verse (Admin only)
 router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const { date, verseText, reference, translation, reflection, prayer, theme } = req.body;
-    if (!date || !verseText || !reference || !reflection) {
-      return res.status(400).json({ error: 'Date, verse text, reference, and reflection are required.' });
-    }
+    const {
+      date,
+      verseText,
+      verseTextVi,
+      verseTextEn,
+      reference,
+      referenceVi,
+      referenceEn,
+      translation,
+      translationVi,
+      translationEn,
+      reflection,
+      reflectionVi,
+      reflectionEn,
+      prayer,
+      prayerVi,
+      prayerEn,
+      theme,
+    } = req.body;
 
-    const bilingual = await TranslationService.translateBilingualFields(
-      {
-        verseText: String(verseText).trim(),
-        reference: String(reference).trim(),
-        reflection: String(reflection).trim(),
-        prayer: prayer ? String(prayer).trim() : null,
-      },
-      'scripture'
-    );
+    const finalVerseEn = String(verseTextEn || verseText || verseTextVi || '').trim();
+    const finalVerseVi = String(verseTextVi || verseText || verseTextEn || '').trim();
+    const finalRefEn = String(referenceEn || reference || referenceVi || '').trim();
+    const finalRefVi = String(referenceVi || reference || referenceEn || '').trim();
+    const finalTransEn = String(translationEn || translation || 'NIV').trim();
+    const finalTransVi = String(translationVi || translation || 'RVV11').trim();
+    const finalReflEn = String(reflectionEn || reflection || reflectionVi || '').trim();
+    const finalReflVi = String(reflectionVi || reflection || reflectionEn || '').trim();
+    const finalPrayerEn = prayerEn !== undefined ? (prayerEn ? String(prayerEn).trim() : null) : (prayer ? String(prayer).trim() : null);
+    const finalPrayerVi = prayerVi !== undefined ? (prayerVi ? String(prayerVi).trim() : null) : (prayer ? String(prayer).trim() : null);
+
+    if (!date || !finalVerseEn || !finalVerseVi || !finalRefEn || !finalRefVi) {
+      return res.status(400).json({ error: 'Date, Vietnamese & English verse text, and references are required.' });
+    }
 
     const inserted = await db
       .insert(dailyVerses)
       .values({
         date,
-        verseText: String(verseText).trim(),
-        verseTextVi: bilingual.verseText?.vi || String(verseText).trim(),
-        verseTextEn: bilingual.verseText?.en || String(verseText).trim(),
-        reference: String(reference).trim(),
-        referenceVi: bilingual.reference?.vi || String(reference).trim(),
-        referenceEn: bilingual.reference?.en || String(reference).trim(),
-        translation: translation || 'NIV',
-        reflection: String(reflection).trim(),
-        reflectionVi: bilingual.reflection?.vi || String(reflection).trim(),
-        reflectionEn: bilingual.reflection?.en || String(reflection).trim(),
-        prayer: prayer ? String(prayer).trim() : null,
-        prayerVi: prayer ? (bilingual.prayer?.vi || String(prayer).trim()) : null,
-        prayerEn: prayer ? (bilingual.prayer?.en || String(prayer).trim()) : null,
-        theme: theme ? String(theme).trim() : 'Daily Devotion',
+        verseText: finalVerseEn,
+        verseTextVi: finalVerseVi,
+        verseTextEn: finalVerseEn,
+        reference: finalRefEn,
+        referenceVi: finalRefVi,
+        referenceEn: finalRefEn,
+        translation: finalTransEn,
+        translationVi: finalTransVi,
+        translationEn: finalTransEn,
+        reflection: finalReflEn || finalVerseEn,
+        reflectionVi: finalReflVi || finalVerseVi,
+        reflectionEn: finalReflEn || finalVerseEn,
+        prayer: finalPrayerEn,
+        prayerVi: finalPrayerVi,
+        prayerEn: finalPrayerEn,
+        theme: theme ? String(theme).trim() : 'Daily Scripture',
         publishedByUid: null,
+        createdBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
+        updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
       })
       .onConflictDoUpdate({
         target: dailyVerses.date,
         set: {
-          verseText: String(verseText).trim(),
-          verseTextVi: bilingual.verseText?.vi || String(verseText).trim(),
-          verseTextEn: bilingual.verseText?.en || String(verseText).trim(),
-          reference: String(reference).trim(),
-          referenceVi: bilingual.reference?.vi || String(reference).trim(),
-          referenceEn: bilingual.reference?.en || String(reference).trim(),
-          translation: translation || 'NIV',
-          reflection: String(reflection).trim(),
-          reflectionVi: bilingual.reflection?.vi || String(reflection).trim(),
-          reflectionEn: bilingual.reflection?.en || String(reflection).trim(),
-          prayer: prayer ? String(prayer).trim() : null,
-          prayerVi: prayer ? (bilingual.prayer?.vi || String(prayer).trim()) : null,
-          prayerEn: prayer ? (bilingual.prayer?.en || String(prayer).trim()) : null,
-          theme: theme ? String(theme).trim() : 'Daily Devotion',
+          verseText: finalVerseEn,
+          verseTextVi: finalVerseVi,
+          verseTextEn: finalVerseEn,
+          reference: finalRefEn,
+          referenceVi: finalRefVi,
+          referenceEn: finalRefEn,
+          translation: finalTransEn,
+          translationVi: finalTransVi,
+          translationEn: finalTransEn,
+          reflection: finalReflEn || finalVerseEn,
+          reflectionVi: finalReflVi || finalVerseVi,
+          reflectionEn: finalReflEn || finalVerseEn,
+          prayer: finalPrayerEn,
+          prayerVi: finalPrayerVi,
+          prayerEn: finalPrayerEn,
+          theme: theme ? String(theme).trim() : 'Daily Scripture',
+          updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
+          updatedAt: new Date(),
         },
       })
       .returning();

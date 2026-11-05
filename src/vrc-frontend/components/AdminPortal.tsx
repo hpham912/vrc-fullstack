@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { apiUrl } from '../utils/api.ts';
 import { NotificationClient } from '../services/notificationClient.ts';
+import { Modal } from '../common-component/Modal.tsx';
 import {
   Calendar,
   BookOpen,
@@ -27,6 +28,7 @@ import {
   Eye,
   Flame,
   Star,
+  HeartHandshake,
 } from 'lucide-react';
 
 interface AdminAccount {
@@ -44,6 +46,7 @@ interface AdminPortalProps {
   announcements: Announcement[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
+  focusedMode?: boolean;
   initialEvent?: ChurchEvent | null;
   initialVerse?: DailyVerse | null;
   onClose: () => void;
@@ -57,6 +60,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   announcements,
   churchInfo,
   initialTab = 'create-event',
+  focusedMode = false,
   initialEvent,
   initialVerse,
   onClose,
@@ -72,8 +76,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // Event Form State
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
-  const [eventTitle, setEventTitle] = useState('');
-  const [eventDescription, setEventDescription] = useState('');
+  const [eventTitleVi, setEventTitleVi] = useState('');
+  const [eventTitleEn, setEventTitleEn] = useState('');
+  const [eventDescriptionVi, setEventDescriptionVi] = useState('');
+  const [eventDescriptionEn, setEventDescriptionEn] = useState('');
   const [eventCategory, setEventCategory] = useState('Worship');
   const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
   const [eventStartTime, setEventStartTime] = useState('03:00 PM');
@@ -87,15 +93,39 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   // Daily Verse Form State
   const [editingVerseId, setEditingVerseId] = useState<number | null>(null);
   const [verseDate, setVerseDate] = useState(new Date().toISOString().split('T')[0]);
-  const [verseReference, setVerseReference] = useState('');
-  const [verseText, setVerseText] = useState('');
-  const [verseTranslation, setVerseTranslation] = useState('NIV');
-  const [verseReflection, setVerseReflection] = useState('');
-  const [versePrayer, setVersePrayer] = useState('');
+  const [verseReferenceVi, setVerseReferenceVi] = useState('');
+  const [verseReferenceEn, setVerseReferenceEn] = useState('');
+  const [verseTranslationVi, setVerseTranslationVi] = useState('RVV11');
+  const [verseTranslationEn, setVerseTranslationEn] = useState('NIV');
+  const [verseTextVi, setVerseTextVi] = useState('');
+  const [verseTextEn, setVerseTextEn] = useState('');
+  const [verseReflectionVi, setVerseReflectionVi] = useState('');
+  const [verseReflectionEn, setVerseReflectionEn] = useState('');
+  const [versePrayerVi, setVersePrayerVi] = useState('');
+  const [versePrayerEn, setVersePrayerEn] = useState('');
   const [verseTheme, setVerseTheme] = useState('Revival & Faith');
-  const [generatingAi, setGeneratingAi] = useState(false);
-  const [translatingEvent, setTranslatingEvent] = useState(false);
-  const [translatingVerse, setTranslatingVerse] = useState(false);
+  const [editingEventAudit, setEditingEventAudit] = useState<{
+    createdBy?: string | null;
+    createdAt?: string;
+    updatedBy?: string | null;
+    updatedAt?: string | null;
+  } | null>(null);
+  const [editingVerseAudit, setEditingVerseAudit] = useState<{
+    createdBy?: string | null;
+    createdAt?: string;
+    updatedBy?: string | null;
+    updatedAt?: string | null;
+  } | null>(null);
+
+  // Prayer Requests State
+  const [prayerList, setPrayerList] = useState<Array<{
+    id: number;
+    title: string;
+    request: string;
+    requesterName: string;
+    createdAt?: string;
+  }>>([]);
+  const [expandedPrayerIds, setExpandedPrayerIds] = useState<Set<number>>(new Set());
 
   // Admin Accounts Management State
   const [adminList, setAdminList] = useState<AdminAccount[]>([]);
@@ -127,38 +157,91 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
+  const loadPrayerRequests = async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await fetch(apiUrl('/api/prayers'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPrayerList(data);
+      }
+    } catch (err) {
+      console.error('Failed to load prayer requests:', err);
+    }
+  };
+
+  const handleDeletePrayer = async (id: number) => {
+    try {
+      const token = getToken();
+      const res = await fetch(apiUrl(`/api/prayers/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setPrayerList((prev) => prev.filter((p) => p.id !== id));
+        showFeedback('success', language === 'vi' ? 'Đã xóa lời cầu nguyện.' : 'Prayer request deleted.');
+      }
+    } catch (err: any) {
+      showFeedback('error', err.message || 'Error deleting prayer request');
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'admin-accounts') {
       loadAdminAccounts();
+    } else if (activeTab === 'prayer-requests') {
+      loadPrayerRequests();
     }
   }, [activeTab]);
 
   const resetVerseForm = () => {
     setEditingVerseId(null);
     setVerseDate(new Date().toISOString().split('T')[0]);
-    setVerseReference('');
-    setVerseText('');
-    setVerseTranslation('NIV');
-    setVerseReflection('');
-    setVersePrayer('');
+    setVerseReferenceVi('');
+    setVerseReferenceEn('');
+    setVerseTranslationVi('RVV11');
+    setVerseTranslationEn('NIV');
+    setVerseTextVi('');
+    setVerseTextEn('');
+    setVerseReflectionVi('');
+    setVerseReflectionEn('');
+    setVersePrayerVi('');
+    setVersePrayerEn('');
     setVerseTheme('Revival & Faith');
+    setEditingVerseAudit(null);
   };
 
   const handleEditVerse = (v: DailyVerse) => {
     setEditingVerseId(v.id);
     setVerseDate(v.date);
-    setVerseReference(v.reference);
-    setVerseText(v.verseText);
-    setVerseTranslation(v.translation || 'NIV');
-    setVerseReflection(v.reflection);
-    setVersePrayer(v.prayer || '');
+    setVerseReferenceVi(v.referenceVi || v.reference || '');
+    setVerseReferenceEn(v.referenceEn || v.reference || '');
+    setVerseTranslationVi(v.translationVi || 'RVV11');
+    setVerseTranslationEn(v.translationEn || v.translation || 'NIV');
+    setVerseTextVi(v.verseTextVi || v.verseText || '');
+    setVerseTextEn(v.verseTextEn || v.verseText || '');
+    setVerseReflectionVi(v.reflectionVi || v.reflection || '');
+    setVerseReflectionEn(v.reflectionEn || v.reflection || '');
+    setVersePrayerVi(v.prayerVi || v.prayer || '');
+    setVersePrayerEn(v.prayerEn || v.prayer || '');
     setVerseTheme(v.theme || 'Revival & Faith');
+    setEditingVerseAudit({
+      createdBy: v.createdBy,
+      createdAt: v.createdAt,
+      updatedBy: v.updatedBy,
+      updatedAt: v.updatedAt,
+    });
   };
 
   const resetEventForm = () => {
     setEditingEventId(null);
-    setEventTitle('');
-    setEventDescription('');
+    setEventTitleVi('');
+    setEventTitleEn('');
+    setEventDescriptionVi('');
+    setEventDescriptionEn('');
     setEventCategory('Worship');
     setEventDate(new Date().toISOString().split('T')[0]);
     setEventStartTime('03:00 PM');
@@ -166,12 +249,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventLocation('Main Sanctuary');
     setEventAddress(churchInfo?.address || 'Tempe, Arizona');
     setEventIsFeatured(false);
+    setEditingEventAudit(null);
   };
 
   const handleEditEvent = (evt: ChurchEvent) => {
     setEditingEventId(evt.id);
-    setEventTitle(evt.title);
-    setEventDescription(evt.description);
+    setEventTitleVi(evt.titleVi || evt.title || '');
+    setEventTitleEn(evt.titleEn || evt.title || '');
+    setEventDescriptionVi(evt.descriptionVi || evt.description || '');
+    setEventDescriptionEn(evt.descriptionEn || evt.description || '');
     setEventCategory(evt.category);
     setEventDate(evt.date);
     setEventStartTime(evt.startTime);
@@ -181,6 +267,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setEventIsFeatured(evt.isFeatured);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');
+    setEditingEventAudit({
+      createdBy: evt.createdBy,
+      createdAt: evt.createdAt,
+      updatedBy: evt.updatedBy,
+      updatedAt: evt.updatedAt,
+    });
     setActiveTab('create-event');
   };
 
@@ -198,8 +290,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eventTitle.trim() || !eventDescription.trim() || !eventDate || !eventStartTime || !eventLocation) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng điền đầy đủ các thông tin sự kiện bắt buộc.' : 'Please fill in all required event details.');
+    if (!eventTitleVi.trim() || !eventTitleEn.trim() || !eventDescriptionVi.trim() || !eventDescriptionEn.trim() || !eventDate || !eventStartTime || !eventLocation) {
+      showFeedback('error', language === 'vi' ? 'Vui lòng điền đầy đủ tên và mô tả sự kiện bằng cả tiếng Việt và tiếng Anh.' : 'Please fill in both Vietnamese and English event titles and descriptions.');
       return;
     }
 
@@ -208,8 +300,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const defaultChurchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
       const payload = {
-        title: eventTitle.trim(),
-        description: eventDescription.trim(),
+        title: eventTitleEn.trim(),
+        titleVi: eventTitleVi.trim(),
+        titleEn: eventTitleEn.trim(),
+        description: eventDescriptionEn.trim(),
+        descriptionVi: eventDescriptionVi.trim(),
+        descriptionEn: eventDescriptionEn.trim(),
         category: eventCategory,
         date: eventDate,
         startTime: eventStartTime,
@@ -244,7 +340,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       // Dispatch local/push notification
       NotificationClient.triggerNotification(
-        `New Church Event: ${eventTitle.trim()}`,
+        `New Church Event: ${eventTitleEn.trim()}`,
         `${eventDate} • ${eventStartTime} at ${eventLocation.trim()}`
       );
 
@@ -274,140 +370,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleFetchScripture = async () => {
-    if (!verseReference.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng nhập đoạn Kinh Thánh (ví dụ: "2 Sử Ký 7:14" hoặc "Giăng 3:16")' : 'Please enter a Scripture reference (e.g. "2 Chronicles 7:14" or "John 3:16") first.');
-      return;
-    }
-
-    try {
-      setGeneratingAi(true);
-      const token = getToken();
-      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          passage: verseReference.trim(),
-        }),
-      });
-
-      const rawText = await res.text();
-      let data: any = {};
-      try {
-        data = rawText ? JSON.parse(rawText) : {};
-      } catch {
-        throw new Error(res.ok ? 'Invalid response from scripture service' : `Server error (${res.status})`);
-      }
-      if (!res.ok) throw new Error(data.error || 'Failed to fetch scripture');
-      if (data.verseText) setVerseText(data.verseText);
-      if (data.translation) setVerseTranslation(data.translation);
-
-      showFeedback('success', language === 'vi' ? 'Đã tải câu Kinh Thánh thành công!' : 'Scripture verse loaded!');
-    } catch (err: any) {
-      showFeedback('error', err.message || 'Error fetching scripture');
-    } finally {
-      setGeneratingAi(false);
-    }
-  };
-
-  const handleTranslateEvent = async (mode: 'bilingual' | 'en' | 'vi') => {
-    if (!eventTitle.trim() && !eventDescription.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng nhập tên hoặc mô tả sự kiện trước khi dịch' : 'Please enter event title or description before translating');
-      return;
-    }
-    try {
-      setTranslatingEvent(true);
-      const token = getToken();
-
-      if (eventTitle.trim()) {
-        const res = await fetch(apiUrl('/api/ai/translate'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            text: eventTitle.trim(),
-            targetLang: mode === 'vi' ? 'vi' : 'en',
-            context: 'event',
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (mode === 'bilingual') {
-            setEventTitle(data.bilingual || `${eventTitle.trim()} • ${data.translated}`);
-          } else {
-            setEventTitle(data.translated);
-          }
-        }
-      }
-
-      if (eventDescription.trim()) {
-        const res = await fetch(apiUrl('/api/ai/translate'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            text: eventDescription.trim(),
-            targetLang: mode === 'vi' ? 'vi' : 'en',
-            context: 'event',
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (mode === 'bilingual') {
-            setEventDescription(`${eventDescription.trim()}\n\n---\n${data.translated}`);
-          } else {
-            setEventDescription(data.translated);
-          }
-        }
-      }
-
-      showFeedback('success', language === 'vi' ? 'Đã dịch sự kiện thành công!' : 'Event translated successfully!');
-    } catch (err: any) {
-      showFeedback('error', err.message || 'Translation error');
-    } finally {
-      setTranslatingEvent(false);
-    }
-  };
-
-  const handleTranslateScripture = async (targetLang: 'vi' | 'en') => {
-    if (!verseText.trim() && !verseReflection.trim() && !verseReference.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng nhập câu gốc hoặc suy gẫm trước khi dịch' : 'Please enter scripture or reflection first');
-      return;
-    }
-    try {
-      setTranslatingVerse(true);
-      const token = getToken();
-      const fields = {
-        reference: verseReference.trim(),
-        verseText: verseText.trim(),
-        reflection: verseReflection.trim(),
-        prayer: versePrayer.trim(),
-      };
-      const res = await fetch(apiUrl('/api/ai/translate-devotional'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ fields, targetLang }),
-      });
-      if (!res.ok) throw new Error('Translation failed');
-      const data = await res.json();
-      if (data.reference) setVerseReference(data.reference);
-      if (data.verseText) setVerseText(data.verseText);
-      if (data.reflection) setVerseReflection(data.reflection);
-      if (data.prayer) setVersePrayer(data.prayer);
-
-      showFeedback('success', language === 'vi' ? 'Đã dịch Lời Chúa & suy gẫm thành công!' : 'Scripture translated successfully!');
-    } catch (err: any) {
-      showFeedback('error', err.message || 'Translation error');
-    } finally {
-      setTranslatingVerse(false);
-    }
-  };
-
   const handleSaveVerse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!verseDate || !verseReference.trim() || !verseText.trim() || !verseReflection.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng điền ngày, câu gốc, nội dung và suy gẫm.' : 'Please fill in date, reference, verse text, and reflection.');
+    if (!verseDate || !verseReferenceVi.trim() || !verseReferenceEn.trim() || !verseTextVi.trim() || !verseTextEn.trim()) {
+      showFeedback('error', language === 'vi' ? 'Vui lòng điền ngày, câu gốc và nội dung Kinh Thánh bằng cả tiếng Việt và tiếng Anh.' : 'Please fill in date, Vietnamese & English references, and verse texts.');
       return;
     }
 
@@ -424,12 +390,22 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         },
         body: JSON.stringify({
           date: verseDate,
-          reference: verseReference.trim(),
-          verseText: verseText.trim(),
-          translation: verseTranslation,
-          reflection: verseReflection.trim(),
-          prayer: versePrayer.trim() || null,
-          theme: verseTheme.trim() || 'Daily Devotion',
+          reference: verseReferenceEn.trim(),
+          referenceVi: verseReferenceVi.trim(),
+          referenceEn: verseReferenceEn.trim(),
+          translation: verseTranslationEn.trim() || 'NIV',
+          translationVi: verseTranslationVi.trim() || 'RVV11',
+          translationEn: verseTranslationEn.trim() || 'NIV',
+          verseText: verseTextEn.trim(),
+          verseTextVi: verseTextVi.trim(),
+          verseTextEn: verseTextEn.trim(),
+          reflection: verseReflectionEn.trim() || verseTextEn.trim(),
+          reflectionVi: verseReflectionVi.trim() || verseTextVi.trim(),
+          reflectionEn: verseReflectionEn.trim() || verseTextEn.trim(),
+          prayer: versePrayerEn.trim() || null,
+          prayerVi: versePrayerVi.trim() || null,
+          prayerEn: versePrayerEn.trim() || null,
+          theme: verseTheme.trim() || 'Daily Scripture',
         }),
       });
 
@@ -440,8 +416,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       if (!editingVerseId) {
         NotificationClient.triggerNotification(
-          `Scripture of the Day: ${verseReference.trim()}`,
-          `"${verseText.slice(0, 100)}..."`
+          `Scripture of the Day: ${verseReferenceEn.trim()}`,
+          `"${verseTextEn.slice(0, 100)}..."`
         );
       }
 
@@ -560,13 +536,31 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 w-full">
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
+    <Modal isOpen={true} onClose={onClose} maxWidthClass="max-w-3xl">
+      <div className="flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800 flex-shrink-0">
           <div>
             <h2 className="text-lg sm:text-xl font-serif font-bold text-white">
-              {t('adminDashboardTitle')}
+              {focusedMode
+                ? activeTab === 'create-event'
+                  ? editingEventId
+                    ? language === 'vi'
+                      ? 'Chỉnh Sửa Sự Kiện'
+                      : 'Edit Event'
+                    : language === 'vi'
+                    ? 'Thêm Sự Kiện Mới'
+                    : 'Add New Event'
+                  : activeTab === 'verses'
+                  ? editingVerseId
+                    ? language === 'vi'
+                      ? 'Chỉnh Sửa Câu Kinh Thánh'
+                      : 'Edit Daily Scripture'
+                    : language === 'vi'
+                    ? 'Thêm Câu Kinh Thánh'
+                    : 'Add Daily Scripture'
+                  : t('adminDashboardTitle')
+                : t('adminDashboardTitle')}
             </h2>
             <p className="text-xs text-stone-400 mt-0.5">
               {language === 'vi' ? 'Đăng nhập với tư cách: ' : 'Logged in as: '}
@@ -611,6 +605,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         )}
 
         {/* Tab Controls - Mobile Grid (no horizontal scroll needed) */}
+        {!focusedMode && (
         <div className="sm:hidden p-3 bg-stone-50 border-b border-stone-200 space-y-2 flex-shrink-0">
           <div className="grid grid-cols-2 gap-1.5">
             <button
@@ -667,6 +662,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <Users className="w-3.5 h-3.5 text-amber-500" />
               <span className="truncate">{t('tabAdminAccounts')}</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('prayer-requests')}
+              className={`px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'prayer-requests'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
+              }`}
+            >
+              <HeartHandshake className="w-3.5 h-3.5 text-amber-500" />
+              <span className="truncate">{language === 'vi' ? 'Cầu Nguyện' : 'Prayers'}</span>
+            </button>
           </div>
 
           {onOpenSpotlightEditor && (
@@ -680,8 +688,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           )}
         </div>
+        )}
 
         {/* Tab Controls - Desktop Horizontal Bar */}
+        {!focusedMode && (
         <div className="hidden sm:flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 flex-shrink-0">
           <button
             onClick={() => {
@@ -746,6 +756,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           )}
         </div>
+        )}
 
         {/* Content Body */}
         <div className="p-4 sm:p-6 overflow-y-auto overflow-x-hidden flex-1 w-full max-w-full min-w-0">
@@ -825,32 +836,81 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </div>
                     </div>
 
-                    <div className="w-full min-w-0">
-                      <label className="block text-xs font-bold text-stone-700 mb-1">
-                        {language === 'vi' ? 'Tên Sự Kiện / Lễ Nhóm *' : 'Event Title *'}
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Sunday Worship Celebration"
-                        value={eventTitle}
-                        onChange={(e) => setEventTitle(e.target.value)}
-                        className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400"
-                      />
+                    {editingEventId && editingEventAudit && (
+                      <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1">
+                        {editingEventAudit.createdBy && (
+                          <span>
+                            <strong>{language === 'vi' ? 'Người tạo:' : 'Created by:'}</strong> {editingEventAudit.createdBy}
+                            {editingEventAudit.createdAt ? ` (${new Date(editingEventAudit.createdAt).toLocaleString()})` : ''}
+                          </span>
+                        )}
+                        {editingEventAudit.updatedBy && (
+                          <span>
+                            <strong>{language === 'vi' ? 'Sửa lần cuối:' : 'Last modified by:'}</strong> {editingEventAudit.updatedBy}
+                            {editingEventAudit.updatedAt ? ` (${new Date(editingEventAudit.updatedAt).toLocaleString()})` : ''}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Tên Sự Kiện (Tiếng Việt) *' : 'Event Title (Vietnamese) *'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Ví dụ: Lễ Thờ Phượng Chúa Nhật"
+                          value={eventTitleVi}
+                          onChange={(e) => setEventTitleVi(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400"
+                        />
+                      </div>
+
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Tên Sự Kiện (Tiếng Anh) *' : 'Event Title (English) *'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Sunday Worship Celebration"
+                          value={eventTitleEn}
+                          onChange={(e) => setEventTitleEn(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400"
+                        />
+                      </div>
                     </div>
 
-                    <div className="w-full min-w-0">
-                      <label className="block text-xs font-bold text-stone-700 mb-1">
-                        {language === 'vi' ? 'Mô Tả Chi Tiết *' : 'Description *'}
-                      </label>
-                      <textarea
-                        rows={3}
-                        required
-                        placeholder={language === 'vi' ? 'Chủ đề bài giảng, diễn giả, thông tin sinh hoạt...' : 'Event details, sermon theme, speaker...'}
-                        value={eventDescription}
-                        onChange={(e) => setEventDescription(e.target.value)}
-                        className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Mô Tả Chi Tiết (Tiếng Việt) *' : 'Description (Vietnamese) *'}
+                        </label>
+                        <textarea
+                          rows={3}
+                          required
+                          placeholder="Chủ đề bài giảng, diễn giả, thông tin sinh hoạt..."
+                          value={eventDescriptionVi}
+                          onChange={(e) => setEventDescriptionVi(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
+                        />
+                      </div>
+
+                      <div className="w-full min-w-0">
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          {language === 'vi' ? 'Mô Tả Chi Tiết (Tiếng Anh) *' : 'Description (English) *'}
+                        </label>
+                        <textarea
+                          rows={3}
+                          required
+                          placeholder="Event details, sermon theme, speaker..."
+                          value={eventDescriptionEn}
+                          onChange={(e) => setEventDescriptionEn(e.target.value)}
+                          className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none"
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
@@ -1030,7 +1090,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         {/* Title, Time, Location */}
                         <div className="min-w-0 flex-1 space-y-1">
                           <h4 className="text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2">
-                            {eventTitle || (language === 'vi' ? 'Tiêu Đề Sự Kiện (Đang nhập...)' : 'Event Title (Type in form...)')}
+                            {(language === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || (language === 'vi' ? 'Tiêu Đề Sự Kiện (Đang nhập...)' : 'Event Title (Type in form...)')}
                           </h4>
 
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-600">
@@ -1051,7 +1111,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       {/* Description Preview */}
                       <p className="text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 line-clamp-3">
-                        {eventDescription || (language === 'vi' ? 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...' : 'Event details and description will appear here as you type in the form above...')}
+                        {(language === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || (language === 'vi' ? 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...' : 'Event details and description will appear here as you type in the form above...')}
                       </p>
                     </div>
                   </div>
@@ -1125,8 +1185,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="flex items-center gap-2">
                     <h3 className="font-serif font-bold text-stone-900 text-sm">
                       {editingVerseId
-                        ? (language === 'vi' ? 'Sửa Lời Chúa & Suy Gẫm' : 'Edit Scripture & Devotional')
-                        : (language === 'vi' ? 'Đăng Lời Chúa & Suy Gẫm Hôm Nay' : 'Post Scripture & Devotional')}
+                        ? (language === 'vi' ? 'Sửa Lời Chúa Hôm Nay' : 'Edit Daily Scripture')
+                        : (language === 'vi' ? 'Đăng Lời Chúa Hôm Nay' : 'Post Daily Scripture')}
                     </h3>
                     {editingVerseId && (
                       <button
@@ -1138,76 +1198,155 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={handleFetchScripture}
-                      disabled={generatingAi}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-medium transition-colors active:scale-95 shadow-2xs"
-                    >
-                      <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{generatingAi ? (language === 'vi' ? 'Đang tải...' : 'Fetching...') : (language === 'vi' ? 'Lấy Câu Kinh Thánh' : 'Fetch Scripture')}</span>
-                    </button>
-                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
-                  <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Ngày *' : 'Date *'}</label>
-                    <input
-                      type="date"
-                      required
-                      value={verseDate}
-                      onChange={(e) => setVerseDate(e.target.value)}
-                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
-                    />
+                {editingVerseId && editingVerseAudit && (
+                  <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1">
+                    {editingVerseAudit.createdBy && (
+                      <span>
+                        <strong>{language === 'vi' ? 'Người tạo:' : 'Created by:'}</strong> {editingVerseAudit.createdBy}
+                        {editingVerseAudit.createdAt ? ` (${new Date(editingVerseAudit.createdAt).toLocaleString()})` : ''}
+                      </span>
+                    )}
+                    {editingVerseAudit.updatedBy && (
+                      <span>
+                        <strong>{language === 'vi' ? 'Sửa lần cuối:' : 'Last modified by:'}</strong> {editingVerseAudit.updatedBy}
+                        {editingVerseAudit.updatedAt ? ` (${new Date(editingVerseAudit.updatedAt).toLocaleString()})` : ''}
+                      </span>
+                    )}
                   </div>
-                  <div className="sm:col-span-2 w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh *' : 'Scripture Reference *'}</label>
+                )}
+
+                <div className="w-full sm:w-1/3 min-w-0">
+                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Ngày *' : 'Date *'}</label>
+                  <input
+                    type="date"
+                    required
+                    value={verseDate}
+                    onChange={(e) => setVerseDate(e.target.value)}
+                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh (Tiếng Việt) *' : 'Scripture Reference (Vietnamese) *'}</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. 2 Chronicles 7:14 / 2 Sử Ký 7:14"
-                      value={verseReference}
-                      onChange={(e) => setVerseReference(e.target.value)}
+                      placeholder="Ví dụ: Giăng 3:16"
+                      value={verseReferenceVi}
+                      onChange={(e) => setVerseReferenceVi(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh (Tiếng Anh) *' : 'Scripture Reference (English) *'}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. John 3:16"
+                      value={verseReferenceEn}
+                      onChange={(e) => setVerseReferenceEn(e.target.value)}
                       className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                     />
                   </div>
                 </div>
 
-                <div className="w-full min-w-0">
-                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa *' : 'Scripture Text *'}</label>
-                  <textarea
-                    rows={2}
-                    required
-                    placeholder={language === 'vi' ? 'Nhập câu gốc Lời Chúa...' : 'Enter the scripture verse text...'}
-                    value={verseText}
-                    onChange={(e) => setVerseText(e.target.value)}
-                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Bản Dịch Kinh Thánh (Tiếng Việt) *' : 'Bible Version (Vietnamese) *'}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ví dụ: RVV11 hoặc Truyền Thống"
+                      value={verseTranslationVi}
+                      onChange={(e) => setVerseTranslationVi(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Bản Dịch Kinh Thánh (Tiếng Anh) *' : 'Bible Version (English) *'}</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. NIV, ESV, KJV"
+                      value={verseTranslationEn}
+                      onChange={(e) => setVerseTranslationEn(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div className="w-full min-w-0">
-                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm Mục Vụ *' : 'Pastoral Reflection *'}</label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder={language === 'vi' ? 'Nội dung suy gẫm và khích lệ đức tin...' : 'Thoughtful pastoral reflection...'}
-                    value={verseReflection}
-                    onChange={(e) => setVerseReflection(e.target.value)}
-                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa (Tiếng Việt) *' : 'Scripture Text (Vietnamese) *'}</label>
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="Nhập câu gốc Lời Chúa bằng tiếng Việt..."
+                      value={verseTextVi}
+                      onChange={(e) => setVerseTextVi(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa (Tiếng Anh) *' : 'Scripture Text (English) *'}</label>
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="Enter the scripture verse text in English..."
+                      value={verseTextEn}
+                      onChange={(e) => setVerseTextEn(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="w-full min-w-0">
-                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện' : 'Prayer (Optional)'}</label>
-                  <input
-                    type="text"
-                    placeholder="Lạy Chúa, xin dẫn dắt từng bước đi của chúng con..."
-                    value={versePrayer}
-                    onChange={(e) => setVersePrayer(e.target.value)}
-                    className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm (Tiếng Việt)' : 'Reflection (Vietnamese, Optional)'}</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Nội dung suy gẫm..."
+                      value={verseReflectionVi}
+                      onChange={(e) => setVerseReflectionVi(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm (Tiếng Anh)' : 'Reflection (English, Optional)'}</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Pastoral reflection in English..."
+                      value={verseReflectionEn}
+                      onChange={(e) => setVerseReflectionEn(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện (Tiếng Việt)' : 'Prayer (Vietnamese, Optional)'}</label>
+                    <input
+                      type="text"
+                      placeholder="Lạy Chúa, xin dẫn dắt chúng con..."
+                      value={versePrayerVi}
+                      onChange={(e) => setVersePrayerVi(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện (Tiếng Anh)' : 'Prayer (English, Optional)'}</label>
+                    <input
+                      type="text"
+                      placeholder="Lord, guide our steps..."
+                      value={versePrayerEn}
+                      onChange={(e) => setVersePrayerEn(e.target.value)}
+                      className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
+                    />
+                  </div>
                 </div>
 
                 <div className="text-right pt-2 border-t border-stone-200">
@@ -1442,8 +1581,87 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </form>
             </div>
           )}
+
+          {activeTab === 'prayer-requests' && (
+            <div className="space-y-4 max-w-2xl mx-auto w-full min-w-0">
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif font-bold text-stone-900 text-base">
+                  {language === 'vi' ? 'Danh Sách Lời Cầu Nguyện' : 'Prayer Requests'} ({prayerList.length})
+                </h3>
+                <button
+                  type="button"
+                  onClick={loadPrayerRequests}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold inline-flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>{language === 'vi' ? 'Làm mới' : 'Refresh'}</span>
+                </button>
+              </div>
+
+              {prayerList.length === 0 ? (
+                <div className="p-8 text-center bg-stone-50 rounded-2xl border border-stone-200 text-xs text-stone-500">
+                  {language === 'vi' ? 'Chưa có lời cầu nguyện nào.' : 'No prayer requests submitted yet.'}
+                </div>
+              ) : (
+                <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
+                  {prayerList.map((p) => {
+                    const isExpanded = expandedPrayerIds.has(p.id);
+                    const firstSentenceMatch = p.request.match(/^.*?[.!?](?:\s|$)/);
+                    const firstSentence = firstSentenceMatch ? firstSentenceMatch[0].trim() : p.request.slice(0, 100);
+                    const isLong = p.request.length > firstSentence.length + 3;
+
+                    return (
+                      <div key={p.id} className="p-4 flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-serif font-bold text-stone-900 text-sm">
+                              {p.requesterName || (language === 'vi' ? 'Ẩn danh' : 'Anonymous')}
+                            </span>
+                            {p.createdAt && (
+                              <span className="text-xs text-stone-500">
+                                • {new Date(p.createdAt).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs sm:text-sm text-stone-700 whitespace-pre-line leading-relaxed">
+                            {isExpanded || !isLong ? p.request : `${firstSentence}...`}
+                          </p>
+                          {isLong && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedPrayerIds((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(p.id)) next.delete(p.id);
+                                  else next.add(p.id);
+                                  return next;
+                                })
+                              }
+                              className="text-xs font-bold text-amber-800 hover:text-amber-950 underline"
+                            >
+                              {isExpanded
+                                ? (language === 'vi' ? 'Thu gọn' : 'Show less')
+                                : (language === 'vi' ? 'Xem thêm' : 'Read more')}
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePrayer(p.id)}
+                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors flex-shrink-0"
+                          title={language === 'vi' ? 'Xóa' : 'Delete'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

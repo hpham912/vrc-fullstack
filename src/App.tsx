@@ -13,9 +13,10 @@ import { AdminPortal } from './vrc-frontend/components/AdminPortal.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/AdminLoginModal.tsx';
 import { SpotlightBannerModal } from './vrc-frontend/components/SpotlightBannerModal.tsx';
 import { EditChurchInfoModal } from './vrc-frontend/components/EditChurchInfoModal.tsx';
+import { PrayerRequestModal } from './vrc-frontend/components/PrayerRequestModal.tsx';
 import { CrossIcon } from './vrc-frontend/components/CrossIcon.tsx';
 import { ChurchEvent, DailyVerse, Announcement, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, HeartHandshake } from 'lucide-react';
 import { apiUrl } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 
@@ -25,6 +26,7 @@ function ChurchAppContent() {
 
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
+  const [prayerModalOpen, setPrayerModalOpen] = useState(false);
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
@@ -56,6 +58,7 @@ function ChurchAppContent() {
   const [spotlightModalOpen, setSpotlightModalOpen] = useState(false);
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
+  const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
 
@@ -119,10 +122,16 @@ function ChurchAppContent() {
     NotificationClient.requestPermission();
   }, []);
 
-  const openAdminWithTab = (tab = 'create-event', eventToEdit?: ChurchEvent | null, verseToEdit?: DailyVerse | null) => {
+  const openAdminWithTab = (
+    tab = 'create-event',
+    eventToEdit?: ChurchEvent | null,
+    verseToEdit?: DailyVerse | null,
+    focused = true
+  ) => {
     setAdminPortalTab(tab);
     setEditingEvent(eventToEdit || null);
     setEditingVerse(verseToEdit || null);
+    setAdminFocusedMode(focused);
     setAdminPortalOpen(true);
   };
 
@@ -132,7 +141,7 @@ function ChurchAppContent() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        openAdminPortal={() => openAdminWithTab('create-event')}
+        openAdminPortal={() => openAdminWithTab('admin-accounts', null, null, false)}
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
         onRequestNotificationPermission={() => NotificationClient.requestPermission()}
@@ -219,7 +228,7 @@ function ChurchAppContent() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-full overflow-x-hidden min-w-0 pt-14 sm:pt-20">
+      <main className="flex-1 w-full max-w-full overflow-x-clip min-w-0">
         {activeTab === 'home' && (
           <HomeDashboard
             events={events}
@@ -227,7 +236,7 @@ function ChurchAppContent() {
             spotlightConfig={spotlightConfig}
             churchInfo={churchInfo}
             onNavigateTab={setActiveTab}
-            onOpenAdminPortal={() => openAdminWithTab('create-event')}
+            onOpenAdminPortal={() => openAdminWithTab('create-event', null, null, true)}
             onOpenSpotlightEditor={() => setSpotlightModalOpen(true)}
             onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
             isAdmin={isAdmin}
@@ -238,6 +247,7 @@ function ChurchAppContent() {
           <EventsSection
             events={events}
             isAdmin={isAdmin}
+            onRefresh={loadData}
             onOpenAdminPortal={openAdminWithTab}
           />
         )}
@@ -291,7 +301,7 @@ function ChurchAppContent() {
       <AdminLoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
-        onLoginSuccess={() => openAdminWithTab('create-event')}
+        onLoginSuccess={() => setLoginModalOpen(false)}
       />
 
       {/* Spotlight / Holiday Hero Banner Customizer Modal */}
@@ -330,6 +340,7 @@ function ChurchAppContent() {
           announcements={announcements}
           churchInfo={churchInfo}
           initialTab={adminPortalTab}
+          focusedMode={adminFocusedMode}
           initialEvent={editingEvent}
           initialVerse={editingVerse}
           onClose={() => {
@@ -381,6 +392,21 @@ function ChurchAppContent() {
           <p>{t('footerPlatform')}</p>
         </div>
       </footer>
+
+      {/* Floating Prayer Request Button */}
+      <button
+        onClick={() => setPrayerModalOpen(true)}
+        className="fixed bottom-20 sm:bottom-6 right-4 z-40 px-3.5 py-2.5 rounded-full bg-stone-950 hover:bg-stone-800 text-white shadow-lg border border-amber-500/30 flex items-center gap-2 text-xs font-bold active:scale-95 transition-all"
+        title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}
+      >
+        <HeartHandshake className="w-4 h-4 text-amber-400" />
+        <span>{language === 'vi' ? 'Cầu Nguyện' : 'Prayer'}</span>
+      </button>
+
+      <PrayerRequestModal
+        isOpen={prayerModalOpen}
+        onClose={() => setPrayerModalOpen(false)}
+      />
     </div>
   );
 }

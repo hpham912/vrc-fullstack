@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { FirestoreChurchService } from '../services/firestoreService.ts';
-import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -155,38 +154,27 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     const rawDescription = isAuto ? '' : (description ? String(description).trim() : '');
     const rawLocationTag = locationTag ? String(locationTag).trim() : 'Tempe, Arizona';
 
-    const bilingual = await TranslationService.translateBilingualFields(
-      {
-        badge: rawBadge,
-        title: rawTitle,
-        subtitle: rawSubtitle,
-        description: rawDescription,
-        locationTag: rawLocationTag,
-      },
-      'church'
-    );
-
     const updated: SpotlightData = {
       mode: isAuto ? 'auto' : 'event',
       selectedEventId: isAuto ? null : Number(selectedEventId),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       theme: theme || 'thanksgiving',
       badge: rawBadge,
-      badgeVi: bilingual.badge?.vi || rawBadge,
-      badgeEn: bilingual.badge?.en || rawBadge,
+      badgeVi: rawBadge,
+      badgeEn: rawBadge,
       title: rawTitle,
-      titleVi: bilingual.title?.vi || rawTitle,
-      titleEn: bilingual.title?.en || rawTitle,
+      titleVi: rawTitle,
+      titleEn: rawTitle,
       subtitle: rawSubtitle,
-      subtitleVi: bilingual.subtitle?.vi || rawSubtitle,
-      subtitleEn: bilingual.subtitle?.en || rawSubtitle,
+      subtitleVi: rawSubtitle,
+      subtitleEn: rawSubtitle,
       description: rawDescription,
-      descriptionVi: bilingual.description?.vi || rawDescription,
-      descriptionEn: bilingual.description?.en || rawDescription,
+      descriptionVi: rawDescription,
+      descriptionEn: rawDescription,
       dateTag: isAuto ? '' : (dateTag ? String(dateTag).trim() : ''),
       locationTag: rawLocationTag,
-      locationTagVi: bilingual.locationTag?.vi || rawLocationTag,
-      locationTagEn: bilingual.locationTag?.en || rawLocationTag,
+      locationTagVi: rawLocationTag,
+      locationTagEn: rawLocationTag,
       customAddress: cleanAddress,
       primaryBtnText: primaryBtnText ? String(primaryBtnText).trim() : 'Xem Tất Cả Sự Kiện',
       primaryBtnAction: primaryBtnAction || 'events',

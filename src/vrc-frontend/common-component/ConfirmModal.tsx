@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.tsx';
+import { Modal } from './Modal.tsx';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -26,42 +27,29 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onCancel,
 }) => {
   const { language } = useLanguage();
-  if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs"
-      onClick={onCancel}
-    >
-      <div
-        className="bg-white rounded-3xl border border-stone-200 max-w-sm w-full p-6 shadow-2xl space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div
-              className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                isDanger ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
-              }`}
-            >
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <h3 className="text-base sm:text-lg font-serif font-bold text-stone-950 leading-snug">
-              {title}
-            </h3>
-          </div>
-          <button
-            onClick={onCancel}
-            className="p-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500"
-          >
-            <X className="w-4 h-4" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onCancel}
+      maxWidthClass="max-w-sm"
+      icon={
+        <div
+          className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            isDanger ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4" />
         </div>
-
+      }
+      title={title}
+    >
+      <div className="p-6 space-y-4">
         <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">{message}</p>
 
         <div className="pt-2 flex items-center justify-end gap-2">
           <button
+            type="button"
             onClick={onCancel}
             disabled={loading}
             className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors"
@@ -69,6 +57,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             {cancelText || (language === 'vi' ? 'Hủy' : 'Cancel')}
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             disabled={loading}
             className={`px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50 ${
@@ -85,6 +74,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

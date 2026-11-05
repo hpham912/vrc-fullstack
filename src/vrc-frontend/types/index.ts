@@ -20,7 +20,10 @@ export interface ChurchEvent {
   maxCapacity?: number | null;
   organizerName?: string | null;
   organizerEmail?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface DailyVerse {
@@ -33,6 +36,8 @@ export interface DailyVerse {
   referenceVi?: string | null;
   referenceEn?: string | null;
   translation: string;
+  translationVi?: string | null;
+  translationEn?: string | null;
   reflection: string;
   reflectionVi?: string | null;
   reflectionEn?: string | null;
@@ -40,7 +45,10 @@ export interface DailyVerse {
   prayerVi?: string | null;
   prayerEn?: string | null;
   theme?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface Announcement {

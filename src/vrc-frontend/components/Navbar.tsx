@@ -42,7 +42,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [isLargeFont, setIsLargeFont] = useState(() => {
     try {
-      return localStorage.getItem('vrc_large_font') === '1';
+      const enabled = localStorage.getItem('vrc_large_font') === '1';
+      if (enabled) {
+        document.documentElement.classList.add('large-font');
+        document.documentElement.style.fontSize = '18.5px';
+      }
+      return enabled;
     } catch {
       return false;
     }
@@ -214,10 +219,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={() => {
                         const next = !isLargeFont;
                         setIsLargeFont(next);
-                        document.documentElement.style.fontSize = next ? '18.5px' : '16px';
+                        document.documentElement.classList.toggle('large-font', next);
+                        document.documentElement.style.fontSize = next ? '18.5px' : '';
                         try {
                           localStorage.setItem('vrc_large_font', next ? '1' : '0');
                         } catch {}
+                        setShowSettings(false);
                       }}
                       className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold"
                     >

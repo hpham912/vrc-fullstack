@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@layer base {
+  html {
+    font-size: 16.5px;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    font-weight: 500;
+    overflow-x: clip;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html.large-font body {
+    font-weight: 600;
+  }
+
+  html.large-font h1,
+  html.large-font h2,
+  html.large-font h3,
+  html.large-font h4,
+  html.large-font button,
+  html.large-font label {
+    font-weight: 700;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 17px;
+    }
+  }
+
+  button {
+    white-space: nowrap;
+  }
+
+  button,
+  a,
+  [role="button"],
+  .cursor-pointer {
+    -webkit-tap-highlight-color: rgba(217, 119, 6, 0.16);
+  }
+
+  @media (max-width: 639px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}

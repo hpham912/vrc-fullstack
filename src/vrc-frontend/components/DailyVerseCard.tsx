@@ -18,7 +18,7 @@ import {
   Plus,
   Sparkles,
 } from 'lucide-react';
-import { ConfirmModal } from './ConfirmModal.tsx';
+import { ConfirmModal } from '../common-component/ConfirmModal.tsx';
 import { apiUrl } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
@@ -321,8 +321,8 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             <span>{verseDateFormatted}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-[11px]">
-              {verse.translation}
+            <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-xs">
+              {pick(verse.translationVi, verse.translationEn, verse.translation)}
             </span>
             {isAdmin && onOpenAdminPortal && (
               <button

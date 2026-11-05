@@ -25,7 +25,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../utils/calendar.ts';
-import { ConfirmModal } from './ConfirmModal.tsx';
+import { ConfirmModal } from '../common-component/ConfirmModal.tsx';
+import { Modal } from '../common-component/Modal.tsx';
 import { apiUrl } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
@@ -204,76 +205,76 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
     const lower = cat.toLowerCase();
     if (lower.includes('youth') || lower.includes('giới trẻ') || lower.includes('thanh niên')) {
       return {
-        cardBg: 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/35 border-emerald-200/90 shadow-xs hover:border-emerald-300',
-        dateBox: 'bg-emerald-100/90 text-emerald-950 border-emerald-200/90',
+        cardBg: 'bg-gradient-to-br from-emerald-100/85 via-emerald-50/70 to-teal-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+        dateBox: 'bg-white/95 text-emerald-950 border border-stone-900/10',
         monthText: 'text-emerald-800',
-        badge: 'bg-emerald-100/80 text-emerald-900 border-emerald-200/80',
+        badge: 'bg-emerald-700 text-white',
         icon: Users,
-        iconColor: 'text-emerald-600',
+        iconColor: 'text-emerald-700',
         actionBtn: 'bg-emerald-600 hover:bg-emerald-700 text-white',
       };
     }
     if (lower.includes('worship') || lower.includes('thờ phượng')) {
       return {
-        cardBg: 'bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/35 border-indigo-200/90 shadow-xs hover:border-indigo-300',
-        dateBox: 'bg-indigo-100/90 text-indigo-950 border-indigo-200/90',
+        cardBg: 'bg-gradient-to-br from-indigo-100/85 via-indigo-50/70 to-violet-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+        dateBox: 'bg-white/95 text-indigo-950 border border-stone-900/10',
         monthText: 'text-indigo-800',
-        badge: 'bg-indigo-100/80 text-indigo-900 border-indigo-200/80',
+        badge: 'bg-indigo-700 text-white',
         icon: Flame,
-        iconColor: 'text-indigo-600',
+        iconColor: 'text-indigo-700',
         actionBtn: 'bg-indigo-600 hover:bg-indigo-700 text-white',
       };
     }
     if (lower.includes('bible') || lower.includes('kinh thánh')) {
       return {
-        cardBg: 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/35 border-amber-200/90 shadow-xs hover:border-amber-300',
-        dateBox: 'bg-amber-100/90 text-amber-950 border-amber-200/90',
+        cardBg: 'bg-gradient-to-br from-amber-100/85 via-amber-50/70 to-orange-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+        dateBox: 'bg-white/95 text-amber-950 border border-stone-900/10',
         monthText: 'text-amber-800',
-        badge: 'bg-amber-100/80 text-amber-900 border-amber-200/80',
+        badge: 'bg-amber-700 text-white',
         icon: BookOpen,
-        iconColor: 'text-amber-600',
+        iconColor: 'text-amber-700',
         actionBtn: 'bg-amber-600 hover:bg-amber-700 text-white',
       };
     }
     if (lower.includes('prayer') || lower.includes('cầu nguyện')) {
       return {
-        cardBg: 'bg-gradient-to-br from-sky-50/90 via-white to-sky-50/35 border-sky-200/90 shadow-xs hover:border-sky-300',
-        dateBox: 'bg-sky-100/90 text-sky-950 border-sky-200/90',
+        cardBg: 'bg-gradient-to-br from-sky-100/85 via-sky-50/70 to-cyan-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+        dateBox: 'bg-white/95 text-sky-950 border border-stone-900/10',
         monthText: 'text-sky-800',
-        badge: 'bg-sky-100/80 text-sky-900 border-sky-200/80',
+        badge: 'bg-sky-700 text-white',
         icon: Sparkles,
-        iconColor: 'text-sky-600',
+        iconColor: 'text-sky-700',
         actionBtn: 'bg-sky-600 hover:bg-sky-700 text-white',
       };
     }
     if (lower.includes('fellowship') || lower.includes('thông công')) {
       return {
-        cardBg: 'bg-gradient-to-br from-rose-50/90 via-white to-rose-50/35 border-rose-200/90 shadow-xs hover:border-rose-300',
-        dateBox: 'bg-rose-100/90 text-rose-950 border-rose-200/90',
+        cardBg: 'bg-gradient-to-br from-rose-100/85 via-rose-50/70 to-pink-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+        dateBox: 'bg-white/95 text-rose-950 border border-stone-900/10',
         monthText: 'text-rose-800',
-        badge: 'bg-rose-100/80 text-rose-900 border-rose-200/80',
+        badge: 'bg-rose-700 text-white',
         icon: Heart,
-        iconColor: 'text-rose-600',
+        iconColor: 'text-rose-700',
         actionBtn: 'bg-rose-600 hover:bg-rose-700 text-white',
       };
     }
     return {
-      cardBg: 'bg-gradient-to-br from-purple-50/90 via-white to-purple-50/35 border-purple-200/90 shadow-xs hover:border-purple-300',
-      dateBox: 'bg-purple-100/90 text-purple-950 border-purple-200/90',
+      cardBg: 'bg-gradient-to-br from-purple-100/85 via-purple-50/70 to-fuchsia-100/75 border border-stone-900/10 shadow-sm hover:shadow-md',
+      dateBox: 'bg-white/95 text-purple-950 border border-stone-900/10',
       monthText: 'text-purple-800',
-      badge: 'bg-purple-100/80 text-purple-900 border-purple-200/80',
+      badge: 'bg-purple-700 text-white',
       icon: Star,
-      iconColor: 'text-purple-600',
+      iconColor: 'text-purple-700',
       actionBtn: 'bg-purple-600 hover:bg-purple-700 text-white',
     };
   };
 
   return (
-    <section className="py-4 sm:py-8 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 max-w-full overflow-x-hidden box-border">
+    <section className="py-4 sm:py-8 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 max-w-full overflow-x-clip box-border">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 min-w-0 w-full">
         <div className="min-w-0">
-          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-700 block">
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block">
             Tempe, Arizona
           </span>
           <h2 className="text-xl sm:text-3xl font-serif font-bold text-stone-950 tracking-tight truncate">
@@ -346,32 +347,36 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             return (
               <div
                 key={evt.id}
-                className={`rounded-2xl border-2 p-3 sm:p-3.5 transition-all duration-200 space-y-2 w-full min-w-0 max-w-full overflow-hidden box-border shadow-xs hover:shadow-md ${theme.cardBg}`}
+                onClick={() => setSelectedDetailEvent(evt)}
+                className={`rounded-2xl p-3.5 sm:p-4 transition-all duration-150 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none ${theme.cardBg}`}
               >
                 {/* Top Row: Category Pill + Featured Pill + Date */}
                 <div className="flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full">
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     <span
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${theme.badge}`}
+                      className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${theme.badge}`}
                     >
                       <CategoryIcon className="w-3 h-3" />
                       <span>{getCategoryLabel(evt.category)}</span>
                     </span>
                     {evt.isFeatured && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/90 border border-amber-400 px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full">
                         {t('featuredBadge')}
                       </span>
                     )}
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-semibold text-stone-500 whitespace-nowrap">
+                    <span className="text-xs font-semibold text-stone-700 whitespace-nowrap">
                       {weekday}, {evt.date}
                     </span>
                     {isAdmin && onOpenAdminPortal && (
                       <button
-                        onClick={() => onOpenAdminPortal('create-event', evt)}
-                        className="p-1 rounded-lg bg-white/80 hover:bg-white text-stone-700 border border-stone-200/80 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenAdminPortal('create-event', evt);
+                        }}
+                        className="p-1 rounded-lg bg-white/80 hover:bg-white text-stone-700 transition-colors"
                         title={language === 'vi' ? 'Sửa' : 'Edit'}
                       >
                         <Pencil className="w-3 h-3 text-amber-700" />
@@ -379,8 +384,11 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     )}
                     {isAdmin && (
                       <button
-                        onClick={() => setDeleteTargetEvent(evt)}
-                        className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTargetEvent(evt);
+                        }}
+                        className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
                         title={language === 'vi' ? 'Xóa' : 'Delete'}
                       >
                         <Trash2 className="w-3 h-3" />
@@ -392,8 +400,8 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 {/* Main Content Area */}
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full max-w-full">
                   {/* Compact Calendar Date Card */}
-                  <div className={`flex-shrink-0 w-11 sm:w-12 text-center rounded-xl border p-1.5 shadow-2xs ${theme.dateBox}`}>
-                    <span className={`block text-[9px] font-bold uppercase tracking-wider ${theme.monthText}`}>
+                  <div className={`flex-shrink-0 w-12 text-center rounded-xl p-1.5 shadow-2xs ${theme.dateBox}`}>
+                    <span className={`block text-[10px] font-bold uppercase tracking-wider ${theme.monthText}`}>
                       {monthShort}
                     </span>
                     <span className="block text-base sm:text-lg font-serif font-bold text-stone-950 leading-tight">
@@ -403,41 +411,38 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                   {/* Title & Timing */}
                   <div className="flex-1 min-w-0 space-y-0.5 max-w-full">
-                    <h3 className="text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug break-words">
+                    <h3 className="text-base sm:text-lg font-serif font-bold text-stone-950 leading-snug break-words">
                       {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                     </h3>
 
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-800">
-                      <Clock className="w-3 h-3 text-amber-700 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800">
+                      <Clock className="w-3.5 h-3.5 text-amber-800 flex-shrink-0" />
                       <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Actions: Compact Calendar buttons + Details button on one line */}
-                <div className="pt-2 border-t border-stone-200/60 flex items-center justify-end gap-1.5 min-w-0 w-full">
+                {/* Footer Actions: Compact Calendar buttons on one line */}
+                <div className="pt-2 border-t border-stone-900/10 flex items-center justify-end gap-2 min-w-0 w-full">
                   <a
                     href={getGoogleCalendarUrl(evt)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 active:scale-95 text-stone-800 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-white/95 hover:bg-white active:scale-95 text-stone-900 rounded-lg text-xs font-semibold transition-all shadow-2xs whitespace-nowrap"
                   >
-                    <CalendarPlus className="w-3 h-3 text-amber-700" />
+                    <CalendarPlus className="w-3.5 h-3.5 text-amber-800" />
                     <span>GCal</span>
                   </a>
                   <button
-                    onClick={() => downloadIcsFile(evt)}
-                    className="inline-flex items-center justify-center gap-1 px-2 py-1 text-stone-600 hover:text-stone-900 bg-white/70 hover:bg-white active:scale-95 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadIcsFile(evt);
+                    }}
+                    className="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-stone-800 hover:text-stone-950 bg-white/90 hover:bg-white active:scale-95 rounded-lg text-xs font-semibold transition-all shadow-2xs whitespace-nowrap"
                   >
-                    <Download className="w-3 h-3 text-stone-500" />
+                    <Download className="w-3.5 h-3.5 text-stone-700" />
                     <span>iCal</span>
-                  </button>
-                  <button
-                    onClick={() => setSelectedDetailEvent(evt)}
-                    className="inline-flex items-center justify-center gap-1 px-2 py-1 bg-white hover:bg-stone-50 active:scale-95 text-stone-800 border border-stone-200 rounded-lg text-[11px] font-semibold transition-all shadow-2xs whitespace-nowrap"
-                  >
-                    <Eye className="w-3 h-3 text-amber-700" />
-                    <span>{language === 'vi' ? 'Chi Tiết' : 'Details'}</span>
                   </button>
                 </div>
               </div>
@@ -544,34 +549,21 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         </div>
       )}
       {/* Event Details Popup Modal */}
-      {selectedDetailEvent && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs"
-          onClick={() => setSelectedDetailEvent(null)}
-        >
-          <div
-            className="bg-white rounded-3xl border border-stone-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900">
-                  {selectedDetailEvent.category}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-950 leading-snug">
-                  {language === 'vi'
-                    ? (selectedDetailEvent.titleVi || tr(selectedDetailEvent.title))
-                    : (selectedDetailEvent.titleEn || tr(selectedDetailEvent.title))}
-                </h3>
-              </div>
-              <button
-                onClick={() => setSelectedDetailEvent(null)}
-                className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 text-xs font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
+      <Modal
+        isOpen={Boolean(selectedDetailEvent)}
+        onClose={() => setSelectedDetailEvent(null)}
+        subtitle={selectedDetailEvent ? getCategoryLabel(selectedDetailEvent.category) : undefined}
+        title={
+          selectedDetailEvent
+            ? language === 'vi'
+              ? (selectedDetailEvent.titleVi || selectedDetailEvent.titleEn || selectedDetailEvent.title)
+              : (selectedDetailEvent.titleEn || selectedDetailEvent.titleVi || selectedDetailEvent.title)
+            : undefined
+        }
+        maxWidthClass="max-w-md"
+      >
+        {selectedDetailEvent && (
+          <div className="p-6 space-y-4">
             <div className="space-y-2.5 text-xs sm:text-sm text-stone-700 bg-stone-50 p-4 rounded-2xl border border-stone-200/70">
               <div className="flex items-center gap-2 font-semibold text-stone-900">
                 <Calendar className="w-4 h-4 text-amber-700 flex-shrink-0" />
@@ -589,8 +581,8 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 <div>
                   <p className="font-semibold text-stone-900">
                     {language === 'vi'
-                      ? (selectedDetailEvent.locationVi || tr(selectedDetailEvent.location))
-                      : (selectedDetailEvent.locationEn || tr(selectedDetailEvent.location))}
+                      ? (selectedDetailEvent.locationVi || selectedDetailEvent.locationEn || selectedDetailEvent.location)
+                      : (selectedDetailEvent.locationEn || selectedDetailEvent.locationVi || selectedDetailEvent.location)}
                   </p>
                   {selectedDetailEvent.address && (
                     <p className="text-xs text-stone-500">{selectedDetailEvent.address}</p>
@@ -605,40 +597,33 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
               </h4>
               <p className="text-stone-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
                 {language === 'vi'
-                  ? (selectedDetailEvent.descriptionVi || tr(selectedDetailEvent.description))
-                  : (selectedDetailEvent.descriptionEn || tr(selectedDetailEvent.description))}
+                  ? (selectedDetailEvent.descriptionVi || selectedDetailEvent.descriptionEn || selectedDetailEvent.description)
+                  : (selectedDetailEvent.descriptionEn || selectedDetailEvent.descriptionVi || selectedDetailEvent.description)}
               </p>
             </div>
 
-            <div className="pt-3 border-t border-stone-200 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <a
-                  href={getGoogleCalendarUrl(selectedDetailEvent)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-all"
-                >
-                  <CalendarPlus className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{t('addToGoogle')}</span>
-                </a>
-                <button
-                  onClick={() => downloadIcsFile(selectedDetailEvent)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-semibold transition-all"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Apple</span>
-                </button>
-              </div>
-              <button
-                onClick={() => setSelectedDetailEvent(null)}
-                className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900"
+            {/* Footer Actions: Clean 2-column calendar buttons on one line */}
+            <div className="pt-3 border-t border-stone-200 grid grid-cols-2 gap-2.5">
+              <a
+                href={getGoogleCalendarUrl(selectedDetailEvent)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-stone-950 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-all"
               >
-                {language === 'vi' ? 'Đóng' : 'Close'}
+                <CalendarPlus className="w-3.5 h-3.5 text-amber-400" />
+                <span>Google Calendar</span>
+              </a>
+              <button
+                onClick={() => downloadIcsFile(selectedDetailEvent)}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold transition-all"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Apple / iCal</span>
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
       {/* Common Confirmation Modal for Delete */}
       <ConfirmModal
         isOpen={Boolean(deleteTargetEvent)}

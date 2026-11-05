@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import { createApp } from './src/vrc-backend/app.ts';
+import { initializeDatabase } from './src/vrc-db/init.ts';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const app = createApp();
 const PORT = Number(process.env.PORT) || 3000;
 
 async function startServer() {
+  await initializeDatabase();
   if (process.env.NODE_ENV === 'production') {
     const distPath = __dirname.endsWith('dist')
       ? __dirname

@@ -4,7 +4,6 @@ import { events, eventRsvps } from '../../vrc-db/schema.ts';
 import { eq, desc, asc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
-import { TranslationService } from '../services/translationService.ts';
 
 const router = Router();
 
@@ -121,7 +120,11 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const {
       title,
+      titleVi,
+      titleEn,
       description,
+      descriptionVi,
+      descriptionEn,
       category,
       date,
       startTime,
@@ -135,35 +138,31 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       organizerEmail,
     } = req.body;
 
-    if (!title || !description || !date || !startTime || !location) {
-      return res.status(400).json({ error: 'Title, description, date, start time, and location are required.' });
-    }
+    const finalTitleEn = String(titleEn || title || titleVi || '').trim();
+    const finalTitleVi = String(titleVi || title || titleEn || '').trim();
+    const finalDescEn = String(descriptionEn || description || descriptionVi || '').trim();
+    const finalDescVi = String(descriptionVi || description || descriptionEn || '').trim();
 
-    const bilingual = await TranslationService.translateBilingualFields(
-      {
-        title: String(title).trim(),
-        description: String(description).trim(),
-        location: String(location).trim(),
-      },
-      'event'
-    );
+    if (!finalTitleEn || !finalTitleVi || !finalDescEn || !finalDescVi || !date || !startTime || !location) {
+      return res.status(400).json({ error: 'Vietnamese and English titles, descriptions, date, start time, and location are required.' });
+    }
 
     const newEvent = await db
       .insert(events)
       .values({
-        title: String(title).trim(),
-        titleVi: bilingual.title?.vi || String(title).trim(),
-        titleEn: bilingual.title?.en || String(title).trim(),
-        description: String(description).trim(),
-        descriptionVi: bilingual.description?.vi || String(description).trim(),
-        descriptionEn: bilingual.description?.en || String(description).trim(),
+        title: finalTitleEn,
+        titleVi: finalTitleVi,
+        titleEn: finalTitleEn,
+        description: finalDescEn,
+        descriptionVi: finalDescVi,
+        descriptionEn: finalDescEn,
         category: category || 'Worship',
         date,
         startTime,
         endTime: endTime || null,
         location: String(location).trim(),
-        locationVi: bilingual.location?.vi || String(location).trim(),
-        locationEn: bilingual.location?.en || String(location).trim(),
+        locationVi: String(location).trim(),
+        locationEn: String(location).trim(),
         address: address ? String(address).trim() : 'Tempe, Arizona',
         imageUrl: imageUrl || null,
         isFeatured: Boolean(isFeatured),
@@ -171,6 +170,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         organizerName: organizerName || req.adminUser?.displayName || 'Church Staff',
         organizerEmail: organizerEmail || req.adminUser?.username || null,
         createdByUid: null,
+        createdBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
+        updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
       })
       .returning();
 
@@ -199,7 +200,11 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
 
     const {
       title,
+      titleVi,
+      titleEn,
       description,
+      descriptionVi,
+      descriptionEn,
       category,
       date,
       startTime,
@@ -213,37 +218,34 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       organizerEmail,
     } = req.body;
 
-    const bilingual = await TranslationService.translateBilingualFields(
-      {
-        title: title ? String(title).trim() : null,
-        description: description ? String(description).trim() : null,
-        location: location ? String(location).trim() : null,
-      },
-      'event'
-    );
+    const finalTitleEn = titleEn !== undefined ? String(titleEn).trim() : (title !== undefined ? String(title).trim() : undefined);
+    const finalTitleVi = titleVi !== undefined ? String(titleVi).trim() : (title !== undefined ? String(title).trim() : undefined);
+    const finalDescEn = descriptionEn !== undefined ? String(descriptionEn).trim() : (description !== undefined ? String(description).trim() : undefined);
+    const finalDescVi = descriptionVi !== undefined ? String(descriptionVi).trim() : (description !== undefined ? String(description).trim() : undefined);
 
     const updated = await db
       .update(events)
       .set({
-        title: title ? String(title).trim() : undefined,
-        titleVi: title ? (bilingual.title?.vi || String(title).trim()) : undefined,
-        titleEn: title ? (bilingual.title?.en || String(title).trim()) : undefined,
-        description: description ? String(description).trim() : undefined,
-        descriptionVi: description ? (bilingual.description?.vi || String(description).trim()) : undefined,
-        descriptionEn: description ? (bilingual.description?.en || String(description).trim()) : undefined,
+        title: finalTitleEn,
+        titleVi: finalTitleVi,
+        titleEn: finalTitleEn,
+        description: finalDescEn,
+        descriptionVi: finalDescVi,
+        descriptionEn: finalDescEn,
         category,
         date,
         startTime,
         endTime,
         location: location ? String(location).trim() : undefined,
-        locationVi: location ? (bilingual.location?.vi || String(location).trim()) : undefined,
-        locationEn: location ? (bilingual.location?.en || String(location).trim()) : undefined,
+        locationVi: location ? String(location).trim() : undefined,
+        locationEn: location ? String(location).trim() : undefined,
         address: address ? String(address).trim() : undefined,
         imageUrl,
         isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : undefined,
         maxCapacity: maxCapacity !== undefined ? (maxCapacity ? Number(maxCapacity) : null) : undefined,
         organizerName,
         organizerEmail,
+        updatedBy: req.adminUser?.displayName || req.adminUser?.username || 'Admin',
         updatedAt: new Date(),
       })
       .where(eq(events.id, eventId))
