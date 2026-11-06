@@ -8,23 +8,23 @@
   "regionDescEn": "Serving Vietnamese communities across Phoenix East Valley",
   "services": [
     {
-      "timeEn": "Sunday • 3:00 PM – 5:00 PM",
-      "id": "sunday-worship",
-      "descVi": "Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.",
       "time": "Chúa Nhật • 3:00 PM – 5:00 PM",
-      "titleEn": "Sunday Worship Service",
+      "id": "sunday-worship",
+      "titleVi": "Lễ Thờ Phượng Chúa Nhật",
+      "timeEn": "Sunday • 3:00 PM – 5:00 PM",
+      "descVi": "Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.",
       "descEn": "Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.",
-      "titleVi": "Lễ Thờ Phượng Chúa Nhật"
+      "titleEn": "Sunday Worship Service"
     },
     {
+      "time": "Thứ Tư • 7:00 PM – 8:30 PM",
       "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
       "descVi": "Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.",
-      "time": "Thứ Tư • 7:00 PM – 8:30 PM",
-      "titleEn": "Midweek Bible Study & Prayer",
+      "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings.",
       "id": "wednesday-prayer",
       "titleVi": "Học Kinh Thánh & Cầu Nguyện",
-      "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings."
+      "titleEn": "Midweek Bible Study & Prayer"
     }
   ],
-  "updatedAt": "2026-11-05T21:54:10.159Z"
+  "updatedAt": "2026-11-05T23:53:20.539Z"
 }

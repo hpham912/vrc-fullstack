@@ -92,11 +92,19 @@ export function sanitizeForFirestore(obj: any): any {
 
 export const FirestoreChurchService = {
   // Get Church Info from Firestore
-  async getChurchInfo(): Promise<any | null> {
+  async getChurchInfo(env: string = 'production'): Promise<any | null> {
     try {
-      const snap = await getDoc(doc(firestoreDb, 'church_info', 'main'));
+      const docName = env === 'development' ? 'main_dev' : 'main';
+      let snap = await getDoc(doc(firestoreDb, 'church_info', docName));
       if (snap.exists()) {
         return snap.data();
+      }
+      // If dev doc doesn't exist yet, fall back to production doc as seed
+      if (env === 'development') {
+        const prodSnap = await getDoc(doc(firestoreDb, 'church_info', 'main'));
+        if (prodSnap.exists()) {
+          return prodSnap.data();
+        }
       }
       return null;
     } catch (error) {
@@ -106,16 +114,17 @@ export const FirestoreChurchService = {
   },
 
   // Save Church Info to Firestore
-  async saveChurchInfo(data: any): Promise<void> {
-    const docPath = 'church_info/main';
+  async saveChurchInfo(data: any, env: string = 'production'): Promise<void> {
+    const docName = env === 'development' ? 'main_dev' : 'main';
+    const docPath = `church_info/${docName}`;
     try {
       const sanitized = sanitizeForFirestore({
         ...data,
         updatedAt: new Date().toISOString(),
       });
-      await setDoc(doc(firestoreDb, 'church_info', 'main'), sanitized);
+      await setDoc(doc(firestoreDb, 'church_info', docName), sanitized);
     } catch (error) {
-      console.error('Failed to save church_info to Firestore:', error);
+      console.error(`Failed to save church_info [${env}] to Firestore:`, error);
       try {
         handleFirestoreError(error, OperationType.WRITE, docPath);
       } catch {
@@ -125,11 +134,19 @@ export const FirestoreChurchService = {
   },
 
   // Get Spotlight / Hero Banner config from Firestore
-  async getSpotlight(): Promise<any | null> {
+  async getSpotlight(env: string = 'production'): Promise<any | null> {
     try {
-      const snap = await getDoc(doc(firestoreDb, 'spotlight', 'current'));
+      const docName = env === 'development' ? 'current_dev' : 'current';
+      let snap = await getDoc(doc(firestoreDb, 'spotlight', docName));
       if (snap.exists()) {
         return snap.data();
+      }
+      // If dev doc doesn't exist yet, fall back to production doc as seed
+      if (env === 'development') {
+        const prodSnap = await getDoc(doc(firestoreDb, 'spotlight', 'current'));
+        if (prodSnap.exists()) {
+          return prodSnap.data();
+        }
       }
       return null;
     } catch (error) {
@@ -139,16 +156,17 @@ export const FirestoreChurchService = {
   },
 
   // Save Spotlight / Hero Banner config to Firestore
-  async saveSpotlight(data: any): Promise<void> {
-    const docPath = 'spotlight/current';
+  async saveSpotlight(data: any, env: string = 'production'): Promise<void> {
+    const docName = env === 'development' ? 'current_dev' : 'current';
+    const docPath = `spotlight/${docName}`;
     try {
       const sanitized = sanitizeForFirestore({
         ...data,
         updatedAt: new Date().toISOString(),
       });
-      await setDoc(doc(firestoreDb, 'spotlight', 'current'), sanitized);
+      await setDoc(doc(firestoreDb, 'spotlight', docName), sanitized);
     } catch (error) {
-      console.error('Failed to save spotlight to Firestore:', error);
+      console.error(`Failed to save spotlight [${env}] to Firestore:`, error);
       try {
         handleFirestoreError(error, OperationType.WRITE, docPath);
       } catch {

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { FirestoreChurchService } from '../services/firestoreService.ts';
+import { getAppEnvironment } from '../utils/appEnvironment.ts';
 
 const router = Router();
 
@@ -105,8 +106,9 @@ function saveLocalSpotlight(data: SpotlightData): void {
 // GET /api/spotlight - Get current hero banner configuration
 router.get('/', async (req, res) => {
   try {
+    const env = getAppEnvironment(req);
     // Read from Firestore for latest persistent cloud state
-    const firestoreData = await FirestoreChurchService.getSpotlight();
+    const firestoreData = await FirestoreChurchService.getSpotlight(env);
     if (firestoreData && firestoreData.title) {
       inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...firestoreData };
       saveLocalSpotlight(inMemorySpotlight);
@@ -124,6 +126,7 @@ router.get('/', async (req, res) => {
 // PUT /api/spotlight - Update hero banner configuration (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
+    const env = getAppEnvironment(req);
     const {
       mode,
       selectedEventId,
@@ -186,8 +189,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     inMemorySpotlight = updated;
     saveLocalSpotlight(updated);
 
-    // Save to Firestore for permanent cross-instance cloud persistence
-    await FirestoreChurchService.saveSpotlight(updated);
+    // Save to Firestore with env isolation
+    await FirestoreChurchService.saveSpotlight(updated, env);
 
     res.json(updated);
   } catch (err: any) {

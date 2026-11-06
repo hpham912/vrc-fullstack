@@ -16,9 +16,13 @@ import {
   Flame,
   Sliders,
   CalendarPlus,
+  Compass,
+  Navigation,
   PenTool,
 } from 'lucide-react';
 import { getGoogleCalendarUrl } from '../utils/calendar.ts';
+import { DirectionsModal } from './DirectionsModal.tsx';
+import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../utils/directions.ts';
 
 interface HomeDashboardProps {
   events: ChurchEvent[];
@@ -47,6 +51,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   const safeConfig = spotlightConfig || DEFAULT_SPOTLIGHT;
   const safeChurch = churchInfo || DEFAULT_CHURCH_INFO;
+
+  // Directions routing modal state
+  const [directionsModalOpen, setDirectionsModalOpen] = React.useState(false);
+  const [directionsTarget, setDirectionsTarget] = React.useState({ name: '', address: '' });
 
   // Current date in YYYY-MM-DD
   const now = new Date();
@@ -340,16 +348,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <span>{language === 'vi' ? 'Xem Sự Kiện' : 'View Events'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
-            <a
-              href={displayDirectionsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-semibold rounded-xl border border-white/25 transition-all shadow-sm"
+            <button
+              type="button"
+              onClick={() => {
+                setDirectionsTarget({
+                  name: displayTitle,
+                  address: displayAddress,
+                });
+                setDirectionsModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-semibold rounded-xl border border-white/25 transition-all shadow-sm cursor-pointer"
             >
-              <MapPin className="w-3.5 h-3.5 text-amber-300" />
+              <Navigation className="w-3.5 h-3.5 text-amber-300" />
               <span>{language === 'vi' ? 'Chỉ Đường' : 'Directions'}</span>
-              <ExternalLink className="w-3 h-3 text-stone-300" />
-            </a>
+              <Compass className="w-3 h-3 text-stone-300" />
+            </button>
           </div>
 
         </div>
@@ -506,15 +519,28 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 <span className="text-stone-500"> • {safeChurch.regionDescVi || t('locationRegion')}</span>
               </div>
             </div>
-            <a
-              href={safeChurch.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(safeChurch.address || 'Tempe Arizona')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-900"
-            >
-              <span>{language === 'vi' ? 'Chỉ Đường' : 'Directions'}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="flex items-center gap-1.5 self-end sm:self-auto">
+              <a
+                href={getGoogleMapsDirectionsUrl(safeChurch.address || 'Tempe, Arizona')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all"
+                title={language === 'vi' ? 'Chỉ đường Google Maps từ vị trí hiện tại' : 'Turn-by-turn in Google Maps'}
+              >
+                <Compass className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Google Maps</span>
+              </a>
+              <a
+                href={getAppleMapsDirectionsUrl(safeChurch.address || 'Tempe, Arizona')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all"
+                title={language === 'vi' ? 'Dẫn đường Apple Maps từ vị trí hiện tại' : 'Turn-by-turn in Apple Maps'}
+              >
+                <Navigation className="w-3.5 h-3.5 text-white" />
+                <span>Apple Maps</span>
+              </a>
+            </div>
           </div>
         </section>
       ) : (
@@ -637,6 +663,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
         </section>
       )}
+
+      {/* Directions Routing Modal */}
+      <DirectionsModal
+        isOpen={directionsModalOpen}
+        onClose={() => setDirectionsModalOpen(false)}
+        destinationName={directionsTarget.name}
+        address={directionsTarget.address}
+      />
     </div>
   );
 };

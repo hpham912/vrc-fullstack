@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { FirestoreChurchService } from '../services/firestoreService.ts';
+import { getAppEnvironment } from '../utils/appEnvironment.ts';
 
 const router = Router();
 
@@ -127,8 +128,9 @@ function saveLocalChurchInfo(data: ChurchInfoData): void {
 // GET /api/church-info - Get sanctuary address & weekly worship schedules
 router.get('/', async (req, res) => {
   try {
+    const env = getAppEnvironment(req);
     // Query Firestore for latest persistent cloud state
-    const firestoreData = await FirestoreChurchService.getChurchInfo();
+    const firestoreData = await FirestoreChurchService.getChurchInfo(env);
     if (firestoreData && firestoreData.sanctuaryName) {
       inMemoryChurchInfo = {
         ...DEFAULT_CHURCH_INFO,
@@ -188,7 +190,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     saveLocalChurchInfo(updated);
 
     // Save to Firestore for permanent cross-instance cloud persistence
-    await FirestoreChurchService.saveChurchInfo(updated);
+    const env = getAppEnvironment(req);
+    await FirestoreChurchService.saveChurchInfo(updated, env);
 
     res.json(updated);
   } catch (err: any) {

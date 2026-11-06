@@ -23,11 +23,14 @@ import {
   Eye,
   Pencil,
   Trash2,
+  Compass,
+  Navigation,
 } from 'lucide-react';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../utils/calendar.ts';
 import { ConfirmModal } from '../common-component/ConfirmModal.tsx';
 import { Modal } from '../common-component/Modal.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
+import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../utils/directions.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
 interface EventsSectionProps {
@@ -110,10 +113,10 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       const url = editingEvent ? apiUrl(`/api/events/${editingEvent.id}`) : apiUrl('/api/events');
       const res = await fetch(url, {
         method: editingEvent ? 'PUT' : 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({
           title: formTitle.trim(),
           description: formDesc.trim(),
@@ -142,7 +145,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/events/${deleteTargetEvent.id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (res.ok) {
         const deletedId = deleteTargetEvent.id;
@@ -576,17 +579,42 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   {selectedDetailEvent.endTime ? ` – ${selectedDetailEvent.endTime}` : ''}
                 </span>
               </div>
-              <div className="flex items-start gap-2 text-stone-700">
-                <MapPin className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-stone-900">
-                    {language === 'vi'
-                      ? (selectedDetailEvent.locationVi || selectedDetailEvent.locationEn || selectedDetailEvent.location)
-                      : (selectedDetailEvent.locationEn || selectedDetailEvent.locationVi || selectedDetailEvent.location)}
-                  </p>
-                  {selectedDetailEvent.address && (
-                    <p className="text-xs text-stone-500">{selectedDetailEvent.address}</p>
-                  )}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-stone-700">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-stone-900">
+                      {language === 'vi'
+                        ? (selectedDetailEvent.locationVi || selectedDetailEvent.locationEn || selectedDetailEvent.location)
+                        : (selectedDetailEvent.locationEn || selectedDetailEvent.locationVi || selectedDetailEvent.location)}
+                    </p>
+                    {selectedDetailEvent.address && (
+                      <p className="text-xs text-stone-500">{selectedDetailEvent.address}</p>
+                    )}
+                  </div>
+                </div>
+                {/* Instant turn-by-turn routing from current location */}
+                <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap flex-shrink-0">
+                  <a
+                    href={getGoogleMapsDirectionsUrl(selectedDetailEvent.address || selectedDetailEvent.location)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-[11px] font-bold shadow-2xs transition-all"
+                    title={language === 'vi' ? 'Bắt đầu chỉ đường Google Maps từ vị trí hiện tại' : 'Turn-by-turn in Google Maps'}
+                  >
+                    <Compass className="w-3 h-3 text-emerald-400" />
+                    <span>Google Maps</span>
+                  </a>
+                  <a
+                    href={getAppleMapsDirectionsUrl(selectedDetailEvent.address || selectedDetailEvent.location)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-95 text-white text-[11px] font-bold shadow-2xs transition-all"
+                    title={language === 'vi' ? 'Dẫn đường Apple Maps từ vị trí hiện tại' : 'Turn-by-turn in Apple Maps'}
+                  >
+                    <Navigation className="w-3 h-3 text-white" />
+                    <span>Apple Maps</span>
+                  </a>
                 </div>
               </div>
             </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent, ChurchInfo, DailyVerse, Announcement } from '../types/index.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
 import { NotificationClient } from '../services/notificationClient.ts';
 import { Modal } from '../common-component/Modal.tsx';
 import {
@@ -146,7 +146,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!token) return;
     try {
       const res = await fetch(apiUrl('/api/auth/admins'), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -162,7 +162,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!token) return;
     try {
       const res = await fetch(apiUrl('/api/prayers'), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -178,7 +178,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/prayers/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (res.ok) {
         setPrayerList((prev) => prev.filter((p) => p.id !== id));
@@ -322,10 +322,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       const res = await fetch(url, {
         method,
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify(payload),
       });
 
@@ -361,7 +361,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/events/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (!res.ok) {
         let errData: any = {};
@@ -389,10 +389,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const method = editingVerseId ? 'PUT' : 'POST';
       const res = await fetch(apiUrl(endpoint), {
         method,
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({
           date: verseDate,
           reference: verseReferenceEn.trim(),
@@ -446,7 +446,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/verses/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (!res.ok) {
         let errData: any = {};
@@ -473,10 +473,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl('/api/auth/create-admin'), {
         method: 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({
           username: newAdminUsername.trim(),
           password: newAdminPassword.trim(),
@@ -509,7 +509,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/auth/admins/${id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete admin');
@@ -531,10 +531,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl('/api/auth/change-password'), {
         method: 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({ oldPassword, newPassword }),
       });
       const data = await res.json();

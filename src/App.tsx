@@ -17,7 +17,7 @@ import { PrayerRequestModal } from './vrc-frontend/components/PrayerRequestModal
 import { CrossIcon } from './vrc-frontend/components/CrossIcon.tsx';
 import { ChurchEvent, DailyVerse, Announcement, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
 import { Plus, ArrowRight, HeartHandshake } from 'lucide-react';
-import { apiUrl } from './vrc-frontend/utils/api.ts';
+import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 
 function ChurchAppContent() {
@@ -65,13 +65,14 @@ function ChurchAppContent() {
   const loadData = async () => {
     try {
       setLoading(true);
+      const headers = apiHeaders();
       const [eventsRes, todayVerseRes, versesRes, spotlightRes, churchInfoRes, notifs] =
         await Promise.all([
-          fetch(apiUrl('/api/events'), { cache: 'no-store' }),
-          fetch(apiUrl('/api/verses/today'), { cache: 'no-store' }),
-          fetch(apiUrl('/api/verses'), { cache: 'no-store' }),
-          fetch(apiUrl('/api/spotlight'), { cache: 'no-store' }),
-          fetch(apiUrl('/api/church-info'), { cache: 'no-store' }),
+          fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
+          fetch(apiUrl('/api/verses/today'), { cache: 'no-store', headers }),
+          fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
+          fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
+          fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
           NotificationClient.fetchRecent(),
         ]);
 

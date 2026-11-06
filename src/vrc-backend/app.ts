@@ -10,8 +10,17 @@ import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 import prayerRoutes from './routes/prayerRoutes.ts';
 
+import { dbContext } from '../vrc-db/index.ts';
+import { getAppEnvironment } from './utils/appEnvironment.ts';
+
 export const createApp = () => {
   const app = express();
+
+  // Route database operations to cloud_sql_development_database or cloud_sql_production_database
+  app.use((req, res, next) => {
+    const env = getAppEnvironment(req);
+    dbContext.run(env, () => next());
+  });
 
   // Security & Parsing Middlewares
   app.use(corsMiddleware);

@@ -18,6 +18,27 @@ export const apiUrl = (endpoint: string): string => {
   return `${API_BASE}${cleanEndpoint}`;
 };
 
+export const getAppEnvHeader = (): string => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.host.toLowerCase();
+    if (host.includes('ais-dev') || host.includes('localhost') || host.includes('127.0.0.1')) {
+      return 'development';
+    }
+    if (host.includes('ais-pre')) {
+      return 'production';
+    }
+  }
+  return import.meta.env.DEV ? 'development' : 'production';
+};
+
+export const apiHeaders = (existing?: HeadersInit): Headers => {
+  const headers = new Headers(existing || {});
+  if (!headers.has('X-App-Env')) {
+    headers.set('X-App-Env', getAppEnvHeader());
+  }
+  return headers;
+};
+
 export class ApiError extends Error {
   status: number;
   details?: any;
@@ -34,7 +55,12 @@ export class ApiError extends Error {
  * a structured ApiError with HTTP status and exception message on failure.
  */
 export async function apiFetch<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(apiUrl(endpoint), options);
+  const mergedOptions: RequestInit = {
+    ...options,
+    headers: apiHeaders(options?.headers),
+  };
+
+  const res = await fetch(apiUrl(endpoint), mergedOptions);
   const rawText = await res.text();
 
   let data: any = {};

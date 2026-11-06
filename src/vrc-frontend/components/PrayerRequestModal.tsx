@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HeartHandshake, Send, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
 import { Modal } from '../common-component/Modal.tsx';
 
 interface PrayerRequestModalProps {
@@ -41,7 +41,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
       setError('');
       const res = await fetch(apiUrl('/api/prayers'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: apiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           requesterName: requesterName.trim() || undefined,
           request: requestText.trim(),

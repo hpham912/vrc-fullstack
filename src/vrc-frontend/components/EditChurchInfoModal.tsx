@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ChurchInfo, WeeklyService, DEFAULT_CHURCH_INFO } from '../types/index.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
+import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../utils/directions.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
   X,
@@ -167,10 +168,10 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
       const res = await fetch(apiUrl('/api/church-info'), {
         method: 'PUT',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        }),
         body: JSON.stringify(payload),
       });
 
@@ -284,16 +285,28 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
               <div className="space-y-1">
                 <label className="block text-[11px] font-bold text-stone-600 flex items-center justify-between">
-                  <span>{language === 'vi' ? 'Đường Dẫn Google Maps' : 'Google Maps URL'}</span>
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-700 hover:underline flex items-center gap-0.5 text-[10px]"
-                  >
-                    <span>{language === 'vi' ? 'Thử mở' : 'Test'}</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </a>
+                  <span>{language === 'vi' ? 'Đường Dẫn Bản Đồ & Dẫn Đường' : 'Maps Navigation URLs'}</span>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <a
+                      href={getGoogleMapsDirectionsUrl(address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-700 hover:underline flex items-center gap-0.5 font-semibold"
+                    >
+                      <span>Google</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                    <span>•</span>
+                    <a
+                      href={getAppleMapsDirectionsUrl(address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-amber-700 hover:underline flex items-center gap-0.5 font-semibold"
+                    >
+                      <span>Apple</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  </div>
                 </label>
                 <input
                   type="text"

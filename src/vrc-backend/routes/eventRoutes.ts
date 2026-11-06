@@ -53,7 +53,7 @@ router.post('/cleanup-expired', async (_req, res) => {
   }
 });
 
-// GET /api/events - List all events from PostgreSQL
+// GET /api/events - List all events from the active database (Dev DB or Prod DB)
 router.get('/', async (req, res) => {
   try {
     await cleanupPastEvents();
@@ -61,7 +61,10 @@ router.get('/', async (req, res) => {
     const category = req.query.category as string;
     const search = req.query.search as string;
 
-    const allEvents = await db.select().from(events).orderBy(asc(events.date), asc(events.startTime));
+    const allEvents = await db
+      .select()
+      .from(events)
+      .orderBy(asc(events.date), asc(events.startTime));
 
     let filtered = allEvents;
     if (category && category !== 'All') {
@@ -156,33 +159,44 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
 
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
-    const newEvent = await db
-      .insert(events)
-      .values({
-        title: finalTitleEn,
-        titleVi: finalTitleVi,
-        titleEn: finalTitleEn,
-        description: finalDescEn,
-        descriptionVi: finalDescVi,
-        descriptionEn: finalDescEn,
-        category: category || 'Worship',
-        date,
-        startTime,
-        endTime: endTime || null,
-        location: finalLocation,
-        locationVi: finalLocation,
-        locationEn: finalLocation,
-        address: address ? String(address).trim() : 'Tempe, Arizona',
-        imageUrl: imageUrl || null,
-        isFeatured: Boolean(isFeatured),
-        maxCapacity: maxCapacity ? Number(maxCapacity) : null,
-        organizerName: organizerName || req.adminUser?.displayName || 'Church Staff',
-        organizerEmail: organizerEmail || req.adminUser?.username || null,
-        createdByUid: null,
-        createdBy: actorName,
-        updatedBy: actorName,
-      })
-      .returning();
+    const insertValues = {
+      title: finalTitleEn,
+      titleVi: finalTitleVi,
+      titleEn: finalTitleEn,
+      description: finalDescEn,
+      descriptionVi: finalDescVi,
+      descriptionEn: finalDescEn,
+      category: category || 'Worship',
+      date,
+      startTime,
+      endTime: endTime || null,
+      location: finalLocation,
+      locationVi: finalLocation,
+      locationEn: finalLocation,
+      address: address ? String(address).trim() : 'Tempe, Arizona',
+      imageUrl: imageUrl || null,
+      isFeatured: Boolean(isFeatured),
+      maxCapacity: maxCapacity ? Number(maxCapacity) : null,
+      organizerName: organizerName || req.adminUser?.displayName || 'Church Staff',
+      organizerEmail: organizerEmail || req.adminUser?.username || null,
+      createdByUid: null,
+      createdBy: actorName,
+      updatedBy: actorName,
+    };
+
+    let newEvent: any[];
+    try {
+      newEvent = await db.insert(events).values(insertValues).returning();
+    } catch (insertErr: any) {
+      const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
+      if (errStr.includes('events_pkey') || errStr.includes('duplicate key')) {
+        // Automatically synchronize sequence if older pre-seeded rows caused ID collision
+        await db.execute(sql`SELECT setval('events_id_seq', COALESCE((SELECT MAX(id) FROM events), 0) + 1, false)`);
+        newEvent = await db.insert(events).values(insertValues).returning();
+      } else {
+        throw insertErr;
+      }
+    }
 
     // Trigger notification record in PostgreSQL
     await BackendNotificationService.recordNotification(
@@ -195,7 +209,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     res.status(201).json(newEvent[0]);
   } catch (error: any) {
     console.error('Failed to create event in PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to create church event in database' });
+    const detail = error?.cause?.detail || error?.cause?.message || error?.message || 'Failed to create church event in database';
+    res.status(500).json({ error: detail });
   }
 });
 

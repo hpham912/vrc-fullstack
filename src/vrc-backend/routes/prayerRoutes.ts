@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { prayerRequests } from '../../vrc-db/schema.ts';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 
 const router = Router();
 
 // GET /api/prayers - List all prayer requests from PostgreSQL (Admin only)
-router.get('/', requireAdmin, async (_req: AuthRequest, res) => {
+router.get('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const list = await db
       .select()
@@ -48,23 +48,34 @@ router.post('/', async (req, res) => {
     const cleanName = String(requesterName || '').trim() || 'Anonymous';
     const cleanTitle = String(title || '').trim() || `Prayer Request from ${cleanName}`;
 
-    const inserted = await db
-      .insert(prayerRequests)
-      .values({
-        title: cleanTitle,
-        request: cleanRequest,
-        requesterName: cleanName,
-        isAnonymous: !String(requesterName || '').trim(),
-        isPraise: false,
-        prayerCount: 0,
-        status: 'active',
-      })
-      .returning();
+    const insertValues = {
+      title: cleanTitle,
+      request: cleanRequest,
+      requesterName: cleanName,
+      isAnonymous: !String(requesterName || '').trim(),
+      isPraise: false,
+      prayerCount: 0,
+      status: 'active',
+    };
+
+    let inserted: any[];
+    try {
+      inserted = await db.insert(prayerRequests).values(insertValues).returning();
+    } catch (insertErr: any) {
+      const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
+      if (errStr.includes('prayer_requests_pkey') || errStr.includes('duplicate key')) {
+        await db.execute(sql`SELECT setval('prayer_requests_id_seq', COALESCE((SELECT MAX(id) FROM prayer_requests), 0) + 1, false)`);
+        inserted = await db.insert(prayerRequests).values(insertValues).returning();
+      } else {
+        throw insertErr;
+      }
+    }
 
     return res.status(201).json(inserted[0]);
   } catch (error: any) {
     console.error('Failed to submit prayer request to PostgreSQL:', error);
-    return res.status(500).json({ error: error?.message || 'Failed to submit prayer request to database' });
+    const detail = error?.cause?.detail || error?.cause?.message || error?.message || 'Failed to submit prayer request to database';
+    return res.status(500).json({ error: detail });
   }
 });
 

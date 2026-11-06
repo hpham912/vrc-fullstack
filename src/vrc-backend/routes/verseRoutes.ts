@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { dailyVerses } from '../../vrc-db/schema.ts';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
 
@@ -23,18 +23,25 @@ async function enforceMaxTenVerses() {
       console.log(`Pruned ${surplus.length} older scripture entries in PostgreSQL.`);
     }
   } catch (err) {
-    console.warn('Scripture pruning warning in PostgreSQL:', err);
+    console.warn('Scripture pruning warning:', err);
   }
 }
 
 // GET /api/verses/today - Get today's verse (or most recent verse) from PostgreSQL
-router.get('/today', async (_req, res) => {
+router.get('/today', async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    let verseResult = await db.select().from(dailyVerses).where(eq(dailyVerses.date, today));
+    let verseResult = await db
+      .select()
+      .from(dailyVerses)
+      .where(eq(dailyVerses.date, today));
 
     if (verseResult.length === 0) {
-      verseResult = await db.select().from(dailyVerses).orderBy(desc(dailyVerses.date)).limit(1);
+      verseResult = await db
+        .select()
+        .from(dailyVerses)
+        .orderBy(desc(dailyVerses.date))
+        .limit(1);
     }
 
     if (verseResult.length === 0) {
@@ -77,10 +84,14 @@ router.get('/today', async (_req, res) => {
 });
 
 // GET /api/verses - List 10 most recent scriptures from PostgreSQL
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
     await enforceMaxTenVerses();
-    const list = await db.select().from(dailyVerses).orderBy(desc(dailyVerses.date)).limit(10);
+    const list = await db
+      .select()
+      .from(dailyVerses)
+      .orderBy(desc(dailyVerses.date))
+      .limit(10);
     res.json(list);
   } catch (error: any) {
     console.error('Failed to fetch verses from PostgreSQL:', error);
@@ -144,54 +155,76 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
 
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
-    const inserted = await db
-      .insert(dailyVerses)
-      .values({
-        date,
-        verseText: finalVerseEn,
-        verseTextVi: finalVerseVi,
-        verseTextEn: finalVerseEn,
-        reference: finalRefEn,
-        referenceVi: finalRefVi,
-        referenceEn: finalRefEn,
-        translation: finalTransEn,
-        translationVi: finalTransVi,
-        translationEn: finalTransEn,
-        reflection: finalReflEn || finalVerseEn,
-        reflectionVi: finalReflVi || finalVerseVi,
-        reflectionEn: finalReflEn || finalVerseEn,
-        prayer: finalPrayerEn,
-        prayerVi: finalPrayerVi,
-        prayerEn: finalPrayerEn,
-        theme: theme ? String(theme).trim() : 'Daily Scripture',
-        publishedByUid: null,
-        createdBy: actorName,
-        updatedBy: actorName,
-      })
-      .onConflictDoUpdate({
-        target: dailyVerses.date,
-        set: {
-          verseText: finalVerseEn,
-          verseTextVi: finalVerseVi,
-          verseTextEn: finalVerseEn,
-          reference: finalRefEn,
-          referenceVi: finalRefVi,
-          referenceEn: finalRefEn,
-          translation: finalTransEn,
-          translationVi: finalTransVi,
-          translationEn: finalTransEn,
-          reflection: finalReflEn || finalVerseEn,
-          reflectionVi: finalReflVi || finalVerseVi,
-          reflectionEn: finalReflEn || finalVerseEn,
-          prayer: finalPrayerEn,
-          prayerVi: finalPrayerVi,
-          prayerEn: finalPrayerEn,
-          theme: theme ? String(theme).trim() : 'Daily Scripture',
-          updatedBy: actorName,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+    const insertValues = {
+      date,
+      verseText: finalVerseEn,
+      verseTextVi: finalVerseVi,
+      verseTextEn: finalVerseEn,
+      reference: finalRefEn,
+      referenceVi: finalRefVi,
+      referenceEn: finalRefEn,
+      translation: finalTransEn,
+      translationVi: finalTransVi,
+      translationEn: finalTransEn,
+      reflection: finalReflEn || finalVerseEn,
+      reflectionVi: finalReflVi || finalVerseVi,
+      reflectionEn: finalReflEn || finalVerseEn,
+      prayer: finalPrayerEn,
+      prayerVi: finalPrayerVi,
+      prayerEn: finalPrayerEn,
+      theme: theme ? String(theme).trim() : 'Daily Scripture',
+      publishedByUid: null,
+      createdBy: actorName,
+      updatedBy: actorName,
+    };
+
+    const updateValues = {
+      verseText: finalVerseEn,
+      verseTextVi: finalVerseVi,
+      verseTextEn: finalVerseEn,
+      reference: finalRefEn,
+      referenceVi: finalRefVi,
+      referenceEn: finalRefEn,
+      translation: finalTransEn,
+      translationVi: finalTransVi,
+      translationEn: finalTransEn,
+      reflection: finalReflEn || finalVerseEn,
+      reflectionVi: finalReflVi || finalVerseVi,
+      reflectionEn: finalReflEn || finalVerseEn,
+      prayer: finalPrayerEn,
+      prayerVi: finalPrayerVi,
+      prayerEn: finalPrayerEn,
+      theme: theme ? String(theme).trim() : 'Daily Scripture',
+      updatedBy: actorName,
+      updatedAt: new Date(),
+    };
+
+    let inserted: any[];
+    try {
+      inserted = await db
+        .insert(dailyVerses)
+        .values(insertValues)
+        .onConflictDoUpdate({
+          target: dailyVerses.date,
+          set: updateValues,
+        })
+        .returning();
+    } catch (insertErr: any) {
+      const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
+      if (errStr.includes('daily_verses_pkey') || errStr.includes('duplicate key')) {
+        await db.execute(sql`SELECT setval('daily_verses_id_seq', COALESCE((SELECT MAX(id) FROM daily_verses), 0) + 1, false)`);
+        inserted = await db
+          .insert(dailyVerses)
+          .values(insertValues)
+          .onConflictDoUpdate({
+            target: dailyVerses.date,
+            set: updateValues,
+          })
+          .returning();
+      } else {
+        throw insertErr;
+      }
+    }
 
     // Trigger push notification record in PostgreSQL
     await BackendNotificationService.recordNotification(
@@ -204,7 +237,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     res.status(201).json(inserted[0]);
   } catch (error: any) {
     console.error('Failed to save daily verse in PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to save daily scripture verse in database' });
+    const detail = error?.cause?.detail || error?.cause?.message || error?.message || 'Failed to save daily scripture verse in database';
+    res.status(500).json({ error: detail });
   }
 });
 

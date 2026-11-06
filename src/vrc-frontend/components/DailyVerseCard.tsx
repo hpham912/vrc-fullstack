@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ConfirmModal } from '../common-component/ConfirmModal.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 
 interface DailyVerseCardProps {
@@ -83,10 +83,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
         method: 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({ passage: vRef.trim() }),
       });
       const raw = await res.text();
@@ -110,10 +110,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl('/api/verses'), {
         method: 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify({
           date: vDate,
           reference: vRef.trim(),
@@ -141,7 +141,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       const token = getToken();
       const res = await fetch(apiUrl(`/api/verses/${deleteTargetVerse.id}`), {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (res.ok) {
         const deletedId = deleteTargetVerse.id;

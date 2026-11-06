@@ -13,7 +13,12 @@ const app = createApp();
 const PORT = Number(process.env.PORT) || 3000;
 
 async function startServer() {
-  if (process.env.NODE_ENV === 'production') {
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    __filename.includes('/dist/') ||
+    __filename.endsWith('dist/server.js');
+
+  if (isProduction) {
     const distPath = __dirname.endsWith('dist')
       ? __dirname
       : path.join(__dirname, 'dist');

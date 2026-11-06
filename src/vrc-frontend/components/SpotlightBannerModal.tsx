@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent, ChurchInfo, SpotlightBannerConfig, SpotlightTheme } from '../types/index.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
   Sparkles,
@@ -156,10 +156,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
 
       const res = await fetch(apiUrl('/api/spotlight'), {
         method: 'PUT',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        },
+        }),
         body: JSON.stringify(payload),
       });
 
