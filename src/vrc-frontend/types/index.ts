@@ -134,11 +134,11 @@ export interface ChurchInfo {
 }
 
 export const DEFAULT_CHURCH_INFO: ChurchInfo = {
-  sanctuaryName: 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary',
-  address: 'Tempe, Arizona',
-  googleMapsUrl: 'https://maps.google.com/?q=Tempe+Arizona',
+  sanctuaryName: 'Hội Thánh Tin Lành Báp-tít Phục Hưng',
+  address: '1565 E Warner Rd, Tempe AZ 85284',
+  googleMapsUrl: 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284',
   phone: '(480) 555-0199',
-  email: 'contact@vnrevivalchurch.org',
+  email: 'info@vnrevivalchurch.org',
   regionDescVi: 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert',
   regionDescEn: 'Serving Vietnamese communities across Phoenix East Valley',
   services: [

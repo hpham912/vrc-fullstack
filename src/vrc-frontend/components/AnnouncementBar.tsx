@@ -18,7 +18,7 @@ export const AnnouncementBar: React.FC<AnnouncementBarProps> = ({ announcements 
         <div className="flex items-center gap-2 overflow-hidden">
           <Megaphone className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
           <span className="font-semibold text-amber-300">{latest.title}:</span>
-          <span className="truncate text-stone-300">{latest.content}</span>
+          <span className="truncate text-stone-100 font-medium">{latest.content}</span>
         </div>
 
         {latest.linkUrl && (

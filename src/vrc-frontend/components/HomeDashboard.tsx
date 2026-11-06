@@ -53,6 +53,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const safeConfig = spotlightConfig || DEFAULT_SPOTLIGHT;
   const safeChurch = churchInfo || DEFAULT_CHURCH_INFO;
   const churchName = CHURCH_NAME;
+  const churchAddress = (safeChurch.address && safeChurch.address.includes('1565'))
+    ? safeChurch.address.trim()
+    : CHURCH_NAME.address;
 
   // Directions routing modal state
   const [directionsModalOpen, setDirectionsModalOpen] = React.useState(false);
@@ -219,8 +222,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const bannerTheme = getBannerThemeClasses(currentThemeKey);
 
   // Default Church Address and Maps URL set in Schedule
-  const defaultChurchAddress = (safeChurch.address || 'Tempe, Arizona').trim();
-  const defaultChurchMapsUrl = safeChurch.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(defaultChurchAddress)}`;
+  const defaultChurchAddress = churchAddress;
+  const defaultChurchMapsUrl = safeChurch.googleMapsUrl && safeChurch.googleMapsUrl.includes('1565')
+    ? safeChurch.googleMapsUrl
+    : `https://maps.google.com/?q=${encodeURIComponent(churchAddress)}`;
 
   // Check if active event specifies a custom address different from church schedule address
   const activeEventAddress = (activeEvent?.address || '').trim();
@@ -317,25 +322,25 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </h1>
 
             {displaySubtitle && (
-              <div className="p-2.5 sm:p-3 rounded-2xl bg-black/30 border border-white/10 text-stone-200 text-xs sm:text-sm italic font-serif leading-relaxed max-w-2xl">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-black/35 border border-white/15 text-stone-100 text-xs sm:text-sm italic font-serif leading-relaxed max-w-2xl">
                 "{language === 'vi' ? (spotlightConfig?.subtitleVi || tr(displaySubtitle)) : (spotlightConfig?.subtitleEn || tr(displaySubtitle))}"
               </div>
             )}
 
-            <p className="text-xs sm:text-sm text-stone-200 font-normal leading-relaxed max-w-xl pt-0.5">
+            <p className="text-xs sm:text-sm text-stone-100 font-medium leading-relaxed max-w-xl pt-0.5">
               {language === 'vi' ? (activeEvent?.descriptionVi || spotlightConfig?.descriptionVi || tr(displayDescription)) : (activeEvent?.descriptionEn || spotlightConfig?.descriptionEn || tr(displayDescription))}
             </p>
           </div>
 
           {/* Date & Location Chips */}
-          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-stone-300">
+          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-stone-100 font-semibold">
             {displayDateTag && (
-              <span className="inline-flex items-center gap-1.5 bg-black/25 px-3 py-1 rounded-xl border border-white/10">
+              <span className="inline-flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-xl border border-white/15">
                 <Calendar className="w-3.5 h-3.5 text-amber-400" />
                 <span>{displayDateTag}</span>
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5 bg-black/25 px-3 py-1 rounded-xl border border-white/10">
+            <span className="inline-flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-xl border border-white/15">
               <MapPin className="w-3.5 h-3.5 text-amber-400" />
               <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || tr(displayLocationTag)) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || tr(displayLocationTag))}</span>
             </span>
@@ -363,7 +368,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             >
               <Navigation className="w-3.5 h-3.5 text-amber-300" />
               <span>{language === 'vi' ? 'Chỉ Đường' : 'Directions'}</span>
-              <Compass className="w-3 h-3 text-stone-300" />
+              <Compass className="w-3 h-3 text-stone-200" />
             </button>
           </div>
 
@@ -377,7 +382,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <Sparkles className="w-4 h-4 text-amber-600" />
             <span>{t('quickAccessTitle')}</span>
           </h2>
-          <span className="text-[11px] text-stone-400 font-medium">
+          <span className="text-xs text-stone-600 font-semibold">
             {language === 'vi' ? 'Nhấn để điều hướng' : 'Tap to navigate'}
           </span>
         </div>
@@ -386,15 +391,15 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Card 1: Events */}
           <button
             onClick={() => onNavigateTab('events')}
-            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:shadow-xs hover:border-amber-200 active:scale-95 transition-all group"
+            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200 shadow-2xs hover:shadow-xs hover:border-amber-300 active:scale-95 transition-all group"
           >
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-2.5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 mb-2.5 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
               <Calendar className="w-4 h-4" />
             </div>
-            <span className="text-xs sm:text-sm font-bold text-stone-900 leading-snug">
+            <span className="text-xs sm:text-sm font-bold text-stone-950 leading-snug">
               {t('navEvents')}
             </span>
-            <span className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">
+            <span className="text-xs text-stone-700 font-semibold mt-0.5 line-clamp-1">
               {events.length} {language === 'vi' ? 'sự kiện sắp tới' : 'upcoming'}
             </span>
           </button>
@@ -402,15 +407,15 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Card 2: Scripture */}
           <button
             onClick={() => onNavigateTab('verse')}
-            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:shadow-xs hover:border-amber-200 active:scale-95 transition-all group"
+            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200 shadow-2xs hover:shadow-xs hover:border-amber-300 active:scale-95 transition-all group"
           >
-            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 mb-2.5 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-800 mb-2.5 group-hover:bg-amber-600 group-hover:text-white transition-colors">
               <BookOpen className="w-4 h-4" />
             </div>
-            <span className="text-xs sm:text-sm font-bold text-stone-900 leading-snug">
+            <span className="text-xs sm:text-sm font-bold text-stone-950 leading-snug">
               {t('navVerse')}
             </span>
-            <span className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">
+            <span className="text-xs text-stone-700 font-semibold mt-0.5 line-clamp-1">
               {todayVerse?.reference || (language === 'vi' ? 'Hôm nay' : 'Today')}
             </span>
           </button>
@@ -418,151 +423,47 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Card 3: Youth */}
           <button
             onClick={() => onNavigateTab('youth')}
-            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:shadow-xs hover:border-amber-200 active:scale-95 transition-all group"
+            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200 shadow-2xs hover:shadow-xs hover:border-amber-300 active:scale-95 transition-all group"
           >
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-2.5 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 mb-2.5 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
               <Flame className="w-4 h-4" />
             </div>
-            <span className="text-xs sm:text-sm font-bold text-stone-900 leading-snug">
+            <span className="text-xs sm:text-sm font-bold text-stone-950 leading-snug">
               {t('navYouth')}
             </span>
-            <span className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">
+            <span className="text-xs text-stone-700 font-semibold mt-0.5 line-clamp-1">
               {language === 'vi' ? 'Thứ Sáu 6:30 PM' : 'Fridays 6:30 PM'}
             </span>
           </button>
 
-          {/* Card 4: Sanctuary & Location */}
+          {/* Card 4: Sanctuary & Directions */}
           <button
-            onClick={() => onNavigateTab('about')}
-            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200/80 shadow-2xs hover:shadow-xs hover:border-amber-200 active:scale-95 transition-all group"
+            onClick={() => {
+              const el = document.getElementById('sanctuary-location');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                setDirectionsTarget({
+                  name: language === 'vi' ? churchName.vi : churchName.en,
+                  address: churchAddress,
+                });
+                setDirectionsModalOpen(true);
+              }
+            }}
+            className="flex flex-col text-left p-3.5 sm:p-4 rounded-2xl bg-white border border-stone-200 shadow-2xs hover:shadow-xs hover:border-amber-300 active:scale-95 transition-all group cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700 mb-2.5 group-hover:bg-stone-800 group-hover:text-white transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-800 mb-2.5 group-hover:bg-stone-900 group-hover:text-white transition-colors">
               <MapPin className="w-4 h-4" />
             </div>
-            <span className="text-xs sm:text-sm font-bold text-stone-900 leading-snug">
-              {t('navAbout')}
+            <span className="text-xs sm:text-sm font-bold text-stone-950 leading-snug">
+              {language === 'vi' ? 'Nhà Nguyện' : 'Sanctuary'}
             </span>
-            <span className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">
-              {safeChurch.address || 'Tempe, AZ'}
+            <span className="text-xs text-stone-700 font-semibold mt-0.5 line-clamp-1">
+              {churchAddress}
             </span>
           </button>
         </div>
       </section>
-
-      {/* Weekly Worship Schedule & Sanctuary Location (Only displayed if services exist or if admin is logged in) */}
-      {safeChurch.services && safeChurch.services.length > 0 ? (
-        <section className="bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <CrossIcon className="w-4 h-4 text-amber-600" />
-                <h2 className="text-base sm:text-lg font-serif font-bold text-stone-950">
-                  {t('weeklyScheduleTitle')}
-                </h2>
-              </div>
-              <p className="text-xs text-stone-500">
-                {safeChurch.sanctuaryName || (language === 'vi' ? 'Nhà nguyện Hội Thánh tại Tempe, Arizona' : 'Sanctuary Worship in Tempe, Arizona')}
-              </p>
-            </div>
-
-            {isAdmin && onOpenChurchInfoEditor && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onOpenChurchInfoEditor();
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-900 rounded-xl text-xs font-bold border border-amber-200 transition-all shadow-2xs cursor-pointer z-20"
-                title="Cập nhật địa chỉ nhà nguyện và giờ thờ phượng"
-              >
-                <PenTool className="w-3.5 h-3.5 text-amber-700" />
-                <span className="hidden sm:inline">{language === 'vi' ? 'Sửa Lịch & Địa Điểm' : 'Edit Schedule & Location'}</span>
-                <span className="sm:hidden">{language === 'vi' ? 'Sửa' : 'Edit'}</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {safeChurch.services.map((svc, idx) => {
-              const { dayPart, hourPart } = getServiceTimeParts(svc, language);
-              const cardColors = [
-                'bg-gradient-to-br from-amber-50/90 via-white to-orange-50/50 border-amber-200/90',
-                'bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/50 border-emerald-200/90',
-                'bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/50 border-indigo-200/90',
-              ][idx % 3];
-              return (
-                <div key={svc.id || idx} className={`p-3.5 rounded-2xl border space-y-1.5 shadow-2xs ${cardColors}`}>
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
-                      {dayPart}
-                    </span>
-                    <span className="text-[11px] font-bold text-stone-800 text-right">
-                      {hourPart}
-                    </span>
-                  </div>
-                  <h3 className="text-xs sm:text-sm font-bold text-stone-900">
-                    {language === 'vi' ? svc.titleVi : (svc.titleEn || svc.titleVi)}
-                  </h3>
-                  <p className="text-[11px] text-stone-600 leading-relaxed">
-                    {language === 'vi' ? svc.descVi : (svc.descEn || svc.descVi)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Location pill */}
-          <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-stone-600 bg-stone-50 p-3 rounded-2xl border border-stone-100">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <div>
-                <span className="font-bold text-stone-900">{safeChurch.address || 'Tempe, Arizona'}</span>
-                <span className="text-stone-500"> • {safeChurch.regionDescVi || t('locationRegion')}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 self-end sm:self-auto">
-              <a
-                href={getGoogleMapsDirectionsUrl(safeChurch.address || 'Tempe, Arizona')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all"
-                title={language === 'vi' ? 'Chỉ đường Google Maps từ vị trí hiện tại' : 'Turn-by-turn in Google Maps'}
-              >
-                <Compass className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Google Maps</span>
-              </a>
-              <a
-                href={getAppleMapsDirectionsUrl(safeChurch.address || 'Tempe, Arizona')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all"
-                title={language === 'vi' ? 'Dẫn đường Apple Maps từ vị trí hiện tại' : 'Turn-by-turn in Apple Maps'}
-              >
-                <Navigation className="w-3.5 h-3.5 text-white" />
-                <span>Apple Maps</span>
-              </a>
-            </div>
-          </div>
-        </section>
-      ) : (
-        isAdmin && onOpenChurchInfoEditor ? (
-          <section className="bg-stone-50/70 rounded-3xl border border-dashed border-stone-300 p-4 sm:p-5 flex items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-stone-600">
-              <Clock className="w-4 h-4 text-amber-700" />
-              <span>{language === 'vi' ? 'Chưa có lịch nhóm hàng tuần nào.' : 'No weekly services schedule currently set.'}</span>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenChurchInfoEditor}
-              className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all active:scale-95 shadow-2xs"
-            >
-              <PenTool className="w-3.5 h-3.5" />
-              <span>{language === 'vi' ? 'Thêm Buổi Nhóm' : 'Add Services'}</span>
-            </button>
-          </section>
-        ) : null
-      )}
 
 
       {/* Featured Upcoming Event Card (if another event exists) */}
@@ -593,22 +494,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 </h3>
               </div>
               <div className="text-right flex-shrink-0">
-                <span className="text-xs font-bold text-stone-900 block">
+                <span className="text-xs font-bold text-stone-950 block">
                   {nextUpcomingEvent.date}
                 </span>
-                <span className="text-[11px] text-stone-500">
+                <span className="text-xs text-stone-700 font-semibold">
                   {nextUpcomingEvent.startTime}
                 </span>
               </div>
             </div>
 
-            <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-800 line-clamp-2 leading-relaxed">
               {nextUpcomingEvent.description}
             </p>
 
             <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2">
-              <span className="text-[11px] text-stone-500 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-stone-400" />
+              <span className="text-xs text-stone-700 font-medium flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
                 <span>{nextUpcomingEvent.location}</span>
               </span>
 
@@ -617,14 +518,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   href={getGoogleCalendarUrl(nextUpcomingEvent)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-semibold transition-all active:scale-95"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-semibold transition-all active:scale-95"
                 >
                   <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
                   <span>{t('addToGoogle')}</span>
                 </a>
                 <button
                   onClick={() => onNavigateTab('events')}
-                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold transition-all active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-all active:scale-95"
                 >
                   {language === 'vi' ? 'Xem chi tiết' : 'Details'}
                 </button>
@@ -638,21 +539,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       {todayVerse && (
         <section className="bg-gradient-to-r from-amber-50/70 via-stone-50 to-amber-50/40 rounded-3xl border border-amber-200/60 p-4 sm:p-5 shadow-2xs space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
               <CrossIcon className="w-3 h-3 text-amber-600" />
               <span>{t('heroScripture')}</span>
             </span>
-            <span className="text-xs font-bold text-amber-900">
+            <span className="text-xs sm:text-sm font-bold text-amber-950">
               {todayVerse.reference}
             </span>
           </div>
 
-          <blockquote className="font-serif italic text-xs sm:text-sm text-stone-800 leading-relaxed">
+          <blockquote className="font-serif italic text-xs sm:text-sm text-stone-900 leading-relaxed font-medium">
             "{todayVerse.verseText}"
           </blockquote>
 
           <div className="pt-1 flex items-center justify-between">
-            <span className="text-[11px] text-stone-500 font-medium">
+            <span className="text-xs text-stone-700 font-semibold">
               {todayVerse.translation}
             </span>
             <button
@@ -665,6 +566,90 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
         </section>
       )}
+
+      {/* Sanctuary Location & Socials (Compact, Friendly Card) */}
+      <section id="sanctuary-location" className="bg-white rounded-3xl border border-stone-200 p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Church Name & Address */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <CrossIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <h3 className="font-serif font-bold text-base sm:text-lg text-stone-950 leading-tight">
+                {language === 'vi' ? CHURCH_NAME.vi : CHURCH_NAME.en}
+              </h3>
+              {isAdmin && onOpenChurchInfoEditor && (
+                <button
+                  type="button"
+                  onClick={onOpenChurchInfoEditor}
+                  className="p-1 rounded-lg text-stone-500 hover:text-amber-800 hover:bg-stone-100 transition-colors cursor-pointer"
+                  title="Edit Location"
+                >
+                  <PenTool className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <p className="text-xs sm:text-sm text-stone-700 font-medium flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+              <span>{churchAddress}</span>
+            </p>
+          </div>
+
+          {/* Action Row: Compact Directions + Circle Social Buttons */}
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            {/* Shorter Direction Buttons */}
+            <a
+              href={getGoogleMapsDirectionsUrl(churchAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-medium text-xs shadow-2xs transition-all"
+              title="Google Maps"
+            >
+              <Compass className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Google</span>
+            </a>
+            <a
+              href={getAppleMapsDirectionsUrl(churchAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-800 hover:to-amber-900 active:scale-95 text-white font-medium text-xs shadow-2xs transition-all"
+              title="Apple Maps"
+            >
+              <Navigation className="w-3.5 h-3.5 text-white" />
+              <span>Apple</span>
+            </a>
+
+            <div className="h-4 w-px bg-stone-200 mx-0.5 hidden sm:block" />
+
+            {/* Circle YouTube Button */}
+            <a
+              href="https://www.youtube.com/@PHUCHUNGAZ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer"
+              title="YouTube: @PHUCHUNGAZ"
+              aria-label="YouTube"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </a>
+
+            {/* Circle Facebook Button */}
+            <a
+              href="https://www.facebook.com/phuchungus"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 rounded-full bg-[#1877F2] hover:bg-[#166fe5] text-white flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer"
+              title="Facebook: phuchungus"
+              aria-label="Facebook"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Directions Routing Modal */}
       <DirectionsModal

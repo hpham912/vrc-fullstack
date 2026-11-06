@@ -117,7 +117,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
               )}
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   {language === 'vi' ? 'Tên của bạn (Không bắt buộc)' : 'Your Name (Optional)'}
                 </label>
                 <input
@@ -125,12 +125,12 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
                   placeholder={language === 'vi' ? 'Để trống nếu muốn ẩn danh...' : 'Leave blank to remain anonymous...'}
                   value={requesterName}
                   onChange={(e) => setRequesterName(e.target.value)}
-                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-xs sm:text-sm bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                  className="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-xs sm:text-sm bg-white text-stone-950 placeholder:text-stone-500 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-900 mb-1">
                   {language === 'vi' ? 'Nội Dung Cầu Nguyện *' : 'Prayer Request *'}
                 </label>
                 <textarea
@@ -139,7 +139,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
                   placeholder={language === 'vi' ? 'Chia sẻ điều bạn muốn Hội Thánh cầu nguyện...' : 'Share what you would like us to pray for...'}
                   value={requestText}
                   onChange={(e) => setRequestText(e.target.value)}
-                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-xs sm:text-sm bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-none"
+                  className="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-xs sm:text-sm bg-white text-stone-950 placeholder:text-stone-500 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-none"
                 />
               </div>
 
@@ -147,7 +147,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors"
                 >
                   {language === 'vi' ? 'Hủy' : 'Cancel'}
                 </button>

@@ -1,16 +1,56 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
 @layer base {
-  html {
-    font-size: 16.5px;
+  /* =========================================================================
+     CENTRALIZED TYPOGRAPHY SYSTEM (Single Source of Truth)
+     To adjust the primary font across the entire web/mobile app, edit --font-main below.
+     Both body copy and headings (.font-serif, h1-h6) inherit from this central engine.
+     ========================================================================= */
+  :root {
+    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: var(--font-main);
+    --font-serif: var(--font-main);
+  }
+
+  html, body {
+    font-family: var(--font-main);
+    font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     overflow-x: clip;
+    color: #1c1917;
+    background-color: #fdfcfb;
   }
 
   body {
+    font-family: var(--font-main);
     font-weight: 500;
     overflow-x: clip;
     -webkit-overflow-scrolling: touch;
+    color: #1c1917;
+  }
+
+  /* All titles, headings, and previous serif classes now render in clean, bold sans-serif */
+  h1, h2, h3, h4, h5, h6,
+  .font-serif,
+  .font-sans {
+    font-family: var(--font-main) !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .font-serif {
+    letter-spacing: -0.015em;
   }
 
   html.large-font body {

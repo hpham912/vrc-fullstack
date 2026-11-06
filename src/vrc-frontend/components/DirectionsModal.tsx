@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, MapPin, Navigation, Compass, Copy, Check, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../utils/directions.ts';
+import { CHURCH_NAME } from '../constants/church.ts';
 
 interface DirectionsModalProps {
   isOpen: boolean;
@@ -13,15 +14,16 @@ interface DirectionsModalProps {
 export const DirectionsModal: React.FC<DirectionsModalProps> = ({
   isOpen,
   onClose,
-  destinationName = 'Vietnamese Revival Church',
-  address = 'Tempe, Arizona',
+  destinationName = CHURCH_NAME.en,
+  address = CHURCH_NAME.address,
 }) => {
   const { language } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
-  const cleanAddress = (address || 'Tempe, Arizona').trim();
+  const fallbackAddress = CHURCH_NAME.address;
+  const cleanAddress = (address && !address.toLowerCase().includes('tempe, arizona') && address.toLowerCase() !== 'tempe, az' && address.toLowerCase() !== 'tempe az' ? address : fallbackAddress).trim();
   const googleUrl = getGoogleMapsDirectionsUrl(cleanAddress);
   const appleUrl = getAppleMapsDirectionsUrl(cleanAddress);
 
@@ -74,18 +76,18 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
                 <p className="font-serif font-bold text-sm text-stone-900 truncate">
                   {destinationName}
                 </p>
-                <p className="text-xs text-stone-600 mt-0.5 leading-relaxed">
+                <p className="text-xs text-stone-800 mt-0.5 leading-relaxed font-medium">
                   {cleanAddress}
                 </p>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-xs text-stone-500">
+            <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-xs text-stone-700 font-medium">
               <span>{language === 'vi' ? 'Điểm đến được chọn' : 'Selected destination'}</span>
               <button
                 type="button"
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1 font-semibold text-amber-800 hover:text-amber-900 active:scale-95 transition-all"
+                className="inline-flex items-center gap-1 font-bold text-amber-800 hover:text-amber-950 active:scale-95 transition-all"
               >
                 {copied ? (
                   <>
@@ -102,7 +104,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
             </div>
           </div>
 
-          <p className="text-xs text-stone-500 text-center">
+          <p className="text-xs text-stone-700 font-medium text-center">
             {language === 'vi'
               ? 'Chọn ứng dụng bản đồ ưa thích để bắt đầu dẫn đường ngay lập tức:'
               : 'Choose your preferred maps app to start turn-by-turn routing immediately:'}

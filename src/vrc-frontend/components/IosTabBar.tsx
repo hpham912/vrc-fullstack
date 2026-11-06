@@ -35,18 +35,18 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
               onClick={() => setActiveTab(tab.id)}
               className={`flex flex-col items-center justify-center py-1 rounded-2xl transition-all duration-200 active:scale-90 ${
                 isActive
-                  ? 'text-amber-800 font-bold'
-                  : 'text-stone-400 hover:text-stone-700 font-medium'
+                  ? 'text-amber-900 font-bold'
+                  : 'text-stone-600 hover:text-stone-900 font-semibold'
               }`}
             >
               <div
                 className={`p-1.5 rounded-xl transition-all ${
-                  isActive ? 'bg-amber-100/90 text-amber-900 shadow-2xs scale-105' : ''
+                  isActive ? 'bg-amber-100/90 text-amber-950 shadow-2xs scale-105' : ''
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.4]' : 'stroke-[1.8]'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
               </div>
-              <span className="text-[10.5px] mt-0.5 tracking-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[76px]">
+              <span className="text-[11px] mt-0.5 tracking-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[76px] font-semibold">
                 {tab.label}
               </span>
             </button>

@@ -3,6 +3,7 @@ import { ChurchEvent, ChurchInfo, DailyVerse, Announcement } from '../types/inde
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../utils/api.ts';
+import { APP_VERSION } from '../constants/version.ts';
 import { NotificationClient } from '../services/notificationClient.ts';
 import { Modal } from '../common-component/Modal.tsx';
 import {
@@ -577,9 +578,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   : t('adminDashboardTitle')
                 : t('adminDashboardTitle')}
             </h2>
-            <p className="text-xs text-stone-400 mt-0.5">
-              {language === 'vi' ? 'Đăng nhập với tư cách: ' : 'Logged in as: '}
-              <span className="text-amber-400 font-semibold">{adminUser?.displayName} (@{adminUser?.username})</span>
+            <p className="text-xs text-stone-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+              <span>
+                {language === 'vi' ? 'Đăng nhập với tư cách: ' : 'Logged in as: '}
+                <span className="text-amber-400 font-semibold">{adminUser?.displayName} (@{adminUser?.username})</span>
+              </span>
+              <span className="text-stone-600">•</span>
+              <span className="text-[11px] font-mono text-stone-500">v{APP_VERSION}</span>
             </p>
           </div>
 
@@ -1108,14 +1113,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             {(language === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || (language === 'vi' ? 'Tiêu Đề Sự Kiện (Đang nhập...)' : 'Event Title (Type in form...)')}
                           </h4>
 
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-600">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-700 font-medium">
                             <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-stone-400 flex-shrink-0" />
+                              <Clock className="w-3 h-3 text-amber-700 flex-shrink-0" />
                               <span>{eventStartTime || '03:00 PM'}{eventEndTime ? ` - ${eventEndTime}` : ''}</span>
                             </span>
 
                             <span className="inline-flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
+                              <MapPin className="w-3 h-3 text-amber-700 flex-shrink-0" />
                               <span className="truncate max-w-[240px]">
                                 {eventLocation || 'Main Sanctuary'} • {eventAddress.trim() || churchInfo?.address || 'Tempe, AZ'}
                               </span>
@@ -1125,7 +1130,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </div>
 
                       {/* Description Preview */}
-                      <p className="text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 line-clamp-3">
+                      <p className="text-xs text-stone-800 leading-relaxed bg-white/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal">
                         {(language === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || (language === 'vi' ? 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...' : 'Event details and description will appear here as you type in the form above...')}
                       </p>
                     </div>
@@ -1391,9 +1396,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   {allVerses.map((v) => (
                     <div key={v.id} className="p-3 flex items-center justify-between gap-3 text-xs">
                       <div className="min-w-0 flex-1">
-                        <span className="font-serif font-bold text-stone-900">{v.reference}</span>
-                        <span className="text-stone-400 ml-2">{v.date}</span>
-                        <p className="text-stone-500 line-clamp-1 mt-0.5">"{v.verseText}"</p>
+                        <span className="font-serif font-bold text-stone-950">{v.reference}</span>
+                        <span className="text-stone-600 font-semibold ml-2">{v.date}</span>
+                        <p className="text-stone-700 line-clamp-1 mt-0.5 font-medium">"{v.verseText}"</p>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button

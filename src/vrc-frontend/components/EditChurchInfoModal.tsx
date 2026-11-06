@@ -38,13 +38,13 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
   const safeInfo = churchInfo || DEFAULT_CHURCH_INFO;
 
-  const [sanctuaryName, setSanctuaryName] = useState(safeInfo.sanctuaryName || 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary');
-  const [address, setAddress] = useState(safeInfo.address || 'Tempe, Arizona');
+  const [sanctuaryName, setSanctuaryName] = useState(safeInfo.sanctuaryName || 'Hội Thánh Tin Lành Báp-tít Phục Hưng');
+  const [address, setAddress] = useState(safeInfo.address || '1565 E Warner Rd, Tempe AZ 85284');
   const [googleMapsUrl, setGoogleMapsUrl] = useState(
-    safeInfo.googleMapsUrl || 'https://maps.google.com/?q=Tempe+Arizona'
+    safeInfo.googleMapsUrl || 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284'
   );
   const [phone, setPhone] = useState(safeInfo.phone || '(480) 555-0199');
-  const [email, setEmail] = useState(safeInfo.email || 'contact@vnrevivalchurch.org');
+  const [email, setEmail] = useState(safeInfo.email || 'info@vnrevivalchurch.org');
   const [regionDescVi, setRegionDescVi] = useState(
     safeInfo.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert'
   );
@@ -63,11 +63,11 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       const current = churchInfo || DEFAULT_CHURCH_INFO;
-      setSanctuaryName(current.sanctuaryName || 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary');
-      setAddress(current.address || 'Tempe, Arizona');
-      setGoogleMapsUrl(current.googleMapsUrl || 'https://maps.google.com/?q=Tempe+Arizona');
+      setSanctuaryName(current.sanctuaryName || 'Hội Thánh Tin Lành Báp-tít Phục Hưng');
+      setAddress(current.address || '1565 E Warner Rd, Tempe AZ 85284');
+      setGoogleMapsUrl(current.googleMapsUrl || 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284');
       setPhone(current.phone || '(480) 555-0199');
-      setEmail(current.email || 'contact@vnrevivalchurch.org');
+      setEmail(current.email || 'info@vnrevivalchurch.org');
       setRegionDescVi(current.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert');
       setRegionDescEn(current.regionDescEn || 'Serving Vietnamese communities across Phoenix East Valley');
       setServices(current.services ? JSON.parse(JSON.stringify(current.services)) : [...DEFAULT_CHURCH_INFO.services]);
@@ -216,14 +216,14 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
               <h3 className="font-serif font-bold text-base sm:text-lg">
                 {language === 'vi' ? 'Cập Nhật Địa Điểm & Lịch Thờ Phượng' : 'Sanctuary Location & Worship Times'}
               </h3>
-              <p className="text-stone-400 text-xs">
+              <p className="text-stone-300 text-xs font-medium">
                 {language === 'vi' ? 'Chỉnh sửa thông tin xuất hiện trên trang chủ' : 'Customize sanctuary location and service times on Home'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+            className="p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

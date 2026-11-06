@@ -33,11 +33,11 @@ export interface ChurchInfoData {
 }
 
 export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
-  sanctuaryName: 'Hội Thánh Phục Hưng Việt Nam • Tempe Sanctuary',
-  address: 'Tempe, Arizona',
-  googleMapsUrl: 'https://maps.google.com/?q=Tempe+Arizona',
+  sanctuaryName: 'Hội Thánh Tin Lành Báp-tít Phục Hưng',
+  address: '1565 E Warner Rd, Tempe AZ 85284',
+  googleMapsUrl: 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284',
   phone: '(480) 555-0199',
-  email: 'contact@vnrevivalchurch.org',
+  email: 'info@vnrevivalchurch.org',
   regionDescVi: 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert',
   regionDescEn: 'Serving Vietnamese communities across Phoenix East Valley',
   services: [
@@ -104,9 +104,14 @@ function saveLocalChurchInfo(data: ChurchInfoData): void {
   try {
     const firestoreData = await FirestoreChurchService.getChurchInfo();
     if (firestoreData && firestoreData.sanctuaryName) {
+      const sanitizedAddress = (!firestoreData.address || firestoreData.address.toLowerCase().includes('tempe, arizona') || firestoreData.address.toLowerCase() === 'tempe, az' || firestoreData.address.toLowerCase() === 'tempe az')
+        ? DEFAULT_CHURCH_INFO.address
+        : firestoreData.address;
       inMemoryChurchInfo = {
         ...DEFAULT_CHURCH_INFO,
         ...firestoreData,
+        address: sanitizedAddress,
+        googleMapsUrl: sanitizedAddress === DEFAULT_CHURCH_INFO.address ? DEFAULT_CHURCH_INFO.googleMapsUrl : (firestoreData.googleMapsUrl || DEFAULT_CHURCH_INFO.googleMapsUrl),
         services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
           ? firestoreData.services
           : DEFAULT_CHURCH_INFO.services,
@@ -114,7 +119,7 @@ function saveLocalChurchInfo(data: ChurchInfoData): void {
       saveLocalChurchInfo(inMemoryChurchInfo);
       // Persist full schema to Firestore
       await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
-      console.log('Church info loaded from Firestore:', inMemoryChurchInfo.sanctuaryName, 'services:', inMemoryChurchInfo.services.length);
+      console.log('Church info loaded from Firestore:', inMemoryChurchInfo.sanctuaryName, 'address:', inMemoryChurchInfo.address);
     } else {
       loadLocalChurchInfo();
       await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
@@ -132,9 +137,14 @@ router.get('/', async (req, res) => {
     // Query Firestore for latest persistent cloud state
     const firestoreData = await FirestoreChurchService.getChurchInfo(env);
     if (firestoreData && firestoreData.sanctuaryName) {
+      const sanitizedAddress = (!firestoreData.address || firestoreData.address.toLowerCase().includes('tempe, arizona') || firestoreData.address.toLowerCase() === 'tempe, az' || firestoreData.address.toLowerCase() === 'tempe az')
+        ? DEFAULT_CHURCH_INFO.address
+        : firestoreData.address;
       inMemoryChurchInfo = {
         ...DEFAULT_CHURCH_INFO,
         ...firestoreData,
+        address: sanitizedAddress,
+        googleMapsUrl: sanitizedAddress === DEFAULT_CHURCH_INFO.address ? DEFAULT_CHURCH_INFO.googleMapsUrl : (firestoreData.googleMapsUrl || DEFAULT_CHURCH_INFO.googleMapsUrl),
         services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
           ? firestoreData.services
           : inMemoryChurchInfo.services,
@@ -145,6 +155,10 @@ router.get('/', async (req, res) => {
 
     // Fallback to in-memory/local
     const local = loadLocalChurchInfo();
+    if (!local.address || local.address.toLowerCase().includes('tempe, arizona') || local.address.toLowerCase() === 'tempe, az' || local.address.toLowerCase() === 'tempe az') {
+      local.address = DEFAULT_CHURCH_INFO.address;
+      local.googleMapsUrl = DEFAULT_CHURCH_INFO.googleMapsUrl;
+    }
     res.json(local);
   } catch (err: any) {
     console.error('Failed to get church info:', err);

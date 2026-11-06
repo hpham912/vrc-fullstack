@@ -1,30 +1,30 @@
 {
   "sanctuaryName": "Hội Thánh Tin Lành Phục Hưng Việt Nam • Tempe Sanctuary",
-  "address": "Tempe, Arizona",
-  "googleMapsUrl": "https://maps.app.goo.gl/NszSG761t35cyn1HA?g_st=ic",
+  "address": "1565 E Warner Rd, Tempe AZ 85284",
+  "googleMapsUrl": "https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284",
   "phone": "(602) 597-0504",
   "email": "htph@vrcfamily.org",
   "regionDescVi": "Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert",
   "regionDescEn": "Serving Vietnamese communities across Phoenix East Valley",
   "services": [
     {
-      "time": "Chúa Nhật • 3:00 PM – 5:00 PM",
-      "id": "sunday-worship",
       "titleVi": "Lễ Thờ Phượng Chúa Nhật",
       "timeEn": "Sunday • 3:00 PM – 5:00 PM",
+      "id": "sunday-worship",
+      "titleEn": "Sunday Worship Service",
       "descVi": "Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.",
       "descEn": "Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.",
-      "titleEn": "Sunday Worship Service"
+      "time": "Chúa Nhật • 3:00 PM – 5:00 PM"
     },
     {
-      "time": "Thứ Tư • 7:00 PM – 8:30 PM",
-      "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
-      "descVi": "Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.",
       "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings.",
       "id": "wednesday-prayer",
-      "titleVi": "Học Kinh Thánh & Cầu Nguyện",
-      "titleEn": "Midweek Bible Study & Prayer"
+      "titleEn": "Midweek Bible Study & Prayer",
+      "descVi": "Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.",
+      "time": "Thứ Tư • 7:00 PM – 8:30 PM",
+      "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
+      "titleVi": "Học Kinh Thánh & Cầu Nguyện"
     }
   ],
-  "updatedAt": "2026-11-05T23:53:20.539Z"
+  "updatedAt": "2026-11-06T15:07:35.468Z"
 }

@@ -208,7 +208,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
               <h3 className="font-serif font-bold text-base sm:text-lg">
                 {language === 'vi' ? 'Tuỳ Chỉnh Sự Kiện Nổi Bật Trang Chủ' : 'Customize Home Feature Banner'}
               </h3>
-              <p className="text-stone-400 text-xs">
+              <p className="text-stone-300 text-xs font-medium">
                 {language === 'vi'
                   ? 'Chọn giao diện màu sắc và chọn sự kiện từ lịch để làm nổi bật'
                   : 'Select visual theme & pick which event to feature'}
@@ -217,7 +217,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+            className="p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

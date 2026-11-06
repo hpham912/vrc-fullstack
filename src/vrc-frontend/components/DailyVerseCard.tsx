@@ -339,13 +339,13 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
       {/* Main Scripture Card */}
       <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-12 shadow-xs space-y-6 sm:space-y-8">
-        <div className="flex items-center justify-between text-xs text-stone-500 pb-3 border-b border-stone-100">
+        <div className="flex items-center justify-between text-xs text-stone-700 font-semibold pb-3 border-b border-stone-100">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-amber-700" />
             <span>{verseDateFormatted}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-md text-xs">
+            <span className="font-bold text-stone-800 bg-stone-100 px-2.5 py-0.5 rounded-md text-xs border border-stone-200">
               {pick(verse.translationVi, verse.translationEn, verse.translation)}
             </span>
             {isAdmin && onOpenAdminPortal && (
@@ -370,30 +370,30 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
         </div>
 
         <blockquote className="my-4 sm:my-6">
-          <p className="font-serif text-xl sm:text-3xl text-stone-900 leading-relaxed tracking-normal font-normal">
+          <p className="font-serif text-xl sm:text-3xl text-stone-950 leading-relaxed tracking-normal font-medium">
             “{pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}”
           </p>
           <footer className="mt-4 text-right">
-            <cite className="font-serif text-base sm:text-lg font-bold text-amber-800 not-italic">
+            <cite className="font-serif text-base sm:text-lg font-bold text-amber-900 not-italic">
               — {pick(verse.referenceVi, verse.referenceEn, verse.reference)}
             </cite>
           </footer>
         </blockquote>
 
         <div className="pt-4 sm:pt-6 border-t border-stone-100 space-y-2.5 sm:space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-800">
             {t('reflectionTitle')}
           </h3>
-          <p className="text-stone-700 text-xs sm:text-base leading-relaxed whitespace-pre-line">
+          <p className="text-stone-850 text-xs sm:text-base leading-relaxed whitespace-pre-line font-normal text-stone-900">
             {pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}
           </p>
 
           {verse.prayer && (
-            <div className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/60">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-900 block mb-1">
+            <div className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 border border-amber-200">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-950 block mb-1">
                 {t('prayerTitle')}
               </span>
-              <p className="font-serif italic text-stone-800 text-xs sm:text-sm leading-relaxed">
+              <p className="font-serif italic text-stone-900 text-xs sm:text-sm leading-relaxed font-medium">
                 "{pick(verse.prayerVi, verse.prayerEn, verse.prayer)}"
               </p>
             </div>
@@ -406,7 +406,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
         <div className="mt-6 sm:mt-8">
           <button
             onClick={() => setShowArchive(!showArchive)}
-            className="flex items-center justify-between w-full p-4 bg-white hover:bg-stone-50 border border-stone-200 rounded-2xl text-stone-700 text-xs font-semibold transition-colors"
+            className="flex items-center justify-between w-full p-4 bg-white hover:bg-stone-50 border border-stone-300 rounded-2xl text-stone-800 text-xs font-bold transition-colors shadow-2xs"
           >
             <span className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-amber-700" />
@@ -435,12 +435,12 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                         : 'bg-white hover:bg-stone-50 border-stone-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-[11px] text-stone-400 mb-1">
+                    <div className="flex items-center justify-between text-xs text-stone-600 font-semibold mb-1">
                       <span>{item.date}</span>
-                      <span className="font-medium text-amber-700">{item.translation}</span>
+                      <span className="font-bold text-amber-800">{item.translation}</span>
                     </div>
-                    <p className="font-serif font-bold text-stone-900 text-sm">{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
-                    <p className="text-stone-600 text-xs line-clamp-2 mt-1">"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
+                    <p className="font-serif font-bold text-stone-950 text-sm">{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
+                    <p className="text-stone-700 text-xs line-clamp-2 mt-1 font-medium">"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
                   </div>
                 );
               })}

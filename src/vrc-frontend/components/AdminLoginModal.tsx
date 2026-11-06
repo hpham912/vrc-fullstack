@@ -54,7 +54,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <h3 className="font-serif font-bold text-lg text-white">
                 {t('loginTitle')}
               </h3>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-stone-300 font-medium">
                 {t('loginSub')}
               </p>
             </div>
@@ -62,7 +62,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-white rounded-lg transition-colors"
+            className="p-1.5 text-stone-300 hover:text-white rounded-lg transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -79,35 +79,35 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           )}
 
           <div>
-            <label className="block text-xs font-bold text-stone-700 mb-1.5">
+            <label className="block text-xs font-bold text-stone-900 mb-1.5">
               {t('usernameLabel')}
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <User className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
                 placeholder="vrcadmin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all font-medium text-stone-900"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-medium text-stone-950 placeholder:text-stone-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-stone-700 mb-1.5">
+            <label className="block text-xs font-bold text-stone-900 mb-1.5">
               {t('passwordLabel')}
             </label>
             <div className="relative">
-              <KeyRound className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <KeyRound className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 transition-all text-stone-900"
+                className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-base sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all text-stone-950 placeholder:text-stone-500"
               />
             </div>
           </div>

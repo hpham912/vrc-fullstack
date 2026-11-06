@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
 import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
 import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
+import { APP_VERSION, APP_BUILD_DATE } from './vrc-frontend/constants/version.ts';
 import { Navbar } from './vrc-frontend/components/Navbar.tsx';
 import { IosTabBar } from './vrc-frontend/components/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/HomeDashboard.tsx';
 import { EventsSection } from './vrc-frontend/components/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/DailyVerseCard.tsx';
 import { YouthSection } from './vrc-frontend/components/YouthSection.tsx';
-import { ChurchInfoSection } from './vrc-frontend/components/ChurchInfoSection.tsx';
 import { AdminPortal } from './vrc-frontend/components/AdminPortal.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/AdminLoginModal.tsx';
 import { SpotlightBannerModal } from './vrc-frontend/components/SpotlightBannerModal.tsx';
@@ -16,7 +16,7 @@ import { EditChurchInfoModal } from './vrc-frontend/components/EditChurchInfoMod
 import { PrayerRequestModal } from './vrc-frontend/components/PrayerRequestModal.tsx';
 import { CrossIcon } from './vrc-frontend/components/CrossIcon.tsx';
 import { ChurchEvent, DailyVerse, Announcement, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight, HeartHandshake } from 'lucide-react';
+import { Plus, ArrowRight } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 import {
@@ -24,7 +24,7 @@ import {
   Calendar,
   BookOpen,
   Flame,
-  Clock
+  ShieldCheck,
 } from 'lucide-react';
 
 function ChurchAppContent() {
@@ -52,7 +52,15 @@ function ChurchAppContent() {
   const [churchInfo, setChurchInfo] = useState<ChurchInfo | null>(() => {
     try {
       const cached = localStorage.getItem('vrc_cached_church_info');
-      if (cached) return JSON.parse(cached);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed) {
+          if (!parsed.address || parsed.address.toLowerCase().includes('tempe, arizona') || parsed.address.toLowerCase() === 'tempe, az' || parsed.address.toLowerCase() === 'tempe az') {
+            parsed.address = CHURCH_NAME.address;
+          }
+          return parsed;
+        }
+      }
     } catch {}
     return DEFAULT_CHURCH_INFO;
   });
@@ -117,6 +125,9 @@ function ChurchAppContent() {
         try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData)); } catch {}
       }
       if (churchInfoData) {
+        if (!churchInfoData.address || churchInfoData.address.toLowerCase().includes('tempe, arizona') || churchInfoData.address.toLowerCase() === 'tempe, az' || churchInfoData.address.toLowerCase() === 'tempe az') {
+          churchInfoData.address = CHURCH_NAME.address;
+        }
         setChurchInfo(churchInfoData);
         try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData)); } catch {}
       }
@@ -151,7 +162,6 @@ function ChurchAppContent() {
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
     { id: 'youth', label: t('navYouth'), icon: Flame },
-    { id: 'about', label: t('navAbout'), icon: Clock },
   ];
 
   return (
@@ -164,28 +174,43 @@ function ChurchAppContent() {
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
         onRequestNotificationPermission={() => NotificationClient.requestPermission()}
+        onOpenPrayerModal={() => setPrayerModalOpen(true)}
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
-      <div className="bg-white border-b border-stone-200/60 py-5 sm:py-10 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-2.5 sm:space-y-3">
+      <div className="bg-white border-b border-stone-200/60 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-3 sm:space-y-3.5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-semibold tracking-wide">
             <CrossIcon className="w-3.5 h-3.5 text-amber-600" />
             <span>{t('heroLocation')}</span>
           </div>
 
-          <div className="space-y-0.5 sm:space-y-1">
+          <div className="space-y-0.5 sm:space-y-1 pt-0.5">
             <h1 className="text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 tracking-tight leading-tight">
               {language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
             </h1>
           </div>
 
-          <p className="text-stone-500 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+          <p className="text-stone-700 font-medium text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
             {t('heroSubtitle')}
           </p>
 
+          {/* Admin Dashboard Action Button - Concise with Logged-in Username */}
+          {isAdmin && (
+            <div className="pt-1.5 sm:pt-2 flex items-center justify-center">
+              <button
+                onClick={() => openAdminWithTab('manage-events', null, null, false)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs shadow-xs transition-all cursor-pointer"
+                title="Admin Dashboard"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-200 flex-shrink-0" />
+                <span>Admin Dashboard ({adminUser?.displayName || adminUser?.username || 'Admin'})</span>
+              </button>
+            </div>
+          )}
+
           {/* Quick Segmented Navigation Switcher */}
-          <nav className="hidden md:flex items-center w-fit mx-auto bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60">
+          <nav className="hidden md:flex items-center w-fit mx-auto bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60 mt-2 sm:mt-3">
             {desktopNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -262,14 +287,6 @@ function ChurchAppContent() {
             onOpenAdminPortal={openAdminWithTab}
           />
         )}
-
-        {activeTab === 'about' && (
-          <ChurchInfoSection
-            churchInfo={churchInfo}
-            isAdmin={isAdmin}
-            onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
-          />
-        )}
       </main>
 
       {/* Native iOS Bottom Tab Bar: Exactly Home, Events, Scripture, Youth (no signin button next to schedule) */}
@@ -338,50 +355,47 @@ function ChurchAppContent() {
       )}
 
       {/* Desktop Footer */}
-      <footer className="hidden md:block bg-white border-t border-stone-200/80 py-8 px-4 text-stone-500 text-xs">
+      <footer className="hidden md:block bg-white border-t border-stone-200/80 py-8 px-4 text-stone-600 text-xs font-medium">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span className="font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5">
               <CrossIcon className="w-3.5 h-3.5 text-amber-600" />
               <span>{CHURCH_NAME.en}</span>
             </span>
-            <span className="hidden sm:inline text-stone-300">|</span>
-            <span className="text-stone-500 text-xs">{CHURCH_NAME.vi}</span>
+            <span className="hidden sm:inline text-stone-400">|</span>
+            <span className="text-stone-700 text-xs font-semibold">{CHURCH_NAME.vi}</span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-medium">
-            <button onClick={() => setActiveTab('home')} className="hover:text-stone-900 transition-colors">
+          <div className="flex items-center gap-4 text-xs font-semibold text-stone-700">
+            <button onClick={() => setActiveTab('home')} className="hover:text-stone-950 transition-colors">
               {t('navHome')}
             </button>
-            <button onClick={() => setActiveTab('events')} className="hover:text-stone-900 transition-colors">
+            <button onClick={() => setActiveTab('events')} className="hover:text-stone-950 transition-colors">
               {t('navEvents')}
             </button>
-            <button onClick={() => setActiveTab('verse')} className="hover:text-stone-900 transition-colors">
+            <button onClick={() => setActiveTab('verse')} className="hover:text-stone-950 transition-colors">
               {t('navVerse')}
             </button>
-            <button onClick={() => setActiveTab('youth')} className="hover:text-stone-900 transition-colors">
+            <button onClick={() => setActiveTab('youth')} className="hover:text-stone-950 transition-colors">
               {t('navYouth')}
-            </button>
-            <button onClick={() => setActiveTab('about')} className="hover:text-stone-900 transition-colors">
-              {t('navAbout')}
             </button>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-400 text-[11px]">
+        <div className="max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-600 text-[11px] font-medium">
           <p>© {new Date().getFullYear()} {CHURCH_NAME.en} • Tempe, Arizona</p>
-          <p>{t('footerPlatform')}</p>
+          <div className="flex items-center gap-2">
+            <p>{t('footerPlatform')}</p>
+            <span className="text-stone-300">•</span>
+            <span className="text-stone-500 font-mono text-[10px]">v{APP_VERSION} ({APP_BUILD_DATE})</span>
+          </div>
         </div>
       </footer>
 
-      {/* Floating Prayer Request Button */}
-      <button
-        onClick={() => setPrayerModalOpen(true)}
-        className="fixed bottom-20 sm:bottom-6 right-4 z-40 px-3.5 py-2.5 rounded-full bg-stone-950 hover:bg-stone-800 text-white shadow-lg border border-amber-500/30 flex items-center gap-2 text-xs font-bold active:scale-95 transition-all"
-        title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}>
-        <HeartHandshake className="w-4 h-4 text-amber-400" />
-        <span>{language === 'vi' ? 'Cầu Nguyện' : 'Prayer'}</span>
-      </button>
+      {/* Mobile Subtle Version Indicator */}
+      <div className="md:hidden py-3 text-center text-[10px] text-stone-500 font-mono select-none">
+        v{APP_VERSION} • {APP_BUILD_DATE}
+      </div>
 
       <PrayerRequestModal
         isOpen={prayerModalOpen}

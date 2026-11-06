@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useLanguage } from '../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../constants/church.ts';
@@ -10,6 +10,7 @@ import {
   Bell,
   X,
   Settings,
+  HeartHandshake,
 } from 'lucide-react';
 import { NotificationModal } from './NotificationModal.tsx';
 import { AppNotification } from '../types/index.ts';
@@ -17,10 +18,11 @@ import { AppNotification } from '../types/index.ts';
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  openAdminPortal: () => void;
+  openAdminPortal?: () => void;
   openLoginModal: () => void;
   notifications: AppNotification[];
   onRequestNotificationPermission: () => void;
+  onOpenPrayerModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -30,11 +32,31 @@ export const Navbar: React.FC<NavbarProps> = ({
   openLoginModal,
   notifications,
   onRequestNotificationPermission,
+  onOpenPrayerModal,
 }) => {
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSettings) return;
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettings(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick, { passive: true });
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [showSettings]);
   const [isLargeFont, setIsLargeFont] = useState(() => {
     try {
       const enabled = localStorage.getItem('vrc_large_font') === '1';
@@ -82,8 +104,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </button>
 
-          {/* Right Header Controls: Notification, Language Toggle, Settings, and Admin */}
+          {/* Right Header Controls: Prayer, Notification, Language Toggle, Settings, and Admin */}
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Prayer Header Action Button - Displays "Prayer" on mobile */}
+            {onOpenPrayerModal && (
+              <button
+                onClick={onOpenPrayerModal}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100/90 active:scale-95 border border-amber-200/90 text-amber-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}
+              >
+                <HeartHandshake className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                <span className="tracking-tight text-xs font-bold">
+                  {language === 'vi' ? 'Cầu Nguyện' : 'Prayer'}
+                </span>
+              </button>
+            )}
+
             {/* Notification Bell Button (Click to Open/Close Popup) */}
             <button
               onClick={() => {
@@ -124,20 +160,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Language Switcher: Mobile Compact Toggle */}
             <button
               onClick={toggleLanguage}
-              className="sm:hidden px-2 py-1.5 rounded-xl bg-stone-100/90 hover:bg-stone-200/80 active:scale-95 border border-stone-200/80 text-xs font-bold text-stone-800 flex items-center gap-1 shadow-2xs"
+              className="sm:hidden px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-300 text-xs font-bold text-stone-900 flex items-center gap-1 shadow-2xs"
               title="Switch language"
             >
-              <span className="text-[13px] font-mono">{language === 'vi' ? 'VI' : 'EN'}</span>
+              <span className="text-[13px] font-mono font-bold">{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
             {/* Language Switcher: Desktop Pill */}
-            <div className="hidden sm:flex items-center bg-stone-100/90 p-1 rounded-xl border border-stone-200 text-xs font-bold shadow-2xs">
+            <div className="hidden sm:flex items-center bg-stone-100 p-1 rounded-xl border border-stone-300 text-xs font-bold shadow-2xs">
               <button
                 onClick={() => setLanguage('vi')}
                 className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] ${
                   language === 'vi'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-800'
+                    ? 'bg-white text-stone-950 shadow-xs font-bold'
+                    : 'text-stone-600 hover:text-stone-950 font-semibold'
                 }`}
                 title="Tiếng Việt"
               >
@@ -147,8 +183,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setLanguage('en')}
                 className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[11px] ${
                   language === 'en'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-800'
+                    ? 'bg-white text-stone-950 shadow-xs font-bold'
+                    : 'text-stone-600 hover:text-stone-950 font-semibold'
                 }`}
                 title="English"
               >
@@ -157,15 +193,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Settings Dropdown (Font Size + Login/Logout) */}
-            <div className="relative">
+            <div className="relative" ref={settingsRef}>
               <button
                 onClick={() => setShowSettings((prev) => !prev)}
-                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 ${
+                className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer ${
                   showSettings
-                    ? 'bg-amber-100 text-amber-900 border-amber-300'
-                    : 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70'
+                    ? 'bg-amber-100 text-amber-950 border-amber-400'
+                    : 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300'
                 }`}
                 title={language === 'vi' ? 'Cài đặt' : 'Settings'}
+                aria-label="Settings"
+                aria-expanded={showSettings}
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -173,8 +211,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               {showSettings && (
                 <>
                   <div
-                    className="fixed inset-0 z-40"
+                    className="fixed inset-0 z-40 bg-transparent cursor-pointer"
                     onClick={() => setShowSettings(false)}
+                    onTouchStart={() => setShowSettings(false)}
+                    aria-hidden="true"
                   />
                   <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs">
                     <button
@@ -188,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         } catch {}
                         setShowSettings(false);
                       }}
-                      className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold"
+                      className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer"
                     >
                       <span>{language === 'vi' ? 'Cỡ chữ lớn (A+)' : 'Larger Text (A+)'}</span>
                       <span
@@ -205,23 +245,37 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="my-1 border-t border-stone-100" />
 
                     {isAdmin ? (
-                      <button
-                        onClick={() => {
-                          setShowSettings(false);
-                          logout();
-                        }}
-                        className="w-full px-3.5 py-2.5 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                        <span>{t('navLogout')}</span>
-                      </button>
+                      <>
+                        {openAdminPortal && (
+                          <button
+                            onClick={() => {
+                              setShowSettings(false);
+                              openAdminPortal();
+                            }}
+                            className="w-full px-3.5 py-2.5 text-left hover:bg-amber-50 flex items-center gap-2 text-stone-900 font-semibold cursor-pointer"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                            <span>{t('navAdmin')}</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setShowSettings(false);
+                            logout();
+                          }}
+                          className="w-full px-3.5 py-2.5 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold cursor-pointer"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>{t('navLogout')}</span>
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={() => {
                           setShowSettings(false);
                           openLoginModal();
                         }}
-                        className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center gap-2 text-stone-800 font-semibold"
+                        className="w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center gap-2 text-stone-800 font-semibold cursor-pointer"
                       >
                         <LogIn className="w-3.5 h-3.5 text-amber-700" />
                         <span>{t('navLogin')}</span>
@@ -231,17 +285,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </>
               )}
             </div>
-
-            {/* Admin Button (when logged in) */}
-            {isAdmin && (
-              <button
-                onClick={openAdminPortal}
-                className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t('navAdmin')}</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
