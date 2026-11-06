@@ -48,18 +48,23 @@ export const devDb = drizzle(devPool, { schema });
 export const prodDb = drizzle(prodPool, { schema });
 
 /**
- * Returns the Drizzle database instance for the specified environment.
- * If no environment is explicitly provided, it checks the active AsyncLocalStorage context
- * or falls back to process.env.NODE_ENV / process.env.APP_URL.
+ * Determine the server process's default environment at startup:
+ * If running on the production service (ais-pre) or SQL_DB_NAME is set to production,
+ * the server defaults directly to production. Otherwise it defaults to development.
+ */
+export const STARTUP_ENV: DatabaseEnvironment =
+  process.env.APP_URL?.includes('ais-pre') ||
+  process.env.K_SERVICE?.includes('ais-pre') ||
+  process.env.SQL_DB_NAME === 'cloud_sql_production_database'
+    ? 'production'
+    : 'development';
+
+/**
+ * Returns the Drizzle database instance for the active environment.
+ * Evaluates request context (if set via middleware) or cleanly falls back to the server's STARTUP_ENV.
  */
 export function getDb(env?: DatabaseEnvironment) {
-  const targetEnv =
-    env ||
-    dbContext.getStore() ||
-    (process.env.NODE_ENV === 'production' || process.env.APP_URL?.includes('ais-pre')
-      ? 'production'
-      : 'development');
-
+  const targetEnv = env || dbContext.getStore() || STARTUP_ENV;
   return targetEnv === 'production' ? prodDb : devDb;
 }
 

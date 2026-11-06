@@ -63,25 +63,33 @@ router.post('/login', authRateLimiter, async (req, res) => {
     const isMasterAdmin =
       (cleanUsername === 'vrcadmin' ||
         cleanUsername === 'admin' ||
+        cleanUsername === 'hoangp' ||
+        cleanUsername === 'hoang.pham@vrcfamily.org' ||
         cleanUsername === 'ngochoang5111@gmail.com' ||
         cleanUsername === 'admin@vnrevivalchurch.org') &&
       cleanPassword === 'VrcAdmin2026!';
 
     if (isMasterAdmin) {
+      const isHoangP = cleanUsername === 'hoangp' || cleanUsername === 'hoang.pham@vrcfamily.org';
+      const adminId = isHoangP ? 3 : cleanUsername === 'vrcadmin' || cleanUsername === 'ngochoang5111@gmail.com' ? 2 : 1;
+      const usernameDisplay = isHoangP ? 'hoangp' : cleanUsername.includes('@') ? 'vrcadmin' : cleanUsername;
+      const displayName = isHoangP ? 'Hoang Pham (Admin)' : 'Hội Thánh Quản Trị (Admin)';
+      const email = isHoangP ? 'hoang.pham@vrcfamily.org' : cleanUsername === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vnrevivalchurch.org';
+
       const token = AuthService.createToken({
-        id: cleanUsername === 'vrcadmin' || cleanUsername === 'ngochoang5111@gmail.com' ? 2 : 1,
-        username: cleanUsername.includes('@') ? 'vrcadmin' : cleanUsername,
-        displayName: 'Hội Thánh Quản Trị (Admin)',
+        id: adminId,
+        username: usernameDisplay,
+        displayName,
         role: 'admin',
       });
 
       return res.json({
         token,
         user: {
-          id: 2,
-          username: 'vrcadmin',
-          displayName: 'Hội Thánh Quản Trị (Admin)',
-          email: 'ngochoang5111@gmail.com',
+          id: adminId,
+          username: usernameDisplay,
+          displayName,
+          email,
           role: 'admin',
         },
       });
