@@ -3,4 +3,5 @@ export const CHURCH_NAME = {
   en: 'Vietnamese Revival Baptist Church',
   shortVi: 'HTTLBPH',
   shortEn: 'VRBC',
+  address: '1565 E Warner Rd, Tempe AZ 85284'
 } as const;

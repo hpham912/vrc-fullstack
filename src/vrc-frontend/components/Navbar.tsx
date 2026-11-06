@@ -4,11 +4,6 @@ import { useLanguage } from '../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../constants/church.ts';
 import { CrossIcon } from './CrossIcon.tsx';
 import {
-  Home,
-  Calendar,
-  BookOpen,
-  Flame,
-  Clock,
   ShieldCheck,
   LogIn,
   LogOut,
@@ -53,14 +48,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   });
 
-  const desktopNavItems = [
-    { id: 'home', label: t('navHome'), icon: Home },
-    { id: 'events', label: t('navEvents'), icon: Calendar },
-    { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'youth', label: t('navYouth'), icon: Flame },
-    { id: 'about', label: t('navAbout'), icon: Clock },
-  ];
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-stone-200/60 transition-all pt-safe">
       <div className="max-w-4xl mx-auto px-3 sm:px-6">
@@ -94,28 +81,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
           </button>
-
-          {/* Desktop Nav Pills */}
-          <nav className="hidden md:flex items-center bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60">
-            {desktopNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                    isActive
-                      ? 'bg-white text-stone-950 shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 opacity-75" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
 
           {/* Right Header Controls: Notification, Language Toggle, Settings, and Admin */}
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -162,8 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="sm:hidden px-2 py-1.5 rounded-xl bg-stone-100/90 hover:bg-stone-200/80 active:scale-95 border border-stone-200/80 text-xs font-bold text-stone-800 flex items-center gap-1 shadow-2xs"
               title="Switch language"
             >
-              <span className="text-sm">{language === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
-              <span className="text-[11px] font-mono">{language === 'vi' ? 'VI' : 'EN'}</span>
+              <span className="text-[13px] font-mono">{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
             {/* Language Switcher: Desktop Pill */}
@@ -177,7 +141,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 title="Tiếng Việt"
               >
-                <span>🇻🇳</span>
                 <span>VI</span>
               </button>
               <button
@@ -189,7 +152,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 title="English"
               >
-                <span>🇺🇸</span>
                 <span>EN</span>
               </button>
             </div>

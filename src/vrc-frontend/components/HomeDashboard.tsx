@@ -23,6 +23,7 @@ import {
 import { getGoogleCalendarUrl } from '../utils/calendar.ts';
 import { DirectionsModal } from './DirectionsModal.tsx';
 import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../utils/directions.ts';
+import { CHURCH_NAME } from '../constants/church.ts';
 
 interface HomeDashboardProps {
   events: ChurchEvent[];
@@ -51,6 +52,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   const safeConfig = spotlightConfig || DEFAULT_SPOTLIGHT;
   const safeChurch = churchInfo || DEFAULT_CHURCH_INFO;
+  const churchName = CHURCH_NAME;
 
   // Directions routing modal state
   const [directionsModalOpen, setDirectionsModalOpen] = React.useState(false);
@@ -243,8 +245,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         : (language === 'vi' ? 'Sự Kiện Nổi Bật' : 'Featured Event'));
 
   const displayTitle = isAutoMode
-    ? (activeEvent ? activeEvent.title : 'Hội Thánh Phục Hưng Việt Nam')
-    : (activeEvent ? activeEvent.title : (safeConfig.title || 'Hội Thánh Phục Hưng Việt Nam'));
+    ? (activeEvent ? activeEvent.title : churchName.vi)
+    : (activeEvent ? activeEvent.title : (safeConfig.title || churchName.vi));
 
   const displaySubtitle = safeConfig.subtitle?.trim()
     ? safeConfig.subtitle.trim()

@@ -19,6 +19,13 @@ import { ChurchEvent, DailyVerse, Announcement, AppNotification, SpotlightBanner
 import { Plus, ArrowRight, HeartHandshake } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
+import {
+  Home,
+  Calendar,
+  BookOpen,
+  Flame,
+  Clock
+} from 'lucide-react';
 
 function ChurchAppContent() {
   const { adminUser, isAdmin } = useAuth();
@@ -139,6 +146,14 @@ function ChurchAppContent() {
     setAdminPortalOpen(true);
   };
 
+  const desktopNavItems = [
+    { id: 'home', label: t('navHome'), icon: Home },
+    { id: 'events', label: t('navEvents'), icon: Calendar },
+    { id: 'verse', label: t('navVerse'), icon: BookOpen },
+    { id: 'youth', label: t('navYouth'), icon: Flame },
+    { id: 'about', label: t('navAbout'), icon: Clock },
+  ];
+
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* iOS App Navigation Bar */}
@@ -161,11 +176,8 @@ function ChurchAppContent() {
 
           <div className="space-y-0.5 sm:space-y-1">
             <h1 className="text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 tracking-tight leading-tight">
-              {CHURCH_NAME.en}
+              {language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
             </h1>
-            <p className="text-xs sm:text-base font-serif text-amber-800 font-medium tracking-normal opacity-90">
-              {CHURCH_NAME.vi}
-            </p>
           </div>
 
           <p className="text-stone-500 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
@@ -173,61 +185,26 @@ function ChurchAppContent() {
           </p>
 
           {/* Quick Segmented Navigation Switcher */}
-          <div className="pt-1.5 flex flex-wrap items-center justify-center gap-2">
-            <div className="inline-flex items-center bg-stone-100/90 p-1 rounded-2xl border border-stone-200/80 shadow-2xs overflow-x-auto max-w-full">
-              <button
-                onClick={() => setActiveTab('home')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  activeTab === 'home'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                {t('navHome')}
-              </button>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  activeTab === 'events'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                {t('navEvents')}
-              </button>
-              <button
-                onClick={() => setActiveTab('verse')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  activeTab === 'verse'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                {t('navVerse')}
-              </button>
-              <button
-                onClick={() => setActiveTab('youth')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  activeTab === 'youth'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                {t('navYouth')}
-              </button>
-              <button
-                onClick={() => setActiveTab('about')}
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  activeTab === 'about'
-                    ? 'bg-white text-stone-950 shadow-xs'
-                    : 'text-stone-500 hover:text-stone-900'
-                }`}
-              >
-                {t('navAbout')}
-              </button>
-            </div>
-
-          </div>
+          <nav className="hidden md:flex items-center w-fit mx-auto bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60">
+            {desktopNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-white text-stone-950 shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 opacity-75" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
 
@@ -401,8 +378,7 @@ function ChurchAppContent() {
       <button
         onClick={() => setPrayerModalOpen(true)}
         className="fixed bottom-20 sm:bottom-6 right-4 z-40 px-3.5 py-2.5 rounded-full bg-stone-950 hover:bg-stone-800 text-white shadow-lg border border-amber-500/30 flex items-center gap-2 text-xs font-bold active:scale-95 transition-all"
-        title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}
-      >
+        title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}>
         <HeartHandshake className="w-4 h-4 text-amber-400" />
         <span>{language === 'vi' ? 'Cầu Nguyện' : 'Prayer'}</span>
       </button>
