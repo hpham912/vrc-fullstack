@@ -1,0 +1,17 @@
+export const modalStyles = {
+  backdropBase: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs transition-opacity duration-200",
+  backdropVisible: "opacity-100",
+  backdropHidden: "opacity-0",
+  dialogBase: "bg-white rounded-3xl border border-stone-200 w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200",
+  dialogVisible: "opacity-100 scale-100 translate-y-0",
+  dialogHidden: "opacity-0 scale-95 translate-y-2",
+  header: "px-6 py-4 bg-stone-950 text-white flex items-center justify-between gap-3 flex-shrink-0",
+  headerLeft: "flex items-center gap-2.5 min-w-0",
+  iconWrap: "flex-shrink-0",
+  titleGroup: "min-w-0",
+  subtitle: "text-[11px] font-bold uppercase tracking-wider text-amber-400 block truncate",
+  title: "font-serif font-bold text-base sm:text-lg text-white truncate",
+  closeBtn: "p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors flex-shrink-0",
+  closeIcon: "w-4 h-4",
+  body: "overflow-y-auto flex-1",
+};

@@ -1,0 +1,453 @@
+import React, { useState } from 'react';
+import { DailyVerse } from '../../types/index.ts';
+import { useLanguage } from '../../context/LanguageContext.tsx';
+import { useAutoTranslate } from '../../hooks/useAutoTranslate.ts';
+import { CHURCH_NAME } from '../../constants/church.ts';
+import {
+  Volume2,
+  VolumeX,
+  Share2,
+  Copy,
+  Check,
+  Calendar,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Trash2,
+  Plus,
+  Sparkles,
+} from 'lucide-react';
+import {
+  ConfirmModal,
+  AdminActionButtons,
+  AdminAddButton,
+  Card,
+  Button,
+} from '../../common-component/index.ts';
+import { apiUrl, apiHeaders } from '../../utils/api.ts';
+import { useAuth } from '../../context/AuthContext.tsx';
+import { dailyVerseStyles as s } from './DailyVerseCard.styles.ts';
+
+interface DailyVerseCardProps {
+  todayVerse: DailyVerse | null;
+  allVerses: DailyVerse[];
+  isAdmin: boolean;
+  onRefresh?: () => void;
+  onOpenAdminPortal?: (tab?: string, eventToEdit?: any, verseToEdit?: DailyVerse | null) => void;
+}
+
+export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
+  todayVerse,
+  allVerses,
+  isAdmin,
+  onRefresh,
+  onOpenAdminPortal,
+}) => {
+  const { language, t } = useLanguage();
+  const { getToken } = useAuth();
+  const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(todayVerse);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [deleteTargetVerse, setDeleteTargetVerse] = useState<DailyVerse | null>(null);
+  const [deletingVerse, setDeletingVerse] = useState(false);
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [vDate, setVDate] = useState('');
+  const [vRef, setVRef] = useState('');
+  const [vText, setVText] = useState('');
+  const [vTrans, setVTrans] = useState('NIV');
+  const [vReflection, setVReflection] = useState('');
+  const [vPrayer, setVPrayer] = useState('');
+  const [fetchingScripture, setFetchingScripture] = useState(false);
+  const [savingVerse, setSavingVerse] = useState(false);
+
+  const openCreateVerseModal = () => {
+    setVDate(new Date().toISOString().split('T')[0]);
+    setVRef('');
+    setVText('');
+    setVTrans('NIV');
+    setVReflection('');
+    setVPrayer('');
+    setEditModalOpen(true);
+  };
+
+  const openEditVerseModal = (v: DailyVerse) => {
+    setVDate(v.date);
+    setVRef(v.reference);
+    setVText(v.verseText);
+    setVTrans(v.translation || 'NIV');
+    setVReflection(v.reflection);
+    setVPrayer(v.prayer || '');
+    setEditModalOpen(true);
+  };
+
+  const handleFetchScripture = async () => {
+    if (!vRef.trim()) return;
+    try {
+      setFetchingScripture(true);
+      const token = getToken();
+      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
+        method: 'POST',
+        headers: apiHeaders({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        }),
+        body: JSON.stringify({ passage: vRef.trim() }),
+      });
+      const raw = await res.text();
+      const data = raw ? JSON.parse(raw) : {};
+      if (res.ok && data.verseText) {
+        setVText(data.verseText);
+        if (data.translation) setVTrans(data.translation);
+      }
+    } catch {
+      // Ignore
+    } finally {
+      setFetchingScripture(false);
+    }
+  };
+
+  const handleSaveVerse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vDate || !vRef.trim() || !vText.trim() || !vReflection.trim()) return;
+    try {
+      setSavingVerse(true);
+      const token = getToken();
+      const res = await fetch(apiUrl('/api/verses'), {
+        method: 'POST',
+        headers: apiHeaders({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        }),
+        body: JSON.stringify({
+          date: vDate,
+          reference: vRef.trim(),
+          verseText: vText.trim(),
+          translation: vTrans.trim() || 'NIV',
+          reflection: vReflection.trim(),
+          prayer: vPrayer.trim() || null,
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setSelectedVerse(saved);
+        setEditModalOpen(false);
+        onRefresh?.();
+      }
+    } finally {
+      setSavingVerse(false);
+    }
+  };
+
+  const handleConfirmDeleteVerse = async () => {
+    if (!deleteTargetVerse) return;
+    try {
+      setDeletingVerse(true);
+      const token = getToken();
+      const res = await fetch(apiUrl(`/api/verses/${deleteTargetVerse.id}`), {
+        method: 'DELETE',
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
+      });
+      if (res.ok) {
+        const deletedId = deleteTargetVerse.id;
+        setDeletedIds((prev) => new Set(prev).add(deletedId));
+        if (selectedVerse?.id === deletedId) {
+          const nextVerse = allVerses.find((v) => v.id !== deletedId && !deletedIds.has(v.id)) || null;
+          setSelectedVerse(nextVerse);
+        }
+        setDeleteTargetVerse(null);
+        onRefresh?.();
+      }
+    } finally {
+      setDeletingVerse(false);
+    }
+  };
+
+  const verse = selectedVerse || todayVerse;
+
+  const pick = (vi?: string | null, en?: string | null, fallback?: string | null) => {
+    const direct = language === 'vi' ? vi : en;
+    if (direct && direct.trim()) return direct.trim();
+    return tr(fallback);
+  };
+
+  const { tr } = useAutoTranslate(
+    [
+      !(language === 'vi' ? verse?.referenceVi : verse?.referenceEn) ? verse?.reference : null,
+      !(language === 'vi' ? verse?.verseTextVi : verse?.verseTextEn) ? verse?.verseText : null,
+      !(language === 'vi' ? verse?.reflectionVi : verse?.reflectionEn) ? verse?.reflection : null,
+      !(language === 'vi' ? verse?.prayerVi : verse?.prayerEn) ? verse?.prayer : null,
+      ...(showArchive
+        ? allVerses.flatMap((v) => [
+            !(language === 'vi' ? v.referenceVi : v.referenceEn) ? v.reference : null,
+            !(language === 'vi' ? v.verseTextVi : v.verseTextEn) ? v.verseText : null,
+          ])
+        : []),
+    ],
+    language
+  );
+
+  React.useEffect(() => {
+    if (todayVerse && !selectedVerse) {
+      setSelectedVerse(todayVerse);
+    }
+  }, [todayVerse, selectedVerse]);
+
+  const toggleSpeech = () => {
+    if (!verse) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const textToRead = `${verse.reference}. ${verse.verseText}. ${verse.reflection}`;
+      const utterance = new SpeechSynthesisUtterance(textToRead);
+      utterance.lang = language === 'vi' ? 'vi-VN' : 'en-US';
+      utterance.rate = 0.9;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      setIsSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (!verse) return;
+    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\n${CHURCH_NAME.en} / ${CHURCH_NAME.vi}`;
+    navigator.clipboard.writeText(shareText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    if (!verse) return;
+    if (navigator.share) {
+      navigator.share({
+        title: `Daily Scripture: ${verse.reference}`,
+        text: `"${verse.verseText}" — ${verse.reference} (${verse.translation})`,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      copyToClipboard();
+    }
+  };
+
+  if (!verse) {
+    return (
+      <section className={s.section}>
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div>
+            <span className={s.tagText}>
+              {t('verseTag')}
+            </span>
+            <h2 className={s.heading}>
+              {t('verseTitle')}
+            </h2>
+          </div>
+          {isAdmin && onOpenAdminPortal && (
+            <AdminAddButton
+              onClick={() => onOpenAdminPortal('verses')}
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+            />
+          )}
+        </div>
+
+        <Card variant="empty" padding="empty">
+          <BookOpen className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+          <p className="font-serif font-bold text-stone-900 text-base">
+            {language === 'vi' ? 'Chưa có Câu Kinh Thánh nào' : 'No Scripture Available'}
+          </p>
+        </Card>
+      </section>
+    );
+  }
+
+  const verseDateFormatted = new Date(verse.date + 'T00:00:00').toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  return (
+    <section className={s.section}>
+      {/* Header bar */}
+      <div className={s.headerBar}>
+        <div className={s.titleGroup}>
+          <div>
+            <span className={s.tagText}>
+              {t('verseTag')}
+            </span>
+            <h2 className={s.heading}>
+              {t('verseTitle')}
+            </h2>
+          </div>
+          {isAdmin && onOpenAdminPortal && (
+            <AdminAddButton
+              onClick={() => onOpenAdminPortal('verses')}
+              className="sm:hidden"
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+            />
+          )}
+        </div>
+
+        {/* Action icons */}
+        <div className={s.actionsRow}>
+          <button
+            onClick={toggleSpeech}
+            className={`${s.audioBtnBase} ${isSpeaking ? s.audioBtnActive : s.audioBtnInactive}`}
+            title={isSpeaking ? 'Stop audio' : 'Listen to scripture'}
+          >
+            {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-700" />}
+            <span>{isSpeaking ? t('pauseAudio') : t('listenAudio')}</span>
+          </button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={copyToClipboard}
+            leftIcon={copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
+          >
+            <span>{copied ? t('copied') : t('copyVerse')}</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            leftIcon={<Share2 className="w-3.5 h-3.5 text-stone-400" />}
+          >
+            <span>{t('shareVerse')}</span>
+          </Button>
+
+          {isAdmin && onOpenAdminPortal && (
+            <AdminAddButton
+              onClick={() => onOpenAdminPortal('verses')}
+              className="hidden sm:flex"
+              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Main Scripture Card */}
+      <Card variant="warmElevated" padding="lg" className="space-y-6">
+        <div className={s.cardMetaRow}>
+          <div className={s.dateGroup}>
+            <Calendar className="w-4 h-4 text-amber-700" />
+            <span>{verseDateFormatted}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={s.translationBadge}>
+              {pick(verse.translationVi, verse.translationEn, verse.translation)}
+            </span>
+            {isAdmin && (
+              <AdminActionButtons
+                onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('verses', null, verse) : undefined}
+                onDelete={verse.id > 0 ? () => setDeleteTargetVerse(verse) : undefined}
+              />
+            )}
+          </div>
+        </div>
+
+        <blockquote className={s.blockquote}>
+          <p className={s.verseText}>
+            “{pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}”
+          </p>
+          <footer className={s.verseCiteFooter}>
+            <cite className={s.verseCite}>
+              — {pick(verse.referenceVi, verse.referenceEn, verse.reference)}
+            </cite>
+          </footer>
+        </blockquote>
+
+        <div className={s.reflectionSection}>
+          <h3 className={s.reflectionLabel}>
+            {t('reflectionTitle')}
+          </h3>
+          <p className={s.reflectionText}>
+            {pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}
+          </p>
+
+          {verse.prayer && (
+            <div className={s.prayerBox}>
+              <span className={s.prayerLabel}>
+                {t('prayerTitle')}
+              </span>
+              <p className={s.prayerText}>
+                "{pick(verse.prayerVi, verse.prayerEn, verse.prayer)}"
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Past Devotionals Archive */}
+      {allVerses.length > 1 && (
+        <div className={s.archiveWrapper}>
+          <button
+            onClick={() => setShowArchive(!showArchive)}
+            className={s.archiveToggleBtn}
+          >
+            <span className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-amber-700" />
+              <span>{t('browseArchive')} ({allVerses.length})</span>
+            </span>
+            {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showArchive && (
+            <div className={s.archiveGrid}>
+              {allVerses.map((item) => {
+                const isSelected = verse.id === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedVerse(item);
+                      if (isSpeaking) {
+                        window.speechSynthesis.cancel();
+                        setIsSpeaking(false);
+                      }
+                    }}
+                    className={`${s.archiveItemBase} ${
+                      isSelected ? s.archiveItemSelected : s.archiveItemUnselected
+                    }`}
+                  >
+                    <div className={s.archiveItemMeta}>
+                      <span>{item.date}</span>
+                      <span className="font-bold text-amber-800">{item.translation}</span>
+                    </div>
+                    <p className={s.archiveItemRef}>{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
+                    <p className={s.archiveItemSnippet}>"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+      {/* Common Confirmation Modal for Delete */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetVerse)}
+        title={language === 'vi' ? 'Xóa Câu Kinh Thánh?' : 'Delete Scripture?'}
+        message={
+          language === 'vi'
+            ? `Bạn có chắc chắn muốn xóa câu Kinh Thánh "${deleteTargetVerse?.reference}"?`
+            : `Are you sure you want to delete "${deleteTargetVerse?.reference}"?`
+        }
+        confirmText={language === 'vi' ? 'Xóa' : 'Delete'}
+        loading={deletingVerse}
+        onConfirm={handleConfirmDeleteVerse}
+        onCancel={() => setDeleteTargetVerse(null)}
+      />
+    </section>
+  );
+};

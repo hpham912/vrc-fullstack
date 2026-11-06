@@ -1,0 +1,46 @@
+export const dailyVerseStyles = {
+  section: 'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto',
+  headerBar: 'flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8',
+  titleGroup: 'flex items-center justify-between gap-3 w-full sm:w-auto',
+  tagText: 'text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-amber-700 block mb-1',
+  heading: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
+  mobileAddBtn:
+    'sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
+  desktopAddBtn:
+    'hidden sm:flex w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
+  actionsRow: 'flex items-center gap-1.5 sm:gap-2',
+  audioBtnBase: 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
+  audioBtnActive: 'bg-amber-600 text-white border-amber-600 animate-pulse',
+  audioBtnInactive: 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50',
+  actionBtn:
+    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors',
+  emptyCard: 'py-12 sm:py-16 text-center bg-white rounded-3xl border border-stone-200/70 p-8 shadow-xs',
+  mainCard: 'bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-12 shadow-xs space-y-6 sm:space-y-8',
+  cardMetaRow:
+    'flex items-center justify-between text-xs text-stone-700 font-semibold pb-3 border-b border-stone-100',
+  dateGroup: 'flex items-center gap-2',
+  translationBadge:
+    'font-bold text-stone-800 bg-stone-100 px-2.5 py-0.5 rounded-md text-xs border border-stone-200',
+  editIconBtn: 'p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors',
+  deleteIconBtn: 'p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors',
+  blockquote: 'my-4 sm:my-6',
+  verseText: 'font-serif text-xl sm:text-3xl text-stone-950 leading-relaxed tracking-normal font-medium',
+  verseCiteFooter: 'mt-4 text-right',
+  verseCite: 'font-serif text-base sm:text-lg font-bold text-amber-900 not-italic',
+  reflectionSection: 'pt-4 sm:pt-6 border-t border-stone-100 space-y-2.5 sm:space-y-3',
+  reflectionLabel: 'text-xs font-bold uppercase tracking-wider text-stone-800',
+  reflectionText: 'text-stone-900 text-xs sm:text-base leading-relaxed whitespace-pre-line font-normal',
+  prayerBox: 'mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 border border-amber-200',
+  prayerLabel: 'text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-950 block mb-1',
+  prayerText: 'font-serif italic text-stone-900 text-xs sm:text-sm leading-relaxed font-medium',
+  archiveWrapper: 'mt-6 sm:mt-8',
+  archiveToggleBtn:
+    'flex items-center justify-between w-full p-4 bg-white hover:bg-stone-50 border border-stone-300 rounded-2xl text-stone-800 text-xs font-bold transition-colors shadow-2xs',
+  archiveGrid: 'mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3',
+  archiveItemBase: 'p-4 rounded-xl cursor-pointer border text-left transition-all',
+  archiveItemSelected: 'bg-amber-50/80 border-amber-300 ring-1 ring-amber-300',
+  archiveItemUnselected: 'bg-white hover:bg-stone-50 border-stone-200',
+  archiveItemMeta: 'flex items-center justify-between text-xs text-stone-600 font-semibold mb-1',
+  archiveItemRef: 'font-serif font-bold text-stone-950 text-sm',
+  archiveItemSnippet: 'text-stone-700 text-xs line-clamp-2 mt-1 font-medium',
+};
