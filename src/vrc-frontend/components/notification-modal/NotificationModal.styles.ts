@@ -9,11 +9,6 @@ export const notificationModalStyles = {
   headerTitle: 'font-serif font-bold text-sm sm:text-base leading-tight',
   headerSub: 'text-stone-300 text-xs font-medium',
   closeIconBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors',
-  pushBanner:
-    'px-4 py-2.5 bg-amber-50 border-b border-amber-200/60 flex items-center justify-between gap-2 text-xs',
-  pushBannerLeft: 'flex items-center gap-1.5 text-stone-900 text-xs font-medium',
-  enableBtn:
-    'px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs whitespace-nowrap shadow-2xs transition-all',
   listContainer: 'flex-1 overflow-y-auto p-3.5 space-y-2.5',
   emptyBox: 'text-center py-10 px-4 space-y-2',
   emptyIconBox: 'w-10 h-10 rounded-2xl bg-stone-100 mx-auto flex items-center justify-center text-stone-500',

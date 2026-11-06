@@ -26,6 +26,8 @@ import {
   BookOpen,
   Flame,
   ShieldCheck,
+  Bell,
+  X,
 } from 'lucide-react';
 import { appStyles as s } from './App.styles.ts';
 
@@ -41,6 +43,7 @@ function ChurchAppContent() {
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [toastNotification, setToastNotification] = useState<{ id?: any; title: string; body: string } | null>(null);
 
   // Hydrate spotlightConfig and churchInfo immediately from localStorage so edits never revert on refresh
   const [spotlightConfig, setSpotlightConfig] = useState<SpotlightBannerConfig | null>(() => {
@@ -134,6 +137,11 @@ function ChurchAppContent() {
         try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData)); } catch {}
       }
       setNotifications(notifs);
+
+      // Automatically schedule 1-hour before event reminders for all upcoming events
+      if (Array.isArray(rawEvents) && rawEvents.length > 0) {
+        NotificationClient.scheduleEventReminders(rawEvents);
+      }
     } catch (err) {
       console.error('Error fetching church data from database:', err);
     } finally {
@@ -143,7 +151,40 @@ function ChurchAppContent() {
 
   useEffect(() => {
     loadData();
-    NotificationClient.requestPermission();
+    // Prompt permission so notifications are enabled by default
+    NotificationClient.requestPermission().then((granted) => {
+      if (granted && events.length > 0) {
+        NotificationClient.scheduleEventReminders(events);
+      }
+    });
+
+    // Check periodically (every 5 minutes) in case an event reaches the 1-hour reminder window while user is in the app
+    const interval = setInterval(() => {
+      if (events.length > 0) {
+        NotificationClient.scheduleEventReminders(events);
+      }
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (events.length > 0) {
+      NotificationClient.scheduleEventReminders(events);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    const handleToast = (e: any) => {
+      if (e?.detail) {
+        setToastNotification(e.detail);
+        setTimeout(() => {
+          setToastNotification((prev) => (prev?.id === e.detail.id ? null : prev));
+        }, 6000);
+      }
+    };
+    window.addEventListener('vrc-toast-notification', handleToast);
+    return () => window.removeEventListener('vrc-toast-notification', handleToast);
   }, []);
 
   const openAdminWithTab = (
@@ -401,6 +442,36 @@ function ChurchAppContent() {
       <div className={s.mobileVersionBar}>
         v{APP_VERSION} • {APP_BUILD_DATE}
       </div>
+
+      {/* Real-time In-App Notification Toast for Web/Browser */}
+      {toastNotification && (
+        <div className="fixed top-4 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[9999] bg-stone-900/95 backdrop-blur-md text-white border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-3 duration-300">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 flex-shrink-0 mt-0.5">
+            <Bell className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0 pr-1">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                {language === 'vi' ? 'Nhắc Nhở Sự Kiện • 1 Giờ' : 'Event Reminder • 1 Hour'}
+              </span>
+              <span className="text-[10px] text-stone-400">VRC</span>
+            </div>
+            <h4 className="font-bold text-xs sm:text-sm text-white line-clamp-1 mt-0.5">
+              {toastNotification.title}
+            </h4>
+            <p className="text-xs text-stone-300 line-clamp-2 mt-0.5">
+              {toastNotification.body}
+            </p>
+          </div>
+          <button
+            onClick={() => setToastNotification(null)}
+            className="text-stone-400 hover:text-white p-1 rounded-lg"
+            title="Đóng / Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <PrayerRequestModal
         isOpen={prayerModalOpen}

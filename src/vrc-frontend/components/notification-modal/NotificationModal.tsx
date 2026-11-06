@@ -10,7 +10,6 @@ import {
   Calendar,
   BookOpen,
   Megaphone,
-  Volume2,
 } from 'lucide-react';
 import { Button } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
@@ -19,7 +18,7 @@ interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   notifications: AppNotification[];
-  onRequestPermission: () => void;
+  onRequestPermission?: () => void;
   onSelectNotification?: (notif: AppNotification) => void;
 }
 
@@ -27,7 +26,6 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
   notifications,
-  onRequestPermission,
   onSelectNotification,
 }) => {
   const { language } = useLanguage();
@@ -112,26 +110,6 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           >
             <X className="w-4 h-4" />
           </button>
-        </div>
-
-        {/* Push Notification Banner */}
-        <div className={s.pushBanner}>
-          <div className={s.pushBannerLeft}>
-            <Volume2 className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
-            <span>
-              {language === 'vi'
-                ? 'Nhận thông báo sự kiện & câu Kinh Thánh'
-                : 'Get alerts for events and scripture'}
-            </span>
-          </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="xs"
-            onClick={onRequestPermission}
-          >
-            {language === 'vi' ? 'Bật' : 'Enable'}
-          </Button>
         </div>
 
         {/* Notifications List */}
