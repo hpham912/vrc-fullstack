@@ -112,11 +112,14 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     language
   );
 
+  // A newly saved (or edited) verse always replaces the card — no
+  // tapping needed. Archive taps still work: they only change the
+  // selection until the next today-verse change arrives.
   React.useEffect(() => {
-    if (todayVerse && !selectedVerse) {
+    if (todayVerse) {
       setSelectedVerse(todayVerse);
     }
-  }, [todayVerse, selectedVerse]);
+  }, [todayVerse?.id, todayVerse?.updatedAt]);
 
   const toggleSpeech = () => {
     if (!verse) return;

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChurchEvent, ChurchInfo, DailyVerse, Announcement } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { APP_VERSION } from '../../constants/version.ts';
 import { NotificationClient } from '../../services/notificationClient.ts';
+import { fetchScripture } from '../../services/scriptureApi.ts';
 import { Modal } from '../../common-component/modal/Modal.tsx';
+import { Button } from '../../common-component/index.ts';
 import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import {
   Calendar,
@@ -147,9 +149,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
+  // Errors stay on screen until dismissed — a vanished error looks
+  // like nothing happened. Success messages still auto-hide.
+  const feedbackTimeout = useRef<number | null>(null);
   const showFeedback = (type: 'success' | 'error', message: string) => {
+    if (feedbackTimeout.current) {
+      window.clearTimeout(feedbackTimeout.current);
+      feedbackTimeout.current = null;
+    }
     setFeedback({ type, message });
-    setTimeout(() => setFeedback(null), 4000);
+    if (type === 'success') {
+      feedbackTimeout.current = window.setTimeout(() => setFeedback(null), 4000);
+    }
   };
 
   const loadAdminAccounts = async () => {
@@ -402,18 +413,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
     try {
       setFetchingScripture(true);
-      const token = getToken();
-      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
-        method: 'POST',
-        headers: apiHeaders({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        }),
-        body: JSON.stringify({ passage }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.verseTextEn || !data.verseTextVi) {
-        throw new Error(data?.error || `Failed to fetch scripture (HTTP ${res.status})`);
+      const data = await fetchScripture(passage, getToken());
+      if (!data.verseTextEn || !data.verseTextVi) {
+        throw new Error('Failed to fetch scripture');
       }
       const fetchedRefEn = data.referenceEn || data.reference || passage;
       const fetchedRefVi = data.referenceVi || data.reference || passage;
@@ -678,7 +680,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             ) : (
               <AlertCircle className={s.alertIconError} />
             )}
-            <span>{feedback.message}</span>
+            <span className="flex-1">{feedback.message}</span>
+            <button
+              type="button"
+              onClick={() => setFeedback(null)}
+              className="flex-shrink-0 p-1 rounded-lg hover:bg-black/5"
+              aria-label="Dismiss"
+              title={language === 'vi' ? 'Đóng' : 'Dismiss'}
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -1258,8 +1269,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </button>
                     )}
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant="primary"
+                    size="sm"
                     onClick={handleFetchScriptureForVerse}
                     disabled={fetchingScripture || isScriptureFetchedForCurrentRef || (!verseReferenceEn.trim() && !verseReferenceVi.trim())}
                     title={
@@ -1267,9 +1280,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         ? (language === 'vi' ? 'Đã lấy câu này rồi. Đổi câu Kinh Thánh để lấy lại.' : 'Already fetched for this reference. Change the reference to fetch again.')
                         : (language === 'vi' ? 'Nhập câu Kinh Thánh ở trên rồi bấm để lấy nội dung thật (NIV + 1925)' : 'Enter a reference above, then fetch the real text (NIV + 1925)')
                     }
-                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+                    leftIcon={<Sparkles className="w-3.5 h-3.5" />}
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
                     <span>
                       {fetchingScripture
                         ? (language === 'vi' ? 'Đang lấy...' : 'Fetching...')
@@ -1277,7 +1289,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           ? (language === 'vi' ? 'Đã lấy ✓' : 'Fetched ✓')
                           : (language === 'vi' ? 'Lấy từ Kinh Thánh' : 'Fetch from Bible')}
                     </span>
-                  </button>
+                  </Button>
                 </div>
 
                 {editingVerseId && editingVerseAudit && (

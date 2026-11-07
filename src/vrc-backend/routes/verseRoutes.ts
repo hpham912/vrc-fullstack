@@ -233,6 +233,11 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       }
     }
 
+    // Keep only the 10 latest verses in the DB so it never fills up:
+    // adding a verse is the one path that grows the table, so prune
+    // here (the list endpoint already prunes on read).
+    await enforceMaxTenVerses();
+
     // Trigger push notification record in PostgreSQL
     await BackendNotificationService.recordNotification(
       `Scripture of the Day: ${finalRefEn}`,
