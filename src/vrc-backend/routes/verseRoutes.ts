@@ -51,14 +51,14 @@ router.get('/today', async (req, res) => {
         verseText:
           'If my people, who are called by my name, will humble themselves and pray and seek my face and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land.',
         verseTextVi:
-          'Nếu dân sự ta, là dân được gọi bằng danh ta, hạ mình xuống, cầu nguyện, tìm kiếm mặt ta và từ bỏ con đường tà, thì từ trên trời ta sẽ lắng nghe, tha thứ tội lỗi họ và chữa lành đất nước họ.',
+          'và nhược bằng dân sự ta, là dân gọi bằng danh ta, hạ mình xuống, cầu nguyện, tìm kiếm mặt ta, và trở lại, bỏ con đường tà, thì ta ở trên trời sẽ nghe, tha thứ tội chúng nó, và cứu xứ họ khỏi tai vạ.',
         verseTextEn:
           'If my people, who are called by my name, will humble themselves and pray and seek my face and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land.',
         reference: '2 Chronicles 7:14 (2 Sử Ký 7:14)',
         referenceVi: '2 Sử Ký 7:14',
         referenceEn: '2 Chronicles 7:14',
         translation: 'NIV',
-        translationVi: 'RVV11',
+        translationVi: '1925',
         translationEn: 'NIV',
         reflection:
           'God’s promise of revival begins when His people unite in humility, sincere prayer, and wholehearted devotion.',
@@ -127,7 +127,7 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     const finalRefEn = String(referenceEn || reference || referenceVi || '').trim();
     const finalRefVi = String(referenceVi || reference || referenceEn || '').trim();
     const finalTransEn = String(translationEn || translation || 'NIV').trim();
-    const finalTransVi = String(translationVi || translation || 'RVV11').trim();
+    const finalTransVi = String(translationVi || translation || '1925').trim();
     const finalReflEn = String(reflectionEn || reflection || reflectionVi || '').trim();
     const finalReflVi = String(reflectionVi || reflection || reflectionEn || '').trim();
     const finalPrayerEn =
@@ -275,7 +275,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
     const finalRefEn = String(referenceEn || reference || referenceVi || '').trim();
     const finalRefVi = String(referenceVi || reference || referenceEn || '').trim();
     const finalTransEn = String(translationEn || translation || 'NIV').trim();
-    const finalTransVi = String(translationVi || translation || 'RVV11').trim();
+    const finalTransVi = String(translationVi || translation || '1925').trim();
     const finalReflEn = String(reflectionEn || reflection || reflectionVi || finalVerseEn).trim();
     const finalReflVi = String(reflectionVi || reflection || reflectionEn || finalVerseVi).trim();
     const finalPrayerEn =

@@ -97,7 +97,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [verseDate, setVerseDate] = useState(new Date().toISOString().split('T')[0]);
   const [verseReferenceVi, setVerseReferenceVi] = useState('');
   const [verseReferenceEn, setVerseReferenceEn] = useState('');
-  const [verseTranslationVi, setVerseTranslationVi] = useState('RVV11');
+  const [verseTranslationVi, setVerseTranslationVi] = useState('1925');
   const [verseTranslationEn, setVerseTranslationEn] = useState('NIV');
   const [verseTextVi, setVerseTextVi] = useState('');
   const [verseTextEn, setVerseTextEn] = useState('');
@@ -106,6 +106,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [versePrayerVi, setVersePrayerVi] = useState('');
   const [versePrayerEn, setVersePrayerEn] = useState('');
   const [verseTheme, setVerseTheme] = useState('Revival & Faith');
+  const [fetchingScripture, setFetchingScripture] = useState(false);
   const [editingEventAudit, setEditingEventAudit] = useState<{
     createdBy?: string | null;
     createdAt?: string;
@@ -204,7 +205,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setVerseDate(new Date().toISOString().split('T')[0]);
     setVerseReferenceVi('');
     setVerseReferenceEn('');
-    setVerseTranslationVi('RVV11');
+    setVerseTranslationVi('1925');
     setVerseTranslationEn('NIV');
     setVerseTextVi('');
     setVerseTextEn('');
@@ -221,7 +222,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setVerseDate(v.date);
     setVerseReferenceVi(v.referenceVi || v.reference || '');
     setVerseReferenceEn(v.referenceEn || v.reference || '');
-    setVerseTranslationVi(v.translationVi || 'RVV11');
+    setVerseTranslationVi(v.translationVi || '1925');
     setVerseTranslationEn(v.translationEn || v.translation || 'NIV');
     setVerseTextVi(v.verseTextVi || v.verseText || '');
     setVerseTextEn(v.verseTextEn || v.verseText || '');
@@ -377,6 +378,49 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
+  // Fetch real EN + VI scripture text from POST /api/ai/fetch-scripture
+  // (apibible: NIV English + Kinh Thánh 1925 Vietnamese) and fill both
+  // sides of the form. Never machine-translate scripture here — both
+  // texts come from the Bible API, verse-for-verse.
+  const handleFetchScriptureForVerse = async () => {
+    const passage = verseReferenceEn.trim() || verseReferenceVi.trim();
+    if (!passage) {
+      showFeedback('error', language === 'vi'
+        ? 'Vui lòng nhập câu Kinh Thánh trước, ví dụ: Giăng 3:16 hoặc John 3:16.'
+        : 'Enter a scripture reference first, e.g. John 3:16 or Giăng 3:16.');
+      return;
+    }
+    try {
+      setFetchingScripture(true);
+      const token = getToken();
+      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
+        method: 'POST',
+        headers: apiHeaders({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        }),
+        body: JSON.stringify({ passage }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.verseTextEn || !data.verseTextVi) {
+        throw new Error(data?.error || `Failed to fetch scripture (HTTP ${res.status})`);
+      }
+      setVerseReferenceEn(data.referenceEn || data.reference || passage);
+      setVerseReferenceVi(data.referenceVi || data.reference || passage);
+      setVerseTextEn(data.verseTextEn);
+      setVerseTextVi(data.verseTextVi);
+      setVerseTranslationEn(data.translationEn || data.translation || 'NIV');
+      setVerseTranslationVi(data.translationVi || '1925');
+      showFeedback('success', language === 'vi'
+        ? `Đã lấy ${data.referenceEn || passage} (NIV + 1925).`
+        : `Fetched ${data.referenceEn || passage} (NIV + 1925).`);
+    } catch (err: any) {
+      showFeedback('error', err.message || 'Error fetching scripture');
+    } finally {
+      setFetchingScripture(false);
+    }
+  };
+
   const handleSaveVerse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verseDate || !verseReferenceVi.trim() || !verseReferenceEn.trim() || !verseTextVi.trim() || !verseTextEn.trim()) {
@@ -401,7 +445,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           referenceVi: verseReferenceVi.trim(),
           referenceEn: verseReferenceEn.trim(),
           translation: verseTranslationEn.trim() || 'NIV',
-          translationVi: verseTranslationVi.trim() || 'RVV11',
+          translationVi: verseTranslationVi.trim() || '1925',
           translationEn: verseTranslationEn.trim() || 'NIV',
           verseText: verseTextEn.trim(),
           verseTextVi: verseTextVi.trim(),
@@ -1199,6 +1243,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </button>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleFetchScriptureForVerse}
+                    disabled={fetchingScripture || (!verseReferenceEn.trim() && !verseReferenceVi.trim())}
+                    title={language === 'vi' ? 'Nhập câu Kinh Thánh ở trên rồi bấm để lấy nội dung thật (NIV + 1925)' : 'Enter a reference above, then fetch the real text (NIV + 1925)'}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>
+                      {fetchingScripture
+                        ? (language === 'vi' ? 'Đang lấy...' : 'Fetching...')
+                        : (language === 'vi' ? 'Lấy từ Kinh Thánh' : 'Fetch from Bible')}
+                    </span>
+                  </button>
                 </div>
 
                 {editingVerseId && editingVerseAudit && (
@@ -1260,7 +1318,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <input
                       type="text"
                       required
-                      placeholder="Ví dụ: RVV11 hoặc Truyền Thống"
+                      placeholder="1925"
                       value={verseTranslationVi}
                       onChange={(e) => setVerseTranslationVi(e.target.value)}
                       className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"

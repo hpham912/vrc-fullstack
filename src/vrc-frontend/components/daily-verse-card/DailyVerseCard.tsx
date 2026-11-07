@@ -54,93 +54,15 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   const [deleteTargetVerse, setDeleteTargetVerse] = useState<DailyVerse | null>(null);
   const [deletingVerse, setDeletingVerse] = useState(false);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [vDate, setVDate] = useState('');
-  const [vRef, setVRef] = useState('');
-  const [vText, setVText] = useState('');
-  const [vTrans, setVTrans] = useState('NIV');
-  const [vReflection, setVReflection] = useState('');
-  const [vPrayer, setVPrayer] = useState('');
-  const [fetchingScripture, setFetchingScripture] = useState(false);
-  const [savingVerse, setSavingVerse] = useState(false);
 
-  const openCreateVerseModal = () => {
-    setVDate(new Date().toISOString().split('T')[0]);
-    setVRef('');
-    setVText('');
-    setVTrans('NIV');
-    setVReflection('');
-    setVPrayer('');
-    setEditModalOpen(true);
-  };
-
-  const openEditVerseModal = (v: DailyVerse) => {
-    setVDate(v.date);
-    setVRef(v.reference);
-    setVText(v.verseText);
-    setVTrans(v.translation || 'NIV');
-    setVReflection(v.reflection);
-    setVPrayer(v.prayer || '');
-    setEditModalOpen(true);
-  };
-
-  const handleFetchScripture = async () => {
-    if (!vRef.trim()) return;
-    try {
-      setFetchingScripture(true);
-      const token = getToken();
-      const res = await fetch(apiUrl('/api/ai/fetch-scripture'), {
-        method: 'POST',
-        headers: apiHeaders({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        }),
-        body: JSON.stringify({ passage: vRef.trim() }),
-      });
-      const raw = await res.text();
-      const data = raw ? JSON.parse(raw) : {};
-      if (res.ok && data.verseText) {
-        setVText(data.verseText);
-        if (data.translation) setVTrans(data.translation);
-      }
-    } catch {
-      // Ignore
-    } finally {
-      setFetchingScripture(false);
-    }
-  };
-
-  const handleSaveVerse = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!vDate || !vRef.trim() || !vText.trim() || !vReflection.trim()) return;
-    try {
-      setSavingVerse(true);
-      const token = getToken();
-      const res = await fetch(apiUrl('/api/verses'), {
-        method: 'POST',
-        headers: apiHeaders({
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        }),
-        body: JSON.stringify({
-          date: vDate,
-          reference: vRef.trim(),
-          verseText: vText.trim(),
-          translation: vTrans.trim() || 'NIV',
-          reflection: vReflection.trim(),
-          prayer: vPrayer.trim() || null,
-        }),
-      });
-      if (res.ok) {
-        const saved = await res.json();
-        setSelectedVerse(saved);
-        setEditModalOpen(false);
-        onRefresh?.();
-      }
-    } finally {
-      setSavingVerse(false);
-    }
-  };
+  // NOTE: Verse creation/editing lives in AdminPortal, which has separate
+  // Vietnamese + English fields. This card used to carry its own dead
+  // single-language create/edit modal (never rendered, and its save only
+  // posted one `verseText`, so the backend copied English into the
+  // Vietnamese field). It was removed — do not re-add a single-text
+  // verse form here. Admins add verses via onOpenAdminPortal('verses'),
+  // and that form has a "Fetch from Bible" button backed by
+  // POST /api/ai/fetch-scripture, which returns real EN + VI text.
 
   const handleConfirmDeleteVerse = async () => {
     if (!deleteTargetVerse) return;
@@ -206,7 +128,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const textToRead = `${verse.reference}. ${verse.verseText}. ${verse.reflection}`;
+      const textToRead = `${pick(verse.referenceVi, verse.referenceEn, verse.reference)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`;
       const utterance = new SpeechSynthesisUtterance(textToRead);
       utterance.lang = language === 'vi' ? 'vi-VN' : 'en-US';
       utterance.rate = 0.9;
@@ -219,7 +141,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
   const copyToClipboard = () => {
     if (!verse) return;
-    const shareText = `"${verse.verseText}" — ${verse.reference} (${verse.translation})\n\n${CHURCH_NAME.en} / ${CHURCH_NAME.vi}`;
+    const shareText = `"${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}" — ${pick(verse.referenceVi, verse.referenceEn, verse.reference)} (${pick(verse.translationVi, verse.translationEn, verse.translation)})\n\n${CHURCH_NAME.en} / ${CHURCH_NAME.vi}`;
     navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -229,8 +151,8 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     if (!verse) return;
     if (navigator.share) {
       navigator.share({
-        title: `Daily Scripture: ${verse.reference}`,
-        text: `"${verse.verseText}" — ${verse.reference} (${verse.translation})`,
+        title: `Daily Scripture: ${pick(verse.referenceVi, verse.referenceEn, verse.reference)}`,
+        text: `"${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}" — ${pick(verse.referenceVi, verse.referenceEn, verse.reference)} (${pick(verse.translationVi, verse.translationEn, verse.translation)})`,
         url: window.location.href,
       }).catch(() => {});
     } else {
@@ -419,7 +341,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                   >
                     <div className={s.archiveItemMeta}>
                       <span>{formatDateLocale(item.date, language)}</span>
-                      <span className="font-bold text-amber-800">{item.translation}</span>
+                      <span className="font-bold text-amber-800">{pick(item.translationVi, item.translationEn, item.translation)}</span>
                     </div>
                     <p className={s.archiveItemRef}>{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
                     <p className={s.archiveItemSnippet}>"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
