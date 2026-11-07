@@ -160,6 +160,15 @@ export const getDayNumber = (dateInput: string | Date | null | undefined): strin
 };
 
 /**
+ * Returns year string (e.g. "2026")
+ */
+export const getYear = (dateInput: string | Date | null | undefined): string => {
+  const d = parseSafeDate(dateInput);
+  if (!d) return '';
+  return String(d.getFullYear());
+};
+
+/**
  * Combined Weekday + Locale Date:
  * - Vietnamese: "Chúa Nhật, 08-11-2026"
  * - English: "Sunday, 11-08-2026"

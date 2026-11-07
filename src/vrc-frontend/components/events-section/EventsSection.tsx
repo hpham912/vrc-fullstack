@@ -31,6 +31,7 @@ import {
   ConfirmModal,
   DirectionButtons,
   CalendarButtons,
+  FeaturedStar,
   AdminActionButtons,
   AdminAddButton,
   Card,
@@ -42,6 +43,7 @@ import {
   getWeekdayName,
   getMonthText,
   getDayNumber,
+  getYear,
   formatWeekdayAndDate,
 } from '../../utils/dateFormatter.ts';
 import { getCategoryTheme, getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
@@ -274,6 +276,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             const weekday = getWeekdayName(evt.date, language);
             const monthShort = getMonthText(evt.date, language, true);
             const dayNum = getDayNumber(evt.date);
+            const year = getYear(evt.date);
             const theme = getCategoryTheme(evt.category);
             const CategoryIcon = theme.icon;
 
@@ -283,18 +286,13 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 onClick={() => setSelectedDetailEvent(evt)}
                 className={`${s.eventCardBase} ${theme.cardBg}`}
               >
-                {/* Top Row: Category Pill + Featured Pill + Admin Actions (Date removed from top right) */}
+                {/* Top Row: Category Pill + Admin Actions (Date removed from top right) */}
                 <div className={s.cardTopRow}>
                   <div className={s.badgeGroup}>
                     <span className={`${s.categoryBadgeBase} ${theme.badge}`}>
                       <CategoryIcon className="w-3 h-3" />
                       <span>{getCategoryLabel(evt.category)}</span>
                     </span>
-                    {evt.isFeatured && (
-                      <span className={s.featuredBadge}>
-                        {t('featuredBadge')}
-                      </span>
-                    )}
                   </div>
 
                   {isAdmin && (
@@ -307,10 +305,13 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   )}
                 </div>
 
-                {/* Main Content Area */}
+                {/* Main Content Area: tall date box + title/time + calendar menu */}
                 <div className={s.cardMainRow}>
-                  {/* Consolidated Calendar Date Card: Weekday (Sunday/Friday), Day Number, Month */}
+                  {/* Date box stretches the full row height, level with the calendar button */}
                   <div className={`${s.dateBoxBase} ${theme.dateBox}`}>
+                    {evt.isFeatured && (
+                      <FeaturedStar className={s.dateBoxStarPosition} />
+                    )}
                     <span className={s.dateBoxWeekday}>
                       {weekday}
                     </span>
@@ -320,10 +321,13 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
                       {monthShort}
                     </span>
+                    <span className={s.dateBoxYear}>
+                      {year}
+                    </span>
                   </div>
 
-                  {/* Title & Timing */}
-                  <div className={s.cardTitleCol}>
+                  {/* Title & Timing + Calendar Menu */}
+                  <div className={s.cardRightCol}>
                     <h3 className={s.cardTitle}>
                       {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                     </h3>
@@ -332,11 +336,12 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                       <Clock className="w-3.5 h-3.5 text-amber-800 flex-shrink-0" />
                       <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
                     </div>
+
+                    <div className={s.cardMenuRow}>
+                      <CalendarButtons event={evt} stopPropagation variant="menu" />
+                    </div>
                   </div>
                 </div>
-
-                {/* Footer Actions */}
-                <CalendarButtons event={evt} stopPropagation className="pt-1" />
               </div>
             );
           })}
