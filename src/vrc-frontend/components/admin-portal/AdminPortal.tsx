@@ -107,6 +107,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [versePrayerEn, setVersePrayerEn] = useState('');
   const [verseTheme, setVerseTheme] = useState('Revival & Faith');
   const [fetchingScripture, setFetchingScripture] = useState(false);
+  // Reference the last successful "Fetch from Bible" was for, as
+  // "referenceEn|referenceVi". While the form still shows that exact
+  // reference the button stays disabled; editing either reference
+  // changes the key and re-enables it.
+  const [fetchedScriptureKey, setFetchedScriptureKey] = useState<string | null>(null);
+  const isScriptureFetchedForCurrentRef =
+    fetchedScriptureKey !== null &&
+    fetchedScriptureKey === `${verseReferenceEn.trim()}|${verseReferenceVi.trim()}`;
   const [editingEventAudit, setEditingEventAudit] = useState<{
     createdBy?: string | null;
     createdAt?: string;
@@ -214,6 +222,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setVersePrayerVi('');
     setVersePrayerEn('');
     setVerseTheme('Revival & Faith');
+    setFetchedScriptureKey(null);
     setEditingVerseAudit(null);
   };
 
@@ -231,6 +240,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setVersePrayerVi(v.prayerVi || v.prayer || '');
     setVersePrayerEn(v.prayerEn || v.prayer || '');
     setVerseTheme(v.theme || 'Revival & Faith');
+    setFetchedScriptureKey(null);
     setEditingVerseAudit({
       createdBy: v.createdBy,
       createdAt: v.createdAt,
@@ -405,12 +415,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       if (!res.ok || !data.verseTextEn || !data.verseTextVi) {
         throw new Error(data?.error || `Failed to fetch scripture (HTTP ${res.status})`);
       }
-      setVerseReferenceEn(data.referenceEn || data.reference || passage);
-      setVerseReferenceVi(data.referenceVi || data.reference || passage);
+      const fetchedRefEn = data.referenceEn || data.reference || passage;
+      const fetchedRefVi = data.referenceVi || data.reference || passage;
+      setVerseReferenceEn(fetchedRefEn);
+      setVerseReferenceVi(fetchedRefVi);
       setVerseTextEn(data.verseTextEn);
       setVerseTextVi(data.verseTextVi);
+      // Bible versions come from the API response (NIV + 1925), so the
+      // version fields fill themselves — no typing needed.
       setVerseTranslationEn(data.translationEn || data.translation || 'NIV');
       setVerseTranslationVi(data.translationVi || '1925');
+      setFetchedScriptureKey(`${fetchedRefEn.trim()}|${fetchedRefVi.trim()}`);
       showFeedback('success', language === 'vi'
         ? `Đã lấy ${data.referenceEn || passage} (NIV + 1925).`
         : `Fetched ${data.referenceEn || passage} (NIV + 1925).`);
@@ -1246,15 +1261,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <button
                     type="button"
                     onClick={handleFetchScriptureForVerse}
-                    disabled={fetchingScripture || (!verseReferenceEn.trim() && !verseReferenceVi.trim())}
-                    title={language === 'vi' ? 'Nhập câu Kinh Thánh ở trên rồi bấm để lấy nội dung thật (NIV + 1925)' : 'Enter a reference above, then fetch the real text (NIV + 1925)'}
+                    disabled={fetchingScripture || isScriptureFetchedForCurrentRef || (!verseReferenceEn.trim() && !verseReferenceVi.trim())}
+                    title={
+                      isScriptureFetchedForCurrentRef
+                        ? (language === 'vi' ? 'Đã lấy câu này rồi. Đổi câu Kinh Thánh để lấy lại.' : 'Already fetched for this reference. Change the reference to fetch again.')
+                        : (language === 'vi' ? 'Nhập câu Kinh Thánh ở trên rồi bấm để lấy nội dung thật (NIV + 1925)' : 'Enter a reference above, then fetch the real text (NIV + 1925)')
+                    }
                     className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>
                       {fetchingScripture
                         ? (language === 'vi' ? 'Đang lấy...' : 'Fetching...')
-                        : (language === 'vi' ? 'Lấy từ Kinh Thánh' : 'Fetch from Bible')}
+                        : isScriptureFetchedForCurrentRef
+                          ? (language === 'vi' ? 'Đã lấy ✓' : 'Fetched ✓')
+                          : (language === 'vi' ? 'Lấy từ Kinh Thánh' : 'Fetch from Bible')}
                     </span>
                   </button>
                 </div>

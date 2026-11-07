@@ -199,30 +199,37 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       updatedAt: new Date(),
     };
 
+    // NOTE: do NOT use .onConflictDoUpdate({ target: dailyVerses.date })
+    // here. The Drizzle schema declares date as .unique(), but the live
+    // daily_verses table was created without that unique constraint, so
+    // Postgres rejects ON CONFLICT (date) with "there is no unique or
+    // exclusion constraint matching the ON CONFLICT specification" — even
+    // for a brand-new date. Check-then-insert/update works with the
+    // table as it actually exists.
     let inserted: any[];
-    try {
+    const existingForDate = await db
+      .select({ id: dailyVerses.id })
+      .from(dailyVerses)
+      .where(eq(dailyVerses.date, date))
+      .limit(1);
+
+    if (existingForDate.length > 0) {
       inserted = await db
-        .insert(dailyVerses)
-        .values(insertValues)
-        .onConflictDoUpdate({
-          target: dailyVerses.date,
-          set: updateValues,
-        })
+        .update(dailyVerses)
+        .set(updateValues)
+        .where(eq(dailyVerses.id, existingForDate[0].id))
         .returning();
-    } catch (insertErr: any) {
-      const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
-      if (errStr.includes('daily_verses_pkey') || errStr.includes('duplicate key')) {
-        await db.execute(sql`SELECT setval('daily_verses_id_seq', COALESCE((SELECT MAX(id) FROM daily_verses), 0) + 1, false)`);
-        inserted = await db
-          .insert(dailyVerses)
-          .values(insertValues)
-          .onConflictDoUpdate({
-            target: dailyVerses.date,
-            set: updateValues,
-          })
-          .returning();
-      } else {
-        throw insertErr;
+    } else {
+      try {
+        inserted = await db.insert(dailyVerses).values(insertValues).returning();
+      } catch (insertErr: any) {
+        const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
+        if (errStr.includes('daily_verses_pkey') || errStr.includes('duplicate key')) {
+          await db.execute(sql`SELECT setval('daily_verses_id_seq', COALESCE((SELECT MAX(id) FROM daily_verses), 0) + 1, false)`);
+          inserted = await db.insert(dailyVerses).values(insertValues).returning();
+        } else {
+          throw insertErr;
+        }
       }
     }
 
