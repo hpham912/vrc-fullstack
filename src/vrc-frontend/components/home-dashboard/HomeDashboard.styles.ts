@@ -43,21 +43,26 @@ export const homeDashboardStyles = {
   quickCardSub: 'text-xs text-stone-700 font-semibold mt-0.5 line-clamp-1',
   upcomingSection: 'space-y-2.5',
   viewAllBtn: 'text-xs font-semibold text-amber-800 hover:text-amber-900 flex items-center gap-1',
-  upcomingCard: 'bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-xs space-y-3',
-  upcomingTopRow: 'flex items-start justify-between gap-3',
-  upcomingCategoryBadge:
-    'inline-block text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full',
-  upcomingTitle: 'text-sm sm:text-base font-serif font-bold text-stone-950',
-  upcomingDateText: 'text-xs font-bold text-stone-950 block',
-  upcomingTimeText: 'text-xs text-stone-700 font-semibold',
-  upcomingDesc: 'text-xs sm:text-sm text-stone-800 line-clamp-2 leading-relaxed',
-  upcomingFooter: 'pt-2 border-t border-stone-100 flex items-center justify-between gap-2',
-  upcomingLoc: 'text-xs text-stone-700 font-medium flex items-center gap-1.5',
-  upcomingBtnsGroup: 'flex items-center gap-1.5',
-  gcalBtn:
-    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-semibold transition-all active:scale-95',
-  detailsBtn:
-    'px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-all active:scale-95',
+  eventCardBase:
+    'rounded-2xl p-3.5 sm:p-4 transition-all duration-150 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
+  cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
+  badgeGroup: 'flex items-center gap-1.5 flex-wrap min-w-0',
+  categoryBadgeBase: 'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full',
+  featuredBadge:
+    'text-[11px] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full',
+  cardMainRow: 'flex items-center gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
+  dateBoxBase:
+    'flex-shrink-0 min-w-[4.25rem] sm:min-w-[4.75rem] px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95',
+  dateBoxWeekday:
+    'block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider leading-tight truncate w-full text-stone-700',
+  dateBoxDay: 'block text-xl sm:text-2xl font-bold text-stone-950 leading-none my-0.5',
+  dateBoxMonthBase: 'block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-tight',
+  cardTitleCol: 'flex-1 min-w-0 space-y-1 max-w-full',
+  cardTitle: 'text-base sm:text-lg font-bold text-stone-950 leading-snug break-words',
+  cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800',
+  cardLocationRow: 'flex items-center gap-1.5 text-xs text-stone-700 font-medium',
+  cardFooterRow: 'pt-2 border-t border-stone-900/10 flex items-center justify-between gap-2 min-w-0 w-full flex-wrap',
+  upcomingBtnsGroup: 'flex items-center gap-1.5 ml-auto',
   servicesCardHeader: 'flex items-center justify-between gap-2 pb-3 border-b border-stone-100',
   servicesUnifiedList:
     'divide-y divide-stone-100 sm:divide-y-0 sm:divide-x sm:grid sm:grid-cols-3',

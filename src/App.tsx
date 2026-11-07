@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Bell,
   X,
+  HeartHandshake,
 } from 'lucide-react';
 import { appStyles as s } from './App.styles.ts';
 
@@ -217,7 +218,6 @@ function ChurchAppContent() {
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
         onRequestNotificationPermission={() => NotificationClient.requestPermission()}
-        onOpenPrayerModal={() => setPrayerModalOpen(true)}
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
@@ -334,6 +334,24 @@ function ChurchAppContent() {
           />
         )}
       </main>
+
+      {/* Floating Glass Prayer Request Button (Home Only, Sticky Above Youth Tab) */}
+      {activeTab === 'home' && (
+        <button
+          type="button"
+          onClick={() => setPrayerModalOpen(true)}
+          className={s.floatingPrayerBtn}
+          title={t('prayerRequestTitle')}
+          aria-label={t('navPrayer')}
+        >
+          <div className={s.floatingPrayerIconBox}>
+            <HeartHandshake className={s.floatingPrayerIcon} />
+          </div>
+          <span className={s.floatingPrayerText}>
+            {t('navPrayer')}
+          </span>
+        </button>
+      )}
 
       {/* Native iOS Bottom Tab Bar: Exactly Home, Events, Scripture, Youth */}
       <IosTabBar

@@ -38,4 +38,10 @@ export const appStyles = {
   footerDot: 'text-stone-300',
   footerVersion: 'text-stone-500 font-mono text-[10px]',
   mobileVersionBar: 'md:hidden py-3 text-center text-[10px] text-stone-500 font-mono select-none',
+  floatingPrayerBtn:
+    'fixed bottom-[84px] sm:bottom-10 right-3.5 sm:right-6 z-40 group flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-stone-900/65 hover:bg-stone-900/80 active:scale-95 text-amber-100 border border-white/20 backdrop-blur-md shadow-xl transition-all cursor-pointer select-none animate-in fade-in zoom-in-95 duration-200',
+  floatingPrayerIconBox:
+    'w-6 h-6 rounded-full bg-amber-500/25 flex items-center justify-center text-amber-300 group-hover:bg-amber-500/35 transition-colors',
+  floatingPrayerIcon: 'w-3.5 h-3.5',
+  floatingPrayerText: 'text-xs sm:text-sm font-bold tracking-tight text-white/95 drop-shadow-xs',
 };

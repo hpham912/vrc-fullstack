@@ -23,7 +23,14 @@ import {
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
 import { DirectionButtons, CalendarButtons, Card, Button } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
-import { formatDateLocale, formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
+import {
+  formatDateLocale,
+  formatWeekdayAndDate,
+  getWeekdayName,
+  getMonthText,
+  getDayNumber,
+} from '../../utils/dateFormatter.ts';
+import { getCategoryTheme, getCategoryLabel } from '../../utils/categoryTheme.ts';
 import { homeDashboardStyles as s } from './HomeDashboard.styles.ts';
 
 interface HomeDashboardProps {
@@ -473,75 +480,129 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
       </section>
 
-      {/* Featured Upcoming Event Card */}
-      {nextUpcomingEvent && (
-        <section className={s.upcomingSection}>
-          <div className={s.sectionHeaderRow}>
-            <h2 className={s.sectionHeading}>
-              <Calendar className="w-4 h-4 text-amber-600" />
-              <span>{t('todayHighlight')}</span>
-            </h2>
-            <Button
-              type="button"
-              variant="linkAmber"
-              size="none"
+      {/* Featured Upcoming Event Card (Styled matching EventsSection card) */}
+      {nextUpcomingEvent && (() => {
+        const weekday = getWeekdayName(nextUpcomingEvent.date, language);
+        const monthShort = getMonthText(nextUpcomingEvent.date, language, true);
+        const dayNum = getDayNumber(nextUpcomingEvent.date);
+        const theme = getCategoryTheme(nextUpcomingEvent.category);
+        const CategoryIcon = theme.icon;
+        const eventTitle = language === 'vi'
+          ? (nextUpcomingEvent.titleVi || tr(nextUpcomingEvent.title))
+          : (nextUpcomingEvent.titleEn || tr(nextUpcomingEvent.title));
+
+        return (
+          <section className={s.upcomingSection}>
+            <div className={s.sectionHeaderRow}>
+              <h2 className={s.sectionHeading}>
+                <Calendar className="w-4 h-4 text-amber-600" />
+                <span>{t('todayHighlight')}</span>
+              </h2>
+              <Button
+                type="button"
+                variant="linkAmber"
+                size="none"
+                onClick={() => onNavigateTab('events')}
+                className="text-xs font-semibold"
+                rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
+              >
+                <span>{t('viewAllEvents')}</span>
+              </Button>
+            </div>
+
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => onNavigateTab('events')}
-              className="text-xs font-semibold"
-              rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onNavigateTab('events');
+                }
+              }}
+              className={`${s.eventCardBase} ${theme.cardBg}`}
             >
-              <span>{t('viewAllEvents')}</span>
-            </Button>
-          </div>
-
-          <Card variant="default" padding="md" className="space-y-2.5">
-            <div className={s.upcomingTopRow}>
-              <div className="space-y-1">
-                <span className={s.upcomingCategoryBadge}>
-                  {nextUpcomingEvent.category}
-                </span>
-                <h3 className={s.upcomingTitle}>
-                  {nextUpcomingEvent.title}
-                </h3>
+              {/* Top Row: Category Pill + Featured Pill */}
+              <div className={s.cardTopRow}>
+                <div className={s.badgeGroup}>
+                  <span className={`${s.categoryBadgeBase} ${theme.badge}`}>
+                    <CategoryIcon className="w-3 h-3" />
+                    <span>{getCategoryLabel(nextUpcomingEvent.category, language, t)}</span>
+                  </span>
+                  {(nextUpcomingEvent.isFeatured ?? true) && (
+                    <span className={s.featuredBadge}>
+                      {t('featuredBadge')}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="text-right flex-shrink-0">
-                <span className={s.upcomingDateText}>
-                  {formatWeekdayAndDate(nextUpcomingEvent.date, language)}
-                </span>
-                <span className={s.upcomingTimeText}>
-                  {nextUpcomingEvent.startTime}
-                </span>
+
+              {/* Main Content Area */}
+              <div className={s.cardMainRow}>
+                {/* Consolidated Calendar Date Card: Weekday (Sunday/Friday), Day Number, Month */}
+                <div className={`${s.dateBoxBase} ${theme.dateBox}`}>
+                  <span className={s.dateBoxWeekday}>
+                    {weekday}
+                  </span>
+                  <span className={s.dateBoxDay}>
+                    {dayNum}
+                  </span>
+                  <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
+                    {monthShort}
+                  </span>
+                </div>
+
+                {/* Title & Timing & Location */}
+                <div className={s.cardTitleCol}>
+                  <h3 className={s.cardTitle}>
+                    {eventTitle}
+                  </h3>
+
+                  <div className={s.cardTimeRow}>
+                    <Clock className="w-3.5 h-3.5 text-amber-800 flex-shrink-0" />
+                    <span>
+                      {nextUpcomingEvent.startTime}
+                      {nextUpcomingEvent.endTime ? ` – ${nextUpcomingEvent.endTime}` : ''}
+                    </span>
+                  </div>
+
+                  {nextUpcomingEvent.location && (
+                    <div className={s.cardLocationRow}>
+                      <MapPin className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                      <span className="truncate">{nextUpcomingEvent.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className={s.cardFooterRow}>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <CalendarButtons
+                    event={nextUpcomingEvent}
+                    stopPropagation
+                    className="pt-1"
+                  />
+                </div>
+
+                <div className={s.upcomingBtnsGroup}>
+                  <Button
+                    type="button"
+                    variant="dark"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onNavigateTab('events');
+                    }}
+                  >
+                    {t('homeDetails')}
+                  </Button>
+                </div>
               </div>
             </div>
-
-            <p className={s.upcomingDesc}>
-              {nextUpcomingEvent.description}
-            </p>
-
-            <div className={s.upcomingFooter}>
-              <span className={s.upcomingLoc}>
-                <MapPin className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
-                <span>{nextUpcomingEvent.location}</span>
-              </span>
-
-              <div className={s.upcomingBtnsGroup}>
-                <CalendarButtons
-                  event={nextUpcomingEvent}
-                  showIcal={false}
-                  gcalLabel={t('addToGoogle')}
-                />
-                <Button
-                  type="button"
-                  variant="dark"
-                  size="sm"
-                  onClick={() => onNavigateTab('events')}
-                >
-                  {t('homeDetails')}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* Weekly Worship Services & Gatherings (Single Unified Card) */}
       {safeChurch.services && safeChurch.services.length > 0 && (

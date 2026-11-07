@@ -10,7 +10,6 @@ import {
   Bell,
   X,
   Settings,
-  HeartHandshake,
 } from 'lucide-react';
 import { NotificationModal } from '../notification-modal/NotificationModal.tsx';
 import { AppNotification } from '../../types/index.ts';
@@ -23,7 +22,6 @@ interface NavbarProps {
   openLoginModal: () => void;
   notifications: AppNotification[];
   onRequestNotificationPermission: () => void;
-  onOpenPrayerModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -33,7 +31,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   openLoginModal,
   notifications,
   onRequestNotificationPermission,
-  onOpenPrayerModal,
 }) => {
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
@@ -106,22 +103,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </button>
 
-          {/* Right Header Controls: Prayer, Notification, Language Toggle, Settings */}
+          {/* Right Header Controls: Notification, Language Toggle, Settings */}
           <div className={s.rightControls}>
-            {/* Prayer Header Action Button */}
-            {onOpenPrayerModal && (
-              <button
-                onClick={onOpenPrayerModal}
-                className={s.prayerBtn}
-                title={t('navPrayerTitle')}
-              >
-                <HeartHandshake className={s.prayerIcon} />
-                <span className={s.prayerText}>
-                  {t('navPrayer')}
-                </span>
-              </button>
-            )}
-
             {/* Notification Bell Button */}
             <button
               onClick={() => {
