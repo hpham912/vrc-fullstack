@@ -3,6 +3,7 @@ import { db } from '../../vrc-db/index.ts';
 import { dailyVerses } from '../../vrc-db/schema.ts';
 import { eq, desc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
+import { AppError } from '../middleware/errorHandler.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
@@ -27,8 +28,49 @@ async function enforceMaxTenVerses() {
   }
 }
 
+// Shared upsert used by POST and PUT: save a verse by its date —
+// update the row for that date if one exists, otherwise insert.
+// NOTE: do NOT use .onConflictDoUpdate({ target: dailyVerses.date })
+// here. The Drizzle schema declares date as .unique(), but the live
+// daily_verses table was created without that unique constraint, so
+// Postgres rejects ON CONFLICT (date) with "there is no unique or
+// exclusion constraint matching the ON CONFLICT specification" — even
+// for a brand-new date. Check-then-insert/update works with the
+// table as it actually exists.
+async function upsertVerseByDate(
+  insertValues: typeof dailyVerses.$inferInsert,
+  updateValues: Partial<typeof dailyVerses.$inferInsert>
+): Promise<any[]> {
+  const existingForDate = await db
+    .select({ id: dailyVerses.id })
+    .from(dailyVerses)
+    .where(eq(dailyVerses.date, insertValues.date as string))
+    .limit(1);
+
+  if (existingForDate.length > 0) {
+    return db
+      .update(dailyVerses)
+      .set(updateValues)
+      .where(eq(dailyVerses.id, existingForDate[0].id))
+      .returning();
+  }
+
+  try {
+    return await db.insert(dailyVerses).values(insertValues).returning();
+  } catch (insertErr: any) {
+    const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
+    if (errStr.includes('daily_verses_pkey') || errStr.includes('duplicate key')) {
+      await db.execute(
+        sql`SELECT setval('daily_verses_id_seq', COALESCE((SELECT MAX(id) FROM daily_verses), 0) + 1, false)`
+      );
+      return db.insert(dailyVerses).values(insertValues).returning();
+    }
+    throw insertErr;
+  }
+}
+
 // GET /api/verses/today - Get today's verse (or most recent verse) from PostgreSQL
-router.get('/today', async (req, res) => {
+router.get('/today', async (req, res, next) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     let verseResult = await db
@@ -78,13 +120,14 @@ router.get('/today', async (req, res) => {
 
     res.json(verseResult[0]);
   } catch (error: any) {
-    console.error('Failed to fetch today verse from PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to fetch daily verse from database' });
+    // Hand it to the shared error handler: it logs the real error and
+    // sends the user a safe, accurate message instead of raw DB text.
+    next(error);
   }
 });
 
 // GET /api/verses - List 10 most recent scriptures from PostgreSQL
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     await enforceMaxTenVerses();
     const list = await db
@@ -94,13 +137,12 @@ router.get('/', async (req, res) => {
       .limit(10);
     res.json(list);
   } catch (error: any) {
-    console.error('Failed to fetch verses from PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to fetch scripture verses from database' });
+    next(error);
   }
 });
 
 // POST /api/verses - Create or update daily verse in PostgreSQL (Admin only)
-router.post('/', requireAdmin, async (req: AuthRequest, res) => {
+router.post('/', requireAdmin, async (req: AuthRequest, res, next) => {
   try {
     const {
       date,
@@ -148,9 +190,11 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         : null;
 
     if (!date || !finalVerseEn || !finalVerseVi || !finalRefEn || !finalRefVi) {
-      return res.status(400).json({
-        error: 'Date, Vietnamese & English verse text, and references are required.',
-      });
+      throw new AppError(
+        'Date, Vietnamese & English verse text, and references are required.',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
@@ -199,39 +243,7 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       updatedAt: new Date(),
     };
 
-    // NOTE: do NOT use .onConflictDoUpdate({ target: dailyVerses.date })
-    // here. The Drizzle schema declares date as .unique(), but the live
-    // daily_verses table was created without that unique constraint, so
-    // Postgres rejects ON CONFLICT (date) with "there is no unique or
-    // exclusion constraint matching the ON CONFLICT specification" — even
-    // for a brand-new date. Check-then-insert/update works with the
-    // table as it actually exists.
-    let inserted: any[];
-    const existingForDate = await db
-      .select({ id: dailyVerses.id })
-      .from(dailyVerses)
-      .where(eq(dailyVerses.date, date))
-      .limit(1);
-
-    if (existingForDate.length > 0) {
-      inserted = await db
-        .update(dailyVerses)
-        .set(updateValues)
-        .where(eq(dailyVerses.id, existingForDate[0].id))
-        .returning();
-    } else {
-      try {
-        inserted = await db.insert(dailyVerses).values(insertValues).returning();
-      } catch (insertErr: any) {
-        const errStr = String(insertErr?.cause?.message || insertErr?.message || '');
-        if (errStr.includes('daily_verses_pkey') || errStr.includes('duplicate key')) {
-          await db.execute(sql`SELECT setval('daily_verses_id_seq', COALESCE((SELECT MAX(id) FROM daily_verses), 0) + 1, false)`);
-          inserted = await db.insert(dailyVerses).values(insertValues).returning();
-        } else {
-          throw insertErr;
-        }
-      }
-    }
+    const inserted = await upsertVerseByDate(insertValues, updateValues);
 
     // Keep only the 10 latest verses in the DB so it never fills up:
     // adding a verse is the one path that grows the table, so prune
@@ -248,18 +260,16 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
 
     res.status(201).json(inserted[0]);
   } catch (error: any) {
-    console.error('Failed to save daily verse in PostgreSQL:', error);
-    const detail = error?.cause?.detail || error?.cause?.message || error?.message || 'Failed to save daily scripture verse in database';
-    res.status(500).json({ error: detail });
+    next(error);
   }
 });
 
 // PUT /api/verses/:id - Update daily verse by ID in PostgreSQL (Admin only)
-router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
+router.put('/:id', requireAdmin, async (req: AuthRequest, res, next) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid verse ID' });
+      throw new AppError('Invalid verse ID', 400, 'VALIDATION_ERROR');
     }
 
     const {
@@ -308,60 +318,102 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         : null;
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
-    const updated = await db
+    // Same required-fields check as POST — without it, an edit with
+    // empty text would silently save a blank verse.
+    if (!date || !finalVerseEn || !finalVerseVi || !finalRefEn || !finalRefVi) {
+      throw new AppError(
+        'Date, Vietnamese & English verse text, and references are required.',
+        400,
+        'VALIDATION_ERROR'
+      );
+    }
+
+    const insertValues = {
+      date,
+      verseText: finalVerseEn,
+      verseTextVi: finalVerseVi,
+      verseTextEn: finalVerseEn,
+      reference: finalRefEn,
+      referenceVi: finalRefVi,
+      referenceEn: finalRefEn,
+      translation: finalTransEn,
+      translationVi: finalTransVi,
+      translationEn: finalTransEn,
+      reflection: finalReflEn,
+      reflectionVi: finalReflVi,
+      reflectionEn: finalReflEn,
+      prayer: finalPrayerEn,
+      prayerVi: finalPrayerVi,
+      prayerEn: finalPrayerEn,
+      theme: theme ? String(theme).trim() : 'Daily Devotion',
+      publishedByUid: null,
+      createdBy: actorName,
+      updatedBy: actorName,
+    };
+
+    const updateValues = {
+      date,
+      verseText: finalVerseEn,
+      verseTextVi: finalVerseVi,
+      verseTextEn: finalVerseEn,
+      reference: finalRefEn,
+      referenceVi: finalRefVi,
+      referenceEn: finalRefEn,
+      translation: finalTransEn,
+      translationVi: finalTransVi,
+      translationEn: finalTransEn,
+      reflection: finalReflEn,
+      reflectionVi: finalReflVi,
+      reflectionEn: finalReflEn,
+      prayer: finalPrayerEn,
+      prayerVi: finalPrayerVi,
+      prayerEn: finalPrayerEn,
+      theme: theme ? String(theme).trim() : 'Daily Devotion',
+      updatedBy: actorName,
+      updatedAt: new Date(),
+    };
+
+    let updated = await db
       .update(dailyVerses)
-      .set({
-        date,
-        verseText: finalVerseEn,
-        verseTextVi: finalVerseVi,
-        verseTextEn: finalVerseEn,
-        reference: finalRefEn,
-        referenceVi: finalRefVi,
-        referenceEn: finalRefEn,
-        translation: finalTransEn,
-        translationVi: finalTransVi,
-        translationEn: finalTransEn,
-        reflection: finalReflEn,
-        reflectionVi: finalReflVi,
-        reflectionEn: finalReflEn,
-        prayer: finalPrayerEn,
-        prayerVi: finalPrayerVi,
-        prayerEn: finalPrayerEn,
-        theme: theme ? String(theme).trim() : 'Daily Devotion',
-        updatedBy: actorName,
-        updatedAt: new Date(),
-      })
+      .set(updateValues)
       .where(eq(dailyVerses.id, id))
       .returning();
 
     if (updated.length === 0) {
-      return res.status(404).json({ error: 'Verse not found' });
+      // The row is gone — the verse was pruned or deleted after the
+      // form was opened, or the id was never a DB row. Don't throw the
+      // admin's edit away with a 404: save it by date instead, so an
+      // edit always lands.
+      updated = await upsertVerseByDate(insertValues, updateValues);
     }
+
+    // A fallback insert grows the table, so prune like POST does.
+    await enforceMaxTenVerses();
 
     res.json(updated[0]);
   } catch (error: any) {
-    console.error('Failed to update verse in PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to update daily scripture verse in database' });
+    next(error);
   }
 });
 
 // DELETE /api/verses/:id - Delete daily verse from PostgreSQL (Admin only)
-router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
+router.delete('/:id', requireAdmin, async (req: AuthRequest, res, next) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid verse ID' });
+      throw new AppError('Invalid verse ID', 400, 'VALIDATION_ERROR');
     }
 
     const deleted = await db.delete(dailyVerses).where(eq(dailyVerses.id, id)).returning();
     if (deleted.length === 0) {
-      return res.status(404).json({ error: 'Verse not found' });
+      // The row is already gone — say so plainly instead of the bare
+      // "Verse not found".
+      throw new AppError('This verse was already deleted.', 404, 'VERSE_NOT_FOUND');
     }
 
     res.json({ message: 'Verse successfully deleted from database' });
   } catch (error: any) {
-    console.error('Failed to delete verse from PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to delete scripture verse from database' });
+    next(error);
   }
 });
 

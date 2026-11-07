@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChurchEvent, ChurchInfo, DailyVerse, Announcement } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { apiUrl, apiHeaders } from '../../utils/api.ts';
+import { apiUrl, apiHeaders, apiFetch } from '../../utils/api.ts';
+import { getErrorMessage } from '../../utils/errors.ts';
 import { APP_VERSION } from '../../constants/version.ts';
 import { NotificationClient } from '../../services/notificationClient.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
@@ -238,7 +239,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   const handleEditVerse = (v: DailyVerse) => {
-    setEditingVerseId(v.id);
+    // id 0 is the built-in fallback verse shown when the DB is empty —
+    // it is not a DB row, so editing it starts a NEW verse (null id
+    // makes the save POST instead of PUT /api/verses/0, which would
+    // 404). Don't rely on 0 being falsy here.
+    setEditingVerseId(v.id > 0 ? v.id : null);
     setVerseDate(v.date);
     setVerseReferenceVi(v.referenceVi || v.reference || '');
     setVerseReferenceEn(v.referenceEn || v.reference || '');
@@ -432,7 +437,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         ? `Đã lấy ${data.referenceEn || passage} (NIV + 1925).`
         : `Fetched ${data.referenceEn || passage} (NIV + 1925).`);
     } catch (err: any) {
-      showFeedback('error', err.message || 'Error fetching scripture');
+      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi lấy Lời Chúa' : 'Error fetching scripture'));
     } finally {
       setFetchingScripture(false);
     }
@@ -450,12 +455,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const token = getToken();
       const endpoint = editingVerseId ? `/api/verses/${editingVerseId}` : '/api/verses';
       const method = editingVerseId ? 'PUT' : 'POST';
-      const res = await fetch(apiUrl(endpoint), {
+      // apiFetch throws a structured ApiError (status + backend code) on
+      // failure, so the catch below can turn it into an accurate message
+      // via getErrorMessage instead of showing raw text.
+      await apiFetch(endpoint, {
         method,
-        headers: apiHeaders({
+        headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-        }),
+        },
         body: JSON.stringify({
           date: verseDate,
           reference: verseReferenceEn.trim(),
@@ -477,12 +485,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         }),
       });
 
-      if (!res.ok) {
-        let errData: any = {};
-        try { errData = await res.json(); } catch {}
-        throw new Error(errData?.error || `Failed to save verse (HTTP ${res.status})`);
-      }
-
       showFeedback('success', language === 'vi'
         ? (editingVerseId ? 'Đã cập nhật Lời Chúa!' : 'Đã lưu Lời Chúa hằng ngày!')
         : (editingVerseId ? 'Daily scripture updated!' : 'Daily scripture saved successfully!'));
@@ -497,7 +499,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       resetVerseForm();
       onRefreshData();
     } catch (err: any) {
-      showFeedback('error', err.message || 'Error saving daily verse');
+      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi lưu Lời Chúa' : 'Error saving daily verse'));
     } finally {
       setSubmitting(false);
     }
@@ -507,19 +509,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!window.confirm(language === 'vi' ? 'Xóa câu Lời Chúa này?' : 'Delete this daily devotional?')) return;
     try {
       const token = getToken();
-      const res = await fetch(apiUrl(`/api/verses/${id}`), {
+      await apiFetch(`/api/verses/${id}`, {
         method: 'DELETE',
-        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
-        let errData: any = {};
-        try { errData = await res.json(); } catch {}
-        throw new Error(errData?.error || `Failed to delete verse (HTTP ${res.status})`);
-      }
       showFeedback('success', language === 'vi' ? 'Đã xóa Lời Chúa.' : 'Verse deleted.');
       onRefreshData();
     } catch (err: any) {
-      showFeedback('error', err.message);
+      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi xóa Lời Chúa' : 'Error deleting verse'));
     }
   };
 
