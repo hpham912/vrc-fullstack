@@ -224,7 +224,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
                   <CalendarButtons
                     event={evt}
                     showIcal={false}
-                    gcalLabel={t('addToGoogle')}
+                    variant="menu"
                   />
                 </div>
               </Card>

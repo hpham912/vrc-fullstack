@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, CalendarPlus, ChevronDown, Download } from 'lucide-react';
+import { CalendarPlus, ChevronDown, Download } from 'lucide-react';
 import { ChurchEvent } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { getGoogleCalendarUrl, downloadIcsFile } from '../../utils/calendar.ts';
@@ -46,8 +46,8 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
           aria-expanded={menuOpen}
           aria-haspopup="menu"
         >
-          <Calendar className={s.menuBtnIcon} />
-          <span>{t('calAddToCalendar')}</span>
+          <CalendarPlus className={s.menuBtnIcon} />
+          <span>{t('calCalendar')}</span>
           <ChevronDown className={`${s.menuBtnChevron} ${menuOpen ? s.menuBtnChevronOpen : ''}`} />
         </button>
         {menuOpen && (

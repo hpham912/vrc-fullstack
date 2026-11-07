@@ -62,9 +62,7 @@ export const translations = {
   searchPlaceholder: { vi: 'Tìm kiếm sự kiện...', en: 'Search events...' },
   noEvents: { vi: 'Chưa có sự kiện nào', en: 'No scheduled events found' },
   noEventsSub: { vi: 'Vui lòng kiểm tra lại sau hoặc điều chỉnh bộ lọc.', en: 'Check back soon or adjust your search filter.' },
-  addToGoogle: { vi: 'Google Calendar', en: 'Google Calendar' },
-  addToApple: { vi: 'Apple Calendar', en: 'Apple Calendar' },
-  calAddToCalendar: { vi: 'Thêm vào Lịch', en: 'Add to Calendar' },
+  calCalendar: { vi: 'Lịch', en: 'Calendar' },
   contactLead: { vi: 'Liên hệ', en: 'Contact' },
   featuredBadge: { vi: 'Nổi bật', en: 'Featured' },
 

@@ -577,13 +577,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
               {/* Footer Actions */}
               <div className={s.cardFooterRow}>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <CalendarButtons
-                    event={nextUpcomingEvent}
-                    stopPropagation
-                    className="pt-1"
-                  />
-                </div>
+                <CalendarButtons
+                  event={nextUpcomingEvent}
+                  stopPropagation
+                  variant="menu"
+                />
 
                 <div className={s.upcomingBtnsGroup}>
                   <Button

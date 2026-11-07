@@ -43,7 +43,6 @@ import {
   getWeekdayName,
   getMonthText,
   getDayNumber,
-  getYear,
   formatWeekdayAndDate,
 } from '../../utils/dateFormatter.ts';
 import { getCategoryTheme, getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
@@ -276,7 +275,6 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             const weekday = getWeekdayName(evt.date, language);
             const monthShort = getMonthText(evt.date, language, true);
             const dayNum = getDayNumber(evt.date);
-            const year = getYear(evt.date);
             const theme = getCategoryTheme(evt.category);
             const CategoryIcon = theme.icon;
 
@@ -320,9 +318,6 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     </span>
                     <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
                       {monthShort}
-                    </span>
-                    <span className={s.dateBoxYear}>
-                      {year}
                     </span>
                   </div>
 

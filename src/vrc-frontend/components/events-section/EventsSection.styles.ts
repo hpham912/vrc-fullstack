@@ -27,22 +27,17 @@ export const eventsSectionStyles = {
   adminActionRow: 'flex items-center gap-1.5 ml-auto',
   cardMainRow: 'flex items-stretch gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
-    'flex-shrink-0 min-w-[4.25rem] sm:min-w-[4.75rem] px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95 relative self-stretch',
+    'flex-shrink-0 w-[5.5rem] px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95 relative self-stretch',
   dateBoxWeekday:
     'block text-xs font-bold uppercase tracking-wider leading-tight truncate w-full text-stone-700',
-  dateBoxDay: 'block text-4xl font-bold text-stone-950 leading-none my-0.5',
+  dateBoxDay: 'block text-3xl font-bold text-stone-950 leading-none my-0.5',
   dateBoxMonthBase: 'block text-xs font-semibold uppercase tracking-wider leading-tight',
-  dateBoxYear: 'block text-xs font-semibold text-stone-500 leading-tight',
   dateBoxStarPosition: 'absolute -top-2 -right-2 z-10',
   cardRightCol: 'flex-1 min-w-0 max-w-full flex flex-col gap-1',
   cardMenuRow: 'mt-auto pt-2 flex items-center justify-end',
   cardTitle: 'text-base sm:text-lg font-bold text-stone-950 leading-snug break-words',
   cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800',
   cardFooterRow: 'pt-2 border-t border-stone-900/10 flex items-center justify-end gap-2 min-w-0 w-full',
-  gcalSmallBtn:
-    'inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-white/95 hover:bg-white active:scale-95 text-stone-900 rounded-lg text-xs font-semibold transition-all shadow-2xs whitespace-nowrap',
-  icalSmallBtn:
-    'inline-flex items-center justify-center gap-1 px-3 py-1.5 text-stone-800 hover:text-stone-950 bg-white/90 hover:bg-white active:scale-95 rounded-lg text-xs font-semibold transition-all shadow-2xs whitespace-nowrap',
   pastSection:
     'pt-8 sm:pt-10 border-t border-stone-200 space-y-4 w-full min-w-0 max-w-full overflow-hidden',
   pastHeaderRow: 'flex flex-wrap items-center justify-between gap-2 min-w-0 w-full',
@@ -57,7 +52,7 @@ export const eventsSectionStyles = {
   concludedPill:
     'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200',
   pastDateBox:
-    'flex-shrink-0 min-w-[4.25rem] sm:min-w-[4.75rem] px-2 py-1.5 text-center rounded-2xl border border-stone-200 bg-white shadow-2xs flex flex-col items-center justify-center select-none',
+    'flex-shrink-0 w-[5.5rem] px-2 py-1.5 text-center rounded-2xl border border-stone-200 bg-white shadow-2xs flex flex-col items-center justify-center select-none',
   pastTitle: 'text-sm sm:text-base font-bold text-stone-800 leading-snug break-words',
   pastDescBox:
     'text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 min-w-0 max-w-full overflow-hidden',
