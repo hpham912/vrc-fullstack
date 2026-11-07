@@ -37,6 +37,13 @@ import {
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
+import {
+  formatDateLocale,
+  getWeekdayName,
+  getMonthText,
+  getDayNumber,
+  formatWeekdayAndDate,
+} from '../../utils/dateFormatter.ts';
 import { eventsSectionStyles as s } from './EventsSection.styles.ts';
 
 interface EventsSectionProps {
@@ -340,10 +347,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       ) : (
         <div className={s.listContainer}>
           {filteredUpcomingEvents.map((evt) => {
-            const eventDate = new Date(evt.date + 'T00:00:00');
-            const monthShort = eventDate.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' });
-            const dayNum = eventDate.getDate();
-            const weekday = eventDate.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
+            const weekday = getWeekdayName(evt.date, language);
+            const monthShort = getMonthText(evt.date, language, true);
+            const dayNum = getDayNumber(evt.date);
             const theme = getCategoryTheme(evt.category);
             const CategoryIcon = theme.icon;
 
@@ -353,7 +359,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 onClick={() => setSelectedDetailEvent(evt)}
                 className={`${s.eventCardBase} ${theme.cardBg}`}
               >
-                {/* Top Row: Category Pill + Featured Pill + Date */}
+                {/* Top Row: Category Pill + Featured Pill + Admin Actions (Date removed from top right) */}
                 <div className={s.cardTopRow}>
                   <div className={s.badgeGroup}>
                     <span className={`${s.categoryBadgeBase} ${theme.badge}`}>
@@ -367,28 +373,28 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     )}
                   </div>
 
-                  <div className={s.dateAdminRow}>
-                    <span className={s.cardDateText}>
-                      {weekday}, {evt.date}
-                    </span>
-                    {isAdmin && (
+                  {isAdmin && (
+                    <div className={s.adminActionRow}>
                       <AdminActionButtons
                         onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
                         onDelete={() => setDeleteTargetEvent(evt)}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Main Content Area */}
                 <div className={s.cardMainRow}>
-                  {/* Compact Calendar Date Card */}
+                  {/* Consolidated Calendar Date Card: Weekday (Sunday/Friday), Day Number, Month */}
                   <div className={`${s.dateBoxBase} ${theme.dateBox}`}>
-                    <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
-                      {monthShort}
+                    <span className={s.dateBoxWeekday}>
+                      {weekday}
                     </span>
                     <span className={s.dateBoxDay}>
                       {dayNum}
+                    </span>
+                    <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
+                      {monthShort}
                     </span>
                   </div>
 
@@ -435,10 +441,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
           <div className="space-y-3 w-full min-w-0 max-w-full">
             {pastEvents.map((evt) => {
-              const eventDate = new Date(evt.date + 'T00:00:00');
-              const monthShort = eventDate.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' });
-              const dayNum = eventDate.getDate();
-              const weekday = eventDate.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
+              const weekday = getWeekdayName(evt.date, language);
+              const monthShort = getMonthText(evt.date, language, true);
+              const dayNum = getDayNumber(evt.date);
               const isDescExpanded = expandedDescId === evt.id;
 
               return (
@@ -453,18 +458,18 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                         <span>{language === 'vi' ? 'Đã Diễn Ra' : 'Concluded'}</span>
                       </span>
                     </div>
-                    <span className="text-xs font-medium text-stone-500 whitespace-nowrap">
-                      {weekday}, {evt.date}
-                    </span>
                   </div>
 
                   <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 w-full max-w-full">
                     <div className={s.pastDateBox}>
-                      <span className="block text-[9px] font-bold uppercase tracking-wider text-stone-500">
-                        {monthShort}
+                      <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 truncate w-full text-center">
+                        {weekday}
                       </span>
-                      <span className="block text-lg font-serif font-bold text-stone-700 leading-tight">
+                      <span className="block text-xl sm:text-2xl font-bold text-stone-700 leading-none my-0.5 text-center">
                         {dayNum}
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 leading-tight text-center">
+                        {monthShort}
                       </span>
                     </div>
 
@@ -527,7 +532,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             <Card variant="subtle" padding="sm" className="space-y-2 text-xs">
               <div className="flex items-center gap-2 font-semibold text-stone-900">
                 <Calendar className="w-4 h-4 text-amber-700 flex-shrink-0" />
-                <span>{selectedDetailEvent.date}</span>
+                <span>{formatWeekdayAndDate(selectedDetailEvent.date, language)}</span>
               </div>
               <div className="flex items-center gap-2 font-medium text-stone-800">
                 <Clock className="w-4 h-4 text-amber-700 flex-shrink-0" />

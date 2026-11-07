@@ -27,6 +27,7 @@ import {
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
+import { formatDateLocale, formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { dailyVerseStyles as s } from './DailyVerseCard.styles.ts';
 
 interface DailyVerseCardProps {
@@ -267,12 +268,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     );
   }
 
-  const verseDateFormatted = new Date(verse.date + 'T00:00:00').toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const verseDateFormatted = formatWeekdayAndDate(verse.date, language);
 
   return (
     <section className={s.section}>
@@ -422,7 +418,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                     }`}
                   >
                     <div className={s.archiveItemMeta}>
-                      <span>{item.date}</span>
+                      <span>{formatDateLocale(item.date, language)}</span>
                       <span className="font-bold text-amber-800">{item.translation}</span>
                     </div>
                     <p className={s.archiveItemRef}>{pick(item.referenceVi, item.referenceEn, item.reference)}</p>

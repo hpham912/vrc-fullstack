@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { CalendarButtons, Card, Button } from '../../common-component/index.ts';
+import { formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { youthSectionStyles as s } from './YouthSection.styles.ts';
 
 interface YouthSectionProps {

@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 @layer base {
   /* =========================================================================
      CENTRALIZED TYPOGRAPHY SYSTEM (Single Source of Truth)
-     To adjust the primary font across the entire web/mobile app, edit --font-main below.
-     Both body copy and headings (.font-serif, h1-h6) inherit from this central engine.
+     Configured with Be Vietnam Pro for native Vietnamese tone marks & diacritics.
      ========================================================================= */
   :root {
-    --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-main: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --font-sans: var(--font-main);
     --font-serif: var(--font-main);
   }
@@ -45,12 +44,13 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.008em;
     font-weight: 700;
+    line-height: 1.32;
   }
 
   .font-serif {
-    letter-spacing: -0.015em;
+    letter-spacing: -0.005em;
   }
 
   html.large-font body {

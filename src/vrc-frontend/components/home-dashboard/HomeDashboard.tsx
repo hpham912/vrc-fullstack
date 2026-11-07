@@ -23,6 +23,7 @@ import {
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
 import { DirectionButtons, CalendarButtons, Card, Button } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
+import { formatDateLocale, formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { homeDashboardStyles as s } from './HomeDashboard.styles.ts';
 
 interface HomeDashboardProps {
@@ -246,7 +247,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const displayBadge = safeConfig.badge?.trim()
     ? safeConfig.badge.trim()
     : (activeEvent
-        ? `${activeEvent.category} • ${activeEvent.date}`
+        ? `${activeEvent.category} • ${formatDateLocale(activeEvent.date, language)}`
         : (language === 'vi' ? 'Sự Kiện Nổi Bật' : 'Featured Event'));
 
   const displayTitle = isAutoMode
@@ -262,8 +263,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     : (activeEvent ? activeEvent.description : (safeConfig.description || t('dashboardSub')));
 
   const displayDateTag = isAutoMode
-    ? (activeEvent ? `${activeEvent.date} • ${activeEvent.startTime}` : 'Chúa Nhật Hàng Tuần • 3:00 PM')
-    : (activeEvent ? `${activeEvent.date} • ${activeEvent.startTime}` : (safeConfig.dateTag || 'Chúa Nhật Hàng Tuần • 3:00 PM'));
+    ? (activeEvent ? `${formatWeekdayAndDate(activeEvent.date, language)} • ${activeEvent.startTime}` : 'Chúa Nhật Hàng Tuần • 3:00 PM')
+    : (activeEvent ? `${formatWeekdayAndDate(activeEvent.date, language)} • ${activeEvent.startTime}` : (safeConfig.dateTag || 'Chúa Nhật Hàng Tuần • 3:00 PM'));
 
   const displayLocationTag = isAutoMode
     ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
@@ -504,7 +505,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </div>
               <div className="text-right flex-shrink-0">
                 <span className={s.upcomingDateText}>
-                  {nextUpcomingEvent.date}
+                  {formatWeekdayAndDate(nextUpcomingEvent.date, language)}
                 </span>
                 <span className={s.upcomingTimeText}>
                   {nextUpcomingEvent.startTime}
