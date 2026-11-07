@@ -5,10 +5,10 @@ import { useLanguage } from '../../context/LanguageContext.tsx';
 import { APP_VERSION } from '../../constants/version.ts';
 import { Modal } from '../../common-component/modal/Modal.tsx';
 import { adminPortalStyles as s } from './AdminPortal.styles.ts';
-import { PrayerRequestsTab } from './tabs/PrayerRequestsTab.tsx';
-import { AdminAccountsTab } from './tabs/AdminAccountsTab.tsx';
-import { VersesTab } from './tabs/VersesTab.tsx';
-import { EventsTab } from './tabs/EventsTab.tsx';
+import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
+import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
+import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
+import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
 import {
   Calendar,
   BookOpen,

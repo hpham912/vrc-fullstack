@@ -1,0 +1,32 @@
+export const versesTabStyles = {
+  container: 'space-y-6 max-w-2xl mx-auto w-full min-w-0',
+  form: 'p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5 w-full min-w-0 box-border',
+  formHeader: 'flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-200',
+  headerGroup: 'flex items-center gap-2',
+  formTitle: 'font-serif font-bold text-stone-900 text-sm',
+  cancelEditBtn: 'text-xs text-stone-500 hover:text-stone-800 underline',
+  auditBox:
+    'p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1',
+  dateField: 'w-full sm:w-1/3 min-w-0',
+  label: 'block text-xs font-bold text-stone-700 mb-1',
+  input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
+  textarea:
+    'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none',
+  fieldGrid: 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0',
+  field: 'w-full min-w-0',
+  submitRow: 'text-right pt-2 border-t border-stone-200',
+  saveBtn:
+    'px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5',
+  saveIcon: 'w-3.5 h-3.5',
+  listSection: 'space-y-2 w-full min-w-0',
+  listTitle: 'text-xs font-bold uppercase tracking-wider text-stone-500',
+  list: 'divide-y divide-stone-100 border border-stone-200 rounded-xl overflow-hidden bg-white',
+  item: 'p-3 flex items-center justify-between gap-3 text-xs',
+  itemBody: 'min-w-0 flex-1',
+  itemRef: 'font-serif font-bold text-stone-950',
+  itemDate: 'text-stone-600 font-semibold ml-2',
+  itemSnippet: 'text-stone-700 line-clamp-1 mt-0.5 font-medium',
+  itemActions: 'flex items-center gap-1 flex-shrink-0',
+  editBtn: 'p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors',
+  deleteBtn: 'p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors',
+};
