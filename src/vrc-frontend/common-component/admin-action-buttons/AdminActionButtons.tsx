@@ -16,7 +16,7 @@ export const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
   stopPropagation = true,
   className = '',
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <div className={`${s.group} ${className}`.trim()}>
@@ -28,7 +28,7 @@ export const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
             onEdit();
           }}
           className={s.editBtn}
-          title={language === 'vi' ? 'Sửa' : 'Edit'}
+          title={t('commonEdit')}
         >
           <Pencil className={s.editIcon} />
         </button>
@@ -41,7 +41,7 @@ export const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
             onDelete();
           }}
           className={s.deleteBtn}
-          title={language === 'vi' ? 'Xóa' : 'Delete'}
+          title={t('commonDelete')}
         >
           <Trash2 className={s.deleteIcon} />
         </button>

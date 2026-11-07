@@ -28,7 +28,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <Modal
@@ -54,7 +54,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onCancel}
             disabled={loading}
           >
-            {cancelText || (language === 'vi' ? 'Hủy' : 'Cancel')}
+            {cancelText || t('commonCancel')}
           </Button>
           <Button
             type="button"
@@ -62,11 +62,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading
-              ? language === 'vi'
-                ? 'Đang xử lý...'
-                : 'Processing...'
-              : confirmText || (language === 'vi' ? 'Xác Nhận' : 'Confirm')}
+            {loading ? t('commonProcessing') : confirmText || t('commonConfirm')}
           </Button>
         </div>
       </div>

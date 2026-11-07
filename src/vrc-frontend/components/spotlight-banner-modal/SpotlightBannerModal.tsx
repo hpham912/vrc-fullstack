@@ -52,7 +52,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   onSaved,
 }) => {
   const { getToken } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [theme, setTheme] = useState<SpotlightTheme>(initialConfig?.theme || 'thanksgiving');
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
@@ -140,9 +140,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       if (!token) {
         setFeedback({
           type: 'error',
-          message: language === 'vi'
-            ? 'Vui lòng đăng nhập tài khoản quản trị (Admin) để lưu banner lên máy chủ.'
-            : 'Please log in as an administrator first to sync banner to server.',
+          message: t('spotLoginFirst'),
         });
         onSaved(payload);
         return;
@@ -159,7 +157,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || (language === 'vi' ? 'Không thể cập nhật banner' : 'Failed to update spotlight banner'));
+        throw new Error(errData.error || t('spotUpdateFailed'));
       }
 
       const updated: SpotlightBannerConfig = await res.json();
@@ -169,7 +167,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
 
       setFeedback({
         type: 'success',
-        message: language === 'vi' ? 'Đã lưu cấu hình banner thành công!' : 'Banner updated successfully!',
+        message: t('spotSaved'),
       });
       onSaved(updated);
       setTimeout(() => {
@@ -179,8 +177,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       console.error('Error saving spotlight:', err);
       const isNetworkLoadFailed = String(err?.message || '').toLowerCase().includes('load failed') || String(err?.message || '').toLowerCase().includes('failed to fetch');
       const friendlyMsg = isNetworkLoadFailed
-        ? (language === 'vi' ? 'Không thể kết nối máy chủ. Thay đổi đã được lưu tạm trên thiết bị này.' : 'Network connection issue. Changes saved locally on this device.')
-        : (err.message || (language === 'vi' ? 'Lỗi khi lưu banner' : 'Failed to save banner'));
+        ? t('spotOfflineSaved')
+        : (err.message || t('spotSaveFailed'));
 
       setFeedback({
         type: 'error',
@@ -197,12 +195,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       onClose={onClose}
       maxWidthClass="max-w-xl"
       icon={<Sparkles className={s.headerIcon} />}
-      subtitle={
-        language === 'vi'
-          ? 'Chọn giao diện màu sắc và chọn sự kiện từ lịch để làm nổi bật'
-          : 'Select visual theme & pick which event to feature'
-      }
-      title={language === 'vi' ? 'Tuỳ Chỉnh Sự Kiện Nổi Bật Trang Chủ' : 'Customize Home Feature Banner'}
+      subtitle={t('spotSubtitle')}
+      title={t('spotTitle')}
     >
       {/* Feedback message */}
         {feedback && (
@@ -227,7 +221,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             <div className={s.stepHeader}>
               <label className={s.stepLabel}>
                 <Palette className={s.paletteIcon} />
-                <span>{language === 'vi' ? '1. Chọn Giao Diện Màu Sắc (Theme):' : '1. Select Theme:'}</span>
+                <span>{t('spotThemeStep')}</span>
               </label>
             </div>
 
@@ -265,10 +259,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             <div className={s.stepHeader}>
               <label className={s.stepLabel}>
                 <Calendar className={s.calendarIcon} />
-                <span>{language === 'vi' ? '2. Chọn Sự Kiện Làm Nổi Bật:' : '2. Choose Event to Feature:'}</span>
+                <span>{t('spotEventStep')}</span>
               </label>
               <span className={s.stepHint}>
-                {language === 'vi' ? 'Chi tiết lấy tự động từ sự kiện' : 'Details come from event'}
+                {t('spotEventAuto')}
               </span>
             </div>
 
@@ -284,18 +278,14 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                   <div className={s.autoBadgeWrap}>
                     <span className={s.autoBadge}>
                       <Zap className={s.zapIcon} />
-                      <span>{language === 'vi' ? 'Tự Động (Khuyên Dùng)' : 'Auto-Next (Recommended)'}</span>
+                      <span>{t('spotAuto')}</span>
                     </span>
                   </div>
                   <p className={s.autoTitle}>
-                    {language === 'vi'
-                      ? 'Luôn tự động hiển thị sự kiện sắp tới gần nhất'
-                      : 'Always show the next upcoming event automatically'}
+                    {t('spotAutoTitle')}
                   </p>
                   <p className={s.autoSubtitle}>
-                    {language === 'vi'
-                      ? 'Khi sự kiện kết thúc, hệ thống sẽ tự động chuyển sang sự kiện kế tiếp.'
-                      : 'When the event ends, automatically updates to the next one.'}
+                    {t('spotAutoSub')}
                   </p>
                 </div>
                 <div
@@ -310,12 +300,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
               {upcomingEvents.length === 0 ? (
                 <div className={s.emptyEventsBox}>
                   <p className={s.emptyEventsTitle}>
-                    {language === 'vi' ? 'Hiện chưa có sự kiện sắp tới nào' : 'No upcoming events currently scheduled'}
+                    {t('spotNoEvents')}
                   </p>
                   <p className={s.emptyEventsSubtitle}>
-                    {language === 'vi'
-                      ? 'Hệ thống dùng chế độ "Tự Động" để hiển thị giờ thờ phượng và sinh hoạt thường lệ.'
-                      : 'Auto-Next will display weekly Sunday worship and prayer services.'}
+                    {t('spotNoEventsSub')}
                   </p>
                 </div>
               ) : (
@@ -363,12 +351,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
           <div className={s.inputSectionDivider}>
             <div className={s.stepHeader}>
               <label className={s.fieldLabel}>
-                {language === 'vi'
-                  ? '3. Nội Dung Thẻ Tròn / Pill Badge Text (Tuỳ Chọn):'
-                  : '3. Custom Pill Badge Text (Optional):'}
+                {t('spotBadgeStep')}
               </label>
               <span className={s.fieldHint}>
-                {language === 'vi' ? 'Hiển thị ở góc trên banner' : 'Top badge on banner'}
+                {t('spotBadgeHint')}
               </span>
             </div>
             <input
@@ -376,21 +362,17 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
               value={badgeText}
               onChange={(e) => setBadgeText(e.target.value)}
               className={s.inputMedium}
-              placeholder={language === 'vi' ? 'e.g. Sự Kiện Nổi Bật, Sunday Worship, Lễ Nhóm Đặc Biệt...' : 'e.g. Featured Event, Sunday Worship, Special Service...'}
+              placeholder={t('spotBadgePlaceholder')}
             />
             <p className={s.fieldHint}>
-              {language === 'vi'
-                ? 'Bạn có thể tuỳ ý kết hợp phong cách màu (theme) với bất kỳ chữ nào trong thẻ pill này.'
-                : 'You can freely combine the color theme with any custom pill text.'}
+              {t('spotBadgeNote')}
             </p>
           </div>
 
           {/* STEP 4: Optional Scripture Quote / Subtitle */}
           <div className={s.inputSectionDivider}>
             <label className={s.fieldLabel}>
-              {language === 'vi'
-                ? '4. Câu Kinh Thánh Trích Dẫn / Lời Chúc (Tuỳ Chọn):'
-                : '4. Optional Scripture Quote or Greeting:'}
+              {t('spotQuoteStep')}
             </label>
             <input
               type="text"
@@ -400,16 +382,14 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
               placeholder='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
             />
             <p className={s.fieldHint}>
-              {language === 'vi'
-                ? 'Tiêu đề, mô tả, ngày giờ và nút chỉ đường sẽ lấy trực tiếp từ sự kiện bạn đã chọn ở trên.'
-                : 'Title, description, date/time and directions link are automatically populated from the chosen event.'}
+              {t('spotQuoteNote')}
             </p>
           </div>
 
           {/* Footer Submit Buttons */}
           <div className={s.footer}>
             <Button type="button" variant="secondary" onClick={onClose}>
-              {language === 'vi' ? 'Huỷ' : 'Cancel'}
+              {t('commonCancel')}
             </Button>
             <Button
               type="submit"
@@ -417,7 +397,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
               disabled={saving}
               leftIcon={<Save className={s.saveIcon} />}
             >
-              <span>{saving ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : (language === 'vi' ? 'Lưu & Áp Dụng' : 'Save & Apply')}</span>
+              <span>{saving ? t('commonSaving') : t('spotSaveApply')}</span>
             </Button>
           </div>
         </form>

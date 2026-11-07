@@ -178,7 +178,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           {isAdmin && onOpenAdminPortal && (
             <AdminAddButton
               onClick={() => onOpenAdminPortal('verses')}
-              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+              title={t('verseAddTitle')}
             />
           )}
         </div>
@@ -186,7 +186,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
         <Card variant="empty" padding="empty">
           <BookOpen className="w-10 h-10 text-stone-300 mx-auto mb-3" />
           <p className="font-serif font-bold text-stone-900 text-base">
-            {language === 'vi' ? 'Chưa có Câu Kinh Thánh nào' : 'No Scripture Available'}
+            {t('verseEmpty')}
           </p>
         </Card>
       </section>
@@ -212,7 +212,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             <AdminAddButton
               onClick={() => onOpenAdminPortal('verses')}
               className="sm:hidden"
-              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+              title={t('verseAddTitle')}
             />
           )}
         </div>
@@ -252,7 +252,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             <AdminAddButton
               onClick={() => onOpenAdminPortal('verses')}
               className="hidden sm:flex"
-              title={language === 'vi' ? 'Thêm Câu Kinh Thánh' : 'Add Scripture'}
+              title={t('verseAddTitle')}
             />
           )}
         </div>
@@ -358,13 +358,9 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       {/* Common Confirmation Modal for Delete */}
       <ConfirmModal
         isOpen={Boolean(deleteTargetVerse)}
-        title={language === 'vi' ? 'Xóa Câu Kinh Thánh?' : 'Delete Scripture?'}
-        message={
-          language === 'vi'
-            ? `Bạn có chắc chắn muốn xóa câu Kinh Thánh "${deleteTargetVerse?.reference}"?`
-            : `Are you sure you want to delete "${deleteTargetVerse?.reference}"?`
-        }
-        confirmText={language === 'vi' ? 'Xóa' : 'Delete'}
+        title={t('verseDeleteTitle')}
+        message={t('verseDeleteConfirm', { reference: deleteTargetVerse?.reference ?? '' })}
+        confirmText={t('commonDelete')}
         loading={deletingVerse}
         onConfirm={handleConfirmDeleteVerse}
         onCancel={() => setDeleteTargetVerse(null)}

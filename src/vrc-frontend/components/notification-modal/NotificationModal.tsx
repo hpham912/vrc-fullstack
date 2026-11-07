@@ -28,7 +28,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   notifications,
   onSelectNotification,
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -57,17 +57,17 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     switch (type) {
       case 'event':
         return {
-          label: language === 'vi' ? 'Sự Kiện' : 'Event',
+          label: t('notifTypeEvent'),
           classes: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         };
       case 'verse':
         return {
-          label: language === 'vi' ? 'Lời Chúa' : 'Verse',
+          label: t('notifTypeVerse'),
           classes: 'bg-amber-50 text-amber-800 border-amber-200',
         };
       default:
         return {
-          label: language === 'vi' ? 'Thông Báo' : 'Notice',
+          label: t('notifTypeNotice'),
           classes: 'bg-rose-50 text-rose-700 border-rose-200',
         };
     }
@@ -85,7 +85,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={language === 'vi' ? 'Thông Báo Hội Thánh' : 'Church Notifications'}
+        aria-label={t('notifTitle')}
         className={s.dialog}
       >
         {/* Header */}
@@ -96,10 +96,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
             </div>
             <div>
               <h3 className={s.headerTitle}>
-                {language === 'vi' ? 'Thông Báo Hội Thánh' : 'Church Notifications'}
+                {t('notifTitle')}
               </h3>
               <p className={s.headerSub}>
-                {language === 'vi' ? 'Tin tức & lịch sinh hoạt mới nhất' : 'Recent church updates & news'}
+                {t('notifSubtitle')}
               </p>
             </div>
           </div>
@@ -120,12 +120,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                 <Bell className="w-5 h-5" />
               </div>
               <p className={s.emptyTitle}>
-                {language === 'vi' ? 'Chưa có thông báo nào mới' : 'No new notifications'}
+                {t('notifEmpty')}
               </p>
               <p className={s.emptySub}>
-                {language === 'vi'
-                  ? 'Khi có lịch thờ phượng hoặc Lời Chúa mới, thông báo sẽ hiển thị ở đây.'
-                  : 'Upcoming worship events and devotionals will appear here.'}
+                {t('notifEmptySub')}
               </p>
             </div>
           ) : (
@@ -181,7 +179,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
             size="sm"
             onClick={onClose}
           >
-            {language === 'vi' ? 'Đóng' : 'Close'}
+            {t('commonClose')}
           </Button>
         </div>
       </div>

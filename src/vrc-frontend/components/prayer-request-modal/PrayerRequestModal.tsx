@@ -11,7 +11,7 @@ interface PrayerRequestModalProps {
 }
 
 export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, onClose }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [requesterName, setRequesterName] = useState('');
   const [requestText, setRequestText] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -28,11 +28,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
       const lastSent = Number(localStorage.getItem('vrc_last_prayer_at') || '0');
       const secondsLeft = Math.ceil((60_000 - (Date.now() - lastSent)) / 1000);
       if (secondsLeft > 0) {
-        setError(
-          language === 'vi'
-            ? `Vui lòng đợi ${secondsLeft} giây trước khi gửi lời cầu nguyện tiếp theo.`
-            : `Please wait ${secondsLeft} seconds before submitting another prayer request.`
-        );
+        setError(t('prayerWait', { seconds: secondsLeft }));
         return;
       }
     } catch {}
@@ -87,7 +83,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
       isOpen={isOpen}
       onClose={handleClose}
       icon={<HeartHandshake className="w-5 h-5 text-amber-400" />}
-      title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Submit a Prayer Request'}
+      title={t('prayerRequestTitle')}
       maxWidthClass="max-w-md"
     >
       <div className={s.body}>
@@ -95,18 +91,16 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
           <div className={s.successWrapper}>
             <CheckCircle2 className={s.successIcon} />
             <h4 className={s.successTitle}>
-              {language === 'vi' ? 'Đã Gửi Lời Cầu Nguyện' : 'Prayer Request Received'}
+              {t('prayerReceived')}
             </h4>
             <p className={s.successSub}>
-              {language === 'vi'
-                ? 'Hội Thánh và ban mục vụ sẽ hiệp ý cầu nguyện cho bạn.'
-                : 'Our pastoral team and church family will be praying with you.'}
+              {t('prayerReceivedSub')}
             </p>
             <button
               onClick={handleClose}
               className={s.successCloseBtn}
             >
-              {language === 'vi' ? 'Đóng' : 'Close'}
+              {t('commonClose')}
             </button>
           </div>
         ) : (
@@ -119,11 +113,11 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
 
             <div>
               <label className={s.label}>
-                {language === 'vi' ? 'Tên của bạn (Không bắt buộc)' : 'Your Name (Optional)'}
+                {t('prayerNameLabel')}
               </label>
               <input
                 type="text"
-                placeholder={language === 'vi' ? 'Để trống nếu muốn ẩn danh...' : 'Leave blank to remain anonymous...'}
+                placeholder={t('prayerNamePlaceholder')}
                 value={requesterName}
                 onChange={(e) => setRequesterName(e.target.value)}
                 className={s.input}
@@ -132,12 +126,12 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
 
             <div>
               <label className={s.label}>
-                {language === 'vi' ? 'Nội Dung Cầu Nguyện *' : 'Prayer Request *'}
+                {t('prayerContentLabel')}
               </label>
               <textarea
                 rows={4}
                 required
-                placeholder={language === 'vi' ? 'Chia sẻ điều bạn muốn Hội Thánh cầu nguyện...' : 'Share what you would like us to pray for...'}
+                placeholder={t('prayerContentPlaceholder')}
                 value={requestText}
                 onChange={(e) => setRequestText(e.target.value)}
                 className={s.textarea}
@@ -150,7 +144,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
                 variant="secondary"
                 onClick={handleClose}
               >
-                {language === 'vi' ? 'Hủy' : 'Cancel'}
+                {t('commonCancel')}
               </Button>
               <Button
                 type="submit"
@@ -160,8 +154,8 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
               >
                 <span>
                   {submitting
-                    ? (language === 'vi' ? 'Đang gửi...' : 'Sending...')
-                    : (language === 'vi' ? 'Gửi Cầu Nguyện' : 'Send Prayer')}
+                    ? t('prayerSending')
+                    : t('prayerSend')}
                 </span>
               </Button>
             </div>

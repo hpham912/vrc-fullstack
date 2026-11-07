@@ -113,11 +113,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onOpenPrayerModal}
                 className={s.prayerBtn}
-                title={language === 'vi' ? 'Gửi Lời Cầu Nguyện' : 'Prayer Request'}
+                title={t('navPrayerTitle')}
               >
                 <HeartHandshake className={s.prayerIcon} />
                 <span className={s.prayerText}>
-                  {language === 'vi' ? 'Cầu Nguyện' : 'Prayer'}
+                  {t('navPrayer')}
                 </span>
               </button>
             )}
@@ -193,7 +193,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`${s.settingsBtnBase} ${
                   showSettings ? s.settingsBtnActive : s.settingsBtnInactive
                 }`}
-                title={language === 'vi' ? 'Cài đặt' : 'Settings'}
+                title={t('navSettings')}
                 aria-label="Settings"
                 aria-expanded={showSettings}
               >
@@ -222,7 +222,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       }}
                       className={s.settingsFontItem}
                     >
-                      <span>{language === 'vi' ? 'Cỡ chữ lớn (A+)' : 'Larger Text (A+)'}</span>
+                      <span>{t('navLargerText')}</span>
                       <span
                         className={`${s.settingsFontBadgeBase} ${
                           isLargeFont ? s.settingsFontBadgeOn : s.settingsFontBadgeOff

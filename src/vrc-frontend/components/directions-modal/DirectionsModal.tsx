@@ -18,7 +18,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
   destinationName = CHURCH_NAME.en,
   address = CHURCH_NAME.address,
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -46,8 +46,8 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
           <Navigation className="w-5 h-5" />
         </div>
       }
-      subtitle={language === 'vi' ? 'Từ vị trí hiện tại của bạn' : 'From your current location'}
-      title={language === 'vi' ? 'Bắt Đầu Chỉ Đường' : 'Start Navigation'}
+      subtitle={t('dirFromCurrent')}
+      title={t('dirStartNav')}
     >
       {/* Destination Card */}
       <div className={s.body}>
@@ -65,7 +65,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
           </div>
 
           <div className={s.destFooter}>
-            <span>{language === 'vi' ? 'Điểm đến được chọn' : 'Selected destination'}</span>
+            <span>{t('dirSelectedDest')}</span>
             <Button
               type="button"
               variant="outline"
@@ -80,18 +80,16 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
               }
             >
               {copied ? (
-                <span className="text-emerald-700">{language === 'vi' ? 'Đã chép' : 'Copied'}</span>
+                <span className="text-emerald-700">{t('dirCopied')}</span>
               ) : (
-                <span>{language === 'vi' ? 'Chép địa chỉ' : 'Copy address'}</span>
+                <span>{t('dirCopyAddress')}</span>
               )}
             </Button>
           </div>
         </Card>
 
         <p className={s.promptText}>
-          {language === 'vi'
-            ? 'Chọn ứng dụng bản đồ ưa thích để bắt đầu dẫn đường ngay lập tức:'
-            : 'Choose your preferred maps app to start turn-by-turn routing immediately:'}
+          {t('dirChooseApp')}
         </p>
 
         {/* Common Reusable Map Choices */}
@@ -110,7 +108,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
           fullWidth
           onClick={onClose}
         >
-          {language === 'vi' ? 'Đóng' : 'Close'}
+          {t('commonClose')}
         </Button>
       </div>
     </Modal>

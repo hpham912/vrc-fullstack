@@ -33,7 +33,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
   onSaved,
 }) => {
   const { getToken } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const safeInfo = churchInfo || DEFAULT_CHURCH_INFO;
 
@@ -132,7 +132,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
     if (!sanctuaryName.trim() || !address.trim()) {
       setFeedback({
         type: 'error',
-        message: language === 'vi' ? 'Vui lòng nhập tên nhà nguyện và địa chỉ' : 'Please provide sanctuary name and address',
+        message: t('churchInfoFillBoth'),
       });
       return;
     }
@@ -184,7 +184,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       }
       setFeedback({
         type: 'success',
-        message: language === 'vi' ? 'Đã lưu thông tin nhà nguyện & lịch nhóm thành công!' : 'Sanctuary & worship schedule saved successfully!',
+        message: t('churchInfoSaved'),
       });
       onSaved(savedData);
       setTimeout(() => {
@@ -194,7 +194,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       console.error('Error saving church info:', err);
       setFeedback({
         type: 'error',
-        message: err.message || (language === 'vi' ? 'Lỗi khi lưu thông tin' : 'Error saving details'),
+        message: err.message || t('churchInfoSaveFailed'),
       });
     } finally {
       setSaving(false);
@@ -207,8 +207,8 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       onClose={onClose}
       maxWidthClass="max-w-2xl"
       icon={<Building2 className={s.headerIcon} />}
-      subtitle={language === 'vi' ? 'Chỉnh sửa thông tin xuất hiện trên trang chủ' : 'Customize sanctuary location and service times on Home'}
-      title={language === 'vi' ? 'Cập Nhật Địa Điểm & Lịch Thờ Phượng' : 'Sanctuary Location & Worship Times'}
+      subtitle={t('churchInfoSubtitle')}
+      title={t('churchInfoTitle')}
     >
       {/* Feedback alert */}
       {feedback && (
@@ -232,12 +232,12 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
         <Card variant="warm" padding="md" className="space-y-3">
             <h4 className={s.sectionTitle}>
               <MapPin className={s.mapPinIcon} />
-              <span>{language === 'vi' ? 'Địa Điểm Nhà Nguyện (Sanctuary)' : 'Sanctuary Location'}</span>
+              <span>{t('churchInfoSanctuary')}</span>
             </h4>
 
             <div className={s.fieldGroup}>
               <label className={s.label}>
-                {language === 'vi' ? 'Tên Nhà Nguyện / Tiêu Đề' : 'Sanctuary Name'}
+                {t('churchInfoName')}
               </label>
               <input
                 type="text"
@@ -251,7 +251,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
             <div className={s.gridTwoCols}>
               <div className={s.fieldGroup}>
                 <label className={s.label}>
-                  {language === 'vi' ? 'Địa Chỉ / Thành Phố' : 'Street Address / City, State'}
+                  {t('churchInfoAddress')}
                 </label>
                 <input
                   type="text"
@@ -264,7 +264,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
               <div className={s.fieldGroup}>
                 <label className={s.labelWithRow}>
-                  <span>{language === 'vi' ? 'Đường Dẫn Bản Đồ & Dẫn Đường' : 'Maps Navigation URLs'}</span>
+                  <span>{t('churchInfoMaps')}</span>
                   <div className={s.mapLinksGroup}>
                     <a
                       href={getGoogleMapsDirectionsUrl(address)}
@@ -300,7 +300,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
             <div className={s.gridTwoColsPt1}>
               <div className={s.fieldGroup}>
                 <label className={s.label}>
-                  {language === 'vi' ? 'Số Điện Thoại Liên Lạc' : 'Contact Phone'}
+                  {t('churchInfoPhone')}
                 </label>
                 <input
                   type="text"
@@ -312,7 +312,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
               </div>
               <div className={s.fieldGroup}>
                 <label className={s.label}>
-                  {language === 'vi' ? 'Email Hội Thánh' : 'Church Email'}
+                  {t('churchInfoEmail')}
                 </label>
                 <input
                   type="email"
@@ -330,7 +330,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
             <div className={s.servicesHeader}>
               <h4 className={s.sectionTitle}>
                 <Clock className={s.clockIcon} />
-                <span>{language === 'vi' ? 'Lịch Nhóm & Thờ Phượng Hàng Tuần' : 'Weekly Worship Services & Gatherings'}</span>
+                <span>{t('churchInfoSchedule')}</span>
               </h4>
               <Button
                 type="button"
@@ -339,16 +339,14 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                 onClick={handleAddService}
                 leftIcon={<Plus className={s.addServiceIcon} />}
               >
-                <span>{language === 'vi' ? '+ Thêm Buổi Nhóm' : '+ Add Service'}</span>
+                <span>{t('churchInfoAddService')}</span>
               </Button>
             </div>
 
             {services.length === 0 ? (
               <Card variant="subtle" padding="lg" className="border-dashed text-center space-y-2">
                 <p className={s.emptyServicesText}>
-                  {language === 'vi'
-                    ? 'Chưa có buổi nhóm nào. Thẻ lịch thờ phượng trên Trang Chủ sẽ tự động ẩn.'
-                    : 'No weekly services added. The schedule card on Home will be hidden.'}
+                  {t('churchInfoNoServices')}
                 </p>
                 <Button
                   type="button"
@@ -357,7 +355,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                   onClick={handleAddService}
                   leftIcon={<Plus className={s.plusIconSm} />}
                 >
-                  <span>{language === 'vi' ? 'Thêm Buổi Nhóm Mới' : 'Add New Service'}</span>
+                  <span>{t('churchInfoAddServiceNew')}</span>
                 </Button>
               </Card>
             ) : (
@@ -366,7 +364,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                   <div className={s.serviceCardHeader}>
                     <span className={s.serviceCardTitle}>
                       <CrossIcon className={s.serviceCrossIcon} />
-                      <span>#{idx + 1}: {svc.titleVi || (language === 'vi' ? 'Buổi nhóm mới' : 'New Service')}</span>
+                      <span>#{idx + 1}: {svc.titleVi || t('churchInfoNewService')}</span>
                     </span>
                     <Button
                       type="button"
@@ -376,14 +374,14 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                       leftIcon={<Trash2 className={s.plusIconSm} />}
                       title="Xoá buổi nhóm này"
                     >
-                      <span>{language === 'vi' ? 'Xoá' : 'Delete'}</span>
+                      <span>{t('commonDelete')}</span>
                     </Button>
                   </div>
 
                   <div className={s.serviceGrid}>
                     <div className={s.subFieldGroup}>
                       <label className={s.subLabel}>
-                        {language === 'vi' ? 'Tên buổi nhóm (Tiếng Việt)' : 'Service Name (Vietnamese)'}
+                        {t('churchInfoServiceNameVi')}
                       </label>
                       <input
                         type="text"
@@ -397,7 +395,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                     <div className={s.subFieldGroup}>
                       <div className={s.serviceCardHeader}>
                         <label className={s.subLabel}>
-                          {language === 'vi' ? 'Thời gian (Ví dụ: Chúa Nhật • 3:00 PM – 5:00 PM)' : 'Day & Time (Vietnamese)'}
+                          {t('churchInfoServiceTimeVi')}
                         </label>
                       </div>
                       <input
@@ -413,7 +411,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                   <div className={s.serviceGridPt1}>
                     <div className={s.subFieldGroup}>
                       <label className={s.subLabel}>
-                        {language === 'vi' ? 'Tên buổi nhóm (Tiếng Anh - English)' : 'Service Name (English)'}
+                        {t('churchInfoServiceNameEn')}
                       </label>
                       <input
                         type="text"
@@ -426,7 +424,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
                     <div className={s.subFieldGroup}>
                       <label className={s.subLabel}>
-                        {language === 'vi' ? 'Thời gian Tiếng Anh (English Day & Time)' : 'Day & Time in English'}
+                        {t('churchInfoServiceTimeEn')}
                       </label>
                       <input
                         type="text"
@@ -440,7 +438,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
 
                   <div className={s.subFieldGroup}>
                     <label className={s.subLabel}>
-                      {language === 'vi' ? 'Mô tả tóm tắt' : 'Description'}
+                      {t('churchInfoDesc')}
                     </label>
                     <textarea
                       rows={2}
@@ -458,7 +456,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
           {/* Footer Submit Buttons */}
           <div className={s.footer}>
             <Button type="button" variant="secondary" onClick={onClose}>
-              {language === 'vi' ? 'Huỷ' : 'Cancel'}
+              {t('commonCancel')}
             </Button>
             <Button
               type="submit"
@@ -466,7 +464,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
               disabled={saving}
               leftIcon={<Save className={s.plusIconSm} />}
             >
-              <span>{saving ? (language === 'vi' ? 'Đang lưu...' : 'Saving...') : (language === 'vi' ? 'Lưu Thay Đổi' : 'Save Changes')}</span>
+              <span>{saving ? t('commonSaving') : t('churchInfoSaveChanges')}</span>
             </Button>
           </div>
         </form>

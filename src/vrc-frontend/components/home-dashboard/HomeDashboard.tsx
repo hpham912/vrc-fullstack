@@ -248,7 +248,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     ? safeConfig.badge.trim()
     : (activeEvent
         ? `${activeEvent.category} • ${formatDateLocale(activeEvent.date, language)}`
-        : (language === 'vi' ? 'Sự Kiện Nổi Bật' : 'Featured Event'));
+        : t('homeFeaturedEvent'));
 
   const displayTitle = isAutoMode
     ? (activeEvent ? activeEvent.title : churchName.vi)
@@ -311,8 +311,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 leftIcon={<Sliders className="w-3.5 h-3.5 text-amber-300" />}
                 title="Tuỳ chỉnh banner trang chủ (Thanksgiving, Christmas, Easter...)"
               >
-                <span className="hidden sm:inline">{language === 'vi' ? 'Tuỳ Chỉnh Banner' : 'Customize Feature'}</span>
-                <span className="sm:hidden">{language === 'vi' ? 'Sửa' : 'Edit'}</span>
+                <span className="hidden sm:inline">{t('homeCustomizeBanner')}</span>
+                <span className="sm:hidden">{t('commonEdit')}</span>
               </Button>
             )}
           </div>
@@ -357,7 +357,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               className={bannerTheme.btnPrimary}
               rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
             >
-              <span>{language === 'vi' ? 'Xem Sự Kiện' : 'View Events'}</span>
+              <span>{t('homeViewEvents')}</span>
             </Button>
             <Button
               type="button"
@@ -373,7 +373,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               leftIcon={<Navigation className="w-3.5 h-3.5 text-amber-300" />}
               rightIcon={<Compass className="w-3 h-3 text-stone-200" />}
             >
-              <span>{language === 'vi' ? 'Chỉ Đường' : 'Directions'}</span>
+              <span>{t('homeDirections')}</span>
             </Button>
           </div>
         </div>
@@ -387,7 +387,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <span>{t('quickAccessTitle')}</span>
           </h2>
           <span className={s.sectionSubHint}>
-            {language === 'vi' ? 'Nhấn để điều hướng' : 'Tap to navigate'}
+            {t('homeTapNavigate')}
           </span>
         </div>
 
@@ -405,7 +405,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navEvents')}
             </span>
             <span className={s.quickCardSub}>
-              {events.length} {language === 'vi' ? 'sự kiện sắp tới' : 'upcoming'}
+              {events.length} {t('upcomingEventsUnit')}
             </span>
           </Card>
 
@@ -422,7 +422,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navVerse')}
             </span>
             <span className={s.quickCardSub}>
-              {todayVerse?.reference || (language === 'vi' ? 'Hôm nay' : 'Today')}
+              {todayVerse?.reference || t('homeToday')}
             </span>
           </Card>
 
@@ -439,7 +439,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navYouth')}
             </span>
             <span className={s.quickCardSub}>
-              {language === 'vi' ? 'Thứ Sáu 6:30 PM' : 'Fridays 6:30 PM'}
+              {t('homeFridayTime')}
             </span>
           </Card>
 
@@ -464,7 +464,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <MapPin className="w-4 h-4" />
             </div>
             <span className={s.quickCardTitle}>
-              {language === 'vi' ? 'Nhà Nguyện' : 'Sanctuary'}
+              {t('homeSanctuary')}
             </span>
             <span className={s.quickCardSub}>
               {churchAddress}
@@ -535,7 +535,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   size="sm"
                   onClick={() => onNavigateTab('events')}
                 >
-                  {language === 'vi' ? 'Xem chi tiết' : 'Details'}
+                  {t('homeDetails')}
                 </Button>
               </div>
             </div>
@@ -549,11 +549,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <div className={s.servicesCardHeader}>
             <h2 className={s.sectionHeading}>
               <Clock className="w-4 h-4 text-amber-600" />
-              <span>
-                {language === 'vi'
-                  ? 'Lịch Nhóm & Thờ Phượng Hàng Tuần'
-                  : 'Weekly Worship Services & Gatherings'}
-              </span>
+              <span>{t('homeWeeklyServices')}</span>
             </h2>
             {isAdmin && onOpenChurchInfoEditor && (
               <Button
@@ -563,7 +559,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 onClick={onOpenChurchInfoEditor}
                 leftIcon={<PenTool className="w-3 h-3" />}
               >
-                <span>{language === 'vi' ? 'Sửa Lịch' : 'Edit Schedule'}</span>
+                <span>{t('homeEditSchedule')}</span>
               </Button>
             )}
           </div>

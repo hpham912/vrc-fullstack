@@ -426,16 +426,14 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             <div className="space-y-0.5 min-w-0">
               <div className={s.pastLabel}>
                 <History className="w-4 h-4 text-stone-400" />
-                <span>{language === 'vi' ? 'Sự Kiện Đã Diễn Ra' : 'Past Events'}</span>
+                <span>{t('eventsPastTitle')}</span>
               </div>
               <p className={s.pastSub}>
-                {language === 'vi'
-                  ? 'Lưu trữ 3 sự kiện gần nhất đã hoàn tất'
-                  : 'Archive of the 3 most recent concluded gatherings'}
+                {t('eventsPastSub')}
               </p>
             </div>
             <span className={s.pastCountBadge}>
-              {pastEvents.length} {language === 'vi' ? 'sự kiện' : 'events'}
+              {pastEvents.length} {t('eventsUnit')}
             </span>
           </div>
 
@@ -455,7 +453,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                       </span>
                       <span className={s.concludedPill}>
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>{language === 'vi' ? 'Đã Diễn Ra' : 'Concluded'}</span>
+                        <span>{t('eventsConcluded')}</span>
                       </span>
                     </div>
                   </div>
@@ -500,7 +498,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                           onClick={() => setExpandedDescId(isDescExpanded ? null : evt.id)}
                           className="text-[11px] font-bold text-amber-800 hover:text-amber-950 inline-flex items-center gap-0.5 mt-1"
                         >
-                          <span>{isDescExpanded ? (language === 'vi' ? 'Thu gọn' : 'Show less') : (language === 'vi' ? 'Xem thêm' : 'Read more')}</span>
+                          <span>{isDescExpanded ? t('commonShowLess') : t('commonReadMore')}</span>
                           {isDescExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                         </button>
                       )}
@@ -564,7 +562,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
             <div className="space-y-1.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-stone-800">
-                {language === 'vi' ? 'Chi Tiết Sự Kiện' : 'Event Details'}
+                {t('eventsDetailTitle')}
               </h4>
               <p className="text-stone-800 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-medium">
                 {language === 'vi'
@@ -583,13 +581,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       {/* Common Confirmation Modal for Delete */}
       <ConfirmModal
         isOpen={Boolean(deleteTargetEvent)}
-        title={language === 'vi' ? 'Xóa Sự Kiện?' : 'Delete Event?'}
-        message={
-          language === 'vi'
-            ? `Bạn có chắc chắn muốn xóa sự kiện "${deleteTargetEvent?.titleVi || deleteTargetEvent?.title}"? Hành động này không thể hoàn tác.`
-            : `Are you sure you want to delete "${deleteTargetEvent?.titleEn || deleteTargetEvent?.title}"? This action cannot be undone.`
-        }
-        confirmText={language === 'vi' ? 'Xóa' : 'Delete'}
+        title={t('eventsDeleteTitle')}
+        message={t('eventsDeleteConfirm', { title: (language === 'vi' ? deleteTargetEvent?.titleVi : deleteTargetEvent?.titleEn) || deleteTargetEvent?.title || '' })}
+        confirmText={t('commonDelete')}
         loading={deletingEvent}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTargetEvent(null)}
@@ -608,13 +602,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
           >
             <div className="flex items-center justify-between">
               <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-950">
-                {editingEvent
-                  ? language === 'vi'
-                    ? 'Chỉnh Sửa Sự Kiện'
-                    : 'Edit Event'
-                  : language === 'vi'
-                  ? 'Thêm Sự Kiện Mới'
-                  : 'Add New Event'}
+                {editingEvent ? t('eventEditTitle') : t('eventsAddFormTitle')}
               </h3>
               <button
                 type="button"
@@ -628,7 +616,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             <div className="space-y-3 text-xs sm:text-sm">
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {language === 'vi' ? 'Tên Sự Kiện *' : 'Event Title *'}
+                  {t('eventsTitleLabel')}
                 </label>
                 <input
                   type="text"
@@ -642,7 +630,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Danh Mục' : 'Category'}
+                    {t('eventsCategory')}
                   </label>
                   <select
                     value={formCategory}
@@ -660,7 +648,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                 <div className="overflow-hidden">
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Ngày *' : 'Date *'}
+                    {t('eventsDate')}
                   </label>
                   <input
                     type="date"
@@ -675,7 +663,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
+                    {t('eventStartTime')}
                   </label>
                   <input
                     type="text"
@@ -688,7 +676,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
+                    {t('eventEndTime')}
                   </label>
                   <input
                     type="text"
@@ -703,7 +691,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Địa Điểm *' : 'Location *'}
+                    {t('eventsLocation')}
                   </label>
                   <input
                     type="text"
@@ -715,7 +703,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {language === 'vi' ? 'Địa Chỉ' : 'Address'}
+                    {t('eventsAddress')}
                   </label>
                   <input
                     type="text"
@@ -728,7 +716,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {language === 'vi' ? 'Mô Tả *' : 'Description *'}
+                  {t('eventsDescription')}
                 </label>
                 <textarea
                   rows={3}
@@ -746,7 +734,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   onChange={(e) => setFormFeatured(e.target.checked)}
                   className="rounded border-stone-300 text-amber-600 focus:ring-amber-500"
                 />
-                <span>{language === 'vi' ? 'Đánh dấu Sự Kiện Nổi Bật' : 'Mark as Featured Event'}</span>
+                <span>{t('eventsFeatured')}</span>
               </label>
             </div>
 
@@ -756,20 +744,14 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 onClick={() => setEditModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200"
               >
-                {language === 'vi' ? 'Hủy' : 'Cancel'}
+                {t('commonCancel')}
               </button>
               <button
                 type="submit"
                 disabled={savingEvent}
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50"
               >
-                {savingEvent
-                  ? language === 'vi'
-                    ? 'Đang lưu...'
-                    : 'Saving...'
-                  : language === 'vi'
-                  ? 'Lưu Sự Kiện'
-                  : 'Save Event'}
+                {savingEvent ? t('commonSaving') : t('eventSave')}
               </button>
             </div>
           </form>

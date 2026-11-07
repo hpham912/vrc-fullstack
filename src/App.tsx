@@ -320,7 +320,7 @@ function ChurchAppContent() {
                 className="underline"
                 rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
               >
-                <span>{language === 'vi' ? 'Xem các buổi thờ phượng và sinh hoạt sắp tới' : 'View scheduled worship services & gatherings'}</span>
+                <span>{t('appUpcomingHint')}</span>
               </Button>
             </div>
           </div>
@@ -452,7 +452,7 @@ function ChurchAppContent() {
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                {language === 'vi' ? 'Nhắc Nhở Sự Kiện • 1 Giờ' : 'Event Reminder • 1 Hour'}
+                {t('notifReminderTitle')}
               </span>
               <span className="text-[10px] text-stone-400">VRC</span>
             </div>

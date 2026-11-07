@@ -19,7 +19,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
   onSelect,
   className = '',
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const googleUrl = getGoogleMapsDirectionsUrl(address);
   const appleUrl = getAppleMapsDirectionsUrl(address);
 
@@ -40,7 +40,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
             <div className={s.detailedTextCol}>
               <span className={s.detailedTitle}>Google Maps</span>
               <span className={s.detailedGoogleSub}>
-                {language === 'vi' ? 'Chỉ đường tức thì' : 'Live directions'}
+                {t('dirLive')}
               </span>
             </div>
           </div>
@@ -61,7 +61,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
             <div className={s.detailedTextCol}>
               <span className={s.detailedTitle}>Apple Maps</span>
               <span className={s.detailedAppleSub}>
-                {language === 'vi' ? 'Dẫn đường iOS' : 'iOS turn-by-turn'}
+                {t('dirIos')}
               </span>
             </div>
           </div>
@@ -79,7 +79,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
         rel="noopener noreferrer"
         onClick={onSelect}
         className={s.compactGoogleBtn}
-        title={language === 'vi' ? 'Chỉ đường Google Maps' : 'Google Maps Directions'}
+        title={t('dirGoogle')}
       >
         <Compass className={s.compactGoogleIcon} />
         <span>{shortLabels ? 'Google' : 'Google Maps'}</span>
@@ -90,7 +90,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
         rel="noopener noreferrer"
         onClick={onSelect}
         className={s.compactAppleBtn}
-        title={language === 'vi' ? 'Chỉ đường Apple Maps' : 'Apple Maps Directions'}
+        title={t('dirApple')}
       >
         <Navigation className={s.compactAppleIcon} />
         <span>{shortLabels ? 'Apple' : 'Apple Maps'}</span>

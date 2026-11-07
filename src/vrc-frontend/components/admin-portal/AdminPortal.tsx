@@ -205,7 +205,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       });
       if (res.ok) {
         setPrayerList((prev) => prev.filter((p) => p.id !== id));
-        showFeedback('success', language === 'vi' ? 'Đã xóa lời cầu nguyện.' : 'Prayer request deleted.');
+        showFeedback('success', t('adminPrayerDeleted'));
       }
     } catch (err: any) {
       showFeedback('error', err.message || 'Error deleting prayer request');
@@ -320,7 +320,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventTitleVi.trim() || !eventTitleEn.trim() || !eventDescriptionVi.trim() || !eventDescriptionEn.trim() || !eventDate || !eventStartTime || !eventLocation) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng điền đầy đủ tên và mô tả sự kiện bằng cả tiếng Việt và tiếng Anh.' : 'Please fill in both Vietnamese and English event titles and descriptions.');
+      showFeedback('error', t('adminEventFillBoth'));
       return;
     }
 
@@ -365,8 +365,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       }
 
       showFeedback('success', editingEventId 
-        ? (language === 'vi' ? 'Cập nhật sự kiện thành công!' : 'Event updated successfully!') 
-        : (language === 'vi' ? 'Đã thêm sự kiện vào lịch hội thánh!' : 'New event published successfully!'));
+        ? t('adminEventUpdated') 
+        : t('adminEventAdded'));
 
       // Dispatch local/push notification
       NotificationClient.triggerNotification(
@@ -385,7 +385,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   };
 
   const handleDeleteEvent = async (id: number) => {
-    if (!window.confirm(language === 'vi' ? 'Bạn có chắc chắn muốn xóa sự kiện này?' : 'Delete this gathering from the calendar?')) return;
+    if (!window.confirm(t('adminEventDeleteConfirm'))) return;
     try {
       const token = getToken();
       const res = await fetch(apiUrl(`/api/events/${id}`), {
@@ -397,7 +397,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         try { errData = await res.json(); } catch {}
         throw new Error(errData?.error || `Failed to delete event (HTTP ${res.status})`);
       }
-      showFeedback('success', language === 'vi' ? 'Đã xóa sự kiện.' : 'Event removed.');
+      showFeedback('success', t('adminEventDeleted'));
       onRefreshData();
     } catch (err: any) {
       showFeedback('error', err.message || 'Error deleting event');
@@ -411,9 +411,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleFetchScriptureForVerse = async () => {
     const passage = verseReferenceEn.trim() || verseReferenceVi.trim();
     if (!passage) {
-      showFeedback('error', language === 'vi'
-        ? 'Vui lòng nhập câu Kinh Thánh trước, ví dụ: Giăng 3:16 hoặc John 3:16.'
-        : 'Enter a scripture reference first, e.g. John 3:16 or Giăng 3:16.');
+      showFeedback('error', t('adminFetchRefFirst'));
       return;
     }
     try {
@@ -433,11 +431,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       setVerseTranslationEn(data.translationEn || data.translation || 'NIV');
       setVerseTranslationVi(data.translationVi || '1925');
       setFetchedScriptureKey(`${fetchedRefEn.trim()}|${fetchedRefVi.trim()}`);
-      showFeedback('success', language === 'vi'
-        ? `Đã lấy ${data.referenceEn || passage} (NIV + 1925).`
-        : `Fetched ${data.referenceEn || passage} (NIV + 1925).`);
+      showFeedback('success', t('adminVerseFetched', { ref: data.referenceEn || passage }));
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi lấy Lời Chúa' : 'Error fetching scripture'));
+      showFeedback('error', getErrorMessage(err, language, t('errFetchScripture')));
     } finally {
       setFetchingScripture(false);
     }
@@ -446,7 +442,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveVerse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verseDate || !verseReferenceVi.trim() || !verseReferenceEn.trim() || !verseTextVi.trim() || !verseTextEn.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng điền ngày, câu gốc và nội dung Kinh Thánh bằng cả tiếng Việt và tiếng Anh.' : 'Please fill in date, Vietnamese & English references, and verse texts.');
+      showFeedback('error', t('adminVerseFillBoth'));
       return;
     }
 
@@ -485,9 +481,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         }),
       });
 
-      showFeedback('success', language === 'vi'
-        ? (editingVerseId ? 'Đã cập nhật Lời Chúa!' : 'Đã lưu Lời Chúa hằng ngày!')
-        : (editingVerseId ? 'Daily scripture updated!' : 'Daily scripture saved successfully!'));
+      showFeedback('success', editingVerseId ? t('adminVerseUpdated') : t('adminVerseSaved'));
 
       if (!editingVerseId) {
         NotificationClient.triggerNotification(
@@ -499,24 +493,24 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       resetVerseForm();
       onRefreshData();
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi lưu Lời Chúa' : 'Error saving daily verse'));
+      showFeedback('error', getErrorMessage(err, language, t('errSaveVerse')));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteVerse = async (id: number) => {
-    if (!window.confirm(language === 'vi' ? 'Xóa câu Lời Chúa này?' : 'Delete this daily devotional?')) return;
+    if (!window.confirm(t('adminVerseDeleteConfirm'))) return;
     try {
       const token = getToken();
       await apiFetch(`/api/verses/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      showFeedback('success', language === 'vi' ? 'Đã xóa Lời Chúa.' : 'Verse deleted.');
+      showFeedback('success', t('adminVerseDeleted'));
       onRefreshData();
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, language === 'vi' ? 'Lỗi khi xóa Lời Chúa' : 'Error deleting verse'));
+      showFeedback('error', getErrorMessage(err, language, t('errDeleteVerse')));
     }
   };
 
@@ -524,7 +518,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdminUsername.trim() || !newAdminPassword.trim() || !newAdminDisplayName.trim()) {
-      showFeedback('error', language === 'vi' ? 'Vui lòng điền tên đăng nhập, mật khẩu và tên hiển thị' : 'Please fill in username, password, and display name');
+      showFeedback('error', t('adminFillFields'));
       return;
     }
 
@@ -548,7 +542,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create admin');
 
-      showFeedback('success', language === 'vi' ? `Tạo tài khoản quản trị [${newAdminUsername}] thành công!` : `Admin account [${newAdminUsername}] created!`);
+      showFeedback('success', t('adminCreated', { username: newAdminUsername }));
       setNewAdminUsername('');
       setNewAdminPassword('');
       setNewAdminDisplayName('');
@@ -563,7 +557,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // Delete Admin Account handler
   const handleDeleteAdmin = async (id: number, username: string) => {
-    if (!window.confirm(language === 'vi' ? `Bạn có chắc chắn muốn xóa tài khoản quản trị [${username}]?` : `Are you sure you want to delete admin account [${username}]?`)) return;
+    if (!window.confirm(t('adminDeleteConfirm', { username }))) return;
 
     try {
       const token = getToken();
@@ -574,7 +568,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete admin');
 
-      showFeedback('success', language === 'vi' ? 'Đã xóa tài khoản quản trị.' : 'Admin account deleted.');
+      showFeedback('success', t('adminDeleted'));
       loadAdminAccounts();
     } catch (err: any) {
       showFeedback('error', err.message);
@@ -600,7 +594,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Password update failed');
 
-      showFeedback('success', language === 'vi' ? 'Đổi mật khẩu thành công!' : 'Password updated successfully!');
+      showFeedback('success', t('adminPasswordUpdated'));
       setOldPassword('');
       setNewPassword('');
     } catch (err: any) {
@@ -620,26 +614,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               {focusedMode
                 ? activeTab === 'create-event'
                   ? editingEventId
-                    ? language === 'vi'
-                      ? 'Chỉnh Sửa Sự Kiện'
-                      : 'Edit Event'
-                    : language === 'vi'
-                    ? 'Thêm Sự Kiện Mới'
-                    : 'Add New Event'
+                    ? t('adminEventEditHeader')
+                    : t('eventsAddFormTitle')
                   : activeTab === 'verses'
                   ? editingVerseId
-                    ? language === 'vi'
-                      ? 'Chỉnh Sửa Câu Kinh Thánh'
-                      : 'Edit Daily Scripture'
-                    : language === 'vi'
-                    ? 'Thêm Câu Kinh Thánh'
-                    : 'Add Daily Scripture'
+                    ? t('adminVerseEditFormTitle')
+                    : t('adminVerseAddFormTitle')
                   : t('adminDashboardTitle')
                 : t('adminDashboardTitle')}
             </h2>
             <p className={s.headerSubtitle}>
               <span>
-                {language === 'vi' ? 'Đăng nhập với tư cách: ' : 'Logged in as: '}
+                {t('adminLoggedInAs')}
                 <span className={s.adminName}>{adminUser?.displayName} (@{adminUser?.username})</span>
               </span>
               <span className={s.separator}>•</span>
@@ -683,7 +669,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               onClick={() => setFeedback(null)}
               className="flex-shrink-0 p-1 rounded-lg hover:bg-black/5"
               aria-label="Dismiss"
-              title={language === 'vi' ? 'Đóng' : 'Dismiss'}
+              title={t('commonDismiss')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -705,7 +691,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               }`}
             >
               <Plus className={s.tabIcon} />
-              <span className="truncate">{editingEventId ? (language === 'vi' ? 'Sửa Sự Kiện' : 'Edit Event') : t('tabAddEvent')}</span>
+              <span className="truncate">{editingEventId ? t('eventEditTitle') : t('tabAddEvent')}</span>
             </button>
 
             <button
@@ -749,7 +735,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               }`}
             >
               <HeartHandshake className={s.tabIconAmber} />
-              <span className="truncate">{language === 'vi' ? 'Cầu Nguyện' : 'Prayers'}</span>
+              <span className="truncate">{t('adminTabPrayers')}</span>
             </button>
           </div>
 
@@ -760,7 +746,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               className={s.mobileSpotlightBtn}
             >
               <Sliders className={s.tabIcon} />
-              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner Trang Chủ' : 'Customize Home Banner'}</span>
+              <span>{t('adminCustomizeBanner')}</span>
             </button>
           )}
         </div>
@@ -779,7 +765,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             }`}
           >
             <Plus className={s.tabIcon} />
-            {editingEventId ? (language === 'vi' ? 'Sửa Sự Kiện' : 'Edit Event') : t('tabAddEvent')}
+            {editingEventId ? t('eventEditTitle') : t('tabAddEvent')}
           </button>
 
           <button
@@ -820,7 +806,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               title="Tuỳ chỉnh banner trang chủ"
             >
               <Sliders className={s.tabIcon} />
-              <span>{language === 'vi' ? 'Tuỳ Chỉnh Banner' : 'Customize Banner'}</span>
+              <span>{t('adminCustomizeBannerShort')}</span>
             </button>
           )}
         </div>
@@ -878,7 +864,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 ? '01'
                 : previewDateObj.getDate();
               const previewWeekday = isNaN(previewDateObj.getTime())
-                ? (language === 'vi' ? 'Chúa Nhật' : 'Sunday')
+                ? t('weekdaySunday')
                 : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
 
               return (
@@ -889,8 +875,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <div className="flex items-center gap-2">
                         <h3 className="font-serif font-bold text-stone-900 text-sm">
                           {editingEventId
-                            ? (language === 'vi' ? 'Sửa Thông Tin Sự Kiện' : 'Edit Event')
-                            : (language === 'vi' ? 'Thêm Sự Kiện Mới Vào Lịch' : 'Add New Event to Calendar')}
+                            ? t('adminEventEditFormTitle')
+                            : t('adminEventFormTitle')}
                         </h3>
                         {editingEventId && (
                           <button
@@ -898,7 +884,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             onClick={resetEventForm}
                             className="text-xs text-stone-500 hover:text-stone-800 underline"
                           >
-                            {language === 'vi' ? 'Hủy Sửa' : 'Cancel'}
+                            {t('cancelEdit')}
                           </button>
                         )}
                       </div>
@@ -908,13 +894,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1">
                         {editingEventAudit.createdBy && (
                           <span>
-                            <strong>{language === 'vi' ? 'Người tạo:' : 'Created by:'}</strong> {editingEventAudit.createdBy}
+                            <strong>{t('commonCreatedBy')}</strong> {editingEventAudit.createdBy}
                             {editingEventAudit.createdAt ? ` (${new Date(editingEventAudit.createdAt).toLocaleString()})` : ''}
                           </span>
                         )}
                         {editingEventAudit.updatedBy && (
                           <span>
-                            <strong>{language === 'vi' ? 'Sửa lần cuối:' : 'Last modified by:'}</strong> {editingEventAudit.updatedBy}
+                            <strong>{t('commonUpdatedBy')}</strong> {editingEventAudit.updatedBy}
                             {editingEventAudit.updatedAt ? ` (${new Date(editingEventAudit.updatedAt).toLocaleString()})` : ''}
                           </span>
                         )}
@@ -924,7 +910,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Tên Sự Kiện (Tiếng Việt) *' : 'Event Title (Vietnamese) *'}
+                          {t('adminEventTitleVi')}
                         </label>
                         <input
                           type="text"
@@ -938,7 +924,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Tên Sự Kiện (Tiếng Anh) *' : 'Event Title (English) *'}
+                          {t('adminEventTitleEn')}
                         </label>
                         <input
                           type="text"
@@ -954,7 +940,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Mô Tả Chi Tiết (Tiếng Việt) *' : 'Description (Vietnamese) *'}
+                          {t('adminEventDescVi')}
                         </label>
                         <textarea
                           rows={3}
@@ -968,7 +954,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Mô Tả Chi Tiết (Tiếng Anh) *' : 'Description (English) *'}
+                          {t('adminEventDescEn')}
                         </label>
                         <textarea
                           rows={3}
@@ -984,7 +970,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0">
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Phân Loại' : 'Category'}
+                          {t('adminEventCategory')}
                         </label>
                         <select
                           value={eventCategory}
@@ -1000,7 +986,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       <div className="w-full min-w-0 overflow-hidden">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Ngày Diễn Ra *' : 'Date *'}
+                          {t('adminEventDate')}
                         </label>
                         <input
                           type="date"
@@ -1013,7 +999,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Giờ Bắt Đầu *' : 'Start Time *'}
+                          {t('eventStartTime')}
                         </label>
                         <input
                           type="text"
@@ -1029,7 +1015,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Giờ Kết Thúc' : 'End Time'}
+                          {t('eventEndTime')}
                         </label>
                         <input
                           type="text"
@@ -1042,7 +1028,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       <div className="w-full min-w-0">
                         <label className="block text-xs font-bold text-stone-700 mb-1">
-                          {language === 'vi' ? 'Phòng Nhóm / Nơi Chốn *' : 'Location / Room *'}
+                          {t('adminEventLocation')}
                         </label>
                         <input
                           type="text"
@@ -1058,10 +1044,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="w-full min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <label className="block text-xs font-bold text-stone-700">
-                          {language === 'vi' ? 'Địa Chỉ Cụ Thể (Chỉ Đường Google Maps)' : 'Venue Address (Google Maps Directions)'}
+                          {t('adminEventAddress')}
                         </label>
                         <span className="text-[10px] text-stone-400">
-                          {language === 'vi' ? 'Để trống = Địa chỉ Hội Thánh' : 'Blank = Church Address'}
+                          {t('adminEventAddressHint')}
                         </span>
                       </div>
                       <input
@@ -1072,9 +1058,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         className="w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white"
                       />
                       <p className="text-[11px] text-stone-500 mt-1">
-                        {language === 'vi'
-                          ? `Nếu để trống hoặc không đổi, nút Chỉ Đường sẽ dẫn tới địa chỉ Hội Thánh thiết lập trong Lịch Sinh Hoạt (${churchInfo?.address || 'Tempe, Arizona'}). Nếu là địa điểm dã ngoại hay ngoài nhà thờ, hãy nhập địa chỉ tại đây.`
-                          : `If left blank, the Directions button routes to the church sanctuary address (${churchInfo?.address || 'Tempe, Arizona'}). For retreats or offsite gatherings, enter the address here.`}
+                        {t('adminEventAddressNote', { address: churchInfo?.address || 'Tempe, Arizona' })}
                       </p>
                     </div>
 
@@ -1086,7 +1070,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           onChange={(e) => setEventIsFeatured(e.target.checked)}
                           className="rounded border-stone-300 text-stone-900 focus:ring-stone-400"
                         />
-                        <span>{language === 'vi' ? 'Đánh dấu là sự kiện nổi bật (Featured)' : 'Mark as Featured Event'}</span>
+                        <span>{t('adminEventFeatured')}</span>
                       </label>
                     </div>
 
@@ -1099,10 +1083,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         <Save className="w-3.5 h-3.5" />
                         <span>
                           {submitting
-                            ? (language === 'vi' ? 'Đang lưu...' : 'Saving...')
+                            ? t('commonSaving')
                             : editingEventId
-                            ? (language === 'vi' ? 'Cập Nhật Sự Kiện' : 'Update Event')
-                            : (language === 'vi' ? 'Lưu Sự Kiện' : 'Save Event')}
+                            ? t('adminEventUpdate')
+                            : t('eventSave')}
                         </span>
                       </button>
                     </div>
@@ -1113,10 +1097,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-500">
                       <span className="flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5 text-amber-600" />
-                        <span>{language === 'vi' ? 'Xem Trước Thẻ Sự Kiện' : 'Event Card Preview'}</span>
+                        <span>{t('adminEventPreview')}</span>
                       </span>
                       <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
-                        {language === 'vi' ? 'Tự động cập nhật' : 'Live preview'}
+                        {t('adminEventPreviewLive')}
                       </span>
                     </div>
 
@@ -1133,7 +1117,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           {eventIsFeatured && (
                             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
                               <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
-                              <span>{language === 'vi' ? 'NỔI BẬT' : 'FEATURED'}</span>
+                              <span>{t('adminEventFeaturedBadge')}</span>
                             </span>
                           )}
                         </div>
@@ -1158,7 +1142,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         {/* Title, Time, Location */}
                         <div className="min-w-0 flex-1 space-y-1">
                           <h4 className="text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2">
-                            {(language === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || (language === 'vi' ? 'Tiêu Đề Sự Kiện (Đang nhập...)' : 'Event Title (Type in form...)')}
+                            {(language === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || t('adminEventTitlePlaceholder')}
                           </h4>
 
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-700 font-medium">
@@ -1179,7 +1163,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                       {/* Description Preview */}
                       <p className="text-xs text-stone-800 leading-relaxed bg-white/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal">
-                        {(language === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || (language === 'vi' ? 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...' : 'Event details and description will appear here as you type in the form above...')}
+                        {(language === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || t('adminEventDescPlaceholder')}
                       </p>
                     </div>
                   </div>
@@ -1192,7 +1176,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           {activeTab === 'manage-events' && (
             <div className="space-y-3 max-w-2xl mx-auto">
               {events.length === 0 ? (
-                <p className="text-stone-500 text-sm py-8 text-center">{language === 'vi' ? 'Chưa có sự kiện nào trong cơ sở dữ liệu.' : 'No events in database.'}</p>
+                <p className="text-stone-500 text-sm py-8 text-center">{t('adminEventNoEvents')}</p>
               ) : (
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
                   {events.map((evt) => {
@@ -1208,11 +1192,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             </span>
                             {isPast ? (
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
-                                {language === 'vi' ? 'Đã diễn ra' : 'Past (Archive)'}
+                                {t('adminEventPast')}
                               </span>
                             ) : (
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                {language === 'vi' ? 'Sắp diễn ra' : 'Upcoming'}
+                                {t('adminEventUpcoming')}
                               </span>
                             )}
                           </div>
@@ -1253,8 +1237,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="flex items-center gap-2">
                     <h3 className="font-serif font-bold text-stone-900 text-sm">
                       {editingVerseId
-                        ? (language === 'vi' ? 'Sửa Lời Chúa Hôm Nay' : 'Edit Daily Scripture')
-                        : (language === 'vi' ? 'Đăng Lời Chúa Hôm Nay' : 'Post Daily Scripture')}
+                        ? t('adminVerseEditTitle')
+                        : t('adminVersePostTitle')}
                     </h3>
                     {editingVerseId && (
                       <button
@@ -1262,7 +1246,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         onClick={resetVerseForm}
                         className="text-xs text-stone-500 hover:text-stone-800 underline"
                       >
-                        {language === 'vi' ? 'Hủy Sửa' : 'Cancel'}
+                        {t('cancelEdit')}
                       </button>
                     )}
                   </div>
@@ -1274,17 +1258,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     disabled={fetchingScripture || isScriptureFetchedForCurrentRef || (!verseReferenceEn.trim() && !verseReferenceVi.trim())}
                     title={
                       isScriptureFetchedForCurrentRef
-                        ? (language === 'vi' ? 'Đã lấy câu này rồi. Đổi câu Kinh Thánh để lấy lại.' : 'Already fetched for this reference. Change the reference to fetch again.')
-                        : (language === 'vi' ? 'Nhập câu Kinh Thánh ở trên rồi bấm để lấy nội dung thật (NIV + 1925)' : 'Enter a reference above, then fetch the real text (NIV + 1925)')
+                        ? t('adminVerseFetchedHint')
+                        : t('adminVerseFetchHint')
                     }
                     leftIcon={<Sparkles className="w-3.5 h-3.5" />}
                   >
                     <span>
                       {fetchingScripture
-                        ? (language === 'vi' ? 'Đang lấy...' : 'Fetching...')
+                        ? t('commonFetching')
                         : isScriptureFetchedForCurrentRef
-                          ? (language === 'vi' ? 'Đã lấy ✓' : 'Fetched ✓')
-                          : (language === 'vi' ? 'Lấy từ Kinh Thánh' : 'Fetch from Bible')}
+                          ? t('adminVerseFetchedBadge')
+                          : t('adminVerseFetch')}
                     </span>
                   </Button>
                 </div>
@@ -1293,13 +1277,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1">
                     {editingVerseAudit.createdBy && (
                       <span>
-                        <strong>{language === 'vi' ? 'Người tạo:' : 'Created by:'}</strong> {editingVerseAudit.createdBy}
+                        <strong>{t('commonCreatedBy')}</strong> {editingVerseAudit.createdBy}
                         {editingVerseAudit.createdAt ? ` (${new Date(editingVerseAudit.createdAt).toLocaleString()})` : ''}
                       </span>
                     )}
                     {editingVerseAudit.updatedBy && (
                       <span>
-                        <strong>{language === 'vi' ? 'Sửa lần cuối:' : 'Last modified by:'}</strong> {editingVerseAudit.updatedBy}
+                        <strong>{t('commonUpdatedBy')}</strong> {editingVerseAudit.updatedBy}
                         {editingVerseAudit.updatedAt ? ` (${new Date(editingVerseAudit.updatedAt).toLocaleString()})` : ''}
                       </span>
                     )}
@@ -1307,7 +1291,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 )}
 
                 <div className="w-full sm:w-1/3 min-w-0">
-                  <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Ngày *' : 'Date *'}</label>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseDate')}</label>
                   <input
                     type="date"
                     required
@@ -1319,7 +1303,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh (Tiếng Việt) *' : 'Scripture Reference (Vietnamese) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseRefVi')}</label>
                     <input
                       type="text"
                       required
@@ -1330,7 +1314,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Câu Kinh Thánh (Tiếng Anh) *' : 'Scripture Reference (English) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseRefEn')}</label>
                     <input
                       type="text"
                       required
@@ -1344,7 +1328,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Bản Dịch Kinh Thánh (Tiếng Việt) *' : 'Bible Version (Vietnamese) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseVersionVi')}</label>
                     <input
                       type="text"
                       required
@@ -1355,7 +1339,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Bản Dịch Kinh Thánh (Tiếng Anh) *' : 'Bible Version (English) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseVersionEn')}</label>
                     <input
                       type="text"
                       required
@@ -1369,7 +1353,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa (Tiếng Việt) *' : 'Scripture Text (Vietnamese) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseTextVi')}</label>
                     <textarea
                       rows={3}
                       required
@@ -1380,7 +1364,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Nội Dung Lời Chúa (Tiếng Anh) *' : 'Scripture Text (English) *'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseTextEn')}</label>
                     <textarea
                       rows={3}
                       required
@@ -1394,7 +1378,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm (Tiếng Việt)' : 'Reflection (Vietnamese, Optional)'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseReflectionVi')}</label>
                     <textarea
                       rows={2}
                       placeholder="Nội dung suy gẫm..."
@@ -1404,7 +1388,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Suy Gẫm (Tiếng Anh)' : 'Reflection (English, Optional)'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVerseReflectionEn')}</label>
                     <textarea
                       rows={2}
                       placeholder="Pastoral reflection in English..."
@@ -1417,7 +1401,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện (Tiếng Việt)' : 'Prayer (Vietnamese, Optional)'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVersePrayerVi')}</label>
                     <input
                       type="text"
                       placeholder="Lạy Chúa, xin dẫn dắt chúng con..."
@@ -1427,7 +1411,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     />
                   </div>
                   <div className="w-full min-w-0">
-                    <label className="block text-xs font-bold text-stone-700 mb-1">{language === 'vi' ? 'Lời Cầu Nguyện (Tiếng Anh)' : 'Prayer (English, Optional)'}</label>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">{t('adminVersePrayerEn')}</label>
                     <input
                       type="text"
                       placeholder="Lord, guide our steps..."
@@ -1447,10 +1431,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <Save className="w-3.5 h-3.5" />
                     <span>
                       {submitting
-                        ? (language === 'vi' ? 'Đang lưu...' : 'Saving...')
+                        ? t('commonSaving')
                         : editingVerseId
-                        ? (language === 'vi' ? 'Cập Nhật Lời Chúa' : 'Update Scripture')
-                        : (language === 'vi' ? 'Lưu Lời Chúa' : 'Save Daily Scripture')}
+                        ? t('adminVerseUpdate')
+                        : t('adminVerseSave')}
                     </span>
                   </button>
                 </div>
@@ -1459,7 +1443,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               {/* Published verses list */}
               <div className="space-y-2 w-full min-w-0">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                  {language === 'vi' ? 'Lời Chúa Đã Đăng' : 'Published Daily Verses'} ({allVerses.length})
+                  {t('adminVersePublished')} ({allVerses.length})
                 </h4>
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-xl overflow-hidden bg-white">
                   {allVerses.map((v) => (
@@ -1572,7 +1556,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     disabled={submitting}
                     className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
                   >
-                    {submitting ? (language === 'vi' ? 'Đang tạo...' : 'Creating...') : t('createAdminBtn')}
+                    {submitting ? t('commonCreating') : t('createAdminBtn')}
                   </button>
                 </div>
               </form>
@@ -1599,7 +1583,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             </span>
                             {isSelf && (
                               <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
-                                {language === 'vi' ? 'Tài khoản của bạn' : 'Your Account'}
+                                {t('commonYourAccount')}
                               </span>
                             )}
                           </div>
@@ -1675,7 +1659,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <div className="space-y-4 max-w-2xl mx-auto w-full min-w-0">
               <div className="flex items-center justify-between">
                 <h3 className="font-serif font-bold text-stone-900 text-base">
-                  {language === 'vi' ? 'Danh Sách Lời Cầu Nguyện' : 'Prayer Requests'} ({prayerList.length})
+                  {t('adminPrayerTitle')} ({prayerList.length})
                 </h3>
                 <button
                   type="button"
@@ -1683,13 +1667,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold inline-flex items-center gap-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>{language === 'vi' ? 'Làm mới' : 'Refresh'}</span>
+                  <span>{t('commonRefresh')}</span>
                 </button>
               </div>
 
               {prayerList.length === 0 ? (
                 <div className="p-8 text-center bg-stone-50 rounded-2xl border border-stone-200 text-xs text-stone-500">
-                  {language === 'vi' ? 'Chưa có lời cầu nguyện nào.' : 'No prayer requests submitted yet.'}
+                  {t('adminPrayerEmpty')}
                 </div>
               ) : (
                 <div className="divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white">
@@ -1704,7 +1688,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-serif font-bold text-stone-900 text-sm">
-                              {p.requesterName || (language === 'vi' ? 'Ẩn danh' : 'Anonymous')}
+                              {p.requesterName || t('commonAnonymous')}
                             </span>
                             {p.createdAt && (
                               <span className="text-xs text-stone-500">
@@ -1729,8 +1713,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               className="text-xs font-bold text-amber-800 hover:text-amber-950 underline"
                             >
                               {isExpanded
-                                ? (language === 'vi' ? 'Thu gọn' : 'Show less')
-                                : (language === 'vi' ? 'Xem thêm' : 'Read more')}
+                                ? t('commonShowLess')
+                                : t('commonReadMore')}
                             </button>
                           )}
                         </div>
@@ -1738,7 +1722,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           type="button"
                           onClick={() => handleDeletePrayer(p.id)}
                           className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors flex-shrink-0"
-                          title={language === 'vi' ? 'Xóa' : 'Delete'}
+                          title={t('commonDelete')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

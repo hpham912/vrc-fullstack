@@ -30,7 +30,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setError(null);
 
     if (!username.trim() || !password.trim()) {
-      setError(language === 'vi' ? 'Vui lòng nhập tên đăng nhập và mật khẩu' : 'Please enter your username and password');
+      setError(t('loginFillBoth'));
       return;
     }
 
@@ -39,7 +39,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       onLoginSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || (language === 'vi' ? 'Đăng nhập không thành công' : 'Login failed'));
+      setError(err.message || t('loginFailed'));
     }
   };
 
@@ -106,7 +106,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             fullWidth
             onClick={onClose}
           >
-            {language === 'vi' ? 'Hủy' : 'Cancel'}
+            {t('commonCancel')}
           </Button>
           <Button
             type="submit"
@@ -114,7 +114,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             fullWidth
             disabled={loading}
           >
-            {loading ? (language === 'vi' ? 'Đang xác thực...' : 'Authenticating...') : t('loginBtn')}
+            {loading ? t('loginAuthenticating') : t('loginBtn')}
           </Button>
         </div>
       </form>

@@ -66,7 +66,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
 
           <div className="space-y-1">
             <h1 className={s.heroTitle}>
-              {language === 'vi' ? 'Mục Vụ Giới Trẻ VRC' : 'VRC Youth & Young Adults'}
+              {t('youthTitle')}
             </h1>
             <p className={s.heroDesc}>
               {t('youthWelcome')}
@@ -89,7 +89,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
             </div>
             <div>
               <span className={s.spotlightTag}>
-                {language === 'vi' ? 'Hàng Tuần • Weekly Gathering' : 'Weekly Gathering'}
+                {t('youthWeekly')}
               </span>
               <h2 className={s.spotlightTitle}>
                 {t('youthNightTitle')}
@@ -107,7 +107,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
           <Card variant="subtle" padding="sm" className="space-y-1.5">
             <span className={s.infoLabel}>
               <MapPin className="w-3.5 h-3.5 text-amber-700" />
-              <span>{language === 'vi' ? 'Địa Điểm' : 'Location'}</span>
+              <span>{t('youthLocation')}</span>
             </span>
             <p className={s.infoText}>
               {t('youthNightLoc')}<br />
@@ -118,12 +118,10 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
           <Card variant="subtle" padding="sm" className="space-y-1.5">
             <span className={s.infoLabel}>
               <Users className="w-3.5 h-3.5 text-emerald-700" />
-              <span>{language === 'vi' ? 'Đối Tượng' : 'Who is Welcome'}</span>
+              <span>{t('youthWho')}</span>
             </span>
             <p className={s.infoText}>
-              {language === 'vi'
-                ? 'Học sinh trung học, sinh viên đại học & thanh niên đi làm.'
-                : 'High school students, college students & young professionals.'}
+              {t('youthWhoDesc')}
             </p>
           </Card>
         </div>
@@ -133,40 +131,40 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
           <div className={s.pillarEmerald}>
             <Music className="w-5 h-5 text-emerald-700 mx-auto" />
             <span className={s.pillarTitle}>
-              {language === 'vi' ? 'Thờ Phượng' : 'Live Worship'}
+              {t('youthWorship')}
             </span>
             <span className={s.pillarSub}>
-              {language === 'vi' ? 'Ban nhạc trẻ & ca ngợi' : 'Dynamic acoustic & band'}
+              {t('youthWorshipDesc')}
             </span>
           </div>
 
           <div className={s.pillarAmber}>
             <Sparkles className="w-5 h-5 text-amber-700 mx-auto" />
             <span className={s.pillarTitle}>
-              {language === 'vi' ? 'Học Lời Chúa' : 'Bible Truth'}
+              {t('youthBible')}
             </span>
             <span className={s.pillarSub}>
-              {language === 'vi' ? 'Ứng dụng thực tế' : 'Real-life faith application'}
+              {t('youthBibleDesc')}
             </span>
           </div>
 
           <div className={s.pillarIndigo}>
             <Users className="w-5 h-5 text-indigo-700 mx-auto" />
             <span className={s.pillarTitle}>
-              {language === 'vi' ? 'Nhóm Nhỏ' : 'Small Groups'}
+              {t('youthSmallGroups')}
             </span>
             <span className={s.pillarSub}>
-              {language === 'vi' ? 'Chia sẻ & cầu thay' : 'Heart-to-heart prayer'}
+              {t('youthSmallGroupsDesc')}
             </span>
           </div>
 
           <div className={s.pillarRose}>
             <Heart className="w-5 h-5 text-rose-700 mx-auto" />
             <span className={s.pillarTitle}>
-              {language === 'vi' ? 'Thông Công' : 'Fellowship'}
+              {t('youthFellowship')}
             </span>
             <span className={s.pillarSub}>
-              {language === 'vi' ? 'Trò chơi, boba & ăn nhẹ' : 'Snacks, boba & games'}
+              {t('youthFellowshipDesc')}
             </span>
           </div>
         </div>
@@ -180,7 +178,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
             <span>{t('viewYouthEvents')}</span>
           </h2>
           <span className={s.eventsCountBadge}>
-            {youthEvents.length} {language === 'vi' ? 'sự kiện' : 'events'}
+            {youthEvents.length} {t('eventsUnit')}
           </span>
         </div>
 
@@ -188,14 +186,10 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
           <Card variant="emeraldWarm" padding="lg" className="text-center space-y-2">
             <Flame className="w-8 h-8 text-emerald-600 mx-auto" />
             <p className="text-xs sm:text-sm font-bold text-stone-950">
-              {language === 'vi'
-                ? 'Đêm Giới Trẻ Thứ Sáu diễn ra đều đặn hàng tuần lúc 6:30 PM!'
-                : 'Friday Youth Fellowship gathers weekly at 6:30 PM!'}
+              {t('youthFridayEmpty')}
             </p>
             <p className="text-xs text-stone-700 font-medium">
-              {language === 'vi'
-                ? 'Hãy đến và mời thêm bạn bè cùng tham gia.'
-                : 'Join us and bring your friends along.'}
+              {t('youthFridayInvite')}
             </p>
           </Card>
         ) : (
@@ -243,15 +237,13 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
       <Card as="section" variant="elevated" padding="lg" className="space-y-4">
         <div>
           <span className={s.spotlightTag}>
-            {language === 'vi' ? 'Kết Nối • Get Connected' : 'Get Connected'}
+            {t('youthConnectTag')}
           </span>
           <h2 className="text-base sm:text-lg font-serif font-bold text-stone-950">
-            {language === 'vi' ? 'Bạn Mới Tham Gia? Kết Nối Ngay!' : 'New to Youth? Connect With Us!'}
+            {t('youthConnectTitle')}
           </h2>
           <p className="text-xs text-stone-600 mt-0.5">
-            {language === 'vi'
-              ? 'Để lại thông tin để Ban Tráng Niên / Giới Trẻ liên hệ đón tiếp bạn vào Thứ Sáu tới.'
-              : 'Leave your info so our youth team can welcome you this Friday.'}
+            {t('youthConnectSub')}
           </p>
         </div>
 
@@ -259,9 +251,7 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
           <div className={s.connectSubmittedBox}>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>
-              {language === 'vi'
-                ? 'Cảm ơn bạn! Ban Giới Trẻ VRC sẽ liên hệ sớm nhất để đón tiếp bạn.'
-                : 'Thank you! The VRC Youth team will reach out soon to welcome you.'}
+              {t('youthConnectThanks')}
             </span>
           </div>
         ) : (
@@ -270,14 +260,14 @@ export const YouthSection: React.FC<YouthSectionProps> = ({
               <input
                 type="text"
                 required
-                placeholder={language === 'vi' ? 'Họ và tên của bạn' : 'Your full name'}
+                placeholder={t('youthNamePlaceholder')}
                 value={connectName}
                 onChange={(e) => setConnectName(e.target.value)}
                 className={s.connectInput}
               />
               <input
                 type="text"
-                placeholder={language === 'vi' ? 'Số điện thoại hoặc Email / Instagram' : 'Phone or Email / Instagram'}
+                placeholder={t('youthContactPlaceholder')}
                 value={connectContact}
                 onChange={(e) => setConnectContact(e.target.value)}
                 className={s.connectInput}

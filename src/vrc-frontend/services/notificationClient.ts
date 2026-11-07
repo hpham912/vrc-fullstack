@@ -1,6 +1,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { apiUrl } from '../utils/api.ts';
 import { AppNotification, ChurchEvent } from '../types/index.ts';
+import { translate, getSavedLanguage } from '../context/LanguageContext.tsx';
 
 const isCapacitor = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -242,9 +243,16 @@ export const NotificationClient = {
       // Event already ended over 1 hour ago
       if (eventTimeMs < now) continue;
 
-      const title = `Nhắc Nhở Sự Kiện • Event in 1 Hour: ${evt.title}`;
-      const locationText = evt.location ? ` tại ${evt.location}` : '';
-      const body = `Sự kiện "${evt.title}" sẽ diễn ra trong 1 giờ nữa (${evt.startTime}${locationText}). Kính mời quý con cái Chúa cùng tham dự!`;
+      // Wording lives in LanguageContext (translations); the service reads
+      // the saved language through the same helper the provider uses.
+      const lang = getSavedLanguage();
+      const title = `${translate('notifReminderTitle', lang)}: ${evt.title}`;
+      const locationText = evt.location ? translate('notifReminderLocation', lang, { location: evt.location }) : '';
+      const body = translate('notifReminderBody', lang, {
+        title: evt.title,
+        time: evt.startTime,
+        location: locationText,
+      });
 
       // 1. Native iOS/Capacitor scheduling
       if (isCapacitor()) {

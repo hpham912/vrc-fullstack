@@ -6,50 +6,25 @@
 // src/vrc-backend/middleware/errorHandler.ts); prefer it over the raw
 // message, which may be in English only or leak internals on routes
 // that haven't migrated to AppError yet.
+//
+// The actual wording lives in LanguageContext (translations) — this file
+// only maps backend codes to translation keys.
+
+import { translate, type TranslationKey } from '../context/LanguageContext.tsx';
 
 export type AppLanguage = 'vi' | 'en';
 
-const MESSAGES: Record<string, { vi: string; en: string }> = {
-  VERSE_NOT_FOUND: {
-    vi: 'Câu Lời Chúa này đã bị xóa rồi.',
-    en: 'This verse was already deleted.',
-  },
-  VALIDATION_ERROR: {
-    vi: 'Vui lòng kiểm tra lại các thông tin đã nhập.',
-    en: 'Please check the information you entered.',
-  },
-  ALREADY_EXISTS: {
-    vi: 'Đã có dữ liệu này rồi.',
-    en: 'This already exists.',
-  },
-  REFERENCED: {
-    vi: 'Không thể thay đổi vì dữ liệu này đang được dùng ở nơi khác.',
-    en: 'This cannot be changed because it is still used elsewhere.',
-  },
-  UNAUTHORIZED: {
-    vi: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
-    en: 'Your session has expired. Please sign in again.',
-  },
-  FORBIDDEN: {
-    vi: 'Bạn không có quyền thực hiện việc này.',
-    en: 'You do not have permission to do this.',
-  },
-  NOT_FOUND: {
-    vi: 'Nội dung này không còn tồn tại.',
-    en: 'This item no longer exists.',
-  },
-  RATE_LIMITED: {
-    vi: 'Bạn thao tác quá nhanh. Vui lòng đợi một chút rồi thử lại.',
-    en: 'Too many requests. Please wait a moment and try again.',
-  },
-  SERVICE_UNAVAILABLE: {
-    vi: 'Máy chủ tạm thời không khả dụng. Vui lòng thử lại sau.',
-    en: 'The service is temporarily unavailable. Please try again later.',
-  },
-  INTERNAL_ERROR: {
-    vi: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
-    en: 'Something went wrong. Please try again later.',
-  },
+const CODE_TO_KEY: Record<string, TranslationKey> = {
+  VERSE_NOT_FOUND: 'errVerseNotFound',
+  VALIDATION_ERROR: 'errValidation',
+  ALREADY_EXISTS: 'errAlreadyExists',
+  REFERENCED: 'errReferenced',
+  UNAUTHORIZED: 'errUnauthorized',
+  FORBIDDEN: 'errForbidden',
+  NOT_FOUND: 'errNotFound',
+  RATE_LIMITED: 'errRateLimited',
+  SERVICE_UNAVAILABLE: 'errServiceUnavailable',
+  INTERNAL_ERROR: 'errInternal',
 };
 
 const STATUS_TO_CODE: Record<number, string> = {
@@ -92,8 +67,7 @@ function backendMessage(err: any): string | null {
 }
 
 export function getErrorMessage(err: unknown, language: AppLanguage, fallback?: string): string {
-  const fallbackMessage =
-    fallback || (language === 'vi' ? 'Đã xảy ra lỗi. Vui lòng thử lại.' : 'Something went wrong. Please try again.');
+  const fallbackMessage = fallback || translate('errGeneric', language);
   if (!err) return fallbackMessage;
   if (typeof err === 'string') {
     return looksInternal(err) ? fallbackMessage : err;
@@ -103,27 +77,25 @@ export function getErrorMessage(err: unknown, language: AppLanguage, fallback?: 
 
   // Network failure: fetch throws a TypeError and there is no status.
   if (err instanceof TypeError || anyErr?.name === 'TypeError') {
-    return language === 'vi'
-      ? 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng rồi thử lại.'
-      : "Couldn't reach the server. Please check your connection and try again.";
+    return translate('errNetwork', language);
   }
 
   const code = anyErr?.details?.code || anyErr?.code;
-  if (typeof code === 'string' && MESSAGES[code]) {
+  if (typeof code === 'string' && CODE_TO_KEY[code]) {
     // Validation errors carry the specific missing-field message from
     // the backend — that is more accurate than the generic wording.
     if (code === 'VALIDATION_ERROR') {
-      return backendMessage(anyErr) || MESSAGES[code][language];
+      return backendMessage(anyErr) || translate(CODE_TO_KEY[code], language);
     }
-    return MESSAGES[code][language];
+    return translate(CODE_TO_KEY[code], language);
   }
 
   const status = anyErr?.status;
   if (typeof status === 'number' && STATUS_TO_CODE[status]) {
     if (status === 400) {
-      return backendMessage(anyErr) || MESSAGES[STATUS_TO_CODE[status]][language];
+      return backendMessage(anyErr) || translate(CODE_TO_KEY[STATUS_TO_CODE[status]], language);
     }
-    return MESSAGES[STATUS_TO_CODE[status]][language];
+    return translate(CODE_TO_KEY[STATUS_TO_CODE[status]], language);
   }
 
   return backendMessage(anyErr) || fallbackMessage;
