@@ -16,7 +16,7 @@ import { EditChurchInfoModal } from './vrc-frontend/components/edit-church-info-
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
 import { Button } from './vrc-frontend/common-component/index.ts';
-import { ChurchEvent, DailyVerse, Announcement, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
+import { ChurchEvent, DailyVerse, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
 import { Plus, ArrowRight } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
@@ -42,7 +42,6 @@ function ChurchAppContent() {
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [toastNotification, setToastNotification] = useState<{ id?: any; title: string; body: string } | null>(null);
 
@@ -399,7 +398,6 @@ function ChurchAppContent() {
         <AdminPortal
           events={events}
           allVerses={allVerses}
-          announcements={announcements}
           churchInfo={churchInfo}
           initialTab={adminPortalTab}
           focusedMode={adminFocusedMode}
