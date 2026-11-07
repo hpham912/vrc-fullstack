@@ -52,9 +52,9 @@ export const homeDashboardStyles = {
     'text-[11px] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full',
   cardMainRow: 'flex items-center gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
-    'flex-shrink-0 w-[5.5rem] px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95',
+    'flex-shrink-0 px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95',
   dateBoxWeekday:
-    'block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider leading-tight truncate w-full text-stone-700',
+    'block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider leading-tight whitespace-nowrap text-stone-700',
   dateBoxDay: 'block text-xl sm:text-2xl font-bold text-stone-950 leading-none my-0.5',
   dateBoxMonthBase: 'block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-tight',
   cardTitleCol: 'flex-1 min-w-0 space-y-1 max-w-full',

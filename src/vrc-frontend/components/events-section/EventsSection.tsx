@@ -384,7 +384,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                   <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 w-full max-w-full">
                     <div className={s.pastDateBox}>
-                      <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 truncate w-full text-center">
+                      <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 whitespace-nowrap text-center">
                         {weekday}
                       </span>
                       <span className="block text-xl sm:text-2xl font-bold text-stone-700 leading-none my-0.5 text-center">

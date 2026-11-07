@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
 import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
 import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
@@ -9,11 +9,26 @@ import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDash
 import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
 import { YouthSection } from './vrc-frontend/components/youth-section/YouthSection.tsx';
-import { AdminPortal } from './vrc-frontend/components/admin-portal/AdminPortal.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
-import { SpotlightBannerModal } from './vrc-frontend/components/spotlight-banner-modal/SpotlightBannerModal.tsx';
-import { EditChurchInfoModal } from './vrc-frontend/components/edit-church-info-modal/EditChurchInfoModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
+
+// Admin-only screens load on demand, so regular visitors never download them.
+// Each one is rendered only when an admin opens it (see Suspense below).
+const AdminPortal = lazy(() =>
+  import('./vrc-frontend/components/admin-portal/AdminPortal.tsx').then((module) => ({
+    default: module.AdminPortal,
+  }))
+);
+const SpotlightBannerModal = lazy(() =>
+  import('./vrc-frontend/components/spotlight-banner-modal/SpotlightBannerModal.tsx').then(
+    (module) => ({ default: module.SpotlightBannerModal })
+  )
+);
+const EditChurchInfoModal = lazy(() =>
+  import('./vrc-frontend/components/edit-church-info-modal/EditChurchInfoModal.tsx').then(
+    (module) => ({ default: module.EditChurchInfoModal })
+  )
+);
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
 import { Button } from './vrc-frontend/common-component/index.ts';
 import { ChurchEvent, DailyVerse, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
@@ -70,8 +85,6 @@ function ChurchAppContent() {
     return DEFAULT_CHURCH_INFO;
   });
 
-  const [loading, setLoading] = useState(true);
-
   // Modals
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [adminPortalOpen, setAdminPortalOpen] = useState(false);
@@ -84,17 +97,14 @@ function ChurchAppContent() {
 
   const loadData = async () => {
     try {
-      setLoading(true);
       const headers = apiHeaders();
-      const [eventsRes, todayVerseRes, versesRes, spotlightRes, churchInfoRes, notifs] =
-        await Promise.all([
-          fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
-          fetch(apiUrl('/api/verses/today'), { cache: 'no-store', headers }),
-          fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
-          fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
-          fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
-          NotificationClient.fetchRecent(),
-        ]);
+      const [eventsRes, versesRes, spotlightRes, churchInfoRes, notifs] = await Promise.all([
+        fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
+        fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
+        fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
+        fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
+        NotificationClient.fetchRecent(),
+      ]);
 
       const safeJson = async (res: Response) => {
         if (!res || !res.ok) return null;
@@ -107,14 +117,12 @@ function ChurchAppContent() {
         }
       };
 
-      const [rawEvents, todayVerseData, rawVerses, spotlightData, churchInfoData] =
-        await Promise.all([
-          safeJson(eventsRes),
-          safeJson(todayVerseRes),
-          safeJson(versesRes),
-          safeJson(spotlightRes),
-          safeJson(churchInfoRes),
-        ]);
+      const [rawEvents, rawVerses, spotlightData, churchInfoData] = await Promise.all([
+        safeJson(eventsRes),
+        safeJson(versesRes),
+        safeJson(spotlightRes),
+        safeJson(churchInfoRes),
+      ]);
 
       if (Array.isArray(rawEvents)) {
         setEvents(rawEvents);
@@ -123,7 +131,17 @@ function ChurchAppContent() {
       if (Array.isArray(rawVerses)) {
         setAllVerses(rawVerses.slice(0, 10));
       }
-      setTodayVerse(todayVerseData || (Array.isArray(rawVerses) ? rawVerses[0] : null));
+      // Today's verse is the verse dated today, falling back to the latest
+      // verse — the same rule GET /api/verses/today used, computed here from
+      // the list we already fetched instead of a second request.
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+        now.getDate()
+      ).padStart(2, '0')}`;
+      const todayVerse = Array.isArray(rawVerses)
+        ? rawVerses.find((verse) => verse.date === todayStr) || rawVerses[0] || null
+        : null;
+      setTodayVerse(todayVerse);
 
       if (spotlightData) {
         setSpotlightConfig(spotlightData);
@@ -144,8 +162,6 @@ function ChurchAppContent() {
       }
     } catch (err) {
       console.error('Error fetching church data from database:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -367,53 +383,59 @@ function ChurchAppContent() {
 
       {/* Spotlight / Holiday Hero Banner Customizer Modal */}
       {spotlightModalOpen && (
-        <SpotlightBannerModal
-          isOpen={spotlightModalOpen}
-          onClose={() => setSpotlightModalOpen(false)}
-          initialConfig={spotlightConfig}
-          events={events}
-          churchInfo={churchInfo}
-          onSaved={(updated) => {
-            setSpotlightConfig(updated);
-            try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(updated)); } catch {}
-          }}
-        />
+        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+          <SpotlightBannerModal
+            isOpen={spotlightModalOpen}
+            onClose={() => setSpotlightModalOpen(false)}
+            initialConfig={spotlightConfig}
+            events={events}
+            churchInfo={churchInfo}
+            onSaved={(updated) => {
+              setSpotlightConfig(updated);
+              try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(updated)); } catch {}
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Sanctuary Location & Weekly Worship Times Customizer Modal */}
       {churchInfoModalOpen && (
-        <EditChurchInfoModal
-          isOpen={churchInfoModalOpen}
-          onClose={() => setChurchInfoModalOpen(false)}
-          churchInfo={churchInfo || DEFAULT_CHURCH_INFO}
-          onSaved={(updated) => {
-            setChurchInfo(updated);
-            try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(updated)); } catch {}
-          }}
-        />
+        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+          <EditChurchInfoModal
+            isOpen={churchInfoModalOpen}
+            onClose={() => setChurchInfoModalOpen(false)}
+            churchInfo={churchInfo || DEFAULT_CHURCH_INFO}
+            onSaved={(updated) => {
+              setChurchInfo(updated);
+              try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(updated)); } catch {}
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Admin Dashboard Modal */}
       {adminPortalOpen && (
-        <AdminPortal
-          events={events}
-          allVerses={allVerses}
-          churchInfo={churchInfo}
-          initialTab={adminPortalTab}
-          focusedMode={adminFocusedMode}
-          initialEvent={editingEvent}
-          initialVerse={editingVerse}
-          onClose={() => {
-            setAdminPortalOpen(false);
-            setEditingEvent(null);
-            setEditingVerse(null);
-          }}
-          onRefreshData={loadData}
-          onOpenSpotlightEditor={() => {
-            setAdminPortalOpen(false);
-            setSpotlightModalOpen(true);
-          }}
-        />
+        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+          <AdminPortal
+            events={events}
+            allVerses={allVerses}
+            churchInfo={churchInfo}
+            initialTab={adminPortalTab}
+            focusedMode={adminFocusedMode}
+            initialEvent={editingEvent}
+            initialVerse={editingVerse}
+            onClose={() => {
+              setAdminPortalOpen(false);
+              setEditingEvent(null);
+              setEditingVerse(null);
+            }}
+            onRefreshData={loadData}
+            onOpenSpotlightEditor={() => {
+              setAdminPortalOpen(false);
+              setSpotlightModalOpen(true);
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Desktop Footer */}

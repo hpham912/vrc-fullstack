@@ -7,7 +7,9 @@ import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
 
-// Helper function to maintain at most 3 past events in PostgreSQL and prune older past events
+// Helper function to maintain at most 3 past events in PostgreSQL and prune older past events.
+// Runs only via POST /cleanup-expired — deliberately NOT on GET /api/events,
+// so an everyday app load never pays for a cleanup query.
 async function cleanupPastEvents() {
   try {
     const now = new Date();
@@ -56,8 +58,6 @@ router.post('/cleanup-expired', async (_req, res) => {
 // GET /api/events - List all events from the active database (Dev DB or Prod DB)
 router.get('/', async (req, res) => {
   try {
-    await cleanupPastEvents();
-
     const category = req.query.category as string;
     const search = req.query.search as string;
 
@@ -66,7 +66,29 @@ router.get('/', async (req, res) => {
       .from(events)
       .orderBy(asc(events.date), asc(events.startTime));
 
-    let filtered = allEvents;
+    // Past events are no longer pruned from the database on read (that ran a
+    // cleanup query on every app load; pruning now happens only via
+    // POST /cleanup-expired). The response still carries at most the 3 most
+    // recent past events, exactly as before — older ones never leave the server.
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+      now.getDate()
+    ).padStart(2, '0')}`;
+    const recentPastIds = new Set(
+      allEvents
+        .filter((event) => event.date < todayStr)
+        .sort(
+          (a, b) =>
+            b.date.localeCompare(a.date) ||
+            String(b.startTime || '').localeCompare(String(a.startTime || '')) ||
+            b.id - a.id
+        )
+        .slice(0, 3)
+        .map((event) => event.id)
+    );
+    let filtered = allEvents.filter(
+      (event) => event.date >= todayStr || recentPastIds.has(event.id)
+    );
     if (category && category !== 'All') {
       filtered = filtered.filter((e) => String(e.category || '').toLowerCase() === category.toLowerCase());
     }

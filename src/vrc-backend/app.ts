@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import { corsMiddleware } from './middleware/securityMiddleware.ts';
 import { errorHandler } from './middleware/errorHandler.ts';
 
@@ -17,6 +18,10 @@ import { getAppEnvironment } from './utils/appEnvironment.ts';
 
 export const createApp = () => {
   const app = express();
+
+  // Compress responses (gzip). The JS/CSS bundles shrink ~70%, and API JSON
+  // shrinks too. API responses still stay no-store (see below).
+  app.use(compression());
 
   // Route database operations to cloud_sql_development_database or cloud_sql_production_database
   app.use((req, res, next) => {

@@ -24,7 +24,11 @@ async function startServer() {
       : path.join(__dirname, 'dist');
 
     console.log(`Serving production static assets from: ${distPath}`);
-    app.use(express.static(distPath));
+    // Vite hashes asset filenames (index-<hash>.js), so they can be cached
+    // immutably for a year. index.html is excluded (index: false) so the SPA
+    // fallback below always serves it fresh — a cached index.html would
+    // point at hashed files from a previous deploy.
+    app.use(express.static(distPath, { maxAge: '1y', immutable: true, index: false }));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

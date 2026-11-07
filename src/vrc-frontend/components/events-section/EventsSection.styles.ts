@@ -27,9 +27,9 @@ export const eventsSectionStyles = {
   adminActionRow: 'flex items-center gap-1.5 ml-auto',
   cardMainRow: 'flex items-stretch gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
-    'flex-shrink-0 w-[5.5rem] px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95 relative self-stretch',
+    'flex-shrink-0 px-2 py-1.5 text-center rounded-2xl shadow-2xs border border-stone-900/10 flex flex-col items-center justify-center select-none bg-white/95 relative self-stretch',
   dateBoxWeekday:
-    'block text-xs font-bold uppercase tracking-wider leading-tight truncate w-full text-stone-700',
+    'block text-xs font-bold uppercase tracking-wider leading-tight whitespace-nowrap text-stone-700',
   dateBoxDay: 'block text-3xl font-bold text-stone-950 leading-none my-0.5',
   dateBoxMonthBase: 'block text-xs font-semibold uppercase tracking-wider leading-tight',
   dateBoxStarPosition: 'absolute -top-2 -right-2 z-10',
@@ -52,7 +52,7 @@ export const eventsSectionStyles = {
   concludedPill:
     'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200',
   pastDateBox:
-    'flex-shrink-0 w-[5.5rem] px-2 py-1.5 text-center rounded-2xl border border-stone-200 bg-white shadow-2xs flex flex-col items-center justify-center select-none',
+    'flex-shrink-0 px-2 py-1.5 text-center rounded-2xl border border-stone-200 bg-white shadow-2xs flex flex-col items-center justify-center select-none',
   pastTitle: 'text-sm sm:text-base font-bold text-stone-800 leading-snug break-words',
   pastDescBox:
     'text-xs text-stone-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/50 min-w-0 max-w-full overflow-hidden',

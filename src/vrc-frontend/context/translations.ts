@@ -79,6 +79,7 @@ export const translations = {
   prayerTitle: { vi: 'Lời Cầu Nguyện Hôm Nay', en: "Today's Prayer" },
   browseArchive: { vi: 'Xem Các Ngày Trước', en: 'Browse Past Verses' },
   loadingScripture: { vi: 'Đang tải Lời Chúa...', en: 'Loading scripture...' },
+  loading: { vi: 'Đang tải...', en: 'Loading...' },
 
   // Service Times Section
   serviceTag: { vi: 'Lịch Nhóm & Địa Điểm • Service Schedule', en: 'Service Times & Location' },

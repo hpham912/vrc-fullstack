@@ -44,4 +44,5 @@ export const appStyles = {
     'w-6 h-6 rounded-full bg-amber-500/25 flex items-center justify-center text-amber-300 group-hover:bg-amber-500/35 transition-colors',
   floatingPrayerIcon: 'w-3.5 h-3.5',
   floatingPrayerText: 'text-xs sm:text-sm font-bold tracking-tight text-white/95 drop-shadow-xs',
+  lazyFallback: 'flex items-center justify-center py-16 text-sm font-semibold text-stone-500',
 };
