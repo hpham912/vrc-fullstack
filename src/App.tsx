@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
 import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
 import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
+import { getHomeBannerSrc } from './vrc-frontend/constants/assets.ts';
 import { APP_VERSION, APP_BUILD_DATE } from './vrc-frontend/constants/version.ts';
 import { Navbar } from './vrc-frontend/components/nav-bar/Navbar.tsx';
 import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
@@ -258,12 +259,12 @@ function ChurchAppContent() {
 
           <div className={s.titleWrapper}>
             <img
-              src={language === 'en' ? '/home-banner-en.png' : '/home-banner-vi.png'}
+              src={getHomeBannerSrc(language, 'light')}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} dark:hidden`}
             />
             <img
-              src={language === 'en' ? '/home-banner-en-dark.png' : '/home-banner-vi-dark.png'}
+              src={getHomeBannerSrc(language, 'dark')}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} hidden dark:block`}
             />

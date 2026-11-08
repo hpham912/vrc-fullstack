@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
+import { getChurchLogoSrc } from '../../constants/assets.ts';
 import {
   ShieldCheck,
   LogIn,
@@ -108,12 +109,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {language === 'vi' ? (
               <>
                 <img
-                  src="/church-logo-vi.png"
+                  src={getChurchLogoSrc('vi', 'light')}
                   alt="Vietnamese Revival Baptist Church"
                   className={`${s.logoImg} dark:hidden`}
                 />
                 <img
-                  src="/church-logo-vi-dark.png"
+                  src={getChurchLogoSrc('vi', 'dark')}
                   alt="Vietnamese Revival Baptist Church"
                   className={`${s.logoImg} hidden dark:block`}
                 />
@@ -121,12 +122,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <>
                 <img
-                  src="/church-logo.png"
+                  src={getChurchLogoSrc('en', 'light')}
                   alt="Vietnamese Revival Baptist Church"
                   className={`${s.logoImg} dark:hidden`}
                 />
                 <img
-                  src="/church-logo-dark.png"
+                  src={getChurchLogoSrc('en', 'dark')}
                   alt="Vietnamese Revival Baptist Church"
                   className={`${s.logoImg} hidden dark:block`}
                 />
