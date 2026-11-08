@@ -125,3 +125,12 @@ These are house rules. Follow them in every change.
    Each tab owns its own state and its own `submitting` flag; all tabs stay
    mounted so half-typed forms survive tab switches.
 10. **Push only when asked.** Never push to `main` without an explicit go-ahead.
+11. **Dark mode: the standard palette converts automatically.** `src/index.css`
+    remaps `bg-white`, `bg-stone-50/100`, `text-stone-950–500`,
+    `border-stone-100/200/300`, `bg-amber-50/100`, `text-amber-950/900/800`,
+    and form inputs to dark colors — a new screen built only from those classes
+    needs no dark-mode work. Any color outside that list (rose, emerald,
+    amber-600/700, `bg-stone-50/80`, gradients, arbitrary hex) needs an explicit
+    `dark:` twin on the same class string. Dark mode and large font are toggled
+    from the Navbar settings menu; the `index.html` boot script applies the saved
+    theme before first paint.

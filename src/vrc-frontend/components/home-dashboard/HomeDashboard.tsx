@@ -20,7 +20,7 @@ import {
   PenTool,
 } from 'lucide-react';
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
-import { DirectionButtons, CalendarButtons, Card, Button } from '../../common-component/index.ts';
+import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   formatDateLocale,
@@ -68,6 +68,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   // Directions routing modal state
   const [directionsModalOpen, setDirectionsModalOpen] = React.useState(false);
   const [directionsTarget, setDirectionsTarget] = React.useState({ name: '', address: '' });
+  const [selectedDetailEvent, setSelectedDetailEvent] = React.useState<ChurchEvent | null>(null);
 
   // Current date in YYYY-MM-DD
   const now = new Date();
@@ -499,11 +500,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <div
               role="button"
               tabIndex={0}
-              onClick={() => onNavigateTab('events')}
+              onClick={() => setSelectedDetailEvent(nextUpcomingEvent)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  onNavigateTab('events');
+                  setSelectedDetailEvent(nextUpcomingEvent);
                 }
               }}
               className={`${s.eventCardBase} ${theme.cardBg}`}
@@ -742,6 +743,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         onClose={() => setDirectionsModalOpen(false)}
         destinationName={directionsTarget.name}
         address={directionsTarget.address}
+      />
+
+      {/* Event Details Popup Modal */}
+      <EventDetailModal
+        event={selectedDetailEvent}
+        onClose={() => setSelectedDetailEvent(null)}
       />
     </div>
   );

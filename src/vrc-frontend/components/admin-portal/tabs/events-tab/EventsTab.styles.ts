@@ -34,7 +34,7 @@ export const eventsTabStyles = {
   previewSection: 'space-y-2 w-full min-w-0',
   previewHeader: 'flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-500',
   previewHeaderLeft: 'flex items-center gap-1.5',
-  previewEyeIcon: 'w-3.5 h-3.5 text-amber-600',
+  previewEyeIcon: 'w-3.5 h-3.5 text-amber-600 dark:text-amber-400',
   liveBadge:
     'text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold',
   previewCard: 'rounded-2xl border p-4 sm:p-5 transition-all duration-200 space-y-3 w-full min-w-0 box-border',
@@ -44,7 +44,7 @@ export const eventsTabStyles = {
   categoryIcon: 'w-3 h-3',
   featuredBadge:
     'text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1',
-  featuredStar: 'w-2.5 h-2.5 fill-amber-500 text-amber-600',
+  featuredStar: 'w-2.5 h-2.5 fill-amber-500 text-amber-600 dark:text-amber-400',
   previewDateText: 'text-[11px] font-semibold text-stone-500',
   previewMain: 'flex items-start gap-3.5',
   dateBox: 'flex-shrink-0 w-14 text-center rounded-xl border p-2 shadow-2xs',
@@ -54,13 +54,13 @@ export const eventsTabStyles = {
   previewTitle: 'text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2',
   previewMeta: 'flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-700 font-medium',
   previewMetaItem: 'inline-flex items-center gap-1',
-  previewMetaIcon: 'w-3 h-3 text-amber-700 flex-shrink-0',
+  previewMetaIcon: 'w-3 h-3 text-amber-700 dark:text-amber-400 flex-shrink-0',
   previewLocation: 'truncate max-w-[240px]',
   previewDesc:
-    'text-xs text-stone-800 leading-relaxed bg-white/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal',
+    'text-xs text-stone-800 leading-relaxed bg-white/90 dark:bg-stone-900/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal',
   listContainer: 'space-y-3 max-w-2xl mx-auto',
   emptyState: 'text-stone-500 text-sm py-8 text-center',
-  list: 'divide-y divide-stone-100 border border-stone-200 rounded-2xl overflow-hidden bg-white',
+  list: 'divide-y divide-stone-100 dark:divide-stone-800 border border-stone-200 rounded-2xl overflow-hidden bg-white',
   item: 'p-4 flex items-center justify-between gap-4 hover:bg-stone-50/60 transition-colors',
   itemBody: 'space-y-1 min-w-0 flex-1',
   itemMeta: 'flex flex-wrap items-center gap-2',
@@ -69,9 +69,9 @@ export const eventsTabStyles = {
   pastBadge:
     'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200',
   upcomingBadge:
-    'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200',
+    'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60',
   itemDetails: 'text-xs text-stone-500 truncate',
   itemActions: 'flex items-center gap-1 flex-shrink-0',
   editBtn: 'p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors',
-  deleteBtn: 'p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors',
+  deleteBtn: 'p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors',
 };

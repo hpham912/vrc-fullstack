@@ -5,12 +5,8 @@ export const navbarStyles = {
   innerRow: 'flex items-center justify-between h-14 sm:h-20',
   logoBtn:
     'flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-95 flex-shrink-0',
-  logoIconBox:
-    'w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-stone-950 text-amber-400 flex items-center justify-center font-bold shadow-xs group-hover:bg-amber-600 group-hover:text-white transition-all flex-shrink-0',
-  logoCrossIcon: 'w-4 h-4 sm:w-5 sm:h-5',
-  mobileTitleCol: 'flex flex-col sm:hidden',
-  mobileTitleEn: 'font-serif text-sm font-bold tracking-tight text-stone-950 leading-tight',
-  mobileTitleVi: 'text-[10px] font-medium text-amber-800 tracking-normal leading-tight opacity-90',
+  logoImg:
+    'w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0',
   desktopTitleCol: 'hidden sm:flex flex-col',
   desktopTitleEn: 'font-serif text-lg font-bold tracking-tight text-stone-950 leading-snug',
   desktopTitleVi: 'text-xs font-medium text-amber-800 tracking-normal leading-tight opacity-90',

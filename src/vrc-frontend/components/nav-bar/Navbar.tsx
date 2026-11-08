@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../../constants/church.ts';
-import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
 import {
   ShieldCheck,
   LogIn,
@@ -102,24 +101,16 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className={s.header}>
       <div className={s.container}>
         <div className={s.innerRow}>
-          {/* Logo & Title with SVG Cross */}
+          {/* Logo & Title */}
           <button
             onClick={() => setActiveTab('home')}
             className={s.logoBtn}
           >
-            <div className={s.logoIconBox}>
-              <CrossIcon className={s.logoCrossIcon} />
-            </div>
-
-            {/* Mobile View: VRBC on top, HTTLBPH on bottom */}
-            <div className={s.mobileTitleCol}>
-              <span className={s.mobileTitleEn}>
-                {CHURCH_NAME.shortEn}
-              </span>
-              <span className={s.mobileTitleVi}>
-                {CHURCH_NAME.shortVi}
-              </span>
-            </div>
+            <img
+              src="/church-logo.png"
+              alt="Vietnamese Revival Baptist Church"
+              className={s.logoImg}
+            />
 
             {/* Desktop View: Full name with English on top, Vietnamese on bottom */}
             <div className={s.desktopTitleCol}>

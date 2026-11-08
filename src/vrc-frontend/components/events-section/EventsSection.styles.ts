@@ -64,7 +64,6 @@ export const eventsSectionStyles = {
   pastTitle: 'text-base sm:text-lg font-bold text-stone-700 dark:text-stone-300 leading-snug break-words',
   pastTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400',
   pastLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400 truncate',
-  detailModalBody: 'p-6 space-y-4 text-stone-900 dark:text-stone-100',
   detailMetaCard: 'space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800',
   detailGoogleBtn:
     'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-[11px] font-bold shadow-2xs transition-all',

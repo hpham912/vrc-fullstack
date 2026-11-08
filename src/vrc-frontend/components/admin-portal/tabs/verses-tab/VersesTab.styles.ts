@@ -20,7 +20,7 @@ export const versesTabStyles = {
   saveIcon: 'w-3.5 h-3.5',
   listSection: 'space-y-2 w-full min-w-0',
   listTitle: 'text-xs font-bold uppercase tracking-wider text-stone-500',
-  list: 'divide-y divide-stone-100 border border-stone-200 rounded-xl overflow-hidden bg-white',
+  list: 'divide-y divide-stone-100 dark:divide-stone-800 border border-stone-200 rounded-xl overflow-hidden bg-white',
   item: 'p-3 flex items-center justify-between gap-3 text-xs',
   itemBody: 'min-w-0 flex-1',
   itemRef: 'font-serif font-bold text-stone-950',
@@ -28,5 +28,5 @@ export const versesTabStyles = {
   itemSnippet: 'text-stone-700 line-clamp-1 mt-0.5 font-medium',
   itemActions: 'flex items-center gap-1 flex-shrink-0',
   editBtn: 'p-1.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors',
-  deleteBtn: 'p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors',
+  deleteBtn: 'p-1.5 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors',
 };

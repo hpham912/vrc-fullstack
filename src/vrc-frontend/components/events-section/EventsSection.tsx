@@ -27,14 +27,13 @@ import {
   Navigation,
 } from 'lucide-react';
 import {
-  Modal,
   ConfirmModal,
-  DirectionButtons,
   CalendarButtons,
   FeaturedStar,
   AdminActionButtons,
   AdminAddButton,
   Card,
+  EventDetailModal,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -44,7 +43,6 @@ import {
   getEventCardWeekday,
   getMonthText,
   getDayNumber,
-  formatWeekdayAndDate,
 } from '../../utils/dateFormatter.ts';
 import { getCategoryTheme, getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
 import { eventsSectionStyles as s } from './EventsSection.styles.ts';
@@ -452,72 +450,10 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       )}
 
       {/* Event Details Popup Modal */}
-      <Modal
-        isOpen={Boolean(selectedDetailEvent)}
+      <EventDetailModal
+        event={selectedDetailEvent}
         onClose={() => setSelectedDetailEvent(null)}
-        subtitle={selectedDetailEvent ? getCategoryLabel(selectedDetailEvent.category) : undefined}
-        title={
-          selectedDetailEvent
-            ? language === 'vi'
-              ? (selectedDetailEvent.titleVi || selectedDetailEvent.titleEn || selectedDetailEvent.title)
-              : (selectedDetailEvent.titleEn || selectedDetailEvent.titleVi || selectedDetailEvent.title)
-            : undefined
-        }
-        maxWidthClass="max-w-md"
-      >
-        {selectedDetailEvent && (
-          <div className={s.detailModalBody}>
-            <Card variant="subtle" padding="sm" className="space-y-2 text-xs">
-              <div className="flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-100">
-                <Calendar className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                <span>{formatWeekdayAndDate(selectedDetailEvent.date, language)}</span>
-              </div>
-              <div className="flex items-center gap-2 font-medium text-stone-800 dark:text-stone-200">
-                <Clock className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                <span>
-                  {selectedDetailEvent.startTime}
-                  {selectedDetailEvent.endTime ? ` – ${selectedDetailEvent.endTime}` : ''}
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-stone-700 dark:text-stone-300">
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-stone-900 dark:text-stone-100">
-                      {language === 'vi'
-                        ? (selectedDetailEvent.locationVi || selectedDetailEvent.locationEn || selectedDetailEvent.location)
-                        : (selectedDetailEvent.locationEn || selectedDetailEvent.locationVi || selectedDetailEvent.location)}
-                    </p>
-                    {selectedDetailEvent.address && (
-                      <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">{selectedDetailEvent.address}</p>
-                    )}
-                  </div>
-                </div>
-                <DirectionButtons
-                  address={selectedDetailEvent.address || selectedDetailEvent.location}
-                  className="flex-shrink-0"
-                />
-              </div>
-            </Card>
-
-            <div className="space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-300">
-                {t('eventsDetailTitle')}
-              </h4>
-              <p className="text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-medium">
-                {language === 'vi'
-                  ? (selectedDetailEvent.descriptionVi || selectedDetailEvent.descriptionEn || selectedDetailEvent.description)
-                  : (selectedDetailEvent.descriptionEn || selectedDetailEvent.descriptionVi || selectedDetailEvent.description)}
-              </p>
-            </div>
-
-            <CalendarButtons
-              event={selectedDetailEvent}
-              variant="full"
-            />
-          </div>
-        )}
-      </Modal>
+      />
       {/* Common Confirmation Modal for Delete */}
       <ConfirmModal
         isOpen={Boolean(deleteTargetEvent)}
