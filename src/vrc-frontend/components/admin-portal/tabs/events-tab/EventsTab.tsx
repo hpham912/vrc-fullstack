@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BookOpen, Clock, Edit3, Eye, Flame, MapPin, Save, Star, Trash2, Users } from 'lucide-react';
+import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
@@ -47,6 +47,9 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
+  // Preview language toggle inside the event preview (same as the
+  // header-verse edit preview): the preview follows this, not the app language.
+  const [previewLang, setPreviewLang] = useState<'vi' | 'en'>(language);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [eventTitleVi, setEventTitleVi] = useState('');
   const [eventTitleEn, setEventTitleEn] = useState('');
@@ -256,13 +259,13 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const previewDateObj = eventDate ? new Date(eventDate + 'T00:00:00') : new Date();
   const previewMonth = isNaN(previewDateObj.getTime())
     ? 'VRC'
-    : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' });
+    : previewDateObj.toLocaleDateString(previewLang === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' });
   const previewDay = isNaN(previewDateObj.getTime())
     ? '01'
     : previewDateObj.getDate();
   const previewWeekday = isNaN(previewDateObj.getTime())
     ? t('weekdaySunday')
-    : previewDateObj.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
+    : previewDateObj.toLocaleDateString(previewLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
 
   if (activeTab !== 'create-event' && activeTab !== 'manage-events') return null;
 
@@ -552,13 +555,23 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       {/* Live Event Preview Card (Rendered cleanly directly below in same width) */}
       <div className={s.previewSection}>
         <div className={s.previewHeader}>
-          <span className={s.previewHeaderLeft}>
-            <Eye className={s.previewEyeIcon} />
-            <span>{t('adminEventPreview')}</span>
-          </span>
-          <span className={s.liveBadge}>
-            {t('adminEventPreviewLive')}
-          </span>
+          <span>{t('headerVersePreview')}</span>
+          <div className={s.previewLangToggle}>
+            <button
+              type="button"
+              onClick={() => setPreviewLang('vi')}
+              className={previewLang === 'vi' ? s.previewLangBtnActive : s.previewLangBtnIdle}
+            >
+              Tiếng Việt
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewLang('en')}
+              className={previewLang === 'en' ? s.previewLangBtnActive : s.previewLangBtnIdle}
+            >
+              English
+            </button>
+          </div>
         </div>
 
         <div className={`${s.previewCard} ${previewTheme.cardBg}`}>
@@ -599,7 +612,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             {/* Title, Time, Location */}
             <div className={s.previewContent}>
               <h4 className={s.previewTitle}>
-                {(language === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || t('adminEventTitlePlaceholder')}
+                {(previewLang === 'vi' ? (eventTitleVi || eventTitleEn) : (eventTitleEn || eventTitleVi)) || t('adminEventTitlePlaceholder')}
               </h4>
 
               <div className={s.previewMeta}>
@@ -620,7 +633,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 
           {/* Description Preview */}
           <p className={s.previewDesc}>
-            {(language === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || t('adminEventDescPlaceholder')}
+            {(previewLang === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || t('adminEventDescPlaceholder')}
           </p>
         </div>
       </div>

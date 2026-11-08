@@ -108,7 +108,7 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
           className={s.fullGcalBtn}
         >
           <CalendarPlus className={s.fullGcalIcon} />
-          <span>{gcalLabel || 'Google Calendar'}</span>
+          <span>{gcalLabel || 'Google'}</span>
         </a>
         {showIcal && (
           <button
@@ -120,7 +120,7 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
             className={s.fullIcalBtn}
           >
             <Download className={s.fullIcalIcon} />
-            <span>{icalLabel || 'Apple / iCal'}</span>
+            <span>{icalLabel || 'Apple'}</span>
           </button>
         )}
       </div>

@@ -54,6 +54,7 @@ import { appStyles as s } from './App.styles.ts';
 function ChurchAppContent() {
   const { adminUser, isAdmin } = useAuth();
   const { language, t } = useLanguage();
+  const adminFirstName = (adminUser?.displayName || adminUser?.username || 'Admin').split(' ')[0];
 
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
@@ -313,7 +314,7 @@ function ChurchAppContent() {
                 leftIcon={<ShieldCheck className={s.adminBtnIcon} />}
                 title="Admin Dashboard"
               >
-                <span>Admin Dashboard ({adminUser?.displayName || adminUser?.username || 'Admin'})</span>
+                <span>Admin Dashboard ({adminFirstName})</span>
               </Button>
             </div>
           )}
@@ -550,10 +551,10 @@ function ChurchAppContent() {
           </div>
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[0.75rem] font-bold uppercase tracking-wider text-amber-400">
+              <span className="text-[0.56rem] font-bold uppercase tracking-wider text-amber-400">
                 {t('notifReminderTitle')}
               </span>
-              <span className="text-[0.75rem] text-stone-400">VRC</span>
+              <span className="text-[0.56rem] text-stone-400">VRC</span>
             </div>
             <h4 className="font-bold text-xs sm:text-sm text-white line-clamp-1 mt-0.5">
               {toastNotification.title}

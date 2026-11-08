@@ -8,7 +8,7 @@ export const homeDashboardStyles = {
   heroContent: 'relative z-10 space-y-3.5',
   heroTopRow: 'flex items-center justify-between gap-2',
   heroBadgeBase:
-    'inline-flex items-center px-3 py-1 rounded-full backdrop-blur-md border text-[0.8125rem] font-semibold max-w-[calc(100%-80px)] sm:max-w-none truncate',
+    'inline-flex items-center px-3 py-1 rounded-full backdrop-blur-md border text-[0.61rem] font-semibold max-w-[calc(100%-80px)] sm:max-w-none truncate',
   customizeBtn:
     'inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 active:scale-95 text-white rounded-xl text-xs font-bold border border-white/30 transition-all shadow-xs cursor-pointer z-20',
   heroTitleGroup: 'space-y-1.5',
@@ -40,23 +40,23 @@ export const homeDashboardStyles = {
   quickIconSanctuary:
     'w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/50 flex items-center justify-center text-stone-800 dark:text-stone-300 mb-1 group-hover:scale-105 group-hover:bg-stone-900 group-hover:text-white transition-all shadow-2xs',
   quickCardTitle: 'text-xs sm:text-sm font-bold text-stone-950 dark:text-stone-100 leading-snug tracking-tight',
-  quickCardSub: 'text-[0.75rem] sm:text-[0.8125rem] text-stone-600 dark:text-stone-400 font-medium mt-0.5 line-clamp-1',
+  quickCardSub: 'text-[0.56rem] sm:text-[0.61rem] text-stone-600 dark:text-stone-400 font-medium mt-0.5 line-clamp-1',
   upcomingSection: 'space-y-2.5',
   viewAllBtn: 'text-xs font-semibold text-amber-800 hover:text-amber-900 flex items-center gap-1',
   eventCardBase:
     'rounded-2xl p-3.5 sm:p-5 transition-all duration-150 space-y-3 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
   cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
   badgeGroup: 'flex items-center gap-1.5 flex-wrap min-w-0',
-  categoryBadgeBase: 'inline-flex items-center gap-1 text-[0.8125rem] font-bold px-2.5 py-0.5 rounded-full',
+  categoryBadgeBase: 'inline-flex items-center gap-1 text-[0.61rem] font-bold px-2.5 py-0.5 rounded-full',
   featuredBadge:
-    'text-[0.8125rem] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full',
+    'text-[0.61rem] font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full',
   cardMainRow: 'flex items-start gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
     'flex-shrink-0 w-14 sm:w-16 py-2 px-1 text-center rounded-2xl shadow-2xs border border-stone-900/10 dark:border-stone-700/60 flex flex-col items-center justify-center select-none bg-white/95 dark:bg-stone-900/90 self-start',
   dateBoxWeekday:
-    'block text-[0.8125rem] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-300',
+    'block text-[0.61rem] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-300',
   dateBoxDay: 'block text-xl sm:text-2xl font-bold text-stone-950 dark:text-stone-50 leading-none my-1',
-  dateBoxMonthBase: 'block text-[0.75rem] sm:text-[0.8125rem] font-semibold uppercase tracking-wider leading-tight',
+  dateBoxMonthBase: 'block text-[0.56rem] sm:text-[0.61rem] font-semibold uppercase tracking-wider leading-tight',
   cardTitleCol: 'flex-1 min-w-0 space-y-1.5 max-w-full',
   cardTitle: 'text-base sm:text-lg font-bold text-stone-950 dark:text-stone-50 leading-snug break-words',
   cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-300',
@@ -71,7 +71,7 @@ export const homeDashboardStyles = {
     'py-3 first:pt-0 last:pb-0 sm:py-0 sm:px-4 sm:first:pl-0 sm:last:pr-0 space-y-1.5',
   serviceCardTopRow: 'flex items-center justify-between gap-2 flex-wrap',
   serviceDayBadge:
-    'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 text-[0.8125rem] font-bold',
+    'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 text-[0.61rem] font-bold',
   serviceHourText: 'text-xs font-bold text-stone-800 dark:text-stone-300',
   serviceTitle: 'text-sm font-serif font-bold text-stone-950 dark:text-stone-100 leading-snug pt-0.5',
   serviceDesc: 'text-xs text-stone-700 dark:text-stone-400 leading-relaxed font-medium',

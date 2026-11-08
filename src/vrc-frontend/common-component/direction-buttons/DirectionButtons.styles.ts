@@ -16,8 +16,8 @@ export const directionButtonsStyles = {
   detailedIcon: "w-4 h-4",
   detailedTextCol: "text-left",
   detailedTitle: "block font-bold text-white text-xs",
-  detailedGoogleSub: "block text-[0.75rem] text-stone-400",
-  detailedAppleSub: "block text-[0.75rem] text-amber-200",
+  detailedGoogleSub: "block text-[0.56rem] text-stone-400",
+  detailedAppleSub: "block text-[0.56rem] text-amber-200",
   detailedGoogleExt: "w-3.5 h-3.5 text-stone-400 group-hover:text-white",
   detailedAppleExt: "w-3.5 h-3.5 text-amber-200 group-hover:text-white",
 };

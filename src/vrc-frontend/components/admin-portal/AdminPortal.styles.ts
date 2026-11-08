@@ -5,7 +5,7 @@ export const adminPortalStyles = {
   headerSubtitle: "text-xs text-stone-400 mt-0.5 flex items-center gap-1.5 flex-wrap",
   adminName: "text-amber-400 font-semibold",
   separator: "text-stone-600",
-  versionText: "text-[0.8125rem] font-mono text-stone-500",
+  versionText: "text-[0.61rem] font-mono text-stone-500",
   headerActions: "flex items-center gap-2",
   iconBtn: "p-2 text-stone-400 hover:text-white rounded-lg hover:bg-stone-800 transition-colors",
   refreshIcon: "w-4 h-4",

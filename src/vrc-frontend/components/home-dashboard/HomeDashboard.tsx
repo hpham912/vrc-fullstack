@@ -430,7 +430,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navVerse')}
             </span>
             <span className={s.quickCardSub}>
-              {todayVerse?.reference || t('homeToday')}
+              {(language === 'vi'
+                ? todayVerse?.referenceVi || todayVerse?.reference
+                : todayVerse?.referenceEn || todayVerse?.reference) || t('homeToday')}
             </span>
           </Card>
 
@@ -646,17 +648,25 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <span>{t('heroScripture')}</span>
             </span>
             <span className={s.verseRef}>
-              {todayVerse.reference}
+              {language === 'vi'
+                ? todayVerse.referenceVi || todayVerse.reference
+                : todayVerse.referenceEn || todayVerse.reference}
             </span>
           </div>
 
           <blockquote className={s.verseQuote}>
-            "{todayVerse.verseText}"
+            "
+            {language === 'vi'
+              ? todayVerse.verseTextVi || todayVerse.verseText
+              : todayVerse.verseTextEn || todayVerse.verseText}
+            "
           </blockquote>
 
           <div className={s.verseFooter}>
             <span className={s.verseTrans}>
-              {todayVerse.translation}
+              {language === 'vi'
+                ? todayVerse.translationVi || todayVerse.translation
+                : todayVerse.translationEn || todayVerse.translation}
             </span>
             <Button
               type="button"

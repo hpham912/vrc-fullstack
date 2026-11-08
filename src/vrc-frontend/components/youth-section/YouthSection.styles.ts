@@ -7,7 +7,7 @@ export const youthSectionStyles = {
     'absolute top-0 right-0 -mt-8 -mr-8 w-44 h-44 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none',
   heroInner: 'relative z-10 space-y-3',
   heroBadge:
-    'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-[0.8125rem] font-bold text-emerald-300 tracking-wide uppercase',
+    'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-[0.61rem] font-bold text-emerald-300 tracking-wide uppercase',
   heroTitle: 'text-xl sm:text-3xl font-serif font-bold text-white tracking-tight leading-tight',
   heroDesc: 'text-xs sm:text-sm text-stone-100 leading-relaxed max-w-xl font-medium',
   scriptureBox:
@@ -17,7 +17,7 @@ export const youthSectionStyles = {
     'flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3',
   spotlightIconBox:
     'w-10 h-10 rounded-2xl bg-emerald-500 text-stone-950 flex items-center justify-center font-bold shadow-xs',
-  spotlightTag: 'text-[0.75rem] font-bold uppercase tracking-wider text-emerald-700 block',
+  spotlightTag: 'text-[0.56rem] font-bold uppercase tracking-wider text-emerald-700 block',
   spotlightTitle: 'text-base sm:text-xl font-serif font-bold text-stone-950',
   timePill:
     'inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold rounded-full w-fit',
@@ -31,7 +31,7 @@ export const youthSectionStyles = {
   pillarIndigo: 'p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-center space-y-1',
   pillarRose: 'p-3 rounded-2xl bg-rose-50/70 border border-rose-200 text-center space-y-1',
   pillarTitle: 'text-xs font-bold text-stone-950 block',
-  pillarSub: 'text-[0.8125rem] text-stone-700 block leading-tight font-medium',
+  pillarSub: 'text-[0.61rem] text-stone-700 block leading-tight font-medium',
   eventsSection: 'space-y-3',
   eventsHeader: 'flex items-center justify-between',
   eventsTitle: 'text-base sm:text-lg font-serif font-bold text-stone-950 flex items-center gap-2',
@@ -40,7 +40,7 @@ export const youthSectionStyles = {
   emptyEventsCard: 'p-6 text-center bg-white rounded-3xl border border-stone-200 space-y-2',
   eventCard: 'bg-white rounded-2xl sm:rounded-3xl border border-stone-200 p-4 sm:p-5 shadow-xs space-y-3',
   eventCategoryTag:
-    'text-[0.75rem] font-bold text-emerald-900 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md uppercase',
+    'text-[0.56rem] font-bold text-emerald-900 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md uppercase',
   eventCardTitle: 'text-sm sm:text-base font-serif font-bold text-stone-950 mt-1',
   eventGcalBtn:
     'inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition-all active:scale-95 border border-emerald-200',

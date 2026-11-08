@@ -18,7 +18,7 @@ export const buttonStyles = {
   },
   sizes: {
     none: "",
-    xs: "px-2.5 py-1 rounded-lg text-[0.8125rem]",
+    xs: "px-2.5 py-1 rounded-lg text-[0.61rem]",
     sm: "px-3 py-1.5 rounded-xl text-xs",
     md: "px-4 py-2 rounded-xl text-xs",
     lg: "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold",
