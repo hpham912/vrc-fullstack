@@ -1,9 +1,10 @@
 export const notificationModalStyles = {
   backdrop: 'fixed inset-0 z-[90] bg-transparent',
-  // Full-screen page on mobile (like Facebook notifications); a dropdown
-  // panel on desktop.
+  // Full-screen page on mobile (like Facebook notifications), but it stops
+  // above the iOS bottom tab bar so the bar stays visible and tappable;
+  // a dropdown panel on desktop.
   dialog:
-    'fixed inset-0 md:top-[86px] md:left-auto md:right-6 md:w-[420px] md:bottom-auto md:max-h-[min(650px,calc(100vh-110px))] z-[100] bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 dark:border-stone-800 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200',
+    'fixed inset-x-0 top-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:top-[86px] md:left-auto md:right-6 md:w-[420px] md:bottom-auto md:max-h-[min(650px,calc(100vh-110px))] z-[100] bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 dark:border-stone-800 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200',
   header: 'px-5 py-3.5 border-b border-stone-200 dark:border-stone-800 bg-stone-900 dark:bg-stone-950 text-white flex items-center justify-between',
   headerLeft: 'flex items-center gap-2.5',
   headerIconBox:
