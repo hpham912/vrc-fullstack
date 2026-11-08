@@ -53,9 +53,8 @@ import {
 import { appStyles as s } from './App.styles.ts';
 
 function ChurchAppContent() {
-  const { adminUser, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { language, t } = useLanguage();
-  const adminFirstName = (adminUser?.displayName || adminUser?.username || 'Admin').split(' ')[0];
 
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
@@ -315,7 +314,7 @@ function ChurchAppContent() {
                 leftIcon={<ShieldCheck className={s.adminBtnIcon} />}
                 title="Admin Dashboard"
               >
-                <span>Admin Dashboard ({adminFirstName})</span>
+                <span>Admin Dashboard</span>
               </Button>
             </div>
           )}
