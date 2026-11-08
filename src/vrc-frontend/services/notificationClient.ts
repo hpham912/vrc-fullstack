@@ -342,4 +342,20 @@ export const NotificationClient = {
     }
     return null;
   },
+
+  // Admin clears all notifications. Returns true when the clear worked.
+  async clearAll(token: string | null): Promise<boolean> {
+    try {
+      const res = await fetch(apiUrl('/api/notifications'), {
+        method: 'DELETE',
+        headers: apiHeaders({
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        }),
+      });
+      return res.ok;
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+      return false;
+    }
+  },
 };

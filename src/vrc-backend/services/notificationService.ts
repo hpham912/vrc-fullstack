@@ -64,6 +64,20 @@ export const BackendNotificationService = {
     }
   },
 
+  // Delete all notifications (admin "Clear all"). Returns how many rows
+  // were removed. New notifications from events, verses, or admin posts
+  // still come in afterwards — this only clears the list, not the
+  // events or verses themselves.
+  async clearAll() {
+    try {
+      const deleted = await db.delete(notifications).returning({ id: notifications.id });
+      return deleted.length;
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+      return -1;
+    }
+  },
+
   async getRecent(limit = 10) {
     try {
       const list = await db

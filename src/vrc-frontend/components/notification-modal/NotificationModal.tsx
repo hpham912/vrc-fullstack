@@ -14,8 +14,9 @@ import {
   BookOpen,
   Megaphone,
   Plus,
+  Trash2,
 } from 'lucide-react';
-import { Button, LoadingShimmer } from '../../common-component/index.ts';
+import { Button, LoadingShimmer, ConfirmModal } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
 interface NotificationModalProps {
@@ -45,6 +46,8 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   const [addBody, setAddBody] = useState('');
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -87,6 +90,16 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     setAddBody('');
     setShowAddForm(false);
     onNotificationAdded?.();
+  };
+
+  const handleClearAll = async () => {
+    setClearing(true);
+    const ok = await NotificationClient.clearAll(getToken());
+    setClearing(false);
+    setShowClearConfirm(false);
+    if (ok) {
+      onNotificationAdded?.();
+    }
   };
 
   const getIconForType = (type: string) => {
@@ -159,6 +172,16 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                 aria-label={t('notifAddBtn')}
               >
                 <Plus className="w-4 h-4" />
+              </button>
+            )}
+            {isAdmin && notifications.length > 0 && (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className={s.addBtn}
+                title={t('notifClearAll')}
+                aria-label={t('notifClearAll')}
+              >
+                <Trash2 className="w-4 h-4" />
               </button>
             )}
             <button
@@ -287,6 +310,18 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Admin: confirm clearing all notifications */}
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        title={t('notifClearTitle')}
+        message={t('notifClearMessage')}
+        confirmText={t('notifClearAll')}
+        isDanger
+        loading={clearing}
+        onConfirm={handleClearAll}
+        onCancel={() => setShowClearConfirm(false)}
+      />
     </>,
     document.body
   );

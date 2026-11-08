@@ -41,4 +41,18 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   }
 });
 
+// Admin clears all notifications.
+router.delete('/', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const deletedCount = await BackendNotificationService.clearAll();
+    if (deletedCount < 0) {
+      return res.status(500).json({ error: 'Failed to clear notifications' });
+    }
+    res.json({ message: 'All notifications cleared', deletedCount });
+  } catch (error: any) {
+    console.error('Failed to clear notifications:', error);
+    res.status(500).json({ error: 'Failed to clear notifications' });
+  }
+});
+
 export default router;

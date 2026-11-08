@@ -209,6 +209,9 @@ export const translations = {
   notifAddPost: { vi: 'Đăng', en: 'Post' },
   notifAddError: { vi: 'Vui lòng nhập tiêu đề và nội dung.', en: 'Please enter a title and a message.' },
   notifAddFailed: { vi: 'Không đăng được thông báo. Vui lòng thử lại.', en: 'Could not post the notification. Please try again.' },
+  notifClearAll: { vi: 'Xóa Tất Cả', en: 'Clear All' },
+  notifClearTitle: { vi: 'Xóa tất cả thông báo?', en: 'Clear all notifications?' },
+  notifClearMessage: { vi: 'Tất cả thông báo sẽ bị xóa vĩnh viễn. Thông báo mới vẫn sẽ hiển thị khi có sự kiện, Lời Chúa, hoặc thông báo mới.', en: 'All notifications will be permanently deleted. New ones will still appear when there is a new event, verse, or notice.' },
 
   // Prayer request
   prayerRequestTitle: { vi: 'Gửi Lời Cầu Nguyện', en: 'Submit a Prayer Request' },
