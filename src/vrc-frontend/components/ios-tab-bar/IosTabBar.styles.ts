@@ -1,5 +1,5 @@
 export const iosTabBarStyles = {
-  nav: 'fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-2xl border-t border-stone-200/80 px-3 py-1 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-lg transition-all',
+  nav: 'fixed bottom-0 left-0 right-0 md:hidden bg-white/95 backdrop-blur-2xl border-t border-stone-200/80 px-3 py-1 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-lg transition-all',
   grid: 'max-w-md mx-auto grid grid-cols-4 items-center gap-1',
   tabBtnBase:
     'flex flex-col items-center justify-center py-1 rounded-2xl transition-all duration-200 active:scale-90',

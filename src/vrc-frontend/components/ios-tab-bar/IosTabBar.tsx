@@ -31,7 +31,7 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
   ];
 
   return (
-    <nav className={s.nav}>
+    <nav className={`${s.nav} ${isNotifOpen ? 'z-[110]' : 'z-40'}`}>
       <div className={s.grid}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
