@@ -20,7 +20,7 @@ import {
   PenTool,
 } from 'lucide-react';
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
-import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal } from '../../common-component/index.ts';
+import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal, LoadingShimmer } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   formatDateLocale,
@@ -43,6 +43,7 @@ interface HomeDashboardProps {
   onOpenSpotlightEditor?: () => void;
   onOpenChurchInfoEditor?: () => void;
   isAdmin: boolean;
+  isLoading?: boolean;
 }
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({
@@ -55,6 +56,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   onOpenSpotlightEditor,
   onOpenChurchInfoEditor,
   isAdmin,
+  isLoading = false,
 }) => {
   const { language, t } = useLanguage();
 
@@ -290,6 +292,16 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     ],
     language
   );
+
+  if (isLoading) {
+    return (
+      <div className={s.container}>
+        <LoadingShimmer variant="hero" />
+        <LoadingShimmer variant="verse" />
+        <LoadingShimmer variant="card" count={3} />
+      </div>
+    );
+  }
 
   return (
     <div className={s.container}>

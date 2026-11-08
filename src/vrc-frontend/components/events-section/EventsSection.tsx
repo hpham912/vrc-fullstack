@@ -34,6 +34,7 @@ import {
   AdminAddButton,
   Card,
   EventDetailModal,
+  LoadingShimmer,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -52,6 +53,7 @@ interface EventsSectionProps {
   isAdmin: boolean;
   onRefresh?: () => void;
   onOpenAdminPortal?: (tab?: string, eventToEdit?: ChurchEvent | null) => void;
+  isLoading?: boolean;
 }
 
 const CATEGORIES = [
@@ -67,6 +69,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
   isAdmin,
   onRefresh,
   onOpenAdminPortal,
+  isLoading = false,
 }) => {
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
@@ -262,7 +265,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       </div>
 
       {/* Events List (Current & Upcoming Events) */}
-      {filteredUpcomingEvents.length === 0 ? (
+      {isLoading ? (
+        <LoadingShimmer variant="card" count={3} />
+      ) : filteredUpcomingEvents.length === 0 ? (
         <Card variant="empty" padding="empty">
           <Calendar className="w-10 h-10 text-stone-300 mx-auto mb-3" />
           <p className={s.emptyTitle}>{t('noEvents')}</p>

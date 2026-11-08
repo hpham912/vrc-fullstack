@@ -36,7 +36,7 @@ const EditHeaderVerseModal = lazy(() =>
   )
 );
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
-import { Button } from './vrc-frontend/common-component/index.ts';
+import { Button, LoadingShimmer } from './vrc-frontend/common-component/index.ts';
 import { ChurchEvent, DailyVerse, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
 import { Plus, ArrowRight, Pencil } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
@@ -59,6 +59,14 @@ function ChurchAppContent() {
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
   const [prayerModalOpen, setPrayerModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Switching tabs always dismisses the notifications panel, so tapping a
+  // bottom-bar tab is the way out of it on mobile (it has no close button).
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setShowNotifModal(false);
+  };
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
@@ -169,6 +177,10 @@ function ChurchAppContent() {
       }
     } catch (err) {
       console.error('Error fetching church data from database:', err);
+    } finally {
+      // First load done — the screens stop showing the shimmer. Refreshes
+      // keep showing the data they already have instead of flashing.
+      setIsLoading(false);
     }
   };
 
@@ -329,7 +341,7 @@ function ChurchAppContent() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`${s.desktopNavItemBase} ${
                     isActive ? s.desktopNavItemActive : s.desktopNavItemInactive
                   }`}
@@ -356,6 +368,7 @@ function ChurchAppContent() {
             onOpenSpotlightEditor={() => setSpotlightModalOpen(true)}
             onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
             isAdmin={isAdmin}
+            isLoading={isLoading}
           />
         )}
 
@@ -365,6 +378,7 @@ function ChurchAppContent() {
             isAdmin={isAdmin}
             onRefresh={loadData}
             onOpenAdminPortal={openAdminWithTab}
+            isLoading={isLoading}
           />
         )}
 
@@ -376,6 +390,7 @@ function ChurchAppContent() {
               isAdmin={isAdmin}
               onRefresh={loadData}
               onOpenAdminPortal={openAdminWithTab}
+              isLoading={isLoading}
             />
 
             <div className="max-w-4xl mx-auto px-4 pb-12 text-center">
@@ -415,9 +430,9 @@ function ChurchAppContent() {
       {/* Native iOS Bottom Tab Bar: Exactly Home, Events, Scripture, Notifications */}
       <IosTabBar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         onOpenNotifications={() => {
-          setShowNotifModal(true);
+          setShowNotifModal((prev) => !prev);
           NotificationClient.requestPermission();
         }}
         hasNotifications={notifications.length > 0}
@@ -433,7 +448,7 @@ function ChurchAppContent() {
 
       {/* Spotlight / Holiday Hero Banner Customizer Modal */}
       {spotlightModalOpen && (
-        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+        <Suspense fallback={<div className={s.lazyFallback}><LoadingShimmer variant="lines" rows={3} className="max-w-md w-full" /></div>}>
           <SpotlightBannerModal
             isOpen={spotlightModalOpen}
             onClose={() => setSpotlightModalOpen(false)}
@@ -450,7 +465,7 @@ function ChurchAppContent() {
 
       {/* Sanctuary Location & Weekly Worship Times Customizer Modal */}
       {churchInfoModalOpen && (
-        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+        <Suspense fallback={<div className={s.lazyFallback}><LoadingShimmer variant="lines" rows={3} className="max-w-md w-full" /></div>}>
           <EditChurchInfoModal
             isOpen={churchInfoModalOpen}
             onClose={() => setChurchInfoModalOpen(false)}
@@ -465,7 +480,7 @@ function ChurchAppContent() {
 
       {/* Header Subtitle Verse Editor Modal */}
       {headerVerseModalOpen && (
-        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+        <Suspense fallback={<div className={s.lazyFallback}><LoadingShimmer variant="lines" rows={3} className="max-w-md w-full" /></div>}>
           <EditHeaderVerseModal
             isOpen={headerVerseModalOpen}
             onClose={() => setHeaderVerseModalOpen(false)}
@@ -478,7 +493,7 @@ function ChurchAppContent() {
 
       {/* Admin Dashboard Modal */}
       {adminPortalOpen && (
-        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+        <Suspense fallback={<div className={s.lazyFallback}><LoadingShimmer variant="lines" rows={3} className="max-w-md w-full" /></div>}>
           <AdminPortal
             events={events}
             allVerses={allVerses}

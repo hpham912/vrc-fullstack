@@ -12,6 +12,14 @@
   --text-caption: 0.56rem; /* ~10px — smallest labels */
   --text-label: 0.61rem; /* ~11px — small labels, badges, pills */
   --text-meta: 0.72rem; /* ~13px — metadata */
+
+  /* Loading shimmer — a highlight that sweeps across a skeleton block.
+     Used by the shared LoadingShimmer component. */
+  --animate-shimmer: shimmer 1.8s infinite;
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }
 
 @layer base {

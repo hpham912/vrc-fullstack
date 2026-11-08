@@ -24,6 +24,7 @@ import {
   AdminAddButton,
   Card,
   Button,
+  LoadingShimmer,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -36,6 +37,7 @@ interface DailyVerseCardProps {
   isAdmin: boolean;
   onRefresh?: () => void;
   onOpenAdminPortal?: (tab?: string, eventToEdit?: any, verseToEdit?: DailyVerse | null) => void;
+  isLoading?: boolean;
 }
 
 export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
@@ -44,6 +46,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   isAdmin,
   onRefresh,
   onOpenAdminPortal,
+  isLoading = false,
 }) => {
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
@@ -259,6 +262,9 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       </div>
 
       {/* Main Scripture Card */}
+      {isLoading ? (
+        <LoadingShimmer variant="verse" />
+      ) : (
       <Card variant="warmElevated" padding="lg" className="space-y-6">
         <div className={s.cardMetaRow}>
           <div className={s.dateGroup}>
@@ -309,6 +315,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           )}
         </div>
       </Card>
+      )}
 
       {/* Past Devotionals Archive */}
       {allVerses.length > 1 && (

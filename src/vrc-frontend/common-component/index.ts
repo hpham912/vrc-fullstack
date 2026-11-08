@@ -9,3 +9,5 @@ export { CalendarButtons } from './calendar-buttons/CalendarButtons.tsx';
 export { AdminActionButtons, AdminAddButton } from './admin-action-buttons/AdminActionButtons.tsx';
 export { FeaturedStar } from './featured-star/FeaturedStar.tsx';
 export { EventDetailModal } from './event-detail-modal/EventDetailModal.tsx';
+export { LoadingShimmer } from './loading-shimmer/LoadingShimmer.tsx';
+export type { LoadingShimmerVariant } from './loading-shimmer/LoadingShimmer.tsx';

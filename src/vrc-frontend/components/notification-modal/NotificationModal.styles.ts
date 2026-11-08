@@ -1,5 +1,5 @@
 export const notificationModalStyles = {
-  backdrop: 'fixed inset-0 z-[90] bg-transparent',
+  backdrop: 'fixed inset-x-0 top-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:inset-0 z-[90] bg-transparent',
   // Full-screen page on mobile (like Facebook notifications), but it stops
   // above the iOS bottom tab bar so the bar stays visible and tappable;
   // a dropdown panel on desktop.
@@ -11,7 +11,7 @@ export const notificationModalStyles = {
     'w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400',
   headerTitle: 'font-serif font-bold text-sm sm:text-base leading-tight text-white',
   headerSub: 'text-stone-300 dark:text-stone-400 text-xs font-medium',
-  closeIconBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 dark:hover:bg-stone-800 transition-colors',
+  closeIconBtn: 'hidden md:block p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 dark:hover:bg-stone-800 transition-colors',
   headerActions: 'flex items-center gap-1',
   addBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors',
   addForm: 'p-3.5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60 space-y-2.5',
@@ -36,7 +36,7 @@ export const notificationModalStyles = {
     'font-serif font-bold text-xs sm:text-sm text-stone-950 dark:text-stone-100 leading-snug group-hover:text-amber-900 dark:group-hover:text-amber-300 transition-colors',
   notifBody: 'text-xs text-stone-700 dark:text-stone-300 leading-relaxed line-clamp-2 font-medium',
   footer:
-    'px-4 py-2.5 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/80 flex items-center justify-between text-label text-stone-500 dark:text-stone-400',
+    'px-4 py-2.5 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/80 hidden md:flex items-center justify-between text-label text-stone-500 dark:text-stone-400',
   footerBrand: 'flex items-center gap-1 font-serif font-bold text-stone-700 dark:text-stone-300',
   footerCloseBtn:
     'px-3 py-1 rounded-lg bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold transition-colors text-label',
