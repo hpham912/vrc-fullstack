@@ -5,8 +5,11 @@ export const navbarStyles = {
   innerRow: 'flex items-center justify-between h-14 sm:h-20',
   logoBtn:
     'flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-95 flex-shrink-0',
+  // Fixed px height (not rem): the logo must not grow when large-font
+  // mode raises the root font size (18px -> 22px). 40px / 54px match
+  // the old h-9 / h-12 at the normal 18px root.
   logoImg:
-    'h-9 sm:h-12 w-auto object-contain flex-shrink-0',
+    'h-[40px] sm:h-[54px] w-auto object-contain flex-shrink-0',
   rightControls: 'flex items-center gap-1.5 sm:gap-2',
   prayerBtn:
     'flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100/90 active:scale-95 border border-amber-200/90 text-amber-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer',
