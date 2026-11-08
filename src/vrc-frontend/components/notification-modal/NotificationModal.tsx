@@ -1,16 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AppNotification } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
+import { useAuth } from '../../context/AuthContext.tsx';
 import { formatNotificationDate } from '../../utils/dateFormatter.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
+import { NotificationClient } from '../../services/notificationClient.ts';
 import {
   Bell,
   X,
   Calendar,
   BookOpen,
   Megaphone,
+  Plus,
 } from 'lucide-react';
 import { Button } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
@@ -21,6 +24,8 @@ interface NotificationModalProps {
   notifications: AppNotification[];
   onRequestPermission?: () => void;
   onSelectNotification?: (notif: AppNotification) => void;
+  isAdmin?: boolean;
+  onNotificationAdded?: () => void;
 }
 
 export const NotificationModal: React.FC<NotificationModalProps> = ({
@@ -28,8 +33,16 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   onClose,
   notifications,
   onSelectNotification,
+  isAdmin,
+  onNotificationAdded,
 }) => {
   const { language, t } = useLanguage();
+  const { getToken } = useAuth();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addTitle, setAddTitle] = useState('');
+  const [addBody, setAddBody] = useState('');
+  const [addSaving, setAddSaving] = useState(false);
+  const [addError, setAddError] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -40,8 +53,39 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Reset the add form whenever the panel closes, so it never reopens half-filled.
+  useEffect(() => {
+    if (!isOpen) {
+      setShowAddForm(false);
+      setAddTitle('');
+      setAddBody('');
+      setAddError('');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
   if (typeof document === 'undefined') return null;
+
+  const handleAddNotification = async () => {
+    const title = addTitle.trim();
+    const body = addBody.trim();
+    if (!title || !body) {
+      setAddError(t('notifAddError'));
+      return;
+    }
+    setAddError('');
+    setAddSaving(true);
+    const created = await NotificationClient.createAnnouncement(title, body, getToken());
+    setAddSaving(false);
+    if (!created) {
+      setAddError(t('notifAddFailed'));
+      return;
+    }
+    setAddTitle('');
+    setAddBody('');
+    setShowAddForm(false);
+    onNotificationAdded?.();
+  };
 
   const getIconForType = (type: string) => {
     switch (type) {
@@ -104,14 +148,72 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className={s.closeIconBtn}
-            title="Đóng / Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className={s.headerActions}>
+            {isAdmin && (
+              <button
+                onClick={() => setShowAddForm((prev) => !prev)}
+                className={s.addBtn}
+                title={t('notifAddBtn')}
+                aria-label={t('notifAddBtn')}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className={s.closeIconBtn}
+              title="Đóng / Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
+
+        {/* Admin: post a notice for all users */}
+        {isAdmin && showAddForm && (
+          <div className={s.addForm}>
+            <input
+              type="text"
+              value={addTitle}
+              onChange={(e) => setAddTitle(e.target.value)}
+              placeholder={t('notifAddTitlePlaceholder')}
+              className={s.addInput}
+            />
+            <textarea
+              value={addBody}
+              onChange={(e) => setAddBody(e.target.value)}
+              placeholder={t('notifAddBodyPlaceholder')}
+              className={s.addTextarea}
+            />
+            {addError && (
+              <p className={s.addError}>{addError}</p>
+            )}
+            <div className={s.addFormActions}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setAddTitle('');
+                  setAddBody('');
+                  setAddError('');
+                }}
+              >
+                {t('commonCancel')}
+              </Button>
+              <Button
+                type="button"
+                variant="darkAmber"
+                size="sm"
+                onClick={handleAddNotification}
+                disabled={addSaving}
+              >
+                {addSaving ? t('commonSaving') : t('notifAddPost')}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Notifications List */}
         <div className={s.listContainer}>

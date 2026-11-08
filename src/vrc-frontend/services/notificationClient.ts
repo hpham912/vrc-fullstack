@@ -1,5 +1,5 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { apiUrl } from '../utils/api.ts';
+import { apiUrl, apiHeaders } from '../utils/api.ts';
 import { AppNotification, ChurchEvent } from '../types/index.ts';
 import { translate, getSavedLanguage } from '../context/LanguageContext.tsx';
 
@@ -315,5 +315,31 @@ export const NotificationClient = {
       console.error('Failed to fetch recent notifications:', err);
     }
     return [];
+  },
+
+  // Admin posts a notice for all users. Returns the created notification,
+  // or null when the save failed.
+  async createAnnouncement(
+    title: string,
+    body: string,
+    token: string | null
+  ): Promise<AppNotification | null> {
+    try {
+      const res = await fetch(apiUrl('/api/notifications'), {
+        method: 'POST',
+        headers: apiHeaders({
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        }),
+        body: JSON.stringify({ title, body }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      console.error('Failed to create notification:', res.status);
+    } catch (err) {
+      console.error('Failed to create notification:', err);
+    }
+    return null;
   },
 };

@@ -3,6 +3,11 @@ export const appStyles = {
     'min-h-screen bg-[#FDFCFB] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
   heroSection:
     'bg-white dark:bg-[#161412] border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
+  // Nav-only hero (non-Home tab, no admin): collapses to zero height on mobile so
+  // regular users see no empty gap under the header; on desktop it keeps the
+  // padding so the segmented nav still sits below the fixed header.
+  heroSectionNavOnly:
+    'bg-white dark:bg-[#161412] sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 sm:px-6 pt-0 pb-0 sm:pt-28 sm:pb-9',
   heroInner: 'max-w-4xl mx-auto text-center space-y-3 sm:space-y-3.5',
   locationPill:
     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-label sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800',
@@ -46,7 +51,7 @@ export const appStyles = {
   footerVersion: 'text-stone-500 font-mono text-caption',
   mobileVersionBar: 'md:hidden py-3 text-center text-caption text-stone-500 font-mono select-none',
   floatingPrayerBtn:
-    'fixed bottom-[84px] sm:bottom-10 right-3.5 sm:right-6 z-40 group flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-stone-900/65 hover:bg-stone-900/80 active:scale-95 text-amber-100 border border-white/20 backdrop-blur-md shadow-xl transition-all cursor-pointer select-none animate-in fade-in zoom-in-95 duration-200',
+    'fixed bottom-[100px] sm:bottom-14 right-3.5 sm:right-6 z-40 group flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-stone-900/65 hover:bg-stone-900/80 active:scale-95 text-amber-100 border border-white/20 backdrop-blur-md shadow-xl transition-all cursor-pointer select-none animate-in fade-in zoom-in-95 duration-200',
   floatingPrayerIconBox:
     'w-6 h-6 rounded-full bg-amber-500/25 flex items-center justify-center text-amber-300 group-hover:bg-amber-500/35 transition-colors',
   floatingPrayerIcon: 'w-3.5 h-3.5',

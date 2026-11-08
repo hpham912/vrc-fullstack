@@ -203,6 +203,12 @@ export const translations = {
   notifSubtitle: { vi: 'Tin tức & lịch sinh hoạt mới nhất', en: 'Recent church updates & news' },
   notifEmpty: { vi: 'Chưa có thông báo nào mới', en: 'No new notifications' },
   notifEmptySub: { vi: 'Khi có lịch thờ phượng hoặc Lời Chúa mới, thông báo sẽ hiển thị ở đây.', en: 'Upcoming worship events and devotionals will appear here.' },
+  notifAddBtn: { vi: 'Thêm Thông Báo', en: 'Add Notification' },
+  notifAddTitlePlaceholder: { vi: 'Tiêu đề thông báo...', en: 'Notification title...' },
+  notifAddBodyPlaceholder: { vi: 'Nội dung thông báo cho mọi người...', en: 'Message for everyone...' },
+  notifAddPost: { vi: 'Đăng', en: 'Post' },
+  notifAddError: { vi: 'Vui lòng nhập tiêu đề và nội dung.', en: 'Please enter a title and a message.' },
+  notifAddFailed: { vi: 'Không đăng được thông báo. Vui lòng thử lại.', en: 'Could not post the notification. Please try again.' },
 
   // Prayer request
   prayerRequestTitle: { vi: 'Gửi Lời Cầu Nguyện', en: 'Submit a Prayer Request' },

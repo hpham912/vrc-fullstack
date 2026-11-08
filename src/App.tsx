@@ -247,7 +247,9 @@ function ChurchAppContent() {
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
-      <div className={s.heroSection}>
+      {/* Nav-only on non-Home tabs for non-admins: collapses on mobile so there is
+          no empty gap under the header; the desktop nav still shows on desktop. */}
+      <div className={activeTab === 'home' || isAdmin ? s.heroSection : s.heroSectionNavOnly}>
         <div className={s.heroInner}>
           {activeTab === 'home' && (
             <>
@@ -589,6 +591,8 @@ function ChurchAppContent() {
           if (notif.type === 'event') setActiveTab('events');
           else if (notif.type === 'verse') setActiveTab('verse');
         }}
+        isAdmin={isAdmin}
+        onNotificationAdded={loadData}
       />
     </div>
   );

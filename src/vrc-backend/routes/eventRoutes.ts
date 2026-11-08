@@ -336,6 +336,10 @@ router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
+    // Remove the notifications that pointed at this event, so the deleted
+    // event no longer shows up in the Notifications tab.
+    await BackendNotificationService.deleteForEvent(eventId);
+
     res.json({ message: 'Event successfully removed from database', event: deleted[0] });
   } catch (error: any) {
     console.error('Failed to delete event from PostgreSQL:', error);

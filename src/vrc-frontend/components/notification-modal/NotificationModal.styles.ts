@@ -1,7 +1,9 @@
 export const notificationModalStyles = {
   backdrop: 'fixed inset-0 z-[90] bg-transparent',
+  // Full-screen page on mobile (like Facebook notifications); a dropdown
+  // panel on desktop.
   dialog:
-    'fixed top-[60px] sm:top-[86px] inset-x-2.5 sm:left-auto sm:right-6 sm:w-[420px] bottom-[72px] md:bottom-auto md:max-h-[min(650px,calc(100vh-110px))] z-[100] bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-3xl shadow-2xl border border-stone-200/90 dark:border-stone-800 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200',
+    'fixed inset-0 md:top-[86px] md:left-auto md:right-6 md:w-[420px] md:bottom-auto md:max-h-[min(650px,calc(100vh-110px))] z-[100] bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 dark:border-stone-800 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200',
   header: 'px-5 py-3.5 border-b border-stone-200 dark:border-stone-800 bg-stone-900 dark:bg-stone-950 text-white flex items-center justify-between',
   headerLeft: 'flex items-center gap-2.5',
   headerIconBox:
@@ -9,6 +11,15 @@ export const notificationModalStyles = {
   headerTitle: 'font-serif font-bold text-sm sm:text-base leading-tight text-white',
   headerSub: 'text-stone-300 dark:text-stone-400 text-xs font-medium',
   closeIconBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 dark:hover:bg-stone-800 transition-colors',
+  headerActions: 'flex items-center gap-1',
+  addBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors',
+  addForm: 'p-3.5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60 space-y-2.5',
+  addInput:
+    'w-full px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50',
+  addTextarea:
+    'w-full px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 min-h-[80px] resize-y',
+  addFormActions: 'flex items-center gap-2 justify-end',
+  addError: 'text-xs font-semibold text-rose-600 dark:text-rose-400',
   listContainer: 'flex-1 overflow-y-auto p-3.5 space-y-2.5',
   emptyBox: 'text-center py-10 px-4 space-y-2',
   emptyIconBox: 'w-10 h-10 rounded-2xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700 mx-auto flex items-center justify-center text-stone-500 dark:text-stone-400',

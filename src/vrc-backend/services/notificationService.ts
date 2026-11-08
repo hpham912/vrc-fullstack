@@ -1,6 +1,26 @@
 import { db } from '../../vrc-db/index.ts';
-import { notifications } from '../../vrc-db/schema.ts';
-import { desc } from 'drizzle-orm';
+import { notifications, events } from '../../vrc-db/schema.ts';
+import { desc, eq, and, inArray } from 'drizzle-orm';
+
+// Keep only the 10 latest notifications (same rule as daily verses).
+async function enforceMaxTenNotifications() {
+  try {
+    const all = await db
+      .select({ id: notifications.id })
+      .from(notifications)
+      .orderBy(desc(notifications.createdAt));
+
+    if (all.length > 10) {
+      const surplus = all.slice(10);
+      for (const item of surplus) {
+        await db.delete(notifications).where(eq(notifications.id, item.id));
+      }
+      console.log(`Pruned ${surplus.length} older notifications in PostgreSQL.`);
+    }
+  } catch (err) {
+    console.warn('Failed to prune notifications to 10:', err);
+  }
+}
 
 export const BackendNotificationService = {
   async recordNotification(
@@ -19,6 +39,7 @@ export const BackendNotificationService = {
           targetId: targetId || null,
         })
         .returning();
+      await enforceMaxTenNotifications();
       return inserted[0];
     } catch (err) {
       console.error('Failed to log push notification to PostgreSQL:', err);
@@ -26,13 +47,49 @@ export const BackendNotificationService = {
     }
   },
 
-  async getRecent(limit = 20) {
+  // Delete notifications that point at a deleted event, so a deleted event
+  // no longer shows up in the Notifications tab.
+  async deleteForEvent(eventId: number) {
     try {
-      return await db
+      await db
+        .delete(notifications)
+        .where(
+          and(
+            eq(notifications.type, 'event'),
+            eq(notifications.targetId, eventId)
+          )
+        );
+    } catch (err) {
+      console.warn('Failed to delete notifications for event:', err);
+    }
+  },
+
+  async getRecent(limit = 10) {
+    try {
+      const list = await db
         .select()
         .from(notifications)
         .orderBy(desc(notifications.createdAt))
         .limit(limit);
+
+      // One-time cleanup on read: drop event notifications whose event was
+      // deleted before the delete-cleanup existed, so they stop showing up.
+      const eventNotifs = list.filter(
+        (item) => item.type === 'event' && item.targetId
+      );
+      if (eventNotifs.length > 0) {
+        const existingEvents = await db.select({ id: events.id }).from(events);
+        const existingIds = new Set(existingEvents.map((event) => event.id));
+        const orphanIds = eventNotifs
+          .filter((item) => !existingIds.has(item.targetId as number))
+          .map((item) => item.id);
+        if (orphanIds.length > 0) {
+          await db.delete(notifications).where(inArray(notifications.id, orphanIds));
+          return list.filter((item) => !orphanIds.includes(item.id));
+        }
+      }
+
+      return list;
     } catch (err) {
       console.error('Failed to fetch notifications from PostgreSQL:', err);
       return [];

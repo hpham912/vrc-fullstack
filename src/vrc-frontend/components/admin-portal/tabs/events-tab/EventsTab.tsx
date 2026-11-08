@@ -50,6 +50,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   // Preview language toggle inside the event preview (same as the
   // header-verse edit preview): the preview follows this, not the app language.
   const [previewLang, setPreviewLang] = useState<'vi' | 'en'>(language);
+
+  // Keep the preview following the app language; the toggle above still lets
+  // the admin preview the other language until the app language changes again.
+  useEffect(() => {
+    setPreviewLang(language);
+  }, [language]);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [eventTitleVi, setEventTitleVi] = useState('');
   const [eventTitleEn, setEventTitleEn] = useState('');
@@ -221,36 +227,36 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     const lower = (eventCategory || '').toLowerCase();
     if (lower.includes('youth') || lower.includes('giới trẻ')) {
       return {
-        cardBg: 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/35 border-emerald-200/90 shadow-xs',
-        dateBox: 'bg-emerald-100/90 text-emerald-950 border-emerald-200/90',
-        monthText: 'text-emerald-800',
-        badge: 'bg-emerald-100/80 text-emerald-900 border-emerald-200/80',
+        cardBg: 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/35 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/25 border-emerald-200/90 dark:border-emerald-800/50 shadow-xs',
+        dateBox: 'bg-emerald-100/90 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-100 border-emerald-200/90 dark:border-emerald-800/60',
+        monthText: 'text-emerald-800 dark:text-emerald-300',
+        badge: 'bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60',
         icon: Users,
       };
     }
     if (lower.includes('worship') || lower.includes('thờ phượng')) {
       return {
-        cardBg: 'bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/35 border-indigo-200/90 shadow-xs',
-        dateBox: 'bg-indigo-100/90 text-indigo-950 border-indigo-200/90',
-        monthText: 'text-indigo-800',
-        badge: 'bg-indigo-100/80 text-indigo-900 border-indigo-200/80',
+        cardBg: 'bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/35 dark:from-indigo-950/50 dark:via-stone-900 dark:to-indigo-950/25 border-indigo-200/90 dark:border-indigo-800/50 shadow-xs',
+        dateBox: 'bg-indigo-100/90 dark:bg-indigo-950/70 text-indigo-950 dark:text-indigo-100 border-indigo-200/90 dark:border-indigo-800/60',
+        monthText: 'text-indigo-800 dark:text-indigo-300',
+        badge: 'bg-indigo-100/80 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/60',
         icon: Flame,
       };
     }
     if (lower.includes('bible') || lower.includes('kinh thánh')) {
       return {
-        cardBg: 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/35 border-amber-200/90 shadow-xs',
-        dateBox: 'bg-amber-100/90 text-amber-950 border-amber-200/90',
-        monthText: 'text-amber-800',
-        badge: 'bg-amber-100/80 text-amber-900 border-amber-200/80',
+        cardBg: 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/35 dark:from-amber-950/50 dark:via-stone-900 dark:to-amber-950/25 border-amber-200/90 dark:border-amber-800/50 shadow-xs',
+        dateBox: 'bg-amber-100/90 dark:bg-amber-950/70 text-amber-950 dark:text-amber-100 border-amber-200/90 dark:border-amber-800/60',
+        monthText: 'text-amber-800 dark:text-amber-300',
+        badge: 'bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60',
         icon: BookOpen,
       };
     }
     return {
-      cardBg: 'bg-gradient-to-br from-purple-50/90 via-white to-purple-50/35 border-purple-200/90 shadow-xs',
-      dateBox: 'bg-purple-100/90 text-purple-950 border-purple-200/90',
-      monthText: 'text-purple-800',
-      badge: 'bg-purple-100/80 text-purple-900 border-purple-200/80',
+      cardBg: 'bg-gradient-to-br from-purple-50/90 via-white to-purple-50/35 dark:from-purple-950/50 dark:via-stone-900 dark:to-purple-950/25 border-purple-200/90 dark:border-purple-800/50 shadow-xs',
+      dateBox: 'bg-purple-100/90 dark:bg-purple-950/70 text-purple-950 dark:text-purple-100 border-purple-200/90 dark:border-purple-800/60',
+      monthText: 'text-purple-800 dark:text-purple-300',
+      badge: 'bg-purple-100/80 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border-purple-200/80 dark:border-purple-800/60',
       icon: Star,
     };
   })();

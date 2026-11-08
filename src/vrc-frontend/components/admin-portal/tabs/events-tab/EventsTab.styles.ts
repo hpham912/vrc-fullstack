@@ -42,7 +42,7 @@ export const eventsTabStyles = {
   categoryPill: 'inline-flex items-center gap-1 text-label font-bold px-2.5 py-0.5 rounded-full border',
   categoryIcon: 'w-3 h-3',
   featuredBadge:
-    'text-caption font-bold uppercase tracking-wider text-amber-900 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1',
+    'text-caption font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 bg-amber-100/90 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 px-2 py-0.5 rounded-full flex items-center gap-1',
   featuredStar: 'w-2.5 h-2.5 fill-amber-500 text-amber-600 dark:text-amber-400',
   previewDateText: 'text-label font-semibold text-stone-500',
   previewMain: 'flex items-start gap-3.5',
@@ -52,11 +52,11 @@ export const eventsTabStyles = {
   previewContent: 'min-w-0 flex-1 space-y-1',
   previewTitle: 'text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2',
   previewMeta: 'flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-700 font-medium',
-  previewMetaItem: 'inline-flex items-center gap-1',
+  previewMetaItem: 'inline-flex items-center gap-1 min-w-0',
   previewMetaIcon: 'w-3 h-3 text-amber-700 dark:text-amber-400 flex-shrink-0',
-  previewLocation: 'truncate max-w-[240px]',
+  previewLocation: 'truncate min-w-0 max-w-[240px]',
   previewDesc:
-    'text-xs text-stone-800 leading-relaxed bg-white/90 dark:bg-stone-900/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal',
+    'text-xs text-stone-800 leading-relaxed bg-white/90 dark:bg-stone-900/90 p-2.5 rounded-xl border border-stone-200 line-clamp-3 font-normal whitespace-pre-line',
   listContainer: 'space-y-3 max-w-2xl mx-auto',
   emptyState: 'text-stone-500 text-sm py-8 text-center',
   list: 'divide-y divide-stone-100 dark:divide-stone-800 border border-stone-200 rounded-2xl overflow-hidden bg-white',

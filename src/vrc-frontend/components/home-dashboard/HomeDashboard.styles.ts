@@ -15,7 +15,7 @@ export const homeDashboardStyles = {
   heroTitle: 'text-xl sm:text-3xl font-serif font-bold tracking-tight text-white leading-tight',
   heroSubtitleBox:
     'p-2.5 sm:p-3 rounded-2xl bg-black/35 border border-white/15 text-stone-100 text-xs sm:text-sm italic font-serif leading-relaxed max-w-2xl',
-  heroDesc: 'text-xs sm:text-sm text-stone-100 font-medium leading-relaxed max-w-xl pt-0.5',
+  heroDesc: 'text-xs sm:text-sm text-stone-100 font-medium leading-relaxed max-w-xl pt-0.5 whitespace-pre-line',
   metaChipsRow: 'flex flex-wrap items-center gap-2 pt-0.5 text-xs text-stone-100 font-semibold',
   metaChip: 'inline-flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-xl border border-white/15',
   metaChipIcon: 'w-3.5 h-3.5 text-amber-400',
