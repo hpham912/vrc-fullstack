@@ -19,10 +19,10 @@ export const navbarStyles = {
   notifDot: 'absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse',
   mobileLangBtn:
     'sm:hidden px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-300 text-xs font-bold text-stone-900 flex items-center gap-1 shadow-2xs',
-  mobileLangText: 'text-[0.72rem] font-mono font-bold',
+  mobileLangText: 'text-meta font-mono font-bold',
   desktopLangGroup:
     'hidden sm:flex items-center bg-stone-100 p-1 rounded-xl border border-stone-300 text-xs font-bold shadow-2xs',
-  desktopLangBtnBase: 'px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-[0.61rem]',
+  desktopLangBtnBase: 'px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-label',
   desktopLangBtnActive: 'bg-white text-stone-950 shadow-xs font-bold',
   desktopLangBtnInactive: 'text-stone-600 hover:text-stone-950 font-semibold',
   settingsWrapper: 'relative',
@@ -40,7 +40,7 @@ export const navbarStyles = {
   settingsItemIconMuted: 'w-4 h-4 text-stone-600 flex-shrink-0',
   settingsFontItem:
     'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer transition-colors',
-  settingsFontBadgeBase: 'px-2 py-0.5 rounded-full text-[0.56rem] font-bold tracking-wide transition-all',
+  settingsFontBadgeBase: 'px-2 py-0.5 rounded-full text-caption font-bold tracking-wide transition-all',
   settingsFontBadgeOn: 'bg-amber-100 text-amber-950 font-bold',
   settingsFontBadgeOff: 'bg-stone-100 text-stone-500 font-medium',
   settingsDivider: 'my-1 border-t border-stone-100',

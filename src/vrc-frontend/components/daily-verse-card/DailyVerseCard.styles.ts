@@ -2,7 +2,7 @@ export const dailyVerseStyles = {
   section: 'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto',
   headerBar: 'flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8',
   titleGroup: 'flex items-center justify-between gap-3 w-full sm:w-auto',
-  tagText: 'text-[0.56rem] sm:text-[0.61rem] font-bold uppercase tracking-widest text-amber-700 block mb-1',
+  tagText: 'text-caption sm:text-label font-bold uppercase tracking-widest text-amber-700 block mb-1',
   heading: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
   mobileAddBtn:
     'sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
@@ -31,7 +31,7 @@ export const dailyVerseStyles = {
   reflectionLabel: 'text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400',
   reflectionText: 'text-stone-800 dark:text-stone-200 text-xs sm:text-base leading-relaxed whitespace-pre-line font-normal',
   prayerBox: 'mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-500/25',
-  prayerLabel: 'text-[0.56rem] sm:text-[0.61rem] font-bold uppercase tracking-wider text-amber-950 dark:text-amber-300 block mb-1',
+  prayerLabel: 'text-caption sm:text-label font-bold uppercase tracking-wider text-amber-950 dark:text-amber-300 block mb-1',
   prayerText: 'font-serif italic text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed font-medium',
   archiveWrapper: 'mt-6 sm:mt-8',
   archiveToggleBtn:

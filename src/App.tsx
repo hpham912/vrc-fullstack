@@ -552,10 +552,10 @@ function ChurchAppContent() {
           </div>
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[0.56rem] font-bold uppercase tracking-wider text-amber-400">
+              <span className="text-caption font-bold uppercase tracking-wider text-amber-400">
                 {t('notifReminderTitle')}
               </span>
-              <span className="text-[0.56rem] text-stone-400">VRC</span>
+              <span className="text-caption text-stone-400">VRC</span>
             </div>
             <h4 className="font-bold text-xs sm:text-sm text-white line-clamp-1 mt-0.5">
               {toastNotification.title}

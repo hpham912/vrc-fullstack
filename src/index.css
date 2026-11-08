@@ -3,6 +3,15 @@
 @theme {
   --font-sans: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-serif: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Font sizes — single source of truth. Change a size here and it
+     updates everywhere that size is used. The small labels (caption /
+     label / meta) are the UI chrome; the body and heading sizes are the
+     content. To change a built-in size (xs, sm, base, lg, xl, 2xl…),
+     add its --text-* line here with the new value. */
+  --text-caption: 0.56rem; /* ~10px — smallest labels */
+  --text-label: 0.61rem; /* ~11px — small labels, badges, pills */
+  --text-meta: 0.72rem; /* ~13px — metadata */
 }
 
 @layer base {

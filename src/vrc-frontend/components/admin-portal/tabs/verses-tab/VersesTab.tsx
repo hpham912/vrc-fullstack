@@ -245,14 +245,14 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       {onOpenHeaderVerseEditor && (
         <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
           <div className="space-y-1 min-w-0 flex-1">
-            <span className="text-[0.61rem] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1.5">
+            <span className="text-label font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{t('headerVerseModalTitle')}</span>
             </span>
             <p className="font-serif italic text-xs sm:text-sm text-stone-800 dark:text-stone-200 line-clamp-2">
               "{language === 'vi' ? (churchInfo?.headerVerse?.verseTextVi || DEFAULT_HEADER_VERSE.verseTextVi) : (churchInfo?.headerVerse?.verseTextEn || DEFAULT_HEADER_VERSE.verseTextEn)}"
             </p>
-            <span className="block text-[0.61rem] font-bold text-amber-800 dark:text-amber-400">
+            <span className="block text-label font-bold text-amber-800 dark:text-amber-400">
               — {language === 'vi' ? (churchInfo?.headerVerse?.referenceVi || DEFAULT_HEADER_VERSE.referenceVi) : (churchInfo?.headerVerse?.referenceEn || DEFAULT_HEADER_VERSE.referenceEn)}
             </span>
           </div>
