@@ -303,7 +303,7 @@ function ChurchAppContent() {
             </>
           )}
 
-          {/* Admin Dashboard Action Button - Concise with Logged-in Username */}
+          {/* Admin Dashboard Action Button */}
           {isAdmin && (
             <div className={s.adminBtnWrapper}>
               <Button
