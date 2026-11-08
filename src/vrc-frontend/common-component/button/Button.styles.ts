@@ -7,7 +7,7 @@ export const buttonStyles = {
     emerald: "bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs",
     emeraldLight: "bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 shadow-2xs",
     dark: "bg-stone-900 hover:bg-stone-800 text-white shadow-2xs",
-    darkAmber: "bg-stone-950 hover:bg-stone-900 text-white border border-stone-800 shadow-sm",
+    darkAmber: "bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold border border-amber-400/40 shadow-xs active:brightness-95",
     glassDark: "bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-md",
     secondary: "bg-stone-100 hover:bg-stone-200 text-stone-700",
     outline: "bg-white hover:bg-stone-50 text-stone-700 border border-stone-200/90 shadow-2xs",

@@ -10,6 +10,7 @@ export const translations = {
   navHome: { vi: 'Trang Chủ', en: 'Home' },
   navEvents: { vi: 'Sự Kiện', en: 'Events' },
   navVerse: { vi: 'Lời Chúa', en: 'Scripture' },
+  navNotifications: { vi: 'Thông Báo', en: 'Notices' },
   navYouth: { vi: 'Giới Trẻ', en: 'Youth' },
   navAbout: { vi: 'Lịch Nhóm', en: 'Schedule' },
   navLocations: { vi: 'Địa Điểm', en: 'Locations' },
@@ -203,6 +204,7 @@ export const translations = {
   navPrayer: { vi: 'Cầu Nguyện', en: 'Prayer' },
   navPrayerTitle: { vi: 'Gửi Lời Cầu Nguyện', en: 'Prayer Request' },
   navSettings: { vi: 'Cài đặt', en: 'Settings' },
+  navDarkMode: { vi: 'Chế độ tối', en: 'Dark Mode' },
   navLargerText: { vi: 'Cỡ chữ lớn (A+)', en: 'Larger Text (A+)' },
 
   // Daily verse card

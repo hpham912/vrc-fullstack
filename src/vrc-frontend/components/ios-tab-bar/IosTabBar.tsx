@@ -1,11 +1,14 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Home, Calendar, BookOpen, Flame } from 'lucide-react';
+import { Home, Calendar, BookOpen, Bell } from 'lucide-react';
 import { iosTabBarStyles as s } from './IosTabBar.styles.ts';
 
 interface IosTabBarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onOpenNotifications: () => void;
+  hasNotifications?: boolean;
+  isNotifOpen?: boolean;
   openAdminPortal?: () => void;
   openLoginModal?: () => void;
 }
@@ -13,15 +16,18 @@ interface IosTabBarProps {
 export const IosTabBar: React.FC<IosTabBarProps> = ({
   activeTab,
   setActiveTab,
+  onOpenNotifications,
+  hasNotifications = false,
+  isNotifOpen = false,
 }) => {
   const { t } = useLanguage();
 
-  // Exactly 4 mobile bottom tabs: Home, Events, Scripture, Youth
+  // Exactly 4 mobile bottom tabs: Home, Events, Scripture, Notifications
   const tabs = [
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'youth', label: t('navYouth'), icon: Flame },
+    { id: 'notifications', label: t('navNotifications'), icon: Bell },
   ];
 
   return (
@@ -29,15 +35,26 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
       <div className={s.grid}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isNotifTab = tab.id === 'notifications';
+          const isActive = isNotifTab ? isNotifOpen : (activeTab === tab.id && !isNotifOpen);
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                if (isNotifTab) {
+                  onOpenNotifications();
+                } else {
+                  setActiveTab(tab.id);
+                }
+              }}
               className={`${s.tabBtnBase} ${isActive ? s.tabBtnActive : s.tabBtnInactive}`}
+              aria-label={tab.label}
             >
-              <div className={`${s.iconBoxBase} ${isActive ? s.iconBoxActive : ''}`}>
+              <div className={`${s.iconBoxBase} ${isActive ? s.iconBoxActive : ''} relative`}>
                 <Icon className={`${s.iconBase} ${isActive ? s.iconActive : s.iconInactive}`} />
+                {isNotifTab && hasNotifications && (
+                  <span className={s.notifDot} />
+                )}
               </div>
               <span className={s.label}>
                 {tab.label}

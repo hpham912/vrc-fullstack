@@ -45,11 +45,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   const getIconForType = (type: string) => {
     switch (type) {
       case 'event':
-        return <Calendar className="w-4 h-4 text-indigo-600" />;
+        return <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />;
       case 'verse':
-        return <BookOpen className="w-4 h-4 text-amber-700" />;
+        return <BookOpen className="w-4 h-4 text-amber-700 dark:text-amber-400" />;
       default:
-        return <Megaphone className="w-4 h-4 text-rose-600" />;
+        return <Megaphone className="w-4 h-4 text-rose-600 dark:text-rose-400" />;
     }
   };
 
@@ -58,17 +58,17 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
       case 'event':
         return {
           label: t('notifTypeEvent'),
-          classes: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+          classes: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60',
         };
       case 'verse':
         return {
           label: t('notifTypeVerse'),
-          classes: 'bg-amber-50 text-amber-800 border-amber-200',
+          classes: 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/60',
         };
       default:
         return {
           label: t('notifTypeNotice'),
-          classes: 'bg-rose-50 text-rose-700 border-rose-200',
+          classes: 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
         };
     }
   };

@@ -20,7 +20,7 @@ export const navbarStyles = {
   prayerIcon: 'w-3.5 h-3.5 text-amber-700 flex-shrink-0',
   prayerText: 'tracking-tight text-xs font-bold',
   notifBtnBase:
-    'w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl active:scale-95 transition-all relative border',
+    'hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl active:scale-95 transition-all relative border',
   notifBtnActive: 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/30',
   notifBtnInactive: 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70',
   notifDot: 'absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse',
@@ -39,17 +39,22 @@ export const navbarStyles = {
   settingsBtnInactive: 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300',
   settingsBackdrop: 'fixed inset-0 z-40 bg-transparent cursor-pointer',
   settingsMenu:
-    'absolute right-0 mt-2 w-52 bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs',
+    'absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs overflow-hidden select-none',
+  settingsToggleItem:
+    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer transition-colors',
+  settingsItemLeft: 'flex items-center gap-2.5',
+  settingsItemIcon: 'w-4 h-4 text-amber-600 flex-shrink-0',
+  settingsItemIconMuted: 'w-4 h-4 text-stone-600 flex-shrink-0',
   settingsFontItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer',
-  settingsFontBadgeBase: 'px-2 py-0.5 rounded-full text-[10px] font-bold',
-  settingsFontBadgeOn: 'bg-amber-100 text-amber-900',
-  settingsFontBadgeOff: 'bg-stone-100 text-stone-500',
+    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer transition-colors',
+  settingsFontBadgeBase: 'px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide transition-all',
+  settingsFontBadgeOn: 'bg-amber-100 text-amber-950 font-bold',
+  settingsFontBadgeOff: 'bg-stone-100 text-stone-500 font-medium',
   settingsDivider: 'my-1 border-t border-stone-100',
   settingsAdminItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-amber-50 flex items-center gap-2 text-stone-900 font-semibold cursor-pointer',
+    'w-full px-3.5 py-2.5 text-left hover:bg-amber-50 flex items-center gap-2.5 text-stone-900 font-semibold cursor-pointer transition-colors',
   settingsLogoutItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold cursor-pointer',
+    'w-full px-3.5 py-2.5 text-left hover:bg-red-50 flex items-center gap-2.5 text-red-600 font-semibold cursor-pointer transition-colors',
   settingsLoginItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center gap-2 text-stone-800 font-semibold cursor-pointer',
+    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center gap-2.5 text-stone-800 font-semibold cursor-pointer transition-colors',
 };

@@ -41,6 +41,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import {
   formatDateLocale,
   getWeekdayName,
+  getEventCardWeekday,
   getMonthText,
   getDayNumber,
   formatWeekdayAndDate,
@@ -272,7 +273,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       ) : (
         <div className={s.listContainer}>
           {filteredUpcomingEvents.map((evt) => {
-            const weekday = getWeekdayName(evt.date, language);
+            const weekday = getEventCardWeekday(evt.date, language);
             const monthShort = getMonthText(evt.date, language, true);
             const dayNum = getDayNumber(evt.date);
             const theme = getCategoryTheme(evt.category);
@@ -284,17 +285,23 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 onClick={() => setSelectedDetailEvent(evt)}
                 className={`${s.eventCardBase} ${theme.cardBg}`}
               >
-                {/* Top Row: Category Pill + Admin Actions (Date removed from top right) */}
+                {/* Top Row: Category Pill + Featured Badge + Admin Actions */}
                 <div className={s.cardTopRow}>
                   <div className={s.badgeGroup}>
                     <span className={`${s.categoryBadgeBase} ${theme.badge}`}>
                       <CategoryIcon className="w-3 h-3" />
                       <span>{getCategoryLabel(evt.category)}</span>
                     </span>
+                    {evt.isFeatured && (
+                      <span className={s.featuredBadge}>
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                        <span>{t('featuredBadge')}</span>
+                      </span>
+                    )}
                   </div>
 
                   {isAdmin && (
-                    <div className={s.adminActionRow}>
+                    <div className={s.adminActionRow} onClick={(e) => e.stopPropagation()}>
                       <AdminActionButtons
                         onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
                         onDelete={() => setDeleteTargetEvent(evt)}
@@ -303,13 +310,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   )}
                 </div>
 
-                {/* Main Content Area: tall date box + title/time + calendar menu */}
+                {/* Main Content Area: Date Box + Title & Timing & Location */}
                 <div className={s.cardMainRow}>
-                  {/* Date box stretches the full row height, level with the calendar button */}
                   <div className={`${s.dateBoxBase} ${theme.dateBox}`}>
-                    {evt.isFeatured && (
-                      <FeaturedStar className={s.dateBoxStarPosition} />
-                    )}
                     <span className={s.dateBoxWeekday}>
                       {weekday}
                     </span>
@@ -321,21 +324,31 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     </span>
                   </div>
 
-                  {/* Title & Timing + Calendar Menu */}
+                  {/* Title & Timing & Location (no description, click to see details) */}
                   <div className={s.cardRightCol}>
                     <h3 className={s.cardTitle}>
                       {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                     </h3>
 
                     <div className={s.cardTimeRow}>
-                      <Clock className="w-3.5 h-3.5 text-amber-800 flex-shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 flex-shrink-0" />
                       <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
                     </div>
 
-                    <div className={s.cardMenuRow}>
-                      <CalendarButtons event={evt} stopPropagation variant="menu" />
-                    </div>
+                    {evt.location && (
+                      <div className={s.cardLocationRow}>
+                        <MapPin className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                        <span className="truncate">
+                          {language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}
+                        </span>
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                {/* Separator row for calendar button like today highlight */}
+                <div className={s.cardFooterRow}>
+                  <CalendarButtons event={evt} stopPropagation variant="menu" />
                 </div>
               </div>
             );
@@ -349,7 +362,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
           <div className={s.pastHeaderRow}>
             <div className="space-y-0.5 min-w-0">
               <div className={s.pastLabel}>
-                <History className="w-4 h-4 text-stone-400" />
+                <History className="w-4 h-4 text-stone-400 dark:text-stone-500" />
                 <span>{t('eventsPastTitle')}</span>
               </div>
               <p className={s.pastSub}>
@@ -363,72 +376,75 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
           <div className="space-y-3 w-full min-w-0 max-w-full">
             {pastEvents.map((evt) => {
-              const weekday = getWeekdayName(evt.date, language);
+              const weekday = getEventCardWeekday(evt.date, language);
               const monthShort = getMonthText(evt.date, language, true);
               const dayNum = getDayNumber(evt.date);
-              const isDescExpanded = expandedDescId === evt.id;
+              const theme = getCategoryTheme(evt.category);
+              const CategoryIcon = theme.icon;
 
               return (
-                <Card key={evt.id} variant="default" padding="sm" className="space-y-2.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 min-w-0 w-full">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <div
+                  key={evt.id}
+                  className={s.pastCard}
+                >
+                  {/* Top Row: Category Pill + Concluded Badge + Admin actions */}
+                  <div className={s.cardTopRow}>
+                    <div className={s.badgeGroup}>
                       <span className={s.pastCategoryPill}>
-                        {getCategoryLabel(evt.category)}
+                        <CategoryIcon className="w-3 h-3 text-stone-500 dark:text-stone-400" />
+                        <span>{getCategoryLabel(evt.category)}</span>
                       </span>
                       <span className={s.concludedPill}>
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                         <span>{t('eventsConcluded')}</span>
                       </span>
                     </div>
+
+                    {isAdmin && (
+                      <div className={s.adminActionRow} onClick={(e) => e.stopPropagation()}>
+                        <AdminActionButtons
+                          onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
+                          onDelete={() => setDeleteTargetEvent(evt)}
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 w-full max-w-full">
+                  {/* Main Content Area: Date Box + Title & Time & Location (disabled style) */}
+                  <div className={s.cardMainRow}>
                     <div className={s.pastDateBox}>
-                      <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 whitespace-nowrap text-center">
+                      <span className={s.pastDateBoxWeekday}>
                         {weekday}
                       </span>
-                      <span className="block text-xl sm:text-2xl font-bold text-stone-700 leading-none my-0.5 text-center">
+                      <span className={s.pastDateBoxDay}>
                         {dayNum}
                       </span>
-                      <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 leading-tight text-center">
+                      <span className={s.pastDateBoxMonth}>
                         {monthShort}
                       </span>
                     </div>
 
-                    <div className="flex-1 min-w-0 space-y-1 max-w-full">
+                    <div className={s.cardRightCol}>
                       <h4 className={s.pastTitle}>
                         {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
                       </h4>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-500 min-w-0 max-w-full">
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-stone-400" />
-                          <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
-                        </span>
-                        <span className="inline-flex items-center gap-1 min-w-0 max-w-full">
-                          <MapPin className="w-3 h-3 text-stone-400 flex-shrink-0" />
-                          <span className="truncate max-w-[200px] sm:max-w-none">{language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
-                  {evt.description && (
-                    <div className={s.pastDescBox}>
-                      <p className={`break-words ${isDescExpanded ? '' : 'line-clamp-2'}`}>
-                        {language === 'vi' ? (evt.descriptionVi || tr(evt.description)) : (evt.descriptionEn || tr(evt.description))}
-                      </p>
-                      {evt.description.length > 100 && (
-                        <button
-                          onClick={() => setExpandedDescId(isDescExpanded ? null : evt.id)}
-                          className="text-[11px] font-bold text-amber-800 hover:text-amber-950 inline-flex items-center gap-0.5 mt-1"
-                        >
-                          <span>{isDescExpanded ? t('commonShowLess') : t('commonReadMore')}</span>
-                          {isDescExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                        </button>
+                      <div className={s.pastTimeRow}>
+                        <Clock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" />
+                        <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
+                      </div>
+
+                      {evt.location && (
+                        <div className={s.pastLocationRow}>
+                          <MapPin className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" />
+                          <span className="truncate">
+                            {language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}
+                          </span>
+                        </div>
                       )}
                     </div>
-                  )}
-                </Card>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -452,28 +468,28 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         {selectedDetailEvent && (
           <div className={s.detailModalBody}>
             <Card variant="subtle" padding="sm" className="space-y-2 text-xs">
-              <div className="flex items-center gap-2 font-semibold text-stone-900">
-                <Calendar className="w-4 h-4 text-amber-700 flex-shrink-0" />
+              <div className="flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-100">
+                <Calendar className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0" />
                 <span>{formatWeekdayAndDate(selectedDetailEvent.date, language)}</span>
               </div>
-              <div className="flex items-center gap-2 font-medium text-stone-800">
-                <Clock className="w-4 h-4 text-amber-700 flex-shrink-0" />
+              <div className="flex items-center gap-2 font-medium text-stone-800 dark:text-stone-200">
+                <Clock className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0" />
                 <span>
                   {selectedDetailEvent.startTime}
                   {selectedDetailEvent.endTime ? ` – ${selectedDetailEvent.endTime}` : ''}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-stone-700">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 text-stone-700 dark:text-stone-300">
                 <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-stone-900">
+                    <p className="font-semibold text-stone-900 dark:text-stone-100">
                       {language === 'vi'
                         ? (selectedDetailEvent.locationVi || selectedDetailEvent.locationEn || selectedDetailEvent.location)
                         : (selectedDetailEvent.locationEn || selectedDetailEvent.locationVi || selectedDetailEvent.location)}
                     </p>
                     {selectedDetailEvent.address && (
-                      <p className="text-xs text-stone-700 font-medium">{selectedDetailEvent.address}</p>
+                      <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">{selectedDetailEvent.address}</p>
                     )}
                   </div>
                 </div>
@@ -485,10 +501,10 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             </Card>
 
             <div className="space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-800">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-300">
                 {t('eventsDetailTitle')}
               </h4>
-              <p className="text-stone-800 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-medium">
+              <p className="text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-medium">
                 {language === 'vi'
                   ? (selectedDetailEvent.descriptionVi || selectedDetailEvent.descriptionEn || selectedDetailEvent.description)
                   : (selectedDetailEvent.descriptionEn || selectedDetailEvent.descriptionVi || selectedDetailEvent.description)}
@@ -522,16 +538,16 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
           <form
             onSubmit={handleSaveEvent}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl border border-stone-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-3xl border border-stone-200 dark:border-stone-800 max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-950">
+              <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-950 dark:text-stone-50">
                 {editingEvent ? t('eventEditTitle') : t('eventsAddFormTitle')}
               </h3>
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="p-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 text-xs font-bold"
+                className="p-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-500 dark:text-stone-400 text-xs font-bold"
               >
                 ✕
               </button>
@@ -539,7 +555,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
             <div className="space-y-3 text-xs sm:text-sm">
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                   {t('eventsTitleLabel')}
                 </label>
                 <input
@@ -547,19 +563,19 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventsCategory')}
                   </label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="Worship">Worship</option>
                     <option value="Bible Study">Bible Study</option>
@@ -571,7 +587,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 </div>
 
                 <div className="overflow-hidden">
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventsDate')}
                   </label>
                   <input
@@ -579,14 +595,14 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     required
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
-                    className="appearance-none min-w-0 w-full max-w-full box-border px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="appearance-none min-w-0 w-full max-w-full box-border px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventStartTime')}
                   </label>
                   <input
@@ -595,11 +611,11 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     value={formStartTime}
                     onChange={(e) => setFormStartTime(e.target.value)}
                     placeholder="03:00 PM"
-                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventEndTime')}
                   </label>
                   <input
@@ -607,14 +623,14 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     value={formEndTime}
                     onChange={(e) => setFormEndTime(e.target.value)}
                     placeholder="05:00 PM"
-                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventsLocation')}
                   </label>
                   <input
@@ -622,24 +638,24 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                     required
                     value={formLocation}
                     onChange={(e) => setFormLocation(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                     {t('eventsAddress')}
                   </label>
                   <input
                     type="text"
                     value={formAddress}
                     onChange={(e) => setFormAddress(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                   {t('eventsDescription')}
                 </label>
                 <textarea
@@ -647,33 +663,33 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   required
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-xs font-semibold text-stone-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs font-semibold text-stone-700 dark:text-stone-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formFeatured}
                   onChange={(e) => setFormFeatured(e.target.checked)}
-                  className="rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                  className="rounded border-stone-300 dark:border-stone-700 text-amber-600 focus:ring-amber-500"
                 />
                 <span>{t('eventsFeatured')}</span>
               </label>
             </div>
 
-            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700"
               >
                 {t('commonCancel')}
               </button>
               <button
                 type="submit"
                 disabled={savingEvent}
-                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50"
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-stone-900 dark:bg-amber-600 hover:bg-stone-800 dark:hover:bg-amber-700 disabled:opacity-50"
               >
                 {savingEvent ? t('commonSaving') : t('eventSave')}
               </button>

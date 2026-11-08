@@ -8,9 +8,9 @@ import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDashboard.tsx';
 import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
-import { YouthSection } from './vrc-frontend/components/youth-section/YouthSection.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
+import { NotificationModal } from './vrc-frontend/components/notification-modal/NotificationModal.tsx';
 
 // Admin-only screens load on demand, so regular visitors never download them.
 // Each one is rendered only when an admin opens it (see Suspense below).
@@ -39,7 +39,6 @@ import {
   Home,
   Calendar,
   BookOpen,
-  Flame,
   ShieldCheck,
   Bell,
   X,
@@ -90,6 +89,7 @@ function ChurchAppContent() {
   const [adminPortalOpen, setAdminPortalOpen] = useState(false);
   const [spotlightModalOpen, setSpotlightModalOpen] = useState(false);
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
@@ -220,7 +220,6 @@ function ChurchAppContent() {
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'youth', label: t('navYouth'), icon: Flame },
   ];
 
   return (
@@ -233,6 +232,11 @@ function ChurchAppContent() {
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
         onRequestNotificationPermission={() => NotificationClient.requestPermission()}
+        onOpenNotifications={() => {
+          setShowNotifModal((prev) => !prev);
+          NotificationClient.requestPermission();
+        }}
+        isNotifOpen={showNotifModal}
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
@@ -340,17 +344,9 @@ function ChurchAppContent() {
             </div>
           </div>
         )}
-
-        {activeTab === 'youth' && (
-          <YouthSection
-            events={events}
-            isAdmin={isAdmin}
-            onOpenAdminPortal={openAdminWithTab}
-          />
-        )}
       </main>
 
-      {/* Floating Glass Prayer Request Button (Home Only, Sticky Above Youth Tab) */}
+      {/* Floating Glass Prayer Request Button (Home Only, Sticky Above Bottom Bar) */}
       {activeTab === 'home' && (
         <button
           type="button"
@@ -368,10 +364,16 @@ function ChurchAppContent() {
         </button>
       )}
 
-      {/* Native iOS Bottom Tab Bar: Exactly Home, Events, Scripture, Youth */}
+      {/* Native iOS Bottom Tab Bar: Exactly Home, Events, Scripture, Notifications */}
       <IosTabBar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        onOpenNotifications={() => {
+          setShowNotifModal(true);
+          NotificationClient.requestPermission();
+        }}
+        hasNotifications={notifications.length > 0}
+        isNotifOpen={showNotifModal}
       />
 
       {/* Admin Login Modal */}
@@ -460,9 +462,6 @@ function ChurchAppContent() {
             <button onClick={() => setActiveTab('verse')} className={s.footerLinkBtn}>
               {t('navVerse')}
             </button>
-            <button onClick={() => setActiveTab('youth')} className={s.footerLinkBtn}>
-              {t('navYouth')}
-            </button>
           </div>
         </div>
 
@@ -514,6 +513,19 @@ function ChurchAppContent() {
       <PrayerRequestModal
         isOpen={prayerModalOpen}
         onClose={() => setPrayerModalOpen(false)}
+      />
+
+      {/* Global Notifications Modal */}
+      <NotificationModal
+        isOpen={showNotifModal}
+        onClose={() => setShowNotifModal(false)}
+        notifications={notifications}
+        onRequestPermission={() => NotificationClient.requestPermission()}
+        onSelectNotification={(notif) => {
+          setShowNotifModal(false);
+          if (notif.type === 'event') setActiveTab('events');
+          else if (notif.type === 'verse') setActiveTab('verse');
+        }}
       />
     </div>
   );

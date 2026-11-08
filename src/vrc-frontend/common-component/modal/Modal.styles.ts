@@ -2,7 +2,7 @@ export const modalStyles = {
   backdropBase: "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/60 backdrop-blur-xs transition-opacity duration-200",
   backdropVisible: "opacity-100",
   backdropHidden: "opacity-0",
-  dialogBase: "bg-white rounded-3xl border border-stone-200 w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200",
+  dialogBase: "bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-3xl border border-stone-200 dark:border-stone-800 w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200",
   dialogVisible: "opacity-100 scale-100 translate-y-0",
   dialogHidden: "opacity-0 scale-95 translate-y-2",
   header: "px-6 py-4 bg-stone-950 text-white flex items-center justify-between gap-3 flex-shrink-0",

@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Sparkles,
   ArrowRight,
-  Flame,
   Sliders,
   CalendarPlus,
   Compass,
@@ -27,6 +26,7 @@ import {
   formatDateLocale,
   formatWeekdayAndDate,
   getWeekdayName,
+  getEventCardWeekday,
   getMonthText,
   getDayNumber,
 } from '../../utils/dateFormatter.ts';
@@ -406,7 +406,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             onClick={() => onNavigateTab('events')}
           >
             <div className={s.quickIconEvents}>
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-5 h-5" />
             </div>
             <span className={s.quickCardTitle}>
               {t('navEvents')}
@@ -423,7 +423,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             onClick={() => onNavigateTab('verse')}
           >
             <div className={s.quickIconVerse}>
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-5 h-5" />
             </div>
             <span className={s.quickCardTitle}>
               {t('navVerse')}
@@ -433,24 +433,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </span>
           </Card>
 
-          {/* Card 3: Youth */}
-          <Card
-            as="button"
-            variant="quickNav"
-            onClick={() => onNavigateTab('youth')}
-          >
-            <div className={s.quickIconYouth}>
-              <Flame className="w-4 h-4" />
-            </div>
-            <span className={s.quickCardTitle}>
-              {t('navYouth')}
-            </span>
-            <span className={s.quickCardSub}>
-              {t('homeFridayTime')}
-            </span>
-          </Card>
-
-          {/* Card 4: Sanctuary & Directions */}
+          {/* Card 3: Sanctuary & Directions */}
           <Card
             as="button"
             variant="quickNav"
@@ -468,13 +451,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             }}
           >
             <div className={s.quickIconSanctuary}>
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-5 h-5" />
             </div>
             <span className={s.quickCardTitle}>
               {t('homeSanctuary')}
             </span>
             <span className={s.quickCardSub}>
-              {churchAddress}
+              Tempe, Arizona
             </span>
           </Card>
         </div>
@@ -482,7 +465,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
       {/* Featured Upcoming Event Card (Styled matching EventsSection card) */}
       {nextUpcomingEvent && (() => {
-        const weekday = getWeekdayName(nextUpcomingEvent.date, language);
+        const weekday = getEventCardWeekday(nextUpcomingEvent.date, language);
         const monthShort = getMonthText(nextUpcomingEvent.date, language, true);
         const dayNum = getDayNumber(nextUpcomingEvent.date);
         const theme = getCategoryTheme(nextUpcomingEvent.category);
@@ -490,6 +473,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         const eventTitle = language === 'vi'
           ? (nextUpcomingEvent.titleVi || tr(nextUpcomingEvent.title))
           : (nextUpcomingEvent.titleEn || tr(nextUpcomingEvent.title));
+        const eventDesc = language === 'vi'
+          ? (nextUpcomingEvent.descriptionVi || tr(nextUpcomingEvent.description))
+          : (nextUpcomingEvent.descriptionEn || tr(nextUpcomingEvent.description));
 
         return (
           <section className={s.upcomingSection}>
@@ -552,14 +538,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </span>
                 </div>
 
-                {/* Title & Timing & Location */}
+                {/* Title & Timing & Location & Full Details */}
                 <div className={s.cardTitleCol}>
                   <h3 className={s.cardTitle}>
                     {eventTitle}
                   </h3>
 
                   <div className={s.cardTimeRow}>
-                    <Clock className="w-3.5 h-3.5 text-amber-800 flex-shrink-0" />
+                    <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 flex-shrink-0" />
                     <span>
                       {nextUpcomingEvent.startTime}
                       {nextUpcomingEvent.endTime ? ` – ${nextUpcomingEvent.endTime}` : ''}
@@ -568,34 +554,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
                   {nextUpcomingEvent.location && (
                     <div className={s.cardLocationRow}>
-                      <MapPin className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
                       <span className="truncate">{nextUpcomingEvent.location}</span>
                     </div>
+                  )}
+
+                  {/* More event details displayed directly on the card */}
+                  {eventDesc && (
+                    <p className={s.cardDesc}>
+                      {eventDesc}
+                    </p>
                   )}
                 </div>
               </div>
 
-              {/* Footer Actions */}
+              {/* Footer Actions: Calendar button moved to the right */}
               <div className={s.cardFooterRow}>
                 <CalendarButtons
                   event={nextUpcomingEvent}
                   stopPropagation
                   variant="menu"
                 />
-
-                <div className={s.upcomingBtnsGroup}>
-                  <Button
-                    type="button"
-                    variant="dark"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigateTab('events');
-                    }}
-                  >
-                    {t('homeDetails')}
-                  </Button>
-                </div>
               </div>
             </div>
           </section>

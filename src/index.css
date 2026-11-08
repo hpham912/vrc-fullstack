@@ -91,3 +91,160 @@
     }
   }
 }
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================================
+   DARK THEME SYSTEM (Warm Obsidian & Amber)
+   Preserves high contrast, readability, and church sanctuary atmosphere.
+   ========================================================================= */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark,
+html.dark body {
+  background-color: #0c0a09 !important;
+  color: #f5f5f4 !important;
+}
+
+html.dark #root {
+  background-color: #0c0a09;
+}
+
+/* Header & Bottom Navigation Bar */
+html.dark header,
+html.dark nav[class*="fixed"],
+html.dark .bg-white\/95 {
+  background-color: rgba(18, 16, 14, 0.94) !important;
+  border-color: rgba(68, 64, 60, 0.5) !important;
+}
+
+/* Base Cards & Hero */
+html.dark .bg-white {
+  background-color: #171412 !important;
+  border-color: rgba(68, 64, 60, 0.5) !important;
+}
+
+html.dark .bg-\[\#FDFCFB\] {
+  background-color: #0c0a09 !important;
+}
+
+/* Text Hierarchy */
+html.dark .text-stone-950,
+html.dark .text-stone-900 {
+  color: #fafaf9 !important;
+}
+
+html.dark .text-stone-800 {
+  color: #f5f5f4 !important;
+}
+
+html.dark .text-stone-700,
+html.dark .text-stone-600 {
+  color: #d6d3d1 !important;
+}
+
+html.dark .text-stone-500 {
+  color: #a8a29e !important;
+}
+
+/* Sub-surfaces & Hover States */
+html.dark .bg-stone-50,
+html.dark .bg-stone-100,
+html.dark .bg-stone-100\/80 {
+  background-color: #211e1b !important;
+  border-color: rgba(68, 64, 60, 0.5) !important;
+}
+
+html.dark .hover\:bg-stone-50:hover,
+html.dark .hover\:bg-stone-100:hover,
+html.dark .hover\:bg-stone-200:hover,
+html.dark .hover\:bg-stone-200\/70:hover {
+  background-color: #2c2724 !important;
+}
+
+/* Borders */
+html.dark .border-stone-100,
+html.dark .border-stone-200,
+html.dark .border-stone-200\/60,
+html.dark .border-stone-200\/70,
+html.dark .border-stone-200\/80,
+html.dark .border-stone-300 {
+  border-color: rgba(68, 64, 60, 0.5) !important;
+}
+
+/* Settings Menu */
+html.dark .settingsMenu,
+html.dark div[class*="settingsMenu"] {
+  background-color: #1a1715 !important;
+  border-color: rgba(87, 83, 78, 0.6) !important;
+  color: #f5f5f4 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7) !important;
+}
+
+html.dark .settingsDivider,
+html.dark div[class*="settingsDivider"] {
+  border-color: rgba(68, 64, 60, 0.45) !important;
+}
+
+/* Modals & Dialogs */
+html.dark [role="dialog"],
+html.dark .bg-white.rounded-3xl,
+html.dark .bg-white.rounded-2xl {
+  background-color: #171412 !important;
+  border-color: rgba(68, 64, 60, 0.55) !important;
+}
+
+/* Form Controls */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #211e1b !important;
+  color: #fafaf9 !important;
+  border-color: rgba(87, 83, 78, 0.6) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #78716c !important;
+}
+
+/* iOS Bottom Tab Bar Active Tint */
+html.dark nav button.text-amber-900 {
+  color: #f59e0b !important;
+}
+
+html.dark .iconBoxActive,
+html.dark nav button .bg-amber-100\/90 {
+  background-color: rgba(180, 83, 9, 0.28) !important;
+  color: #fde68a !important;
+}
+
+/* Amber Text & Verse Contrast in Dark Mode */
+html.dark .text-amber-950 {
+  color: #fde68a !important;
+}
+
+html.dark .text-amber-900 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-amber-800 {
+  color: #fbbf24 !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-50\/80,
+html.dark .bg-amber-50\/90,
+html.dark .bg-amber-100 {
+  background-color: rgba(120, 53, 15, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Event Cards in Dark Mode */
+html.dark [class*="eventCardBase"] {
+  border-color: rgba(68, 64, 60, 0.45) !important;
+}
+
+

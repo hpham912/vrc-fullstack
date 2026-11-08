@@ -132,6 +132,24 @@ export const getWeekdayShort = (
 };
 
 /**
+ * Returns event card weekday text with consistent length:
+ * - Vietnamese: "CN", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"
+ * - English: "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+ */
+export const getEventCardWeekday = (
+  dateInput: string | Date | null | undefined,
+  language: 'vi' | 'en' = 'vi'
+): string => {
+  const d = parseSafeDate(dateInput);
+  if (!d) return '';
+  const day = d.getDay();
+  if (language === 'vi') {
+    return day === 0 ? 'CN' : `Thứ ${day + 1}`;
+  }
+  return EN_WEEKDAYS_SHORT[day];
+};
+
+/**
  * Returns month text formatted for locale:
  * - Vietnamese: Tháng 11 (or Thg 11)
  * - English: Nov (or November)

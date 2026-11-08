@@ -10,6 +10,9 @@ import {
   Bell,
   X,
   Settings,
+  Moon,
+  Sun,
+  Type,
 } from 'lucide-react';
 import { NotificationModal } from '../notification-modal/NotificationModal.tsx';
 import { AppNotification } from '../../types/index.ts';
@@ -22,6 +25,8 @@ interface NavbarProps {
   openLoginModal: () => void;
   notifications: AppNotification[];
   onRequestNotificationPermission: () => void;
+  onOpenNotifications?: () => void;
+  isNotifOpen?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,6 +36,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   openLoginModal,
   notifications,
   onRequestNotificationPermission,
+  onOpenNotifications,
+  isNotifOpen,
 }) => {
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
@@ -64,6 +71,28 @@ export const Navbar: React.FC<NavbarProps> = ({
         document.documentElement.style.fontSize = '18.5px';
       }
       return enabled;
+    } catch {
+      return false;
+    }
+  });
+
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vrc_theme');
+      if (saved) {
+        const dark = saved === 'dark';
+        document.documentElement.classList.toggle('dark', dark);
+        return dark;
+      }
+      const prefersDark =
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+        return true;
+      }
+      return false;
     } catch {
       return false;
     }
@@ -105,16 +134,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Header Controls: Notification, Language Toggle, Settings */}
           <div className={s.rightControls}>
-            {/* Notification Bell Button */}
+            {/* Notification Bell Button (Desktop View) */}
             <button
               onClick={() => {
-                setShowNotifModal((prev) => !prev);
-                if (!showNotifModal) {
-                  onRequestNotificationPermission();
+                if (onOpenNotifications) {
+                  onOpenNotifications();
+                } else {
+                  setShowNotifModal((prev) => !prev);
+                  if (!showNotifModal) {
+                    onRequestNotificationPermission();
+                  }
                 }
               }}
               className={`${s.notifBtnBase} ${
-                showNotifModal ? s.notifBtnActive : s.notifBtnInactive
+                (isNotifOpen !== undefined ? isNotifOpen : showNotifModal)
+                  ? s.notifBtnActive
+                  : s.notifBtnInactive
               }`}
               title="Notifications"
               aria-label="Toggle notifications"
@@ -125,18 +160,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Notification Modal Covering Whole Page */}
-            <NotificationModal
-              isOpen={showNotifModal}
-              onClose={() => setShowNotifModal(false)}
-              notifications={notifications}
-              onRequestPermission={onRequestNotificationPermission}
-              onSelectNotification={(notif) => {
-                setShowNotifModal(false);
-                if (notif.type === 'event') setActiveTab('events');
-                else if (notif.type === 'verse') setActiveTab('verse');
-              }}
-            />
+            {/* Notification Modal (rendered if not handled by root app) */}
+            {!onOpenNotifications && (
+              <NotificationModal
+                isOpen={showNotifModal}
+                onClose={() => setShowNotifModal(false)}
+                notifications={notifications}
+                onRequestPermission={onRequestNotificationPermission}
+                onSelectNotification={(notif) => {
+                  setShowNotifModal(false);
+                  if (notif.type === 'event') setActiveTab('events');
+                  else if (notif.type === 'verse') setActiveTab('verse');
+                }}
+              />
+            )}
 
             {/* Language Switcher: Mobile Compact Toggle */}
             <button
@@ -192,6 +229,38 @@ export const Navbar: React.FC<NavbarProps> = ({
                     aria-hidden="true"
                   />
                   <div className={s.settingsMenu}>
+                    {/* Dark Mode Toggle */}
+                    <button
+                      onClick={() => {
+                        const next = !isDarkMode;
+                        setIsDarkMode(next);
+                        document.documentElement.classList.toggle('dark', next);
+                        try {
+                          localStorage.setItem('vrc_theme', next ? 'dark' : 'light');
+                        } catch {}
+                      }}
+                      className={s.settingsToggleItem}
+                      role="switch"
+                      aria-checked={isDarkMode}
+                    >
+                      <div className={s.settingsItemLeft}>
+                        {isDarkMode ? (
+                          <Moon className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20 flex-shrink-0" />
+                        ) : (
+                          <Sun className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                        )}
+                        <span>{t('navDarkMode')}</span>
+                      </div>
+                      <span
+                        className={`${s.settingsFontBadgeBase} ${
+                          isDarkMode ? s.settingsFontBadgeOn : s.settingsFontBadgeOff
+                        }`}
+                      >
+                        {isDarkMode ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    {/* Font Size Toggle */}
                     <button
                       onClick={() => {
                         const next = !isLargeFont;
@@ -201,11 +270,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                         try {
                           localStorage.setItem('vrc_large_font', next ? '1' : '0');
                         } catch {}
-                        setShowSettings(false);
                       }}
-                      className={s.settingsFontItem}
+                      className={s.settingsToggleItem}
+                      role="switch"
+                      aria-checked={isLargeFont}
                     >
-                      <span>{t('navLargerText')}</span>
+                      <div className={s.settingsItemLeft}>
+                        <Type className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300 flex-shrink-0" />
+                        <span>{t('navLargerText')}</span>
+                      </div>
                       <span
                         className={`${s.settingsFontBadgeBase} ${
                           isLargeFont ? s.settingsFontBadgeOn : s.settingsFontBadgeOff
