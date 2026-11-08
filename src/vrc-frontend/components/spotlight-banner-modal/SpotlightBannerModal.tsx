@@ -3,6 +3,8 @@ import { ChurchEvent, ChurchInfo, SpotlightBannerConfig, SpotlightTheme } from '
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
+import { fetchScripture } from '../../services/scriptureApi.ts';
+import { getErrorMessage } from '../../utils/errors.ts';
 import {
   Sparkles,
   Save,
@@ -62,6 +64,25 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [subtitle, setSubtitle] = useState(
     initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
   );
+  // Per-language scripture quotes (filled by Fetch from Bible, editable).
+  // The combined `subtitle` stays as the Vietnamese version for fallback.
+  const [subtitleVi, setSubtitleVi] = useState(
+    initialConfig?.subtitleVi || initialConfig?.subtitle || ''
+  );
+  const [subtitleEn, setSubtitleEn] = useState(
+    initialConfig?.subtitleEn || initialConfig?.subtitle || ''
+  );
+  // Reference typed by admin to fetch (e.g. "Thi Thiên 100:4"). Prefilled
+  // from the saved quote when it starts with a reference ("Ref - ...").
+  const initialQuoteRef = (() => {
+    const saved = (initialConfig?.subtitle || '').split(' - ')[0]?.trim() || '';
+    return saved.includes(':') ? saved : '';
+  })();
+  const [quoteRef, setQuoteRef] = useState(initialQuoteRef);
+  const [fetchingQuote, setFetchingQuote] = useState(false);
+  const [fetchedQuoteKey, setFetchedQuoteKey] = useState<string | null>(null);
+  const isQuoteFetchedForCurrentRef =
+    fetchedQuoteKey !== null && fetchedQuoteKey === quoteRef.trim();
 
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -80,9 +101,53 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       const isPast = existingId ? events.some((e) => e.id === existingId && e.date < todayStr) : false;
       setSelectedEventId(isPast ? null : existingId);
       setBadgeText(initialConfig?.badge || '');
-      setSubtitle(initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"');
+      const savedSubtitle = initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"';
+      setSubtitle(savedSubtitle);
+      setSubtitleVi(initialConfig?.subtitleVi || savedSubtitle);
+      setSubtitleEn(initialConfig?.subtitleEn || savedSubtitle);
+      const savedRef = savedSubtitle.split(' - ')[0]?.trim() || '';
+      setQuoteRef(savedRef.includes(':') ? savedRef : '');
+      setFetchedQuoteKey(null);
     }
   }, [isOpen, initialConfig, events, todayStr]);
+
+  // Fetch real EN + VI scripture text from POST /api/ai/fetch-scripture
+  // (apibible: NIV English + Kinh Thánh 1925 Vietnamese) and fill both
+  // quote fields in the exact display format: Ref - "verse text".
+  // Reuses the shared fetchScripture helper (same as the verse form).
+  const handleFetchQuote = async () => {
+    const passage = quoteRef.trim();
+    if (!passage) {
+      setFeedback({ type: 'error', message: t('adminFetchRefFirst') });
+      return;
+    }
+    try {
+      setFetchingQuote(true);
+      const data = await fetchScripture(passage, getToken());
+      if (!data.verseTextEn || !data.verseTextVi) {
+        throw new Error('Failed to fetch scripture');
+      }
+      const fetchedRefEn = data.referenceEn || data.reference || passage;
+      const fetchedRefVi = data.referenceVi || data.reference || passage;
+      const viQuote = `${fetchedRefVi} - "${data.verseTextVi}"`;
+      const enQuote = `${fetchedRefEn} - "${data.verseTextEn}"`;
+      setSubtitleVi(viQuote);
+      setSubtitleEn(enQuote);
+      setSubtitle(viQuote);
+      setFetchedQuoteKey(passage);
+      setFeedback({
+        type: 'success',
+        message: t('adminVerseFetched', { ref: data.referenceEn || passage }),
+      });
+    } catch (err: any) {
+      setFeedback({
+        type: 'error',
+        message: getErrorMessage(err, language, t('errFetchScripture')),
+      });
+    } finally {
+      setFetchingQuote(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -119,6 +184,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         theme,
         badge: cleanBadge,
         subtitle: (subtitle || '').trim(),
+        subtitleVi: (subtitleVi || '').trim(),
+        subtitleEn: (subtitleEn || '').trim(),
         title: isAuto ? '' : (pickedEvt ? pickedEvt.title : ''),
         description: isAuto ? '' : (pickedEvt ? pickedEvt.description : ''),
         dateTag: isAuto ? '' : (pickedEvt ? `${pickedEvt.date} • ${pickedEvt.startTime}` : ''),
@@ -374,12 +441,64 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             <label className={s.fieldLabel}>
               {t('spotQuoteStep')}
             </label>
+            <label className={s.fieldLabel}>
+              {t('spotQuoteRefLabel')}
+            </label>
+            <div className={s.quoteFetchRow}>
+              <input
+                type="text"
+                value={quoteRef}
+                onChange={(e) => {
+                  setQuoteRef(e.target.value);
+                  setFetchedQuoteKey(null);
+                }}
+                className={s.quoteRefInput}
+                placeholder={t('spotQuoteRefPlaceholder')}
+              />
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={handleFetchQuote}
+                disabled={fetchingQuote || isQuoteFetchedForCurrentRef || !quoteRef.trim()}
+                title={
+                  isQuoteFetchedForCurrentRef
+                    ? t('adminVerseFetchedHint')
+                    : t('adminVerseFetchHint')
+                }
+                leftIcon={<Sparkles className={s.saveIcon} />}
+              >
+                <span>
+                  {fetchingQuote
+                    ? t('commonFetching')
+                    : isQuoteFetchedForCurrentRef
+                      ? t('adminVerseFetchedBadge')
+                      : t('adminVerseFetch')}
+                </span>
+              </Button>
+            </div>
+            <label className={s.fieldLabel}>
+              {t('spotQuoteViLabel')}
+            </label>
             <input
               type="text"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
+              value={subtitleVi}
+              onChange={(e) => {
+                setSubtitleVi(e.target.value);
+                setSubtitle(e.target.value);
+              }}
               className={s.inputItalicSerif}
               placeholder='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
+            />
+            <label className={s.fieldLabel}>
+              {t('spotQuoteEnLabel')}
+            </label>
+            <input
+              type="text"
+              value={subtitleEn}
+              onChange={(e) => setSubtitleEn(e.target.value)}
+              className={s.inputItalicSerif}
+              placeholder='Psalm 100:4 - "Enter his gates with thanksgiving and his courts with praise!"'
             />
             <p className={s.fieldHint}>
               {t('spotQuoteNote')}

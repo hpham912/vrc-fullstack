@@ -333,7 +333,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
             {displaySubtitle && (
               <div className={s.heroSubtitleBox}>
-                "{language === 'vi' ? (spotlightConfig?.subtitleVi || tr(displaySubtitle)) : (spotlightConfig?.subtitleEn || tr(displaySubtitle))}"
+                {language === 'vi' ? (spotlightConfig?.subtitleVi || tr(displaySubtitle)) : (spotlightConfig?.subtitleEn || tr(displaySubtitle))}
               </div>
             )}
 
@@ -413,7 +413,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navEvents')}
             </span>
             <span className={s.quickCardSub}>
-              {events.length} {t('upcomingEventsUnit')}
+              {upcomingEvents.length} {t('upcomingEventsUnit')}
             </span>
           </Card>
 

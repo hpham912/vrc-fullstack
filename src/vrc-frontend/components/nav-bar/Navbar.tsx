@@ -66,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       const enabled = localStorage.getItem('vrc_large_font') === '1';
       if (enabled) {
         document.documentElement.classList.add('large-font');
-        document.documentElement.style.fontSize = '18.5px';
+        document.documentElement.style.fontSize = '22px';
       }
       return enabled;
     } catch {
@@ -105,16 +105,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('home')}
             className={s.logoBtn}
           >
-            <img
-              src="/church-logo.png"
-              alt="Vietnamese Revival Baptist Church"
-              className={`${s.logoImg} dark:hidden`}
-            />
-            <img
-              src="/church-logo-dark.png"
-              alt="Vietnamese Revival Baptist Church"
-              className={`${s.logoImg} hidden dark:block`}
-            />
+            {language === 'vi' ? (
+              <>
+                <img
+                  src="/church-logo-vi.png"
+                  alt="Vietnamese Revival Baptist Church"
+                  className={`${s.logoImg} dark:hidden`}
+                />
+                <img
+                  src="/church-logo-vi-dark.png"
+                  alt="Vietnamese Revival Baptist Church"
+                  className={`${s.logoImg} hidden dark:block`}
+                />
+              </>
+            ) : (
+              <>
+                <img
+                  src="/church-logo.png"
+                  alt="Vietnamese Revival Baptist Church"
+                  className={`${s.logoImg} dark:hidden`}
+                />
+                <img
+                  src="/church-logo-dark.png"
+                  alt="Vietnamese Revival Baptist Church"
+                  className={`${s.logoImg} hidden dark:block`}
+                />
+              </>
+            )}
           </button>
 
           {/* Right Header Controls: Notification, Language Toggle, Settings */}
@@ -251,7 +268,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         const next = !isLargeFont;
                         setIsLargeFont(next);
                         document.documentElement.classList.toggle('large-font', next);
-                        document.documentElement.style.fontSize = next ? '18.5px' : '';
+                        document.documentElement.style.fontSize = next ? '22px' : '';
                         try {
                           localStorage.setItem('vrc_large_font', next ? '1' : '0');
                         } catch {}

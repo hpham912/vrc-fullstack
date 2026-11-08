@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppNotification } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
+import { formatNotificationDate } from '../../utils/dateFormatter.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
 import {
@@ -129,10 +130,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           ) : (
             notifications.map((item) => {
               const badge = getTypeBadge(item.type);
-              const formattedDate = new Date(item.createdAt).toLocaleDateString(
-                language === 'vi' ? 'vi-VN' : 'en-US',
-                { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-              );
+              const formattedDate = formatNotificationDate(item.createdAt, language);
 
               return (
                 <div

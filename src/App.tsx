@@ -248,23 +248,24 @@ function ChurchAppContent() {
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
       <div className={s.heroSection}>
         <div className={s.heroInner}>
+          {activeTab === 'home' && (
+            <>
           <div className={s.locationPill}>
             <CrossIcon className={s.locationIcon} />
             <span>{t('heroLocation')}</span>
           </div>
 
           <div className={s.titleWrapper}>
-            {activeTab === 'home' ? (
-              <img
-                src={language === 'en' ? '/home-banner-en.jpeg' : '/home-banner-vi.jpeg'}
-                alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
-                className={s.homeBannerImg}
-              />
-            ) : (
-              <h1 className={s.heroTitle}>
-                {language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
-              </h1>
-            )}
+            <img
+              src={language === 'en' ? '/home-banner-en.jpeg' : '/home-banner-vi.jpeg'}
+              alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
+              className={`${s.homeBannerImg} dark:hidden`}
+            />
+            <img
+              src={language === 'en' ? '/home-banner-en-dark.jpeg' : '/home-banner-vi-dark.jpeg'}
+              alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
+              className={`${s.homeBannerImg} hidden dark:block`}
+            />
           </div>
 
           {/* Subtitle Scripture Verse chosen by Admin */}
@@ -298,6 +299,8 @@ function ChurchAppContent() {
               </div>
             );
           })()}
+            </>
+          )}
 
           {/* Admin Dashboard Action Button - Concise with Logged-in Username */}
           {isAdmin && (
@@ -547,10 +550,10 @@ function ChurchAppContent() {
           </div>
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+              <span className="text-[0.75rem] font-bold uppercase tracking-wider text-amber-400">
                 {t('notifReminderTitle')}
               </span>
-              <span className="text-[10px] text-stone-400">VRC</span>
+              <span className="text-[0.75rem] text-stone-400">VRC</span>
             </div>
             <h4 className="font-bold text-xs sm:text-sm text-white line-clamp-1 mt-0.5">
               {toastNotification.title}

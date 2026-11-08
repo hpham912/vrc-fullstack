@@ -9,7 +9,7 @@ export const modalStyles = {
   headerLeft: "flex items-center gap-2.5 min-w-0",
   iconWrap: "flex-shrink-0",
   titleGroup: "min-w-0",
-  subtitle: "text-[11px] font-bold uppercase tracking-wider text-amber-400 block truncate",
+  subtitle: "text-[0.8125rem] font-bold uppercase tracking-wider text-amber-400 block truncate",
   title: "font-serif font-bold text-base sm:text-lg text-white truncate",
   closeBtn: "p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors flex-shrink-0",
   closeIcon: "w-4 h-4",

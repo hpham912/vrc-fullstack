@@ -135,6 +135,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       badge,
       title,
       subtitle,
+      subtitleVi,
+      subtitleEn,
       description,
       dateTag,
       locationTag,
@@ -154,6 +156,11 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     const rawBadge = badge ? String(badge).trim() : '';
     const rawTitle = isAuto ? '' : (title ? String(title).trim() : '');
     const rawSubtitle = subtitle ? String(subtitle).trim() : '';
+    // Per-language quotes: the admin fetch fills these separately (VI 1925 +
+    // EN NIV). Fall back to the combined subtitle when a side is absent,
+    // so older saves keep showing the same text in both languages.
+    const rawSubtitleVi = subtitleVi ? String(subtitleVi).trim() : rawSubtitle;
+    const rawSubtitleEn = subtitleEn ? String(subtitleEn).trim() : rawSubtitle;
     const rawDescription = isAuto ? '' : (description ? String(description).trim() : '');
     const rawLocationTag = locationTag ? String(locationTag).trim() : 'Tempe, Arizona';
 
@@ -169,8 +176,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       titleVi: rawTitle,
       titleEn: rawTitle,
       subtitle: rawSubtitle,
-      subtitleVi: rawSubtitle,
-      subtitleEn: rawSubtitle,
+      subtitleVi: rawSubtitleVi,
+      subtitleEn: rawSubtitleEn,
       description: rawDescription,
       descriptionVi: rawDescription,
       descriptionEn: rawDescription,

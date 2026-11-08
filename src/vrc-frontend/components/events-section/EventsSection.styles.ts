@@ -23,17 +23,17 @@ export const eventsSectionStyles = {
     'rounded-2xl p-3.5 sm:p-4 transition-all duration-150 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
   cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
   badgeGroup: 'flex items-center gap-1.5 flex-wrap min-w-0',
-  categoryBadgeBase: 'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full',
+  categoryBadgeBase: 'inline-flex items-center gap-1 text-[0.8125rem] font-bold px-2.5 py-0.5 rounded-full',
   featuredBadge:
-    'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 shadow-2xs',
+    'inline-flex items-center gap-1 text-[0.8125rem] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 shadow-2xs',
   adminActionRow: 'flex items-center gap-1.5 ml-auto',
   cardMainRow: 'flex items-start gap-3 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
     'flex-shrink-0 w-14 sm:w-16 py-2 px-1 text-center rounded-2xl shadow-2xs border border-stone-900/10 dark:border-stone-700/60 flex flex-col items-center justify-center select-none bg-white/95 dark:bg-stone-900/90 relative self-start',
   dateBoxWeekday:
-    'block text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-300',
+    'block text-[0.8125rem] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-300',
   dateBoxDay: 'block text-xl sm:text-2xl font-bold text-stone-950 dark:text-stone-50 leading-none my-1',
-  dateBoxMonthBase: 'block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-tight',
+  dateBoxMonthBase: 'block text-[0.75rem] sm:text-[0.8125rem] font-semibold uppercase tracking-wider leading-tight',
   dateBoxStarPosition: 'absolute -top-2 -right-2 z-10',
   cardRightCol: 'flex-1 min-w-0 max-w-full flex flex-col gap-1',
   cardTitle: 'text-base sm:text-lg font-bold text-stone-950 dark:text-stone-50 leading-snug break-words',
@@ -46,29 +46,29 @@ export const eventsSectionStyles = {
   pastLabel: 'inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400',
   pastSub: 'text-xs text-stone-500 dark:text-stone-400',
   pastCountBadge:
-    'text-[11px] font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800 whitespace-nowrap',
+    'text-[0.8125rem] font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800 whitespace-nowrap',
   pastCard:
     'rounded-2xl p-3.5 sm:p-4 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border select-none border border-stone-200/80 dark:border-stone-800 bg-stone-100/70 dark:bg-[#161412] opacity-75 cursor-default',
   pastCategoryPill:
-    'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300',
+    'inline-flex items-center gap-1 text-[0.8125rem] font-bold px-2.5 py-0.5 rounded-full bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300',
   concludedPill:
-    'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50',
+    'inline-flex items-center gap-1 text-[0.8125rem] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50',
   pastDateBox:
     'flex-shrink-0 w-14 sm:w-16 py-2 px-1 text-center rounded-2xl shadow-2xs border border-stone-300/70 dark:border-stone-800 flex flex-col items-center justify-center select-none bg-stone-200/60 dark:bg-stone-900/90 self-start',
   pastDateBoxWeekday:
-    'block text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-500 dark:text-stone-400',
+    'block text-[0.8125rem] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-500 dark:text-stone-400',
   pastDateBoxDay:
     'block text-xl sm:text-2xl font-bold text-stone-700 dark:text-stone-300 leading-none my-1',
   pastDateBoxMonth:
-    'block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider leading-tight text-stone-500 dark:text-stone-400',
+    'block text-[0.75rem] sm:text-[0.8125rem] font-semibold uppercase tracking-wider leading-tight text-stone-500 dark:text-stone-400',
   pastTitle: 'text-base sm:text-lg font-bold text-stone-700 dark:text-stone-300 leading-snug break-words',
   pastTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400',
   pastLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400 truncate',
   detailMetaCard: 'space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800',
   detailGoogleBtn:
-    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-[11px] font-bold shadow-2xs transition-all',
+    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-[0.8125rem] font-bold shadow-2xs transition-all',
   detailAppleBtn:
-    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-95 text-white text-[11px] font-bold shadow-2xs transition-all',
+    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 active:scale-95 text-white text-[0.8125rem] font-bold shadow-2xs transition-all',
   detailFooterGrid: 'pt-3 border-t border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-2.5',
   detailGcalBtn:
     'inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-stone-950 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-all',
