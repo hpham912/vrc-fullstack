@@ -6,8 +6,8 @@ import type { Language } from '../context/translations.ts';
 // components for hardcoded paths.
 
 export const CHURCH_LOGO = {
-  light: { en: '/church-logo.png', vi: '/church-logo-vi.png' },
-  dark: { en: '/church-logo-dark.png', vi: '/church-logo-vi-dark.png' },
+  light: { en: '/church-logo-en.png', vi: '/church-logo-vi.png' },
+  dark: { en: '/church-logo-en-dark.png', vi: '/church-logo-vi-dark.png' },
 } as const;
 
 export const HOME_BANNER = {
