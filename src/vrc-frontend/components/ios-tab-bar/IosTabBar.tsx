@@ -11,6 +11,10 @@ interface IosTabBarProps {
   isNotifOpen?: boolean;
   openAdminPortal?: () => void;
   openLoginModal?: () => void;
+  // Ref to the <nav> so the app can measure the tab bar's real height
+  // (it varies by device safe area and font size) for the notifications
+  // panel, which ends exactly above the tab bar instead of covering it.
+  navRef?: React.Ref<HTMLElement>;
 }
 
 export const IosTabBar: React.FC<IosTabBarProps> = ({
@@ -19,6 +23,7 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
   onOpenNotifications,
   hasNotifications = false,
   isNotifOpen = false,
+  navRef,
 }) => {
   const { t } = useLanguage();
 
@@ -31,7 +36,7 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
   ];
 
   return (
-    <nav className={`${s.nav} ${isNotifOpen ? 'z-[110]' : 'z-40'}`}>
+    <nav ref={navRef} className={`${s.nav} z-40`}>
       <div className={s.grid}>
         {tabs.map((tab) => {
           const Icon = tab.icon;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
 import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
 import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
@@ -105,6 +105,21 @@ function ChurchAppContent() {
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
   const [headerVerseModalOpen, setHeaderVerseModalOpen] = useState(false);
   const [showNotifModal, setShowNotifModal] = useState(false);
+
+  // Measured height of the iOS tab bar (px). It varies by device safe
+  // area and by font size, so the notifications panel ends exactly above
+  // the tab bar instead of covering it — no guessed offset, no gap.
+  const tabBarRef = useRef<HTMLElement | null>(null);
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+  useEffect(() => {
+    const el = tabBarRef.current;
+    if (!el) return;
+    const measure = () => setTabBarHeight(el.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
@@ -438,6 +453,7 @@ function ChurchAppContent() {
         }}
         hasNotifications={notifications.length > 0}
         isNotifOpen={showNotifModal}
+        navRef={tabBarRef}
       />
 
       {/* Admin Login Modal */}
@@ -610,6 +626,7 @@ function ChurchAppContent() {
         isAdmin={isAdmin}
         onNotificationAdded={loadData}
         isLoading={isLoading}
+        tabBarHeight={tabBarHeight}
       />
     </div>
   );

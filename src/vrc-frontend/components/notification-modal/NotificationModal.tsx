@@ -28,6 +28,9 @@ interface NotificationModalProps {
   isAdmin?: boolean;
   onNotificationAdded?: () => void;
   isLoading?: boolean;
+  // Measured height of the iOS tab bar (px). The panel and its backdrop
+  // end exactly above the tab bar on mobile, so the tab is never covered.
+  tabBarHeight?: number;
 }
 
 export const NotificationModal: React.FC<NotificationModalProps> = ({
@@ -38,6 +41,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   isAdmin,
   onNotificationAdded,
   isLoading = false,
+  tabBarHeight = 0,
 }) => {
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
@@ -133,12 +137,19 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     }
   };
 
+  // Bottom offset for the panel + backdrop on mobile, so both end exactly
+  // at the top of the iOS tab bar instead of covering it.
+  const notifBottomStyle = {
+    '--notif-bottom': `${tabBarHeight}px`,
+  } as React.CSSProperties;
+
   return createPortal(
     <>
       {/* Transparent full-screen click catcher */}
       <div
         onClick={onClose}
         className={s.backdrop}
+        style={notifBottomStyle}
       />
 
       {/* Popup Dialog */}
@@ -147,6 +158,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
         aria-modal="true"
         aria-label={t('notifTitle')}
         className={s.dialog}
+        style={notifBottomStyle}
       >
         {/* Header */}
         <div className={s.header}>
