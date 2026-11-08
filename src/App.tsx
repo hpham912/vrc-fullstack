@@ -258,12 +258,12 @@ function ChurchAppContent() {
 
           <div className={s.titleWrapper}>
             <img
-              src={language === 'en' ? '/home-banner-en.jpeg' : '/home-banner-vi.jpeg'}
+              src={language === 'en' ? '/home-banner-en.png' : '/home-banner-vi.png'}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} dark:hidden`}
             />
             <img
-              src={language === 'en' ? '/home-banner-en-dark.jpeg' : '/home-banner-vi-dark.jpeg'}
+              src={language === 'en' ? '/home-banner-en-dark.png' : '/home-banner-vi-dark.png'}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} hidden dark:block`}
             />
