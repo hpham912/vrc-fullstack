@@ -6,10 +6,7 @@ export const navbarStyles = {
   logoBtn:
     'flex items-center gap-2.5 sm:gap-3 text-left group transition-transform active:scale-95 flex-shrink-0',
   logoImg:
-    'w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0',
-  desktopTitleCol: 'hidden sm:flex flex-col',
-  desktopTitleEn: 'font-serif text-lg font-bold tracking-tight text-stone-950 leading-snug',
-  desktopTitleVi: 'text-xs font-medium text-amber-800 tracking-normal leading-tight opacity-90',
+    'h-9 sm:h-12 w-auto object-contain flex-shrink-0',
   rightControls: 'flex items-center gap-1.5 sm:gap-2',
   prayerBtn:
     'flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100/90 active:scale-95 border border-amber-200/90 text-amber-900 text-xs font-semibold shadow-2xs transition-all cursor-pointer',

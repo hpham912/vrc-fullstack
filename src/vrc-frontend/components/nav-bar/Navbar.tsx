@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   ShieldCheck,
   LogIn,
@@ -101,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className={s.header}>
       <div className={s.container}>
         <div className={s.innerRow}>
-          {/* Logo & Title */}
+          {/* Logo: horizontal lockup with the church name built in */}
           <button
             onClick={() => setActiveTab('home')}
             className={s.logoBtn}
@@ -109,18 +108,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src="/church-logo.png"
               alt="Vietnamese Revival Baptist Church"
-              className={s.logoImg}
+              className={`${s.logoImg} dark:hidden`}
             />
-
-            {/* Desktop View: Full name with English on top, Vietnamese on bottom */}
-            <div className={s.desktopTitleCol}>
-              <span className={s.desktopTitleEn}>
-                {CHURCH_NAME.en}
-              </span>
-              <span className={s.desktopTitleVi}>
-                {CHURCH_NAME.vi}
-              </span>
-            </div>
+            <img
+              src="/church-logo-dark.png"
+              alt="Vietnamese Revival Baptist Church"
+              className={`${s.logoImg} hidden dark:block`}
+            />
           </button>
 
           {/* Right Header Controls: Notification, Language Toggle, Settings */}
