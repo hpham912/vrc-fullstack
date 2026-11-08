@@ -259,8 +259,9 @@ function ChurchAppContent() {
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
-      {/* Nav-only on non-Home tabs for non-admins: collapses on mobile so there is
-          no empty gap under the header; the desktop nav still shows on desktop. */}
+      {/* Nav-only on non-Home tabs for non-admins: just enough top padding
+          to clear the fixed header on mobile (no empty gap, nothing cut
+          off); the desktop nav still shows on desktop. */}
       <div className={activeTab === 'home' || isAdmin ? s.heroSection : s.heroSectionNavOnly}>
         <div className={s.heroInner}>
           {activeTab === 'home' && (

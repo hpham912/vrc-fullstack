@@ -3,11 +3,12 @@ export const appStyles = {
     'min-h-screen bg-[#FDFCFB] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
   heroSection:
     'bg-white dark:bg-[#161412] border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
-  // Nav-only hero (non-Home tab, no admin): collapses to zero height on mobile so
-  // regular users see no empty gap under the header; on desktop it keeps the
-  // padding so the segmented nav still sits below the fixed header.
+  // Nav-only hero (non-Home tab, no admin): on mobile it is just enough
+  // top padding to clear the fixed header (56px + safe area) — no extra
+  // gap, and the content is not cut off under the header. On desktop it
+  // keeps the full padding so the segmented nav sits below the header.
   heroSectionNavOnly:
-    'bg-white dark:bg-[#161412] sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 sm:px-6 pt-0 pb-0 sm:pt-28 sm:pb-9',
+    'bg-white dark:bg-[#161412] sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 sm:px-6 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] pb-0 sm:pt-28 sm:pb-9',
   heroInner: 'max-w-4xl mx-auto text-center space-y-3 sm:space-y-3.5',
   locationPill:
     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-label sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800',
