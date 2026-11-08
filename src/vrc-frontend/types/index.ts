@@ -121,6 +121,24 @@ export interface WeeklyService {
   descEn: string;
 }
 
+export interface HeaderVerse {
+  verseTextVi: string;
+  verseTextEn: string;
+  referenceVi: string;
+  referenceEn: string;
+  translationVi?: string;
+  translationEn?: string;
+}
+
+export const DEFAULT_HEADER_VERSE: HeaderVerse = {
+  verseTextVi: 'Vì Đức Chúa Trời yêu thương thế gian, đến nỗi đã ban Con một của Ngài, hầu cho hễ ai tin Con ấy không bị hư mất mà được sự sống đời đời.',
+  verseTextEn: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+  referenceVi: 'Giăng 3:16',
+  referenceEn: 'John 3:16',
+  translationVi: '1925',
+  translationEn: 'NIV',
+};
+
 export interface ChurchInfo {
   sanctuaryName: string;
   address: string;
@@ -129,6 +147,7 @@ export interface ChurchInfo {
   email: string;
   regionDescVi: string;
   regionDescEn: string;
+  headerVerse?: HeaderVerse;
   services: WeeklyService[];
   updatedAt?: string;
 }
@@ -141,6 +160,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfo = {
   email: 'info@vnrevivalchurch.org',
   regionDescVi: 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert',
   regionDescEn: 'Serving Vietnamese communities across Phoenix East Valley',
+  headerVerse: DEFAULT_HEADER_VERSE,
   services: [
     {
       id: 'sunday-worship',

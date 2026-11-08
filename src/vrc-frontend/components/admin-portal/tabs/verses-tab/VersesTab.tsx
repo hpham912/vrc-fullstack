@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Edit3, Save, Sparkles, Trash2 } from 'lucide-react';
-import { DailyVerse } from '../../../../types/index.ts';
+import { DailyVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
@@ -23,6 +23,8 @@ interface VersesTabProps {
   // The parent header shows "Edit Verse" vs "Add Verse" in focused mode,
   // so the child reports whether it is currently editing a verse.
   onEditingChange: (editing: boolean) => void;
+  churchInfo?: ChurchInfo | null;
+  onOpenHeaderVerseEditor?: () => void;
 }
 
 // Daily verses: form + published list. Owns all verse form state, the
@@ -36,6 +38,8 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   showFeedback,
   onRefreshData,
   onEditingChange,
+  churchInfo,
+  onOpenHeaderVerseEditor,
 }) => {
   const { t, language } = useLanguage();
   const [editingVerseId, setEditingVerseId] = useState<number | null>(null);
@@ -237,6 +241,35 @@ export const VersesTab: React.FC<VersesTabProps> = ({
 
   return (
     <div className={s.container}>
+      {/* Header Subtitle Verse Quick Management Banner */}
+      {onOpenHeaderVerseEditor && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="space-y-1 min-w-0 flex-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{t('headerVerseModalTitle')}</span>
+            </span>
+            <p className="font-serif italic text-xs sm:text-sm text-stone-800 dark:text-stone-200 line-clamp-2">
+              "{language === 'vi' ? (churchInfo?.headerVerse?.verseTextVi || DEFAULT_HEADER_VERSE.verseTextVi) : (churchInfo?.headerVerse?.verseTextEn || DEFAULT_HEADER_VERSE.verseTextEn)}"
+            </p>
+            <span className="block text-[11px] font-bold text-amber-800 dark:text-amber-400">
+              — {language === 'vi' ? (churchInfo?.headerVerse?.referenceVi || DEFAULT_HEADER_VERSE.referenceVi) : (churchInfo?.headerVerse?.referenceEn || DEFAULT_HEADER_VERSE.referenceEn)}
+            </span>
+          </div>
+
+          <Button
+            type="button"
+            variant="amberLight"
+            size="sm"
+            onClick={onOpenHeaderVerseEditor}
+            leftIcon={<Sparkles className="w-3.5 h-3.5 text-amber-600" />}
+            className="flex-shrink-0"
+          >
+            <span>{t('headerVerseEditBtn')}</span>
+          </Button>
+        </div>
+      )}
+
       <form onSubmit={handleSaveVerse} className={s.form}>
         <div className={s.formHeader}>
           <div className={s.headerGroup}>

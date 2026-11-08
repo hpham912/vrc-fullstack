@@ -6,25 +6,33 @@
   "email": "htph@vrcfamily.org",
   "regionDescVi": "Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert",
   "regionDescEn": "Serving Vietnamese communities across Phoenix East Valley",
+  "headerVerse": {
+    "referenceVi": "Giăng 3:16",
+    "referenceEn": "John 3:16",
+    "translationEn": "NIV",
+    "verseTextVi": "Vì Đức Chúa Trời yêu thương thế gian, đến nỗi đã ban Con một của Ngài, hầu cho hễ ai tin Con ấy không bị hư mất mà được sự sống đời đời.",
+    "verseTextEn": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+    "translationVi": "1925"
+  },
   "services": [
     {
-      "titleVi": "Lễ Thờ Phượng Chúa Nhật",
       "timeEn": "Sunday • 3:00 PM – 5:00 PM",
       "id": "sunday-worship",
+      "descVi": "Tôn vinh Chúa, lắng nghe sứ điệp Lời Ngài,và thắt chặt tình thông công với anh em. Đây là khoảng thời gian biệt riêng ra để tái tạo năng lượng tâm linh, dâng lên Chúa lòng biết ơn và cùng nhau lớn lên trong đức tin.",
+      "time": "Chúa Nhật • 3:00 PM – 5:00 PM",
+      "titleVi": "Lễ Thờ Phượng Chúa Nhật",
       "titleEn": "Sunday Worship Service",
-      "descVi": "Tôn vinh Chúa, cầu nguyện và lắng nghe sứ điệp Lời Chúa gây dựng đức tin, phục hưng đời sống.",
-      "descEn": "Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments.",
-      "time": "Chúa Nhật • 3:00 PM – 5:00 PM"
+      "descEn": "Bilingual worship, uplifting praise, gospel sermon and warm fellowship refreshments."
     },
     {
-      "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings.",
+      "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
       "id": "wednesday-prayer",
       "titleEn": "Midweek Bible Study & Prayer",
-      "descVi": "Đào sâu Lời Chúa theo từng phân đoạn và cùng hiệp lòng cầu nguyện chữa lành, phục hưng cho hội thánh.",
+      "descVi": "Cơ hội để chúng ta cùng đào sâu Lời Chúa và hiệp lòng cầu nguyện cho các nhu cầu của cá nhân, Hội Thánh, đất nước. Đây cũng là dịp để anh em thông công, chia sẻ trải nghiệm đời sống và cùng nhau lớn lên trong đức tin.",
+      "titleVi": "Học Kinh Thánh & Cầu Nguyện",
       "time": "Thứ Tư • 7:00 PM – 8:30 PM",
-      "timeEn": "Wednesday • 7:00 PM – 8:30 PM",
-      "titleVi": "Học Kinh Thánh & Cầu Nguyện"
+      "descEn": "In-depth scripture study and united intercessory prayer for revival, families, and healings."
     }
   ],
-  "updatedAt": "2026-11-06T15:07:35.468Z"
+  "updatedAt": "2026-11-08T03:05:03.976Z"
 }

@@ -1,26 +1,32 @@
 export const appStyles = {
   pageWrapper:
-    'min-h-screen bg-[#FDFCFB] text-stone-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
+    'min-h-screen bg-[#FDFCFB] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
   heroSection:
-    'bg-white border-b border-stone-200/60 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
+    'bg-white dark:bg-[#161412] border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
   heroInner: 'max-w-4xl mx-auto text-center space-y-3 sm:space-y-3.5',
   locationPill:
-    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[11px] sm:text-xs font-semibold tracking-wide',
-  locationIcon: 'w-3.5 h-3.5 text-amber-600',
+    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-[11px] sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800',
+  locationIcon: 'w-3.5 h-3.5 text-amber-600 dark:text-amber-400',
   titleWrapper: 'space-y-0.5 sm:space-y-1 pt-0.5',
   heroTitle:
-    'text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 tracking-tight leading-tight',
-  heroSubtitle: 'text-stone-700 font-medium text-xs sm:text-sm max-w-lg mx-auto leading-relaxed',
+    'text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 dark:text-stone-50 tracking-tight leading-tight',
+  heroSubtitle: 'text-stone-700 dark:text-stone-300 font-medium text-xs sm:text-sm max-w-lg mx-auto leading-relaxed',
+  heroVerseWrapper: 'relative max-w-xl mx-auto flex flex-col items-center justify-center gap-1.5 group px-3',
+  heroVerseQuote:
+    'font-serif italic text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed text-center break-words max-w-lg',
+  heroVerseRef: 'block font-sans not-italic text-[11px] sm:text-xs font-semibold tracking-wide text-amber-800 dark:text-amber-400 text-center mt-1',
+  heroVerseEditBtn:
+    'inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-200 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-800/80 px-2.5 py-0.5 rounded-full transition-all mt-0.5 cursor-pointer active:scale-95 shadow-2xs',
   adminBtnWrapper: 'pt-1.5 sm:pt-2 flex items-center justify-center',
   adminBtn:
     'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold text-xs shadow-xs transition-all cursor-pointer',
   adminBtnIcon: 'w-3.5 h-3.5 text-amber-200 flex-shrink-0',
   desktopNav:
-    'hidden md:flex items-center w-fit mx-auto bg-stone-100/80 p-1 rounded-2xl border border-stone-200/60 mt-2 sm:mt-3',
+    'hidden md:flex items-center w-fit mx-auto bg-stone-100/80 dark:bg-stone-900/80 p-1 rounded-2xl border border-stone-200/60 dark:border-stone-800 mt-2 sm:mt-3',
   desktopNavItemBase:
     'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
-  desktopNavItemActive: 'bg-white text-stone-950 shadow-xs',
-  desktopNavItemInactive: 'text-stone-600 hover:text-stone-900',
+  desktopNavItemActive: 'bg-white dark:bg-[#161412] text-stone-950 dark:text-stone-50 shadow-xs border border-stone-200/60 dark:border-stone-700',
+  desktopNavItemInactive: 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100',
   desktopNavIcon: 'w-3.5 h-3.5 opacity-75',
   mainContent: 'flex-1 w-full max-w-full overflow-x-clip min-w-0',
   desktopFooter:

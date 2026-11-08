@@ -29,10 +29,15 @@ const EditChurchInfoModal = lazy(() =>
     (module) => ({ default: module.EditChurchInfoModal })
   )
 );
+const EditHeaderVerseModal = lazy(() =>
+  import('./vrc-frontend/components/edit-header-verse-modal/EditHeaderVerseModal.tsx').then(
+    (module) => ({ default: module.EditHeaderVerseModal })
+  )
+);
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
 import { Button } from './vrc-frontend/common-component/index.ts';
-import { ChurchEvent, DailyVerse, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight } from 'lucide-react';
+import { ChurchEvent, DailyVerse, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
+import { Plus, ArrowRight, Pencil } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 import {
@@ -89,6 +94,7 @@ function ChurchAppContent() {
   const [adminPortalOpen, setAdminPortalOpen] = useState(false);
   const [spotlightModalOpen, setSpotlightModalOpen] = useState(false);
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
+  const [headerVerseModalOpen, setHeaderVerseModalOpen] = useState(false);
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
@@ -253,9 +259,37 @@ function ChurchAppContent() {
             </h1>
           </div>
 
-          <p className={s.heroSubtitle}>
-            {t('heroSubtitle')}
-          </p>
+          {/* Subtitle Scripture Verse chosen by Admin */}
+          {(() => {
+            const currentHeaderVerse = churchInfo?.headerVerse || DEFAULT_HEADER_VERSE;
+            const verseText = language === 'en'
+              ? (currentHeaderVerse.verseTextEn || currentHeaderVerse.verseTextVi)
+              : (currentHeaderVerse.verseTextVi || currentHeaderVerse.verseTextEn);
+            const verseRef = language === 'en'
+              ? (currentHeaderVerse.referenceEn || currentHeaderVerse.referenceVi)
+              : (currentHeaderVerse.referenceVi || currentHeaderVerse.referenceEn);
+
+            return (
+              <div className={s.heroVerseWrapper}>
+                <p className={s.heroVerseQuote}>
+                  "{verseText}"
+                  <span className={s.heroVerseRef}>— {verseRef}</span>
+                </p>
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setHeaderVerseModalOpen(true)}
+                    className={s.heroVerseEditBtn}
+                    title={t('headerVerseEditBtn')}
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span>{t('headerVerseEditBtn')}</span>
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Admin Dashboard Action Button - Concise with Logged-in Username */}
           {isAdmin && (
@@ -415,6 +449,19 @@ function ChurchAppContent() {
         </Suspense>
       )}
 
+      {/* Header Subtitle Verse Editor Modal */}
+      {headerVerseModalOpen && (
+        <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
+          <EditHeaderVerseModal
+            isOpen={headerVerseModalOpen}
+            onClose={() => setHeaderVerseModalOpen(false)}
+            churchInfo={churchInfo || DEFAULT_CHURCH_INFO}
+            allVerses={allVerses}
+            onSaveSuccess={loadData}
+          />
+        </Suspense>
+      )}
+
       {/* Admin Dashboard Modal */}
       {adminPortalOpen && (
         <Suspense fallback={<div className={s.lazyFallback}>{t('loading')}</div>}>
@@ -435,6 +482,10 @@ function ChurchAppContent() {
             onOpenSpotlightEditor={() => {
               setAdminPortalOpen(false);
               setSpotlightModalOpen(true);
+            }}
+            onOpenHeaderVerseEditor={() => {
+              setAdminPortalOpen(false);
+              setHeaderVerseModalOpen(true);
             }}
           />
         </Suspense>

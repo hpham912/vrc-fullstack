@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChurchInfo, WeeklyService, DEFAULT_CHURCH_INFO } from '../../types/index.ts';
+import { ChurchInfo, WeeklyService, DEFAULT_CHURCH_INFO, DEFAULT_HEADER_VERSE } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
@@ -159,6 +159,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
         email: email.trim(),
         regionDescVi: regionDescVi.trim(),
         regionDescEn: regionDescEn.trim(),
+        headerVerse: safeInfo.headerVerse || DEFAULT_HEADER_VERSE,
         services: processedServices,
       };
 

@@ -33,6 +33,7 @@ interface AdminPortalProps {
   onClose: () => void;
   onRefreshData: () => void;
   onOpenSpotlightEditor?: () => void;
+  onOpenHeaderVerseEditor?: () => void;
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
@@ -46,6 +47,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   onClose,
   onRefreshData,
   onOpenSpotlightEditor,
+  onOpenHeaderVerseEditor,
 }) => {
   const { adminUser, getToken } = useAuth();
   const { t } = useLanguage();
@@ -290,7 +292,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div className={s.contentBody}>
           <EventsTab events={events} churchInfo={churchInfo} initialEvent={initialEvent} adminUser={adminUser} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onTabChange={setActiveTab} onEditingChange={setEventEditing} resetFormSignal={resetEventFormSignal} />
 
-          <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
+          <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
           <AdminAccountsTab activeTab={activeTab} getToken={getToken} adminUser={adminUser} showFeedback={showFeedback} />
 

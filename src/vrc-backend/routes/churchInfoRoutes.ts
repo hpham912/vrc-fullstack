@@ -20,6 +20,24 @@ export interface WeeklyService {
   descEn: string;
 }
 
+export interface HeaderVerseData {
+  verseTextVi: string;
+  verseTextEn: string;
+  referenceVi: string;
+  referenceEn: string;
+  translationVi?: string;
+  translationEn?: string;
+}
+
+export const DEFAULT_HEADER_VERSE: HeaderVerseData = {
+  verseTextVi: 'Vì Đức Chúa Trời yêu thương thế gian, đến nỗi đã ban Con một của Ngài, hầu cho hễ ai tin Con ấy không bị hư mất mà được sự sống đời đời.',
+  verseTextEn: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+  referenceVi: 'Giăng 3:16',
+  referenceEn: 'John 3:16',
+  translationVi: '1925',
+  translationEn: 'NIV',
+};
+
 export interface ChurchInfoData {
   sanctuaryName: string;
   address: string;
@@ -28,6 +46,7 @@ export interface ChurchInfoData {
   email: string;
   regionDescVi: string;
   regionDescEn: string;
+  headerVerse?: HeaderVerseData;
   services: WeeklyService[];
   updatedAt: string;
 }
@@ -40,6 +59,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
   email: 'info@vnrevivalchurch.org',
   regionDescVi: 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert',
   regionDescEn: 'Serving Vietnamese communities across Phoenix East Valley',
+  headerVerse: DEFAULT_HEADER_VERSE,
   services: [
     {
       id: 'sunday-worship',
@@ -169,7 +189,7 @@ router.get('/', async (req, res) => {
 // PUT /api/church-info - Update sanctuary address & worship schedules (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services } = req.body;
+    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services, headerVerse } = req.body;
 
     if (!address || !sanctuaryName) {
       return res.status(400).json({ error: 'Sanctuary name and address are required.' });
@@ -188,6 +208,15 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
         }))
       : inMemoryChurchInfo.services;
 
+    const cleanedHeaderVerse: HeaderVerseData = headerVerse ? {
+      verseTextVi: String(headerVerse.verseTextVi || inMemoryChurchInfo.headerVerse?.verseTextVi || DEFAULT_HEADER_VERSE.verseTextVi).trim(),
+      verseTextEn: String(headerVerse.verseTextEn || inMemoryChurchInfo.headerVerse?.verseTextEn || DEFAULT_HEADER_VERSE.verseTextEn).trim(),
+      referenceVi: String(headerVerse.referenceVi || inMemoryChurchInfo.headerVerse?.referenceVi || DEFAULT_HEADER_VERSE.referenceVi).trim(),
+      referenceEn: String(headerVerse.referenceEn || inMemoryChurchInfo.headerVerse?.referenceEn || DEFAULT_HEADER_VERSE.referenceEn).trim(),
+      translationVi: headerVerse.translationVi ? String(headerVerse.translationVi).trim() : (inMemoryChurchInfo.headerVerse?.translationVi || '1925'),
+      translationEn: headerVerse.translationEn ? String(headerVerse.translationEn).trim() : (inMemoryChurchInfo.headerVerse?.translationEn || 'NIV'),
+    } : (inMemoryChurchInfo.headerVerse || DEFAULT_HEADER_VERSE);
+
     const updated: ChurchInfoData = {
       sanctuaryName: String(sanctuaryName).trim(),
       address: String(address).trim(),
@@ -196,6 +225,7 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       email: email ? String(email).trim() : inMemoryChurchInfo.email,
       regionDescVi: regionDescVi ? String(regionDescVi).trim() : inMemoryChurchInfo.regionDescVi,
       regionDescEn: regionDescEn ? String(regionDescEn).trim() : inMemoryChurchInfo.regionDescEn,
+      headerVerse: cleanedHeaderVerse,
       services: cleanedServices,
       updatedAt: new Date().toISOString(),
     };
@@ -211,6 +241,42 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   } catch (err: any) {
     console.error('Failed to update church info:', err);
     res.status(500).json({ error: 'Failed to update church info' });
+  }
+});
+
+// PUT /api/church-info/header-verse - Dedicated endpoint to update subtitle scripture below church name
+router.put('/header-verse', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { verseTextVi, verseTextEn, referenceVi, referenceEn, translationVi, translationEn } = req.body;
+
+    if (!verseTextVi || !verseTextEn || !referenceVi || !referenceEn) {
+      return res.status(400).json({ error: 'Verse text and reference are required in both languages.' });
+    }
+
+    const newHeaderVerse: HeaderVerseData = {
+      verseTextVi: String(verseTextVi).trim(),
+      verseTextEn: String(verseTextEn).trim(),
+      referenceVi: String(referenceVi).trim(),
+      referenceEn: String(referenceEn).trim(),
+      translationVi: translationVi ? String(translationVi).trim() : '1925',
+      translationEn: translationEn ? String(translationEn).trim() : 'NIV',
+    };
+
+    inMemoryChurchInfo = {
+      ...inMemoryChurchInfo,
+      headerVerse: newHeaderVerse,
+      updatedAt: new Date().toISOString(),
+    };
+
+    saveLocalChurchInfo(inMemoryChurchInfo);
+
+    const env = getAppEnvironment(req);
+    await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo, env);
+
+    res.json(inMemoryChurchInfo);
+  } catch (err: any) {
+    console.error('Failed to update header verse:', err);
+    res.status(500).json({ error: 'Failed to update header verse' });
   }
 });
 
