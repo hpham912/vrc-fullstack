@@ -15,7 +15,7 @@ import {
   Megaphone,
   Plus,
 } from 'lucide-react';
-import { Button } from '../../common-component/index.ts';
+import { Button, LoadingShimmer } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
 interface NotificationModalProps {
@@ -26,6 +26,7 @@ interface NotificationModalProps {
   onSelectNotification?: (notif: AppNotification) => void;
   isAdmin?: boolean;
   onNotificationAdded?: () => void;
+  isLoading?: boolean;
 }
 
 export const NotificationModal: React.FC<NotificationModalProps> = ({
@@ -35,6 +36,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   onSelectNotification,
   isAdmin,
   onNotificationAdded,
+  isLoading = false,
 }) => {
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
@@ -217,7 +219,9 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
         {/* Notifications List */}
         <div className={s.listContainer}>
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <LoadingShimmer variant="card" count={3} />
+          ) : notifications.length === 0 ? (
             <div className={s.emptyBox}>
               <div className={s.emptyIconBox}>
                 <Bell className="w-5 h-5" />

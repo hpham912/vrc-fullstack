@@ -609,6 +609,7 @@ function ChurchAppContent() {
         }}
         isAdmin={isAdmin}
         onNotificationAdded={loadData}
+        isLoading={isLoading}
       />
     </div>
   );
