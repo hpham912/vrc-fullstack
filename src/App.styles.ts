@@ -8,6 +8,7 @@ export const appStyles = {
     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-[11px] sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800',
   locationIcon: 'w-3.5 h-3.5 text-amber-600 dark:text-amber-400',
   titleWrapper: 'space-y-0.5 sm:space-y-1 pt-0.5',
+  homeBannerImg: 'w-full h-auto object-contain',
   heroTitle:
     'text-xl sm:text-4xl lg:text-5xl font-serif font-bold text-stone-950 dark:text-stone-50 tracking-tight leading-tight',
   heroSubtitle: 'text-stone-700 dark:text-stone-300 font-medium text-xs sm:text-sm max-w-lg mx-auto leading-relaxed',

@@ -254,9 +254,24 @@ function ChurchAppContent() {
           </div>
 
           <div className={s.titleWrapper}>
-            <h1 className={s.heroTitle}>
-              {language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
-            </h1>
+            {activeTab === 'home' ? (
+              <>
+                <img
+                  src={language === 'en' ? '/home-banner-en.jpeg' : '/home-banner-vi.jpeg'}
+                  alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
+                  className={`${s.homeBannerImg} dark:hidden`}
+                />
+                <img
+                  src={language === 'en' ? '/home-banner-en-dark.png' : '/home-banner-dark-vi.png'}
+                  alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
+                  className={`${s.homeBannerImg} hidden dark:block`}
+                />
+              </>
+            ) : (
+              <h1 className={s.heroTitle}>
+                {language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
+              </h1>
+            )}
           </div>
 
           {/* Subtitle Scripture Verse chosen by Admin */}
