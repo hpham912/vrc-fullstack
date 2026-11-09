@@ -26,6 +26,9 @@ interface NavbarProps {
   onRequestNotificationPermission: () => void;
   onOpenNotifications?: () => void;
   isNotifOpen?: boolean;
+  // Ref to the bell button, handed up so the desktop notifications
+  // popup can anchor directly below it.
+  notifButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -37,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRequestNotificationPermission,
   onOpenNotifications,
   isNotifOpen,
+  notifButtonRef,
 }) => {
   const { isAdmin, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
@@ -139,6 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className={s.rightControls}>
             {/* Notification Bell Button (Desktop View) */}
             <button
+              ref={notifButtonRef}
               onClick={() => {
                 if (onOpenNotifications) {
                   onOpenNotifications();

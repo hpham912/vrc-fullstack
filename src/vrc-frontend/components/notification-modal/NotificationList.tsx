@@ -4,8 +4,8 @@ import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { formatNotificationDate } from '../../utils/dateFormatter.ts';
 import { NotificationClient } from '../../services/notificationClient.ts';
-import { Calendar, BookOpen, Megaphone, Plus, Trash2 } from 'lucide-react';
-import { Button, LoadingShimmer, ConfirmModal } from '../../common-component/index.ts';
+import { Calendar, BookOpen, Megaphone } from 'lucide-react';
+import { Button, LoadingShimmer, ConfirmModal, AdminAddButton, AdminActionButtons } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
 interface NotificationListProps {
@@ -101,26 +101,17 @@ export const NotificationList: React.FC<NotificationListProps> = ({
 
   return (
     <>
-      {/* Admin toolbar: post a notice / clear all */}
+      {/* Admin toolbar: post a notice / clear all. The add and delete
+          buttons are the shared app-wide designs (AdminAddButton and the
+          AdminActionButtons delete), not one-off styles. */}
       {isAdmin && (
         <div className={s.toolbar}>
-          <button
+          <AdminAddButton
             onClick={() => setShowAddForm((prev) => !prev)}
-            className={s.toolbarBtn}
             title={t('notifAddBtn')}
-            aria-label={t('notifAddBtn')}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+          />
           {notifications.length > 0 && (
-            <button
-              onClick={() => setShowClearConfirm(true)}
-              className={s.toolbarBtn}
-              title={t('notifClearAll')}
-              aria-label={t('notifClearAll')}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            <AdminActionButtons onDelete={() => setShowClearConfirm(true)} />
           )}
         </div>
       )}

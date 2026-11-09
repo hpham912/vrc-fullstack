@@ -140,6 +140,10 @@ function ChurchAppContent() {
   // area and by font size, so the notifications panel ends exactly above
   // the tab bar instead of covering it — no guessed offset, no gap.
   const tabBarRef = useRef<HTMLElement | null>(null);
+  // Ref to the header bell button, so the desktop notifications popup
+  // can anchor directly below it (measured position, not a guessed
+  // offset — the bell moves with the centered header on wide screens).
+  const bellButtonRef = useRef<HTMLButtonElement | null>(null);
   const [tabBarHeight, setTabBarHeight] = useState(0);
   useEffect(() => {
     const el = tabBarRef.current;
@@ -301,6 +305,7 @@ function ChurchAppContent() {
           NotificationClient.requestPermission();
         }}
         isNotifOpen={showNotifModal}
+        notifButtonRef={bellButtonRef}
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
@@ -675,6 +680,7 @@ function ChurchAppContent() {
         onNotificationAdded={loadData}
         isLoading={isLoading}
         tabBarHeight={tabBarHeight}
+        anchorRef={bellButtonRef}
       />
 
       {/* Event details opened from a notification tap */}

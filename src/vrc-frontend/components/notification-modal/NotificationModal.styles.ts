@@ -17,9 +17,9 @@ export const notificationModalStyles = {
   addBtn: 'p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors',
   // Admin toolbar row above the list (post a notice / clear all). The
   // desktop popup and the mobile tab page share it via NotificationList.
+  // The buttons themselves are the shared app-wide AdminAddButton and
+  // AdminActionButtons delete — no one-off button style lives here.
   toolbar: 'flex items-center justify-end gap-1 px-3.5 pt-3',
-  toolbarBtn:
-    'p-2 rounded-full text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors',
   addForm: 'p-3.5 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60 space-y-2.5',
   addInput:
     'w-full px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50',
