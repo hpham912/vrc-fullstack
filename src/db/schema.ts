@@ -140,19 +140,3 @@ export const notifications = pgTable('notifications', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Sermons & Video Messages
-export const sermons = pgTable('sermons', {
-  id: serial('id').primaryKey(),
-  youtubeUrl: text('youtube_url').notNull(),
-  videoId: text('video_id').notNull(),
-  titleVi: text('title_vi').notNull(),
-  titleEn: text('title_en').notNull(),
-  descriptionVi: text('description_vi'),
-  descriptionEn: text('description_en'),
-  date: text('date').notNull(),
-  createdBy: text('created_by'),
-  updatedBy: text('updated_by'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
