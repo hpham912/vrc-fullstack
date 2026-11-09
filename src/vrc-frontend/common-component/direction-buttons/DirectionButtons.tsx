@@ -8,7 +8,6 @@ import { directionButtonsStyles as s } from './DirectionButtons.styles.ts';
 interface DirectionButtonsProps {
   address: string;
   variant?: 'compact' | 'detailed';
-  shortLabels?: boolean;
   onSelect?: () => void;
   className?: string;
 }
@@ -16,7 +15,6 @@ interface DirectionButtonsProps {
 export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
   address,
   variant = 'compact',
-  shortLabels = false,
   onSelect,
   className = '',
 }) => {
@@ -47,7 +45,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
               <Compass className={s.detailedIcon} />
             </div>
             <div className={s.detailedTextCol}>
-              <span className={s.detailedTitle}>Google Maps</span>
+              <span className={s.detailedTitle}>Google</span>
               <span className={s.detailedGoogleSub}>
                 {t('dirLive')}
               </span>
@@ -68,7 +66,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
               <Navigation className={s.detailedIcon} />
             </div>
             <div className={s.detailedTextCol}>
-              <span className={s.detailedTitle}>Apple Maps</span>
+              <span className={s.detailedTitle}>Apple</span>
               <span className={s.detailedAppleSub}>
                 {t('dirIos')}
               </span>
@@ -91,7 +89,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
         title={t('dirGoogle')}
       >
         <Compass className={s.compactGoogleIcon} />
-        <span>{shortLabels ? 'Google' : 'Google Maps'}</span>
+        <span>Google</span>
       </a>
       <a
         href={appleUrl}
@@ -102,7 +100,7 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
         title={t('dirApple')}
       >
         <Navigation className={s.compactAppleIcon} />
-        <span>{shortLabels ? 'Apple' : 'Apple Maps'}</span>
+        <span>Apple</span>
       </a>
     </div>
   );

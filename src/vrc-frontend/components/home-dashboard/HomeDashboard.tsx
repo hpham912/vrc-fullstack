@@ -722,7 +722,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <span className={s.contactLabel}>{t('contactAddressLabel')}</span>
               <span className={s.contactValue}>{churchAddress}</span>
               <div className={s.contactDirections}>
-                <DirectionButtons address={churchAddress} shortLabels />
+                <DirectionButtons address={churchAddress} />
               </div>
             </div>
           </div>
