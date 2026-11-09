@@ -241,6 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         try {
                           localStorage.setItem('vrc_theme', next ? 'dark' : 'light');
                         } catch {}
+                        setShowSettings(false);
                       }}
                       className={s.settingsToggleItem}
                       role="switch"

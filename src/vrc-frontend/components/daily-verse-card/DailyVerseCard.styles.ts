@@ -29,7 +29,7 @@ export const dailyVerseStyles = {
   verseCite: 'font-serif text-base sm:text-lg font-bold text-amber-800 dark:text-amber-300 not-italic',
   reflectionSection: 'pt-4 sm:pt-6 border-t border-stone-100 dark:border-stone-800 space-y-2.5 sm:space-y-3',
   reflectionLabel: 'text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400',
-  reflectionText: 'text-stone-800 dark:text-stone-200 text-xs sm:text-base leading-relaxed whitespace-pre-line font-normal',
+  reflectionText: 'text-stone-800 dark:text-stone-200 text-sm sm:text-lg leading-relaxed whitespace-pre-line font-normal',
   prayerBox: 'mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-500/25',
   prayerLabel: 'text-caption sm:text-label font-bold uppercase tracking-wider text-amber-950 dark:text-amber-300 block mb-1',
   prayerText: 'font-serif italic text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed font-medium',

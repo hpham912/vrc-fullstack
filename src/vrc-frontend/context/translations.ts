@@ -314,6 +314,8 @@ export const translations = {
   spotBadgeHint: { vi: 'Hiển thị ở góc trên banner', en: 'Top badge on banner' },
   spotBadgePlaceholder: { vi: 'e.g. Sự Kiện Nổi Bật, Sunday Worship, Lễ Nhóm Đặc Biệt...', en: 'e.g. Featured Event, Sunday Worship, Special Service...' },
   spotBadgeNote: { vi: 'Bạn có thể tuỳ ý kết hợp phong cách màu (theme) với bất kỳ chữ nào trong thẻ pill này.', en: 'You can freely combine the color theme with any custom pill text.' },
+  spotBadgeViLabel: { vi: 'Thẻ tròn — Tiếng Việt', en: 'Pill badge — Vietnamese' },
+  spotBadgeEnLabel: { vi: 'Thẻ tròn — Tiếng Anh', en: 'Pill badge — English' },
   spotQuoteStep: { vi: '4. Câu Kinh Thánh Trích Dẫn / Lời Chúc (Tuỳ Chọn):', en: '4. Optional Scripture Quote or Greeting:' },
   spotQuoteNote: { vi: 'Tiêu đề, mô tả, ngày giờ và nút chỉ đường sẽ lấy trực tiếp từ sự kiện bạn đã chọn ở trên.', en: 'Title, description, date/time and directions link are automatically populated from the chosen event.' },
   spotQuoteRefLabel: { vi: 'Câu Kinh Thánh (VD: Thi Thiên 100:4)', en: 'Bible Reference (e.g. Psalm 100:4)' },

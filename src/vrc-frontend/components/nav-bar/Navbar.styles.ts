@@ -30,7 +30,7 @@ export const navbarStyles = {
   desktopLangBtnInactive: 'text-stone-600 hover:text-stone-950 font-semibold',
   settingsWrapper: 'relative',
   settingsBtnBase:
-    'w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer',
+    'relative z-50 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer',
   settingsBtnActive: 'bg-amber-100 text-amber-950 border-amber-400',
   settingsBtnInactive: 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300',
   settingsBackdrop: 'fixed inset-0 z-40 bg-transparent cursor-pointer',

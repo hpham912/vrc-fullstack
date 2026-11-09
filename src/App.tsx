@@ -12,6 +12,8 @@ import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/Daily
 import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
 import { NotificationModal } from './vrc-frontend/components/notification-modal/NotificationModal.tsx';
+import { AnnouncementDetailModal } from './vrc-frontend/components/notification-modal/AnnouncementDetailModal.tsx';
+import { EventDetailModal } from './vrc-frontend/common-component/index.ts';
 
 // Admin-only screens load on demand, so regular visitors never download them.
 // Each one is rendered only when an admin opens it (see Suspense below).
@@ -67,6 +69,12 @@ function ChurchAppContent() {
     setActiveTab(tab);
     setShowNotifModal(false);
   };
+
+  // Every tab switch scrolls back to the top, so a tab never opens
+  // half-way down from where the last tab was left.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
@@ -105,6 +113,9 @@ function ChurchAppContent() {
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
   const [headerVerseModalOpen, setHeaderVerseModalOpen] = useState(false);
   const [showNotifModal, setShowNotifModal] = useState(false);
+  // Event / announcement opened from a notification tap.
+  const [selectedEvent, setSelectedEvent] = useState<ChurchEvent | null>(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AppNotification | null>(null);
 
   // Measured height of the iOS tab bar (px). It varies by device safe
   // area and by font size, so the notifications panel ends exactly above
@@ -620,13 +631,32 @@ function ChurchAppContent() {
         onRequestPermission={() => NotificationClient.requestPermission()}
         onSelectNotification={(notif) => {
           setShowNotifModal(false);
-          if (notif.type === 'event') setActiveTab('events');
-          else if (notif.type === 'verse') setActiveTab('verse');
+          if (notif.type === 'event') {
+            // Show the event's details. If the event is gone (deleted),
+            // fall back to the Events tab.
+            const evt = events.find((e) => e.id === notif.targetId);
+            if (evt) setSelectedEvent(evt);
+            else setActiveTab('events');
+          } else if (notif.type === 'verse') {
+            setActiveTab('verse');
+          } else if (notif.type === 'announcement') {
+            // Admin notice: show the full text in a modal, stay put.
+            setSelectedAnnouncement(notif);
+          }
         }}
         isAdmin={isAdmin}
         onNotificationAdded={loadData}
         isLoading={isLoading}
         tabBarHeight={tabBarHeight}
+      />
+
+      {/* Event details opened from a notification tap */}
+      <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+
+      {/* Admin notice opened from a notification tap (no navigation) */}
+      <AnnouncementDetailModal
+        notification={selectedAnnouncement}
+        onClose={() => setSelectedAnnouncement(null)}
       />
     </div>
   );

@@ -60,7 +60,14 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     initialConfig?.selectedEventId ?? null
   );
-  const [badgeText, setBadgeText] = useState(initialConfig?.badge || '');
+  // Per-language pill badge text. The combined `badge` stays as the
+  // Vietnamese version for fallback.
+  const [badgeVi, setBadgeVi] = useState(
+    initialConfig?.badgeVi || initialConfig?.badge || ''
+  );
+  const [badgeEn, setBadgeEn] = useState(
+    initialConfig?.badgeEn || initialConfig?.badge || ''
+  );
   const [subtitle, setSubtitle] = useState(
     initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
   );
@@ -100,7 +107,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       const existingId = initialConfig?.selectedEventId ?? null;
       const isPast = existingId ? events.some((e) => e.id === existingId && e.date < todayStr) : false;
       setSelectedEventId(isPast ? null : existingId);
-      setBadgeText(initialConfig?.badge || '');
+      setBadgeVi(initialConfig?.badgeVi || initialConfig?.badge || '');
+      setBadgeEn(initialConfig?.badgeEn || initialConfig?.badge || '');
       const savedSubtitle = initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"';
       setSubtitle(savedSubtitle);
       setSubtitleVi(initialConfig?.subtitleVi || savedSubtitle);
@@ -175,7 +183,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         ? `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`
         : defaultChurchMapsUrl;
 
-      const cleanBadge = (badgeText || '').trim();
+      const cleanBadge = (badgeVi || '').trim();
 
       const payload: SpotlightBannerConfig = {
         mode: isAuto ? 'auto' : 'event',
@@ -183,6 +191,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         isActive: true,
         theme,
         badge: cleanBadge,
+        badgeVi: (badgeVi || '').trim(),
+        badgeEn: (badgeEn || '').trim(),
         subtitle: (subtitle || '').trim(),
         subtitleVi: (subtitleVi || '').trim(),
         subtitleEn: (subtitleEn || '').trim(),
@@ -424,10 +434,23 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 {t('spotBadgeHint')}
               </span>
             </div>
+            <label className={s.fieldLabel}>
+              {t('spotBadgeViLabel')}
+            </label>
             <input
               type="text"
-              value={badgeText}
-              onChange={(e) => setBadgeText(e.target.value)}
+              value={badgeVi}
+              onChange={(e) => setBadgeVi(e.target.value)}
+              className={s.inputMedium}
+              placeholder={t('spotBadgePlaceholder')}
+            />
+            <label className={s.fieldLabel}>
+              {t('spotBadgeEnLabel')}
+            </label>
+            <input
+              type="text"
+              value={badgeEn}
+              onChange={(e) => setBadgeEn(e.target.value)}
               className={s.inputMedium}
               placeholder={t('spotBadgePlaceholder')}
             />
