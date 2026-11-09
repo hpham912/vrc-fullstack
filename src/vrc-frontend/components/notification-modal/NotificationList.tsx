@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { AppNotification } from '../../types/index.ts';
+import { useLanguage } from '../../context/LanguageContext.tsx';
+import { useAuth } from '../../context/AuthContext.tsx';
+import { formatNotificationDate } from '../../utils/dateFormatter.ts';
+import { NotificationClient } from '../../services/notificationClient.ts';
+import { Calendar, BookOpen, Megaphone, Plus, Trash2 } from 'lucide-react';
+import { Button, LoadingShimmer, ConfirmModal } from '../../common-component/index.ts';
+import { notificationModalStyles as s } from './NotificationModal.styles.ts';
+
+interface NotificationListProps {
+  notifications: AppNotification[];
+  onSelectNotification?: (notif: AppNotification) => void;
+  isAdmin?: boolean;
+  onNotificationAdded?: () => void;
+  isLoading?: boolean;
+}
+
+// Shared notification list content, used by both the desktop popup
+// (NotificationModal) and the mobile Notifications tab screen.
+// Owns the admin add-notice form and the clear-all confirm, so neither
+// container duplicates them.
+export const NotificationList: React.FC<NotificationListProps> = ({
+  notifications,
+  onSelectNotification,
+  isAdmin,
+  onNotificationAdded,
+  isLoading = false,
+}) => {
+  const { language, t } = useLanguage();
+  const { getToken } = useAuth();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addTitle, setAddTitle] = useState('');
+  const [addBody, setAddBody] = useState('');
+  const [addSaving, setAddSaving] = useState(false);
+  const [addError, setAddError] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  const handleAddNotification = async () => {
+    const title = addTitle.trim();
+    const body = addBody.trim();
+    if (!title || !body) {
+      setAddError(t('notifAddError'));
+      return;
+    }
+    setAddError('');
+    setAddSaving(true);
+    const created = await NotificationClient.createAnnouncement(title, body, getToken());
+    setAddSaving(false);
+    if (!created) {
+      setAddError(t('notifAddFailed'));
+      return;
+    }
+    setAddTitle('');
+    setAddBody('');
+    setShowAddForm(false);
+    onNotificationAdded?.();
+  };
+
+  const handleClearAll = async () => {
+    setClearing(true);
+    const ok = await NotificationClient.clearAll(getToken());
+    setClearing(false);
+    setShowClearConfirm(false);
+    if (ok) {
+      onNotificationAdded?.();
+    }
+  };
+
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case 'event':
+        return <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />;
+      case 'verse':
+        return <BookOpen className="w-4 h-4 text-amber-700 dark:text-amber-400" />;
+      default:
+        return <Megaphone className="w-4 h-4 text-rose-600 dark:text-rose-400" />;
+    }
+  };
+
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case 'event':
+        return {
+          label: t('notifTypeEvent'),
+          classes: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60',
+        };
+      case 'verse':
+        return {
+          label: t('notifTypeVerse'),
+          classes: 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/60',
+        };
+      default:
+        return {
+          label: t('notifTypeNotice'),
+          classes: 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
+        };
+    }
+  };
+
+  return (
+    <>
+      {/* Admin toolbar: post a notice / clear all */}
+      {isAdmin && (
+        <div className={s.toolbar}>
+          <button
+            onClick={() => setShowAddForm((prev) => !prev)}
+            className={s.toolbarBtn}
+            title={t('notifAddBtn')}
+            aria-label={t('notifAddBtn')}
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+          {notifications.length > 0 && (
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              className={s.toolbarBtn}
+              title={t('notifClearAll')}
+              aria-label={t('notifClearAll')}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Admin: post a notice for all users */}
+      {isAdmin && showAddForm && (
+        <div className={s.addForm}>
+          <input
+            type="text"
+            value={addTitle}
+            onChange={(e) => setAddTitle(e.target.value)}
+            placeholder={t('notifAddTitlePlaceholder')}
+            className={s.addInput}
+          />
+          <textarea
+            value={addBody}
+            onChange={(e) => setAddBody(e.target.value)}
+            placeholder={t('notifAddBodyPlaceholder')}
+            className={s.addTextarea}
+          />
+          {addError && <p className={s.addError}>{addError}</p>}
+          <div className={s.addFormActions}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setShowAddForm(false);
+                setAddTitle('');
+                setAddBody('');
+                setAddError('');
+              }}
+            >
+              {t('commonCancel')}
+            </Button>
+            <Button
+              type="button"
+              variant="darkAmber"
+              size="sm"
+              onClick={handleAddNotification}
+              disabled={addSaving}
+            >
+              {addSaving ? t('commonSaving') : t('notifAddPost')}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Notifications List */}
+      <div className={s.listContainer}>
+        {isLoading ? (
+          <LoadingShimmer variant="card" count={3} />
+        ) : notifications.length === 0 ? (
+          <div className={s.emptyBox}>
+            <div className={s.emptyIconBox}>
+              <Megaphone className="w-5 h-5" />
+            </div>
+            <p className={s.emptyTitle}>{t('notifEmpty')}</p>
+            <p className={s.emptySub}>{t('notifEmptySub')}</p>
+          </div>
+        ) : (
+          notifications.map((item) => {
+            const badge = getTypeBadge(item.type);
+            const formattedDate = formatNotificationDate(item.createdAt, language);
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => onSelectNotification?.(item)}
+                className={s.notifItem}
+              >
+                <div className={s.notifItemTopRow}>
+                  <div className="flex items-center gap-1.5">
+                    <div className={s.notifItemIconBox}>{getIconForType(item.type)}</div>
+                    <span className={`${s.notifTypeBadgeBase} ${badge.classes}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                  <span className={s.notifDateText}>{formattedDate}</span>
+                </div>
+
+                <h4 className={s.notifTitle}>{item.title}</h4>
+
+                <p className={s.notifBody}>{item.body}</p>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Admin: confirm clearing all notifications */}
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        title={t('notifClearTitle')}
+        message={t('notifClearMessage')}
+        confirmText={t('notifClearAll')}
+        isDanger
+        loading={clearing}
+        onConfirm={handleClearAll}
+        onCancel={() => setShowClearConfirm(false)}
+      />
+    </>
+  );
+};
