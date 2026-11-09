@@ -1,9 +1,9 @@
 export const eventsSectionStyles = {
   section:
-    'py-4 sm:py-8 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 max-w-full overflow-x-clip box-border',
+    'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 max-w-full overflow-x-clip box-border',
   headerRow: 'flex items-center justify-between gap-3 min-w-0 w-full',
-  headerSubtitle: 'text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block',
-  headerTitle: 'text-xl sm:text-3xl font-serif font-bold text-stone-950 dark:text-stone-50 tracking-tight truncate',
+  headerSubtitle: 'text-sm sm:text-base font-bold uppercase tracking-widest text-amber-700 block mb-1',
+  headerTitle: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
   addEventBtn:
     'w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 active:scale-95 text-amber-400 flex items-center justify-center shadow-xs transition-all flex-shrink-0',
   searchWrapper: 'relative w-full min-w-0',

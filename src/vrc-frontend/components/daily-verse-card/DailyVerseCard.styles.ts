@@ -2,7 +2,7 @@ export const dailyVerseStyles = {
   section: 'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto',
   headerBar: 'flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8',
   titleGroup: 'flex items-center justify-between gap-3 w-full sm:w-auto',
-  tagText: 'text-caption sm:text-label font-bold uppercase tracking-widest text-amber-700 block mb-1',
+  tagText: 'text-sm sm:text-base font-bold uppercase tracking-widest text-amber-700 block mb-1',
   heading: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
   mobileAddBtn:
     'sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
