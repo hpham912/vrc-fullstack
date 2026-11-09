@@ -66,7 +66,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const [eventStartTime, setEventStartTime] = useState('03:00 PM');
   const [eventEndTime, setEventEndTime] = useState('05:00 PM');
   const [eventLocation, setEventLocation] = useState('Main Sanctuary');
-  const [eventAddress, setEventAddress] = useState('Tempe, Arizona');
+  const [eventAddress, setEventAddress] = useState('Liên hệ Hội Thánh');
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
   const [eventOrganizer, setEventOrganizer] = useState(adminUser?.displayName || 'Pastoral Ministry Team');
   const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vnrevivalchurch.org');
@@ -88,7 +88,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEventStartTime('03:00 PM');
     setEventEndTime('05:00 PM');
     setEventLocation('Main Sanctuary');
-    setEventAddress(churchInfo?.address || 'Tempe, Arizona');
+    setEventAddress('Liên hệ Hội Thánh');
     setEventIsFeatured(false);
     setEditingEventAudit(null);
   };
