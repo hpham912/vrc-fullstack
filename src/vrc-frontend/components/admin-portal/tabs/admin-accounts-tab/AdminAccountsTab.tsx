@@ -215,7 +215,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
             </label>
             <input
               type="email"
-              placeholder="pastor@vnrevivalchurch.org"
+              placeholder="pastor@vrcfamily.org"
               value={newAdminEmail}
               onChange={(e) => setNewAdminEmail(e.target.value)}
               className={s.input}

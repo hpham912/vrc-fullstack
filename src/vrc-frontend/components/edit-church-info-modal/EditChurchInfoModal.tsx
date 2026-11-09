@@ -43,7 +43,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
     safeInfo.googleMapsUrl || 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284'
   );
   const [phone, setPhone] = useState(safeInfo.phone || '(480) 555-0199');
-  const [email, setEmail] = useState(safeInfo.email || 'info@vnrevivalchurch.org');
+  const [email, setEmail] = useState(safeInfo.email || 'htph@vrcfamily.org');
   const [regionDescVi, setRegionDescVi] = useState(
     safeInfo.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert'
   );
@@ -66,7 +66,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       setAddress(current.address || '1565 E Warner Rd, Tempe AZ 85284');
       setGoogleMapsUrl(current.googleMapsUrl || 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284');
       setPhone(current.phone || '(480) 555-0199');
-      setEmail(current.email || 'info@vnrevivalchurch.org');
+      setEmail(current.email || 'htph@vrcfamily.org');
       setRegionDescVi(current.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert');
       setRegionDescEn(current.regionDescEn || 'Serving Vietnamese communities across Phoenix East Valley');
       setServices(current.services ? JSON.parse(JSON.stringify(current.services)) : [...DEFAULT_CHURCH_INFO.services]);
@@ -320,7 +320,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={s.inputRegular}
-                  placeholder="contact@vnrevivalchurch.org"
+                  placeholder="contact@vrcfamily.org"
                 />
               </div>
             </div>

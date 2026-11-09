@@ -56,7 +56,7 @@ export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
   address: '1565 E Warner Rd, Tempe AZ 85284',
   googleMapsUrl: 'https://maps.google.com/?q=1565+E+Warner+Rd,+Tempe+AZ+85284',
   phone: '(480) 555-0199',
-  email: 'info@vnrevivalchurch.org',
+  email: 'htph@vrcfamily.org',
   regionDescVi: 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert',
   regionDescEn: 'Serving Vietnamese communities across Phoenix East Valley',
   headerVerse: DEFAULT_HEADER_VERSE,

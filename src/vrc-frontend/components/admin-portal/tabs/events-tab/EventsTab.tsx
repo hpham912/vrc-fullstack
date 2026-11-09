@@ -70,7 +70,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const [eventAddress, setEventAddress] = useState(DEFAULT_EVENT_ADDRESS);
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
   const [eventOrganizer, setEventOrganizer] = useState(adminUser?.displayName || 'Pastoral Ministry Team');
-  const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vnrevivalchurch.org');
+  const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vrcfamily.org');
   const [editingEventAudit, setEditingEventAudit] = useState<{
     createdBy?: string | null;
     createdAt?: string;
