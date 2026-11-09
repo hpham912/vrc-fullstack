@@ -96,7 +96,7 @@ router.get('/me', requireAdmin, async (req: AuthRequest, res) => {
         id: admin.id,
         username: admin.username,
         displayName: admin.displayName || 'Administrator',
-        email: admin.username === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vnrevivalchurch.org',
+        email: admin.username === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vrcfamily.org',
         role: admin.role,
       },
     });
@@ -160,7 +160,7 @@ router.post('/create-admin', requireAdmin, async (req: AuthRequest, res) => {
       .insert(adminUsers)
       .values({
         username: cleanUsername,
-        email: email ? String(email).trim() : `${cleanUsername}@vnrevivalchurch.org`,
+        email: email ? String(email).trim() : '',
         displayName: String(displayName).trim().slice(0, 100),
         passwordHash: hash,
         passwordSalt: salt,
