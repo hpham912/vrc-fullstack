@@ -44,7 +44,7 @@ async function cleanupPastEvents() {
 }
 
 // POST /api/events/cleanup-expired - Explicit trigger to clean up past events older than the 3 most recent
-router.post('/cleanup-expired', async (_req, res) => {
+router.post('/cleanup-expired', requireAdmin, async (_req, res) => {
   try {
     const removedCount = await cleanupPastEvents();
     res.json({ message: 'Past events pruned to max 3 successfully in PostgreSQL', removedCount });
