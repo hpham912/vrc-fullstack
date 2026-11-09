@@ -59,42 +59,6 @@ router.post('/login', authRateLimiter, async (req, res) => {
       }
     }
 
-    // Master failsafe admin credentials for Pastor/Admin
-    const isMasterAdmin =
-      (cleanUsername === 'vrcadmin' ||
-        cleanUsername === 'admin' ||
-        cleanUsername === 'hoangp' ||
-        cleanUsername === 'hoang.pham@vrcfamily.org' ||
-        cleanUsername === 'ngochoang5111@gmail.com' ||
-        cleanUsername === 'admin@vnrevivalchurch.org') &&
-      cleanPassword === 'VrcAdmin2026!';
-
-    if (isMasterAdmin) {
-      const isHoangP = cleanUsername === 'hoangp' || cleanUsername === 'hoang.pham@vrcfamily.org';
-      const adminId = isHoangP ? 3 : cleanUsername === 'vrcadmin' || cleanUsername === 'ngochoang5111@gmail.com' ? 2 : 1;
-      const usernameDisplay = isHoangP ? 'hoangp' : cleanUsername.includes('@') ? 'vrcadmin' : cleanUsername;
-      const displayName = isHoangP ? 'Hoang Pham (Admin)' : 'Hội Thánh Quản Trị (Admin)';
-      const email = isHoangP ? 'hoang.pham@vrcfamily.org' : cleanUsername === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vnrevivalchurch.org';
-
-      const token = AuthService.createToken({
-        id: adminId,
-        username: usernameDisplay,
-        displayName,
-        role: 'admin',
-      });
-
-      return res.json({
-        token,
-        user: {
-          id: adminId,
-          username: usernameDisplay,
-          displayName,
-          email,
-          role: 'admin',
-        },
-      });
-    }
-
     return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác / Invalid username or password.' });
   } catch (error: any) {
     console.error('Login error:', error);
@@ -264,7 +228,7 @@ router.post('/change-password', requireAdmin, async (req: AuthRequest, res) => {
 
     const user = userResult[0];
     const isOldMatch = AuthService.verifyPassword(oldPassword, user.passwordHash, user.passwordSalt);
-    if (!isOldMatch && oldPassword !== 'VrcAdmin2026!') {
+    if (!isOldMatch) {
       return res.status(400).json({ error: 'Mật khẩu cũ không đúng / Old password is incorrect.' });
     }
 

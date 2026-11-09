@@ -11,7 +11,6 @@ import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 import prayerRoutes from './routes/prayerRoutes.ts';
 import devotionalRoutes from './routes/devotionalRoutes.ts';
-import translationRoutes from './routes/translationRoutes.ts';
 
 import { dbContext } from '../vrc-db/index.ts';
 import { getAppEnvironment } from './utils/appEnvironment.ts';
@@ -60,9 +59,7 @@ export const createApp = () => {
   app.use('/api/prayers', prayerRoutes);
   // Both routers share the /api/ai prefix with no overlapping paths:
   // devotional: /fetch-scripture, /generate-devotional
-  // translation: /translate, /translate-devotional, /translate-batch
   app.use('/api/ai', devotionalRoutes);
-  app.use('/api/ai', translationRoutes);
 
   // Structured 404 for unmatched API routes
   app.use('/api/*', (req, res) => {

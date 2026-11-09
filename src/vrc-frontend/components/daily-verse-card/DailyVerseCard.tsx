@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { DailyVerse } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { useAutoTranslate } from '../../hooks/useAutoTranslate.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   Volume2,
@@ -96,24 +95,8 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   const pick = (vi?: string | null, en?: string | null, fallback?: string | null) => {
     const direct = language === 'vi' ? vi : en;
     if (direct && direct.trim()) return direct.trim();
-    return tr(fallback);
+    return fallback || '';
   };
-
-  const { tr } = useAutoTranslate(
-    [
-      !(language === 'vi' ? verse?.referenceVi : verse?.referenceEn) ? verse?.reference : null,
-      !(language === 'vi' ? verse?.verseTextVi : verse?.verseTextEn) ? verse?.verseText : null,
-      !(language === 'vi' ? verse?.reflectionVi : verse?.reflectionEn) ? verse?.reflection : null,
-      !(language === 'vi' ? verse?.prayerVi : verse?.prayerEn) ? verse?.prayer : null,
-      ...(showArchive
-        ? allVerses.flatMap((v) => [
-            !(language === 'vi' ? v.referenceVi : v.referenceEn) ? v.reference : null,
-            !(language === 'vi' ? v.verseTextVi : v.verseTextEn) ? v.verseText : null,
-          ])
-        : []),
-    ],
-    language
-  );
 
   // A newly saved (or edited) verse always replaces the card — no
   // tapping needed. Archive taps still work: they only change the

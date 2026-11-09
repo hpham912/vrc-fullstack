@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChurchEvent, DailyVerse, SpotlightBannerConfig, SpotlightTheme, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { useAutoTranslate } from '../../hooks/useAutoTranslate.ts';
 import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
 import {
   Calendar,
@@ -280,19 +279,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
     : (activeEvent ? (activeEvent.location || displayAddress) : (safeConfig.locationTag || displayAddress));
 
-  const { tr } = useAutoTranslate(
-    [
-      displayBadge,
-      displayTitle,
-      displaySubtitle,
-      displayDescription,
-      displayLocationTag,
-      todayVerse?.verseText,
-      todayVerse?.reference,
-    ],
-    language
-  );
-
   if (isLoading) {
     return (
       <div className={s.container}>
@@ -315,7 +301,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Top Row: Clean Themed Badge Pill + Admin Customizer Button */}
           <div className={s.heroTopRow}>
             <div className={`${s.heroBadgeBase} ${bannerTheme.badgeText}`}>
-              <span className="truncate">{language === 'vi' ? (spotlightConfig?.badgeVi || tr(displayBadge)) : (spotlightConfig?.badgeEn || tr(displayBadge))}</span>
+              <span className="truncate">{language === 'vi' ? (spotlightConfig?.badgeVi || (displayBadge || '')) : (spotlightConfig?.badgeEn || (displayBadge || ''))}</span>
             </div>
 
             {isAdmin && onOpenSpotlightEditor && (
@@ -340,17 +326,17 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           {/* Title & Subtitle */}
           <div className={s.heroTitleGroup}>
             <h1 className={s.heroTitle}>
-              {language === 'vi' ? (activeEvent?.titleVi || spotlightConfig?.titleVi || tr(displayTitle)) : (activeEvent?.titleEn || spotlightConfig?.titleEn || tr(displayTitle))}
+              {language === 'vi' ? (activeEvent?.titleVi || spotlightConfig?.titleVi || (displayTitle || '')) : (activeEvent?.titleEn || spotlightConfig?.titleEn || (displayTitle || ''))}
             </h1>
 
             {displaySubtitle && (
               <div className={s.heroSubtitleBox}>
-                {language === 'vi' ? (spotlightConfig?.subtitleVi || tr(displaySubtitle)) : (spotlightConfig?.subtitleEn || tr(displaySubtitle))}
+                {language === 'vi' ? (spotlightConfig?.subtitleVi || (displaySubtitle || '')) : (spotlightConfig?.subtitleEn || (displaySubtitle || ''))}
               </div>
             )}
 
             <p className={s.heroDesc}>
-              {language === 'vi' ? (activeEvent?.descriptionVi || spotlightConfig?.descriptionVi || tr(displayDescription)) : (activeEvent?.descriptionEn || spotlightConfig?.descriptionEn || tr(displayDescription))}
+              {language === 'vi' ? (activeEvent?.descriptionVi || spotlightConfig?.descriptionVi || (displayDescription || '')) : (activeEvent?.descriptionEn || spotlightConfig?.descriptionEn || (displayDescription || ''))}
             </p>
           </div>
 
@@ -364,7 +350,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             )}
             <span className={s.metaChip}>
               <MapPin className={s.metaChipIcon} />
-              <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || tr(displayLocationTag)) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || tr(displayLocationTag))}</span>
+              <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || (displayLocationTag || '')) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || (displayLocationTag || ''))}</span>
             </span>
           </div>
 
@@ -486,11 +472,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         const theme = getCategoryTheme(nextUpcomingEvent.category);
         const CategoryIcon = theme.icon;
         const eventTitle = language === 'vi'
-          ? (nextUpcomingEvent.titleVi || tr(nextUpcomingEvent.title))
-          : (nextUpcomingEvent.titleEn || tr(nextUpcomingEvent.title));
+          ? (nextUpcomingEvent.titleVi || (nextUpcomingEvent.title || ''))
+          : (nextUpcomingEvent.titleEn || (nextUpcomingEvent.title || ''));
         const eventDesc = language === 'vi'
-          ? (nextUpcomingEvent.descriptionVi || tr(nextUpcomingEvent.description))
-          : (nextUpcomingEvent.descriptionEn || tr(nextUpcomingEvent.description));
+          ? (nextUpcomingEvent.descriptionVi || (nextUpcomingEvent.description || ''))
+          : (nextUpcomingEvent.descriptionEn || (nextUpcomingEvent.description || ''));
 
         return (
           <section className={s.upcomingSection}>
@@ -623,11 +609,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               const serviceTitle =
                 language === 'vi'
                   ? svc.titleVi
-                  : svc.titleEn?.trim() || tr(svc.titleVi);
+                  : svc.titleEn?.trim() || (svc.titleVi || '');
               const serviceDesc =
                 language === 'vi'
                   ? svc.descVi
-                  : svc.descEn?.trim() || tr(svc.descVi);
+                  : svc.descEn?.trim() || (svc.descVi || '');
 
               return (
                 <div key={svc.id || idx} className={s.serviceItemCol}>

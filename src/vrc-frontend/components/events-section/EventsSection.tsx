@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChurchEvent } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { useAutoTranslate } from '../../hooks/useAutoTranslate.ts';
 import {
   Calendar,
   Clock,
@@ -175,11 +174,6 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
     }
   };
 
-  const { tr } = useAutoTranslate(
-    events.flatMap((e) => [e.title, e.description, e.location]),
-    language
-  );
-
   // Current local date in YYYY-MM-DD
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -330,7 +324,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   {/* Title & Timing & Location (no description, click to see details) */}
                   <div className={s.cardRightCol}>
                     <h3 className={s.cardTitle}>
-                      {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
+                      {language === 'vi' ? (evt.titleVi || (evt.title || '')) : (evt.titleEn || (evt.title || ''))}
                     </h3>
 
                     <div className={s.cardTimeRow}>
@@ -342,7 +336,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                       <div className={s.cardLocationRow}>
                         <MapPin className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
                         <span className="truncate">
-                          {language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}
+                          {language === 'vi' ? (evt.locationVi || (evt.location || '')) : (evt.locationEn || (evt.location || ''))}
                         </span>
                       </div>
                     )}
@@ -429,7 +423,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                     <div className={s.cardRightCol}>
                       <h4 className={s.pastTitle}>
-                        {language === 'vi' ? (evt.titleVi || tr(evt.title)) : (evt.titleEn || tr(evt.title))}
+                        {language === 'vi' ? (evt.titleVi || (evt.title || '')) : (evt.titleEn || (evt.title || ''))}
                       </h4>
 
                       <div className={s.pastTimeRow}>
@@ -441,7 +435,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                         <div className={s.pastLocationRow}>
                           <MapPin className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" />
                           <span className="truncate">
-                            {language === 'vi' ? (evt.locationVi || tr(evt.location)) : (evt.locationEn || tr(evt.location))}
+                            {language === 'vi' ? (evt.locationVi || (evt.location || '')) : (evt.locationEn || (evt.location || ''))}
                           </span>
                         </div>
                       )}
