@@ -9,6 +9,7 @@ import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDashboard.tsx';
 import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
+import { NotificationsSection } from './vrc-frontend/components/notifications-section/NotificationsSection.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
 import { NotificationModal } from './vrc-frontend/components/notification-modal/NotificationModal.tsx';
@@ -68,6 +69,24 @@ function ChurchAppContent() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setShowNotifModal(false);
+  };
+
+  // Tapping a notification never navigates away from the tab you are on,
+  // except a verse notice, which goes to the Scripture tab. A notice opens
+  // its modal and an event opens its details, both on top of the current
+  // tab — on mobile that is the Notifications tab itself.
+  const handleSelectNotification = (notif: AppNotification) => {
+    setShowNotifModal(false);
+    if (notif.type === 'event') {
+      // Show the event's details only — never navigate away.
+      const evt = events.find((e) => e.id === notif.targetId);
+      if (evt) setSelectedEvent(evt);
+    } else if (notif.type === 'verse') {
+      setActiveTab('verse');
+    } else if (notif.type === 'announcement') {
+      // Admin notice: show the full text in a modal, stay put.
+      setSelectedAnnouncement(notif);
+    }
   };
 
   // Every tab switch scrolls back to the top, so a tab never opens
@@ -451,6 +470,16 @@ function ChurchAppContent() {
             </div>
           </div>
         )}
+
+        {activeTab === 'notifications' && (
+          <NotificationsSection
+            notifications={notifications}
+            onSelectNotification={handleSelectNotification}
+            isAdmin={isAdmin}
+            onNotificationAdded={loadData}
+            isLoading={isLoading}
+          />
+        )}
       </main>
 
       {/* Floating Glass Prayer Request Button (Home Only, Sticky Above Bottom Bar) */}
@@ -475,12 +504,7 @@ function ChurchAppContent() {
       <IosTabBar
         activeTab={activeTab}
         setActiveTab={handleTabChange}
-        onOpenNotifications={() => {
-          setShowNotifModal((prev) => !prev);
-          NotificationClient.requestPermission();
-        }}
         hasNotifications={notifications.length > 0}
-        isNotifOpen={showNotifModal}
         navRef={tabBarRef}
       />
 
@@ -640,25 +664,13 @@ function ChurchAppContent() {
         onClose={() => setPrayerModalOpen(false)}
       />
 
-      {/* Global Notifications Modal */}
+      {/* Global Notifications Modal (desktop popup) */}
       <NotificationModal
         isOpen={showNotifModal}
         onClose={() => setShowNotifModal(false)}
         notifications={notifications}
         onRequestPermission={() => NotificationClient.requestPermission()}
-        onSelectNotification={(notif) => {
-          setShowNotifModal(false);
-          if (notif.type === 'event') {
-            // Show the event's details only — never navigate away.
-            const evt = events.find((e) => e.id === notif.targetId);
-            if (evt) setSelectedEvent(evt);
-          } else if (notif.type === 'verse') {
-            setActiveTab('verse');
-          } else if (notif.type === 'announcement') {
-            // Admin notice: show the full text in a modal, stay put.
-            setSelectedAnnouncement(notif);
-          }
-        }}
+        onSelectNotification={handleSelectNotification}
         isAdmin={isAdmin}
         onNotificationAdded={loadData}
         isLoading={isLoading}

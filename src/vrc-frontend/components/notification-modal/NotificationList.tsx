@@ -17,9 +17,9 @@ interface NotificationListProps {
 }
 
 // Shared notification list content, used by both the desktop popup
-// (NotificationModal) and the mobile Notifications tab screen.
-// Owns the admin add-notice form and the clear-all confirm, so neither
-// container duplicates them.
+// (NotificationModal) and the mobile Notifications tab page
+// (NotificationsSection). Owns the admin add-notice form and the
+// clear-all confirm, so neither container duplicates them.
 export const NotificationList: React.FC<NotificationListProps> = ({
   notifications,
   onSelectNotification,

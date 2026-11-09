@@ -6,9 +6,7 @@ import { iosTabBarStyles as s } from './IosTabBar.styles.ts';
 interface IosTabBarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  onOpenNotifications: () => void;
   hasNotifications?: boolean;
-  isNotifOpen?: boolean;
   openAdminPortal?: () => void;
   openLoginModal?: () => void;
   // Ref to the <nav> so the app can measure the tab bar's real height
@@ -20,14 +18,16 @@ interface IosTabBarProps {
 export const IosTabBar: React.FC<IosTabBarProps> = ({
   activeTab,
   setActiveTab,
-  onOpenNotifications,
   hasNotifications = false,
-  isNotifOpen = false,
   navRef,
 }) => {
   const { t } = useLanguage();
 
-  // Exactly 4 mobile bottom tabs: Home, Events, Scripture, Notifications
+  // Exactly 4 mobile bottom tabs: Home, Events, Scripture, Notifications.
+  // Notifications is a real tab page on mobile (NotificationsSection),
+  // so the bell navigates like any other tab. Tapping it while already
+  // on Notifications stays there — it never toggles closed. On desktop
+  // the notifications stay a popup opened from the header bell.
   const tabs = [
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
@@ -41,17 +41,11 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isNotifTab = tab.id === 'notifications';
-          const isActive = isNotifTab ? isNotifOpen : (activeTab === tab.id && !isNotifOpen);
+          const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                if (isNotifTab) {
-                  onOpenNotifications();
-                } else {
-                  setActiveTab(tab.id);
-                }
-              }}
+              onClick={() => setActiveTab(tab.id)}
               className={`${s.tabBtnBase} ${isActive ? s.tabBtnActive : s.tabBtnInactive}`}
               aria-label={tab.label}
             >
