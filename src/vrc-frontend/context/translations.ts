@@ -383,8 +383,8 @@ export const translations = {
   adminCustomizeBannerShort: { vi: 'Tuỳ Chỉnh Banner', en: 'Customize Banner' },
   adminVerseEditFormTitle: { vi: 'Chỉnh Sửa Câu Kinh Thánh', en: 'Edit Daily Scripture' },
   adminVerseAddFormTitle: { vi: 'Thêm Câu Kinh Thánh', en: 'Add Daily Scripture' },
-  adminEventEditHeader: { vi: 'Chỉnh Sửa Sự Kiện', en: 'Edit Event' },
-  adminEventEditFormTitle: { vi: 'Sửa Thông Tin Sự Kiện', en: 'Edit Event' },
+  adminEventEditHeader: { vi: 'Sửa Sự Kiện', en: 'Edit Event' },
+  adminEventEditFormTitle: { vi: 'Sửa Sự Kiện', en: 'Edit Event' },
 
   // Admin portal — event form
   adminEventFormTitle: { vi: 'Thêm Sự Kiện Mới Vào Lịch', en: 'Add New Event to Calendar' },
