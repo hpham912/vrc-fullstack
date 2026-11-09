@@ -36,7 +36,7 @@ export function getYouTubeThumbnailUrl(videoId: string): string {
 }
 
 export function getYouTubeEmbedUrl(videoId: string): string {
-  return `https://www.youtube.com/embed/${videoId}?rel=0`;
+  return `https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1`;
 }
 
 export function getYouTubeWatchUrl(videoId: string): string {

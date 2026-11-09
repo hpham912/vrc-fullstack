@@ -22,7 +22,7 @@ export const sermonsSectionStyles = {
   emptyIcon: 'w-10 h-10 text-stone-300 mx-auto mb-3',
   emptyTitle: 'font-serif font-bold text-stone-900 dark:text-stone-100 text-base',
   emptySub: 'text-stone-500 dark:text-stone-400 text-xs mt-1',
-  playerBody: 'space-y-3',
+  playerBody: 'p-6 space-y-3',
   playerFrame: 'w-full aspect-video rounded-xl bg-stone-950 border-0',
   playerDesc: 'text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-line break-words',
   playerMeta: 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-stone-500 dark:text-stone-400',
