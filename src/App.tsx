@@ -302,11 +302,28 @@ function ChurchAppContent() {
               src={getHomeBannerSrc(language, 'light')}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} dark:hidden`}
+              onError={(e) => {
+                // If the banner file is missing from the deployed build,
+                // hide the broken image instead of showing a broken icon.
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <img
               src={getHomeBannerSrc(language, 'dark')}
               alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
               className={`${s.homeBannerImg} hidden dark:block`}
+              onError={(e) => {
+                // If the dark banner file is missing from the deployed
+                // build, fall back to the light banner for this language
+                // instead of showing a broken image. Only swap once.
+                const img = e.currentTarget;
+                const fallback = getHomeBannerSrc(language, 'light');
+                if (!img.src.endsWith(fallback)) {
+                  img.src = fallback;
+                } else {
+                  img.style.display = 'none';
+                }
+              }}
             />
           </div>
 
