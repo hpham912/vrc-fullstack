@@ -461,12 +461,13 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         </div>
 
         <div className={s.submitRow}>
-          <button
+          <Button
             type="submit"
+            variant="dark"
+            size="md"
             disabled={submitting}
-            className={s.saveBtn}
+            leftIcon={<Save className="w-3.5 h-3.5" />}
           >
-            <Save className={s.saveIcon} />
             <span>
               {submitting
                 ? t('commonSaving')
@@ -474,7 +475,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
                 ? t('adminVerseUpdate')
                 : t('adminVerseSave')}
             </span>
-          </button>
+          </Button>
         </div>
       </form>
 

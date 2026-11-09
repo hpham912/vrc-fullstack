@@ -50,6 +50,21 @@ export interface DailyVerse {
   updatedAt?: string | null;
 }
 
+export interface Sermon {
+  id: number;
+  youtubeUrl: string;
+  videoId: string;
+  titleVi: string;
+  titleEn: string;
+  descriptionVi?: string | null;
+  descriptionEn?: string | null;
+  date: string; // YYYY-MM-DD (the Sunday worship date)
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
 export interface Announcement {
   id: number;
   title: string;

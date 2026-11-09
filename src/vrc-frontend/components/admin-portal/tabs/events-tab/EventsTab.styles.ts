@@ -28,9 +28,6 @@ export const eventsTabStyles = {
   featuredLabel: 'flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700',
   checkbox: 'rounded border-stone-300 text-stone-900 focus:ring-stone-400',
   submitRow: 'text-right pt-2 border-t border-stone-200',
-  saveBtn:
-    'px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition-colors',
-  saveIcon: 'w-3.5 h-3.5',
   actionIcon: 'w-4 h-4',
   previewSection: 'space-y-2 w-full min-w-0',
   previewHeader: 'flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-500',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Home, Calendar, BookOpen, Bell } from 'lucide-react';
+import { Home, Calendar, BookOpen, Video, Bell } from 'lucide-react';
 import { iosTabBarStyles as s } from './IosTabBar.styles.ts';
 
 interface IosTabBarProps {
@@ -23,15 +23,17 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
 }) => {
   const { t } = useLanguage();
 
-  // Exactly 4 mobile bottom tabs: Home, Events, Scripture, Notifications.
-  // Notifications is a real tab page on mobile (NotificationsSection),
-  // so the bell navigates like any other tab. Tapping it while already
-  // on Notifications stays there — it never toggles closed. On desktop
-  // the notifications stay a popup opened from the header bell.
+  // Exactly 5 mobile bottom tabs: Home, Events, Scripture, Sermons,
+  // Notifications. Notifications is a real tab page on mobile
+  // (NotificationsSection), so the bell navigates like any other tab.
+  // Tapping it while already on Notifications stays there — it never
+  // toggles closed. On desktop the notifications stay a popup opened
+  // from the header bell.
   const tabs = [
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
+    { id: 'sermons', label: t('navSermons'), icon: Video },
     { id: 'notifications', label: t('navNotifications'), icon: Bell },
   ];
 

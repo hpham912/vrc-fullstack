@@ -6,6 +6,7 @@ import { errorHandler } from './middleware/errorHandler.ts';
 import authRoutes from './routes/authRoutes.ts';
 import eventRoutes from './routes/eventRoutes.ts';
 import verseRoutes from './routes/verseRoutes.ts';
+import sermonRoutes from './routes/sermonRoutes.ts';
 import notifRoutes from './routes/notifRoutes.ts';
 import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
@@ -53,6 +54,7 @@ export const createApp = () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/verses', verseRoutes);
+  app.use('/api/sermons', sermonRoutes);
   app.use('/api/notifications', notifRoutes);
   app.use('/api/spotlight', spotlightRoutes);
   app.use('/api/church-info', churchInfoRoutes);

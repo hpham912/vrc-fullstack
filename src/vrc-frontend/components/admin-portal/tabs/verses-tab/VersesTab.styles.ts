@@ -15,8 +15,6 @@ export const versesTabStyles = {
   fieldGrid: 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0',
   field: 'w-full min-w-0',
   submitRow: 'text-right pt-2 border-t border-stone-200',
-  saveBtn:
-    'px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5',
   saveIcon: 'w-3.5 h-3.5',
   listSection: 'space-y-2 w-full min-w-0',
   listTitle: 'text-xs font-bold uppercase tracking-wider text-stone-500',

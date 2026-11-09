@@ -1,0 +1,185 @@
+import { Router } from 'express';
+import { db } from '../../vrc-db/index.ts';
+import { sermons } from '../../vrc-db/schema.ts';
+import { eq, desc } from 'drizzle-orm';
+import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
+import { extractYouTubeVideoId } from '../../vrc-shared/utils/youtube.ts';
+
+const router = Router();
+
+// GET /api/sermons - List all sermons from the active database (Dev DB or
+// Prod DB), newest Sunday first. A growing archive — never pruned to 10
+// like verses / notifications.
+router.get('/', async (_req, res) => {
+  try {
+    const allSermons = await db
+      .select()
+      .from(sermons)
+      .orderBy(desc(sermons.date), desc(sermons.id));
+    res.json(allSermons);
+  } catch (error: any) {
+    console.error('Failed to fetch sermons from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to retrieve sermons from database' });
+  }
+});
+
+// GET /api/sermons/:id - Get single sermon from PostgreSQL
+router.get('/:id', async (req, res) => {
+  try {
+    const sermonId = Number(req.params.id);
+    if (isNaN(sermonId)) {
+      return res.status(400).json({ error: 'Invalid sermon ID' });
+    }
+
+    const sermonResult = await db.select().from(sermons).where(eq(sermons.id, sermonId)).limit(1);
+
+    if (sermonResult.length === 0) {
+      return res.status(404).json({ error: 'Sermon not found' });
+    }
+
+    res.json(sermonResult[0]);
+  } catch (error: any) {
+    console.error('Failed to fetch sermon from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to fetch sermon details' });
+  }
+});
+
+// POST /api/sermons - Create new sermon in PostgreSQL (Admin only).
+// The video lives on YouTube — only the link / video ID, bilingual
+// title + description, and the Sunday date are stored.
+router.post('/', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const {
+      youtubeUrl,
+      titleVi,
+      titleEn,
+      descriptionVi,
+      descriptionEn,
+      date,
+    } = req.body;
+
+    const cleanUrl = String(youtubeUrl || '').trim();
+    const videoId = extractYouTubeVideoId(cleanUrl);
+    const finalTitleVi = String(titleVi || '').trim();
+    const finalTitleEn = String(titleEn || '').trim();
+    const finalDescVi = String(descriptionVi || '').trim() || null;
+    const finalDescEn = String(descriptionEn || '').trim() || null;
+
+    if (!cleanUrl || !videoId) {
+      return res.status(400).json({
+        error: 'A valid YouTube link is required.',
+      });
+    }
+    if (!finalTitleVi || !finalTitleEn || !date) {
+      return res.status(400).json({
+        error: 'Vietnamese and English titles and the Sunday date are required.',
+      });
+    }
+
+    const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
+
+    const newSermon = await db
+      .insert(sermons)
+      .values({
+        youtubeUrl: cleanUrl,
+        videoId,
+        titleVi: finalTitleVi,
+        titleEn: finalTitleEn,
+        descriptionVi: finalDescVi,
+        descriptionEn: finalDescEn,
+        date,
+        createdBy: actorName,
+        updatedBy: actorName,
+      })
+      .returning();
+
+    res.status(201).json(newSermon[0]);
+  } catch (error: any) {
+    console.error('Failed to create sermon in PostgreSQL:', error);
+    const detail = error?.cause?.detail || error?.cause?.message || error?.message || 'Failed to create sermon in database';
+    res.status(500).json({ error: detail });
+  }
+});
+
+// PUT /api/sermons/:id - Update sermon in PostgreSQL (Admin only)
+router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const sermonId = Number(req.params.id);
+    if (isNaN(sermonId)) {
+      return res.status(400).json({ error: 'Invalid sermon ID' });
+    }
+
+    const {
+      youtubeUrl,
+      titleVi,
+      titleEn,
+      descriptionVi,
+      descriptionEn,
+      date,
+    } = req.body;
+
+    const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
+
+    // A new YouTube link must be a valid one; otherwise keep the stored
+    // video ID and link untouched.
+    let videoId: string | undefined;
+    let cleanUrl: string | undefined;
+    if (youtubeUrl !== undefined) {
+      cleanUrl = String(youtubeUrl || '').trim();
+      const extracted = extractYouTubeVideoId(cleanUrl);
+      if (!cleanUrl || !extracted) {
+        return res.status(400).json({ error: 'A valid YouTube link is required.' });
+      }
+      videoId = extracted;
+    }
+
+    const updated = await db
+      .update(sermons)
+      .set({
+        youtubeUrl: cleanUrl,
+        videoId,
+        titleVi: titleVi !== undefined ? String(titleVi).trim() : undefined,
+        titleEn: titleEn !== undefined ? String(titleEn).trim() : undefined,
+        descriptionVi: descriptionVi !== undefined ? String(descriptionVi).trim() || null : undefined,
+        descriptionEn: descriptionEn !== undefined ? String(descriptionEn).trim() || null : undefined,
+        date,
+        updatedBy: actorName,
+        updatedAt: new Date(),
+      })
+      .where(eq(sermons.id, sermonId))
+      .returning();
+
+    if (updated.length === 0) {
+      return res.status(404).json({ error: 'Sermon not found' });
+    }
+
+    res.json(updated[0]);
+  } catch (error: any) {
+    console.error('Failed to update sermon in PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to update sermon in database' });
+  }
+});
+
+// DELETE /api/sermons/:id - Delete sermon from PostgreSQL (Admin only).
+// No notification is posted for sermons, so there is nothing to clean up.
+router.delete('/:id', requireAdmin, async (req, res) => {
+  try {
+    const sermonId = Number(req.params.id);
+    if (isNaN(sermonId)) {
+      return res.status(400).json({ error: 'Invalid sermon ID' });
+    }
+
+    const deleted = await db.delete(sermons).where(eq(sermons.id, sermonId)).returning();
+
+    if (deleted.length === 0) {
+      return res.status(404).json({ error: 'Sermon not found' });
+    }
+
+    res.json({ message: 'Sermon successfully removed from database', sermon: deleted[0] });
+  } catch (error: any) {
+    console.error('Failed to delete sermon from PostgreSQL:', error);
+    res.status(500).json({ error: error?.message || 'Failed to delete sermon from database' });
+  }
+});
+
+export default router;

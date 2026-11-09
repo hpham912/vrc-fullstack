@@ -39,6 +39,4 @@ export const editHeaderVerseModalStyles = {
     'pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2 flex-wrap',
   cancelBtn:
     'px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors',
-  saveBtn:
-    'px-5 py-2 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 disabled:opacity-50 transition-all shadow-xs flex items-center gap-1.5',
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChurchEvent, ChurchInfo, DailyVerse } from '../../types/index.ts';
+import { ChurchEvent, ChurchInfo, DailyVerse, Sermon } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { APP_VERSION } from '../../constants/version.ts';
@@ -8,10 +8,12 @@ import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
 import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
 import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
+import { SermonsTab } from './tabs/sermons-tab/SermonsTab.tsx';
 import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
 import {
   Calendar,
   BookOpen,
+  Video,
   Plus,
   X,
   CheckCircle2,
@@ -25,6 +27,7 @@ import {
 interface AdminPortalProps {
   events: ChurchEvent[];
   allVerses: DailyVerse[];
+  sermons: Sermon[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
   focusedMode?: boolean;
@@ -39,6 +42,7 @@ interface AdminPortalProps {
 export const AdminPortal: React.FC<AdminPortalProps> = ({
   events,
   allVerses,
+  sermons,
   churchInfo,
   initialTab = 'create-event',
   focusedMode = false,
@@ -194,6 +198,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <button
               type="button"
+              onClick={() => setActiveTab('sermons')}
+              className={`${s.mobileTabBtnBase} ${
+                activeTab === 'sermons' ? s.mobileTabActiveDark : s.mobileTabIdle
+              }`}
+            >
+              <Video className={s.tabIcon} />
+              <span className="truncate">{t('tabSermons')} ({sermons.length})</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('admin-accounts')}
               className={`${s.mobileTabBtnBase} ${
                 activeTab === 'admin-accounts' ? s.mobileTabActiveAmber : s.mobileTabIdle
@@ -265,6 +280,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('sermons')}
+            className={`${s.desktopTabBtnBase} ${
+              activeTab === 'sermons' ? s.desktopTabActiveDark : s.desktopTabIdle
+            }`}
+          >
+            <Video className={s.tabIcon} />
+            {t('tabSermons')} ({sermons.length})
+          </button>
+
+          <button
             onClick={() => setActiveTab('admin-accounts')}
             className={`${s.desktopTabBtnBase} ${
               activeTab === 'admin-accounts' ? s.desktopTabActiveAmber : s.desktopTabIdleAmber
@@ -293,6 +318,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <EventsTab events={events} churchInfo={churchInfo} initialEvent={initialEvent} adminUser={adminUser} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onTabChange={setActiveTab} onEditingChange={setEventEditing} resetFormSignal={resetEventFormSignal} />
 
           <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
+
+          <SermonsTab sermons={sermons} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
 
           <AdminAccountsTab activeTab={activeTab} getToken={getToken} adminUser={adminUser} showFeedback={showFeedback} />
 

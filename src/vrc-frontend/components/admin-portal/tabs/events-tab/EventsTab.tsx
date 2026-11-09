@@ -6,6 +6,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
+import { Button } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -553,12 +554,13 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         </div>
 
         <div className={s.submitRow}>
-          <button
+          <Button
             type="submit"
+            variant="dark"
+            size="md"
             disabled={submitting}
-            className={s.saveBtn}
+            leftIcon={<Save className="w-3.5 h-3.5" />}
           >
-            <Save className={s.saveIcon} />
             <span>
               {submitting
                 ? t('commonSaving')
@@ -566,7 +568,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 ? t('adminEventUpdate')
                 : t('eventSave')}
             </span>
-          </button>
+          </Button>
         </div>
       </form>
 

@@ -3,6 +3,7 @@ import { ChurchInfo, DailyVerse, HeaderVerse, DEFAULT_HEADER_VERSE } from '../..
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
+import { Button } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -344,23 +345,21 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           >
             {t('commonCancel')}
           </button>
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
             disabled={saving || fetchingApi}
-            className={s.saveBtn}
-          >
-            {saving ? (
-              <>
+            leftIcon={
+              saving ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>{t('commonSaving')}</span>
-              </>
-            ) : (
-              <>
+              ) : (
                 <Save className="w-3.5 h-3.5" />
-                <span>{t('churchInfoSaveChanges')}</span>
-              </>
-            )}
-          </button>
+              )
+            }
+          >
+            <span>{saving ? t('commonSaving') : t('churchInfoSaveChanges')}</span>
+          </Button>
         </div>
       </form>
     </Modal>

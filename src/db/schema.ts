@@ -86,6 +86,25 @@ export const dailyVerses = pgTable('daily_verses', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Sunday worship sermon videos (Bài Giảng) — hosted on YouTube, the app
+// stores NO video data: only the YouTube link / video ID, bilingual title
+// + description, and the Sunday worship date. A growing archive, never
+// pruned (unlike the 10-latest verses / notifications).
+export const sermons = pgTable('sermons', {
+  id: serial('id').primaryKey(),
+  youtubeUrl: text('youtube_url').notNull(),
+  videoId: text('video_id').notNull(),
+  titleVi: text('title_vi').notNull(),
+  titleEn: text('title_en').notNull(),
+  descriptionVi: text('description_vi'),
+  descriptionEn: text('description_en'),
+  date: text('date').notNull(), // YYYY-MM-DD (the Sunday worship date)
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 // Community Prayer Requests & Praise Reports
 export const prayerRequests = pgTable('prayer_requests', {
   id: serial('id').primaryKey(),
