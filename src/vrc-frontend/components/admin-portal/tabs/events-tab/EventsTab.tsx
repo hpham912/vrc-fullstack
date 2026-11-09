@@ -5,6 +5,7 @@ import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
+import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -66,7 +67,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const [eventStartTime, setEventStartTime] = useState('03:00 PM');
   const [eventEndTime, setEventEndTime] = useState('05:00 PM');
   const [eventLocation, setEventLocation] = useState('Main Sanctuary');
-  const [eventAddress, setEventAddress] = useState('Liên hệ Hội Thánh');
+  const [eventAddress, setEventAddress] = useState(DEFAULT_EVENT_ADDRESS);
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
   const [eventOrganizer, setEventOrganizer] = useState(adminUser?.displayName || 'Pastoral Ministry Team');
   const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vnrevivalchurch.org');
@@ -88,7 +89,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEventStartTime('03:00 PM');
     setEventEndTime('05:00 PM');
     setEventLocation('Main Sanctuary');
-    setEventAddress('Liên hệ Hội Thánh');
+    setEventAddress(DEFAULT_EVENT_ADDRESS);
     setEventIsFeatured(false);
     setEditingEventAudit(null);
   };
@@ -104,7 +105,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEventStartTime(evt.startTime);
     setEventEndTime(evt.endTime || '');
     setEventLocation(evt.location);
-    setEventAddress(evt.address || churchInfo?.address || 'Tempe, Arizona');
+    // If the event has no address, or its address is just the church
+    // street address (the old default), show the new default instead.
+    // A real offsite address is kept as-is.
+    const churchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
+    const savedAddr = (evt.address || '').trim();
+    setEventAddress(!savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : evt.address);
     setEventIsFeatured(evt.isFeatured);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');

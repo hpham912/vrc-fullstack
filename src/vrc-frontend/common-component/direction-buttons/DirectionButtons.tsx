@@ -2,6 +2,7 @@ import React from 'react';
 import { Compass, Navigation, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../../utils/directions.ts';
+import { DEFAULT_EVENT_ADDRESS } from '../../constants/church.ts';
 import { directionButtonsStyles as s } from './DirectionButtons.styles.ts';
 
 interface DirectionButtonsProps {
@@ -20,8 +21,16 @@ export const DirectionButtons: React.FC<DirectionButtonsProps> = ({
   className = '',
 }) => {
   const { language, t } = useLanguage();
-  const googleUrl = getGoogleMapsDirectionsUrl(address);
-  const appleUrl = getAppleMapsDirectionsUrl(address);
+  const cleanAddress = (address || '').trim();
+
+  // The default address ("Liên hệ Hội Thánh") is not a real street
+  // address, so there is nothing to route to — hide the buttons entirely.
+  if (!cleanAddress || cleanAddress === DEFAULT_EVENT_ADDRESS) {
+    return null;
+  }
+
+  const googleUrl = getGoogleMapsDirectionsUrl(cleanAddress);
+  const appleUrl = getAppleMapsDirectionsUrl(cleanAddress);
 
   if (variant === 'detailed') {
     return (
