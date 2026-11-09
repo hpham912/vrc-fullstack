@@ -23,6 +23,8 @@ export const eventsTabStyles = {
   addressLabelRow: 'flex items-center justify-between mb-1',
   hintText: 'text-caption text-stone-400',
   noteText: 'text-label text-stone-500 mt-1',
+  useChurchAddrBtn:
+    'mt-1.5 text-label font-bold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0',
   featuredRow: 'flex items-center pt-1',
   featuredLabel: 'flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700',
   checkbox: 'rounded border-stone-300 text-stone-900 focus:ring-stone-400',

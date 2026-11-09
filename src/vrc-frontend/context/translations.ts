@@ -396,6 +396,7 @@ export const translations = {
   adminEventAddress: { vi: 'Địa Chỉ Cụ Thể (Chỉ Đường Google Maps)', en: 'Venue Address (Google Maps Directions)' },
   adminEventAddressHint: { vi: 'Để trống = Địa chỉ Hội Thánh', en: 'Blank = Church Address' },
   adminEventAddressNote: { vi: 'Nếu để trống hoặc không đổi, nút Chỉ Đường sẽ dẫn tới địa chỉ Hội Thánh thiết lập trong Lịch Sinh Hoạt ({address}). Nếu là địa điểm dã ngoại hay ngoài nhà thờ, hãy nhập địa chỉ tại đây.', en: 'If left blank, the Directions button routes to the church sanctuary address ({address}). For retreats or offsite gatherings, enter the address here.' },
+  adminEventUseChurchAddress: { vi: 'Dùng địa chỉ Hội Thánh', en: 'Use church address' },
   adminEventFeatured: { vi: 'Đánh dấu là sự kiện nổi bật (Featured)', en: 'Mark as Featured Event' },
   adminEventUpdate: { vi: 'Cập Nhật Sự Kiện', en: 'Update Event' },
   adminEventFeaturedBadge: { vi: 'NỔI BẬT', en: 'FEATURED' },

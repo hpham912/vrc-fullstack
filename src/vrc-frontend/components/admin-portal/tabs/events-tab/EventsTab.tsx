@@ -529,6 +529,15 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             onChange={(e) => setEventAddress(e.target.value)}
             className={s.input}
           />
+          {eventAddress.trim() !== (churchInfo?.address || 'Tempe, Arizona').trim() && (
+            <button
+              type="button"
+              onClick={() => setEventAddress(churchInfo?.address || 'Tempe, Arizona')}
+              className={s.useChurchAddrBtn}
+            >
+              {t('adminEventUseChurchAddress')}
+            </button>
+          )}
           <p className={s.noteText}>
             {t('adminEventAddressNote', { address: churchInfo?.address || 'Tempe, Arizona' })}
           </p>
