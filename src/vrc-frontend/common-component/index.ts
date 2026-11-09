@@ -11,3 +11,5 @@ export { FeaturedStar } from './featured-star/FeaturedStar.tsx';
 export { EventDetailModal } from './event-detail-modal/EventDetailModal.tsx';
 export { LoadingShimmer } from './loading-shimmer/LoadingShimmer.tsx';
 export type { LoadingShimmerVariant } from './loading-shimmer/LoadingShimmer.tsx';
+export { YouTubePlayer } from './youtube-player/YouTubePlayer.tsx';
+export type { YouTubePlayerProps } from './youtube-player/YouTubePlayer.tsx';

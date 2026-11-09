@@ -227,7 +227,7 @@ export const translations = {
   sermonTitle: { vi: 'Bài Giảng', en: 'Sermons' },
   sermonEmpty: { vi: 'Chưa có bài giảng nào.', en: 'No sermons yet.' },
   sermonEmptySub: { vi: 'Bài giảng Chúa Nhật sẽ xuất hiện ở đây sau khi được đăng.', en: 'Sunday sermons will appear here once they are posted.' },
-  sermonWatchOnYoutube: { vi: 'Xem trên YouTube', en: 'Watch on YouTube' },
+  videoWatchOnYoutube: { vi: 'Xem trên YouTube', en: 'Watch on YouTube' },
   adminSermonAddTitle: { vi: 'Thêm Bài Giảng Mới', en: 'Add New Sermon' },
   adminSermonEditTitle: { vi: 'Sửa Bài Giảng', en: 'Edit Sermon' },
   adminSermonPublished: { vi: 'Bài Giảng Đã Đăng', en: 'Published Sermons' },

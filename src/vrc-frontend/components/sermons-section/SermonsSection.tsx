@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { Video, Play, Calendar, ExternalLink } from 'lucide-react';
+import { Video, Play, Calendar } from 'lucide-react';
 import { Sermon } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Modal, Card, LoadingShimmer, AdminAddButton } from '../../common-component/index.ts';
-import {
-  getYouTubeThumbnailUrl,
-  getYouTubeEmbedUrl,
-  getYouTubeWatchUrl,
-} from '../../../vrc-shared/utils/youtube.ts';
+import { Card, LoadingShimmer, AdminAddButton, YouTubePlayer } from '../../common-component/index.ts';
+import { getYouTubeThumbnailUrl } from '../../../vrc-shared/utils/youtube.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { sermonsSectionStyles as s } from './SermonsSection.styles.ts';
 
@@ -104,44 +100,18 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
         </div>
       )}
 
-      {/* Video player: the YouTube embed streams from YouTube, so the
-          app never downloads or stores the video itself. */}
-      <Modal
-        isOpen={Boolean(selectedSermon)}
-        onClose={() => setSelectedSermon(null)}
-        title={selectedSermon ? getSermonTitle(selectedSermon) : ''}
-        maxWidthClass="max-w-2xl"
-      >
-        {selectedSermon && (
-          <div className={s.playerBody}>
-            <iframe
-              src={getYouTubeEmbedUrl(selectedSermon.videoId)}
-              title={getSermonTitle(selectedSermon)}
-              className={s.playerFrame}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-            {getSermonDescription(selectedSermon) && (
-              <p className={s.playerDesc}>{getSermonDescription(selectedSermon)}</p>
-            )}
-            <div className={s.playerMeta}>
-              <span className={s.playerDateRow}>
-                <Calendar className={s.cardDateIcon} />
-                <span>{formatDateLocale(selectedSermon.date, language)}</span>
-              </span>
-              <a
-                href={getYouTubeWatchUrl(selectedSermon.videoId)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={s.playerWatchLink}
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>{t('sermonWatchOnYoutube')}</span>
-              </a>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* Video player: the shared YouTubePlayer modal. The video streams
+          from YouTube, so the app never downloads or stores it. */}
+      {selectedSermon && (
+        <YouTubePlayer
+          isOpen={Boolean(selectedSermon)}
+          onClose={() => setSelectedSermon(null)}
+          videoId={selectedSermon.videoId}
+          title={getSermonTitle(selectedSermon)}
+          description={getSermonDescription(selectedSermon)}
+          date={selectedSermon.date}
+        />
+      )}
     </div>
   );
 };
