@@ -22,7 +22,6 @@ export const eventsTabStyles = {
     'w-full max-w-full box-border min-w-0 appearance-none px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
   addressLabelRow: 'flex items-center justify-between mb-1',
   hintText: 'text-caption text-stone-400',
-  noteText: 'text-label text-stone-500 mt-1',
   useChurchAddrBtn:
     'mt-1.5 text-label font-bold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0',
   featuredRow: 'flex items-center pt-1',

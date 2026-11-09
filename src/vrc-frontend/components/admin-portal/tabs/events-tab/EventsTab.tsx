@@ -538,9 +538,6 @@ export const EventsTab: React.FC<EventsTabProps> = ({
               {t('adminEventUseChurchAddress')}
             </button>
           )}
-          <p className={s.noteText}>
-            {t('adminEventAddressNote', { address: churchInfo?.address || 'Tempe, Arizona' })}
-          </p>
         </div>
 
         <div className={s.featuredRow}>

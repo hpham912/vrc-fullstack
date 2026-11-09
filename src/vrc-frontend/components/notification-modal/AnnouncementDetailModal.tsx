@@ -26,7 +26,11 @@ export const AnnouncementDetailModal: React.FC<AnnouncementDetailModalProps> = (
       }
       maxWidthClass="max-w-md"
     >
-      {notification && <p className={s.bodyText}>{notification.body}</p>}
+      {notification && (
+        <div className={s.body}>
+          <p className={s.bodyText}>{notification.body}</p>
+        </div>
+      )}
     </Modal>
   );
 };

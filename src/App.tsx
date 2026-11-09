@@ -649,11 +649,9 @@ function ChurchAppContent() {
         onSelectNotification={(notif) => {
           setShowNotifModal(false);
           if (notif.type === 'event') {
-            // Show the event's details. If the event is gone (deleted),
-            // fall back to the Events tab.
+            // Show the event's details only — never navigate away.
             const evt = events.find((e) => e.id === notif.targetId);
             if (evt) setSelectedEvent(evt);
-            else setActiveTab('events');
           } else if (notif.type === 'verse') {
             setActiveTab('verse');
           } else if (notif.type === 'announcement') {
