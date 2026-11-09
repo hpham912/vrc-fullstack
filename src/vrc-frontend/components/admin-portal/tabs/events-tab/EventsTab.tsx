@@ -110,7 +110,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     // A real offsite address is kept as-is.
     const churchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
     const savedAddr = (evt.address || '').trim();
-    setEventAddress(!savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : evt.address);
+    setEventAddress(!savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : savedAddr);
     setEventIsFeatured(evt.isFeatured);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');
