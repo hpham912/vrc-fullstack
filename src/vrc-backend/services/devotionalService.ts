@@ -21,6 +21,15 @@
 
 const API_BASE = 'https://apibible.wbem.org/api/bibles';
 const FETCH_TIMEOUT_MS = 10_000;
+// A daily verse is one verse or a short run of verses — never a whole
+// chapter. Anything longer is almost certainly a mistyped reference.
+const MAX_VERSES = 5;
+
+function verseLimitError(count: number): Error {
+  return new Error(
+    `Chỉ lấy tối đa 5 câu một lần — đoạn này có ${count} câu. / Only up to 5 verses at a time — this passage has ${count} verses.`
+  );
+}
 
 export interface FetchScriptureResult {
   reference: string;
@@ -166,6 +175,16 @@ function parsePassage(passage: string): ParsedPassage {
   if (verseStart !== undefined && verseEnd !== undefined && verseEnd !== 'end' && verseEnd < verseStart) {
     throw new Error(`Invalid verse range in "${passage}".`);
   }
+  // Fail fast before calling the Bible API: an explicit range longer than
+  // the limit (e.g. "John 3:1-6") errors right away.
+  if (
+    verseStart !== undefined &&
+    verseEnd !== undefined &&
+    verseEnd !== 'end' &&
+    verseEnd - verseStart + 1 > MAX_VERSES
+  ) {
+    throw verseLimitError(verseEnd - verseStart + 1);
+  }
   return { bookNumber, chapter, verseStart, verseEnd };
 }
 
@@ -204,6 +223,10 @@ function selectVerses(
   verseEnd?: number | 'end'
 ): string {
   if (verseStart === undefined) {
+    // Whole chapter — only allowed when the chapter itself is short.
+    if (verses.length > MAX_VERSES) {
+      throw verseLimitError(verses.length);
+    }
     return verses.join(' ');
   }
   const startIndex = verseStart - 1;
@@ -216,6 +239,12 @@ function selectVerses(
       : verseEnd === 'end'
         ? verses.length - 1
         : Math.min(verseEnd - 1, verses.length - 1);
+  // Safety net for open-ended ranges ("John 3:16-end"): the explicit
+  // numeric range is already checked in parsePassage, but 'end' can only
+  // be counted once the chapter is fetched.
+  if (endIndex - startIndex + 1 > MAX_VERSES) {
+    throw verseLimitError(endIndex - startIndex + 1);
+  }
   return verses.slice(startIndex, endIndex + 1).join(' ');
 }
 
