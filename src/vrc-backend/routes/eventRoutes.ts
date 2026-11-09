@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
-import { events, eventRsvps } from '../../vrc-db/schema.ts';
+import { events } from '../../vrc-db/schema.ts';
 import { eq, desc, asc, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
@@ -30,7 +30,6 @@ async function cleanupPastEvents() {
       const idsToDelete = surplusPast.map((e) => e.id);
       if (idsToDelete.length > 0) {
         for (const id of idsToDelete) {
-          await db.delete(eventRsvps).where(eq(eventRsvps.eventId, id));
           await db.delete(events).where(eq(events.id, id));
         }
         console.log(`Pruned ${idsToDelete.length} past events in PostgreSQL, keeping 3 most recent.`);
@@ -114,7 +113,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/events/:id - Get single event with RSVPs from PostgreSQL
+// GET /api/events/:id - Get single event from PostgreSQL
 router.get('/:id', async (req, res) => {
   try {
     const eventId = Number(req.params.id);
@@ -128,16 +127,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    const rsvps = await db
-      .select()
-      .from(eventRsvps)
-      .where(eq(eventRsvps.eventId, eventId))
-      .orderBy(desc(eventRsvps.createdAt));
-
-    res.json({
-      ...eventResult[0],
-      rsvps,
-    });
+    res.json(eventResult[0]);
   } catch (error: any) {
     console.error('Failed to fetch event from PostgreSQL:', error);
     res.status(500).json({ error: error?.message || 'Failed to fetch event details' });
@@ -329,7 +319,6 @@ router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Invalid event ID' });
     }
 
-    await db.delete(eventRsvps).where(eq(eventRsvps.eventId, eventId));
     const deleted = await db.delete(events).where(eq(events.id, eventId)).returning();
 
     if (deleted.length === 0) {
@@ -344,43 +333,6 @@ router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
   } catch (error: any) {
     console.error('Failed to delete event from PostgreSQL:', error);
     res.status(500).json({ error: error?.message || 'Failed to delete event from database' });
-  }
-});
-
-// POST /api/events/:id/rsvp - RSVP to event in PostgreSQL
-router.post('/:id/rsvp', async (req, res) => {
-  try {
-    const eventId = Number(req.params.id);
-    const { userName, userEmail, attendeesCount, notes } = req.body;
-
-    if (!userName || !userEmail) {
-      return res.status(400).json({ error: 'Name and email are required for RSVP.' });
-    }
-
-    const count = Number(attendeesCount) || 1;
-
-    const newRsvp = await db
-      .insert(eventRsvps)
-      .values({
-        eventId,
-        userName: String(userName).trim(),
-        userEmail: String(userEmail).trim(),
-        attendeesCount: count,
-        notes: notes ? String(notes).trim() : null,
-      })
-      .returning();
-
-    await db
-      .update(events)
-      .set({
-        rsvpCount: sql`${events.rsvpCount} + ${count}`,
-      })
-      .where(eq(events.id, eventId));
-
-    res.status(201).json(newRsvp[0]);
-  } catch (error: any) {
-    console.error('Failed to submit RSVP to PostgreSQL:', error);
-    res.status(500).json({ error: error?.message || 'Failed to submit RSVP' });
   }
 });
 

@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
@@ -50,7 +49,6 @@ export const events = pgTable('events', {
   address: text('address').default('Tempe, Arizona'),
   imageUrl: text('image_url'),
   isFeatured: boolean('is_featured').notNull().default(false),
-  rsvpCount: integer('rsvp_count').notNull().default(0),
   maxCapacity: integer('max_capacity'),
   organizerName: text('organizer_name'),
   organizerEmail: text('organizer_email'),
@@ -88,19 +86,6 @@ export const dailyVerses = pgTable('daily_verses', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// Event RSVPs by attendees
-export const eventRsvps = pgTable('event_rsvps', {
-  id: serial('id').primaryKey(),
-  eventId: integer('event_id')
-    .notNull()
-    .references(() => events.id, { onDelete: 'cascade' }),
-  userName: text('user_name').notNull(),
-  userEmail: text('user_email').notNull(),
-  attendeesCount: integer('attendees_count').notNull().default(1),
-  notes: text('notes'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
 // Community Prayer Requests & Praise Reports
 export const prayerRequests = pgTable('prayer_requests', {
   id: serial('id').primaryKey(),
@@ -135,15 +120,3 @@ export const notifications = pgTable('notifications', {
   targetId: integer('target_id'),
   createdAt: timestamp('created_at').defaultNow(),
 });
-
-// Relationships
-export const eventsRelations = relations(events, ({ many }) => ({
-  rsvps: many(eventRsvps),
-}));
-
-export const eventRsvpsRelations = relations(eventRsvps, ({ one }) => ({
-  event: one(events, {
-    fields: [eventRsvps.eventId],
-    references: [events.id],
-  }),
-}));

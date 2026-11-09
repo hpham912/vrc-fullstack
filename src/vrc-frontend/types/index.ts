@@ -16,7 +16,6 @@ export interface ChurchEvent {
   address?: string | null;
   imageUrl?: string | null;
   isFeatured: boolean;
-  rsvpCount: number;
   maxCapacity?: number | null;
   organizerName?: string | null;
   organizerEmail?: string | null;
