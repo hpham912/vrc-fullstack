@@ -81,6 +81,12 @@ export const translations = {
   noEventsSub: { vi: 'Vui lòng kiểm tra lại sau hoặc điều chỉnh bộ lọc.', en: 'Check back soon or adjust your search filter.' },
   calCalendar: { vi: 'Lịch', en: 'Calendar' },
   contactLead: { vi: 'Liên hệ', en: 'Contact' },
+  contactAddressLabel: { vi: 'Địa Chỉ', en: 'Address' },
+  contactPhoneLabel: { vi: 'Điện Thoại', en: 'Phone' },
+  contactEmailLabel: { vi: 'Email', en: 'Email' },
+  contactHoursLabel: { vi: 'Giờ Thờ Phượng', en: 'Worship Hours' },
+  contactFollowLabel: { vi: 'Theo Dõi', en: 'Follow Us' },
+  contactEditTitle: { vi: 'Chỉnh Sửa Liên Hệ', en: 'Edit Contact' },
   featuredBadge: { vi: 'Nổi bật', en: 'Featured' },
 
   // Daily Verse Section

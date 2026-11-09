@@ -83,21 +83,28 @@ export const homeDashboardStyles = {
   verseFooter: 'pt-1 flex items-center justify-between',
   verseTrans: 'text-xs text-stone-700 dark:text-stone-400 font-semibold',
   verseReadBtn: 'text-xs font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1',
-  sanctuaryCard: 'bg-white rounded-3xl border border-stone-200 p-4 sm:p-5 shadow-xs',
-  sanctuaryRow: 'flex flex-col sm:flex-row sm:items-center justify-between gap-3',
-  sanctuaryNameRow: 'flex items-center gap-2',
-  sanctuaryTitle: 'font-serif font-bold text-base sm:text-lg text-stone-950 leading-tight',
-  sanctuaryEditBtn:
-    'p-1 rounded-lg text-stone-500 hover:text-amber-800 hover:bg-stone-100 transition-colors cursor-pointer',
-  sanctuaryAddress: 'text-xs sm:text-sm text-stone-700 font-medium flex items-center gap-1.5',
-  sanctuaryActions: 'flex items-center gap-2 self-start sm:self-auto flex-wrap',
-  googleDirBtn:
-    'inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-medium text-xs shadow-2xs transition-all',
-  appleDirBtn:
-    'inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-800 hover:to-amber-900 active:scale-95 text-white font-medium text-xs shadow-2xs transition-all',
-  socialDivider: 'h-4 w-px bg-stone-200 mx-0.5 hidden sm:block',
-  youtubeCircleBtn:
-    'w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer',
-  facebookCircleBtn:
-    'w-8 h-8 rounded-full bg-[#1877F2] hover:bg-[#166fe5] text-white flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer',
+  // Contact card (last card on Home): address, phone, email, worship hours, socials.
+  contactCard: 'space-y-4',
+  contactHeader: 'flex items-center justify-between gap-2',
+  contactHeaderLabel:
+    'text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1.5',
+  contactEditBtn:
+    'p-1 rounded-lg text-stone-500 hover:text-amber-800 hover:bg-stone-100 dark:hover:text-amber-300 dark:hover:bg-stone-800 transition-colors cursor-pointer',
+  contactList: 'space-y-3',
+  contactRow: 'flex items-start gap-3 min-w-0',
+  contactIconChip:
+    'w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-500/25 flex items-center justify-center text-amber-700 dark:text-amber-400 flex-shrink-0',
+  contactTextCol: 'min-w-0 space-y-0.5 flex-1',
+  contactLabel: 'text-caption font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block',
+  contactValue: 'text-sm font-semibold text-stone-900 dark:text-stone-100 leading-snug break-words',
+  contactValueLink:
+    'text-sm font-semibold text-stone-900 dark:text-stone-100 leading-snug break-words hover:text-amber-800 dark:hover:text-amber-300 transition-colors',
+  contactDirections: 'pt-1.5 flex flex-wrap items-center gap-2',
+  contactDivider: 'border-t border-stone-100 dark:border-stone-800',
+  contactSocialRow: 'flex flex-wrap items-center gap-2',
+  contactSocialLabel: 'text-caption font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400',
+  socialPill:
+    'inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/60 hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-amber-50/60 dark:hover:bg-amber-950/20 text-xs font-bold text-stone-800 dark:text-stone-200 transition-all active:scale-95 cursor-pointer',
+  socialPillYoutubeIcon: 'w-4 h-4 text-red-600 flex-shrink-0',
+  socialPillFacebookIcon: 'w-4 h-4 text-[#1877F2] flex-shrink-0',
 };
