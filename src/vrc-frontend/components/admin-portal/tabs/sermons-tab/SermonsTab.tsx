@@ -242,8 +242,8 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
               {submitting
                 ? t('commonSaving')
                 : editingSermonId
-                ? t('adminSermonUpdate')
-                : t('adminSermonSave')}
+                ? t('commonSaveChanges')
+                : t('commonSave')}
             </span>
           </Button>
         </div>

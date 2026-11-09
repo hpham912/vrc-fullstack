@@ -347,7 +347,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           </button>
           <Button
             type="submit"
-            variant="primary"
+            variant="dark"
             size="md"
             disabled={saving || fetchingApi}
             leftIcon={
@@ -358,7 +358,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
               )
             }
           >
-            <span>{saving ? t('commonSaving') : t('churchInfoSaveChanges')}</span>
+            <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
           </Button>
         </div>
       </form>

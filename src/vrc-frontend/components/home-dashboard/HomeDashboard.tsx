@@ -610,7 +610,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 onClick={onOpenChurchInfoEditor}
                 leftIcon={<PenTool className="w-3 h-3" />}
               >
-                <span>{t('homeEditSchedule')}</span>
+                <span className="hidden sm:inline">{t('homeEditSchedule')}</span>
               </Button>
             )}
           </div>
@@ -703,11 +703,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <Button
               type="button"
               variant="amberLight"
-              size="iconSm"
+              size="xs"
               onClick={onOpenChurchInfoEditor}
               title={t('contactEditTitle')}
+              leftIcon={<PenTool className="w-3.5 h-3.5" />}
             >
-              <PenTool className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('contactEditTitle')}</span>
             </Button>
           )}
         </div>

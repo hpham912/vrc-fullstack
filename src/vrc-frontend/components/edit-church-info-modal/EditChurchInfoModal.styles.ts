@@ -34,11 +34,8 @@ export const editChurchInfoModalStyles = {
 
   servicesSection: "space-y-3",
   servicesHeader: "flex items-center justify-between",
-  addServiceBtn: "inline-flex items-center gap-1 px-3 py-1 bg-amber-50 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-amber-900 rounded-xl text-xs font-bold border border-amber-200 dark:border-amber-800/60 transition-all shadow-2xs cursor-pointer active:scale-95",
-  addServiceIcon: "w-3.5 h-3.5 text-amber-700 dark:text-amber-400",
   emptyServicesBox: "p-6 rounded-2xl bg-stone-50 border border-dashed border-stone-300 text-center space-y-2",
   emptyServicesText: "text-xs font-medium text-stone-600",
-  emptyAddBtn: "inline-flex items-center gap-1 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-2xs transition-all active:scale-95",
   plusIconSm: "w-3.5 h-3.5",
 
   serviceCard: "p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2.5",

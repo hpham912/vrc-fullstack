@@ -14,9 +14,8 @@ import {
   AlertCircle,
   Building2,
   Plus,
-  Trash2,
 } from 'lucide-react';
-import { Modal, Card, Button } from '../../common-component/index.ts';
+import { Modal, Card, Button, AdminActionButtons, AdminAddButton } from '../../common-component/index.ts';
 import { editChurchInfoModalStyles as s } from './EditChurchInfoModal.styles.ts';
 
 interface EditChurchInfoModalProps {
@@ -333,15 +332,10 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                 <Clock className={s.clockIcon} />
                 <span>{t('churchInfoSchedule')}</span>
               </h4>
-              <Button
-                type="button"
-                variant="amberLight"
-                size="sm"
+              <AdminAddButton
                 onClick={handleAddService}
-                leftIcon={<Plus className={s.addServiceIcon} />}
-              >
-                <span>{t('churchInfoAddService')}</span>
-              </Button>
+                title={t('churchInfoAddService')}
+              />
             </div>
 
             {services.length === 0 ? (
@@ -351,7 +345,7 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                 </p>
                 <Button
                   type="button"
-                  variant="primary"
+                  variant="dark"
                   size="sm"
                   onClick={handleAddService}
                   leftIcon={<Plus className={s.plusIconSm} />}
@@ -367,16 +361,9 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                       <CrossIcon className={s.serviceCrossIcon} />
                       <span>#{idx + 1}: {svc.titleVi || t('churchInfoNewService')}</span>
                     </span>
-                    <Button
-                      type="button"
-                      variant="dangerLight"
-                      size="xs"
-                      onClick={() => handleDeleteService(idx)}
-                      leftIcon={<Trash2 className={s.plusIconSm} />}
-                      title="Xoá buổi nhóm này"
-                    >
-                      <span>{t('commonDelete')}</span>
-                    </Button>
+                    <AdminActionButtons
+                      onDelete={() => handleDeleteService(idx)}
+                    />
                   </div>
 
                   <div className={s.serviceGrid}>
@@ -461,11 +448,11 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              variant="dark"
               disabled={saving}
               leftIcon={<Save className={s.plusIconSm} />}
             >
-              <span>{saving ? t('commonSaving') : t('churchInfoSaveChanges')}</span>
+              <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
             </Button>
           </div>
         </form>

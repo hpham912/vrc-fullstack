@@ -565,8 +565,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
               {submitting
                 ? t('commonSaving')
                 : editingEventId
-                ? t('adminEventUpdate')
-                : t('eventSave')}
+                ? t('commonSaveChanges')
+                : t('commonSave')}
             </span>
           </Button>
         </div>

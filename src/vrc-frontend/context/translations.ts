@@ -169,6 +169,8 @@ export const translations = {
   commonDismiss: { vi: 'Đóng', en: 'Dismiss' },
   commonConfirm: { vi: 'Xác Nhận', en: 'Confirm' },
   commonSaving: { vi: 'Đang lưu...', en: 'Saving...' },
+  commonSave: { vi: 'Lưu', en: 'Save' },
+  commonSaveChanges: { vi: 'Lưu Thay Đổi', en: 'Save Changes' },
   commonCreating: { vi: 'Đang tạo...', en: 'Creating...' },
   commonFetching: { vi: 'Đang lấy...', en: 'Fetching...' },
   commonProcessing: { vi: 'Đang xử lý...', en: 'Processing...' },
@@ -241,8 +243,6 @@ export const translations = {
   adminSermonDescEn: { vi: 'Mô Tả (English)', en: 'Description (English)' },
   adminSermonDate: { vi: 'Ngày Chúa Nhật *', en: 'Sunday Date *' },
   adminSermonFillRequired: { vi: 'Vui lòng nhập link YouTube hợp lệ, tiêu đề và ngày.', en: 'Please enter a valid YouTube link, both titles, and a date.' },
-  adminSermonSave: { vi: 'Lưu Bài Giảng', en: 'Save Sermon' },
-  adminSermonUpdate: { vi: 'Cập Nhật Bài Giảng', en: 'Update Sermon' },
   adminSermonSaved: { vi: 'Đã lưu bài giảng.', en: 'Sermon saved.' },
   adminSermonUpdated: { vi: 'Đã cập nhật bài giảng.', en: 'Sermon updated.' },
   adminSermonDeleted: { vi: 'Đã xóa bài giảng.', en: 'Sermon deleted.' },
@@ -297,7 +297,6 @@ export const translations = {
   eventEditTitle: { vi: 'Sửa Sự Kiện', en: 'Edit Event' },
   eventStartTime: { vi: 'Giờ Bắt Đầu *', en: 'Start Time *' },
   eventEndTime: { vi: 'Giờ Kết Thúc', en: 'End Time' },
-  eventSave: { vi: 'Lưu Sự Kiện', en: 'Save Event' },
 
   // Home dashboard
   homeFeaturedEvent: { vi: 'Sự Kiện Nổi Bật', en: 'Featured Event' },
@@ -364,7 +363,6 @@ export const translations = {
   spotOfflineSaved: { vi: 'Không thể kết nối máy chủ. Thay đổi đã được lưu tạm trên thiết bị này.', en: 'Network connection issue. Changes saved locally on this device.' },
   spotSaveFailed: { vi: 'Lỗi khi lưu banner', en: 'Failed to save banner' },
   spotUpdateFailed: { vi: 'Không thể cập nhật banner', en: 'Failed to update spotlight banner' },
-  spotSaveApply: { vi: 'Lưu & Áp Dụng', en: 'Save & Apply' },
 
   // Edit church info modal
   churchInfoFillBoth: { vi: 'Vui lòng nhập tên nhà nguyện và địa chỉ', en: 'Please provide sanctuary name and address' },
@@ -379,7 +377,7 @@ export const translations = {
   churchInfoPhone: { vi: 'Số Điện Thoại Liên Lạc', en: 'Contact Phone' },
   churchInfoEmail: { vi: 'Email Hội Thánh', en: 'Church Email' },
   churchInfoSchedule: { vi: 'Lịch Nhóm & Thờ Phượng Hàng Tuần', en: 'Weekly Worship Services & Gatherings' },
-  churchInfoAddService: { vi: '+ Thêm Buổi Nhóm', en: '+ Add Service' },
+  churchInfoAddService: { vi: 'Thêm Buổi Nhóm', en: 'Add Service' },
   churchInfoAddServiceNew: { vi: 'Thêm Buổi Nhóm Mới', en: 'Add New Service' },
   churchInfoNoServices: { vi: 'Chưa có buổi nhóm nào. Thẻ lịch thờ phượng trên Trang Chủ sẽ tự động ẩn.', en: 'No weekly services added. The schedule card on Home will be hidden.' },
   churchInfoNewService: { vi: 'Buổi nhóm mới', en: 'New Service' },
@@ -388,7 +386,6 @@ export const translations = {
   churchInfoServiceNameEn: { vi: 'Tên buổi nhóm (Tiếng Anh - English)', en: 'Service Name (English)' },
   churchInfoServiceTimeEn: { vi: 'Thời gian Tiếng Anh (English Day & Time)', en: 'Day & Time in English' },
   churchInfoDesc: { vi: 'Mô tả tóm tắt', en: 'Description' },
-  churchInfoSaveChanges: { vi: 'Lưu Thay Đổi', en: 'Save Changes' },
 
   // Admin portal — feedback & confirms
   adminPrayerDeleted: { vi: 'Đã xóa lời cầu nguyện.', en: 'Prayer request deleted.' },
@@ -437,7 +434,6 @@ export const translations = {
   adminEventAddressHint: { vi: 'Để trống = Địa chỉ Hội Thánh', en: 'Blank = Church Address' },
   adminEventUseChurchAddress: { vi: 'Dùng địa chỉ Hội Thánh', en: 'Use church address' },
   adminEventFeatured: { vi: 'Đánh dấu là sự kiện nổi bật (Featured)', en: 'Mark as Featured Event' },
-  adminEventUpdate: { vi: 'Cập Nhật Sự Kiện', en: 'Update Event' },
   adminEventFeaturedBadge: { vi: 'NỔI BẬT', en: 'FEATURED' },
   adminEventTitlePlaceholder: { vi: 'Tiêu Đề Sự Kiện (Đang nhập...)', en: 'Event Title (Type in form...)' },
   adminEventDescPlaceholder: { vi: 'Mô tả chi tiết sự kiện sẽ hiển thị tại đây khi bạn nhập vào biểu mẫu bên trên...', en: 'Event details and description will appear here as you type in the form above...' },
@@ -463,8 +459,6 @@ export const translations = {
   adminVerseReflectionEn: { vi: 'Suy Gẫm (Tiếng Anh)', en: 'Reflection (English, Optional)' },
   adminVersePrayerVi: { vi: 'Lời Cầu Nguyện (Tiếng Việt)', en: 'Prayer (Vietnamese, Optional)' },
   adminVersePrayerEn: { vi: 'Lời Cầu Nguyện (Tiếng Anh)', en: 'Prayer (English, Optional)' },
-  adminVerseUpdate: { vi: 'Cập Nhật Lời Chúa', en: 'Update Scripture' },
-  adminVerseSave: { vi: 'Lưu Lời Chúa', en: 'Save Daily Scripture' },
   adminVersePublished: { vi: 'Lời Chúa Đã Đăng', en: 'Published Daily Verses' },
 
   // Admin portal — prayer requests

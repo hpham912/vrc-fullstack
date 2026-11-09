@@ -24,6 +24,7 @@ import {
   Trash2,
   Compass,
   Navigation,
+  Save,
 } from 'lucide-react';
 import {
   ConfirmModal,
@@ -31,6 +32,7 @@ import {
   FeaturedStar,
   AdminActionButtons,
   AdminAddButton,
+  Button,
   Card,
   EventDetailModal,
   LoadingShimmer,
@@ -614,20 +616,24 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             </div>
 
             <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setEditModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700"
-              >
+              <Button type="button" variant="secondary" onClick={() => setEditModalOpen(false)}>
                 {t('commonCancel')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="dark"
+                size="md"
                 disabled={savingEvent}
-                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-stone-900 dark:bg-amber-600 hover:bg-stone-800 dark:hover:bg-amber-700 disabled:opacity-50"
+                leftIcon={<Save className="w-3.5 h-3.5" />}
               >
-                {savingEvent ? t('commonSaving') : t('eventSave')}
-              </button>
+                <span>
+                  {savingEvent
+                    ? t('commonSaving')
+                    : editingEvent
+                    ? t('commonSaveChanges')
+                    : t('commonSave')}
+                </span>
+              </Button>
             </div>
           </form>
         </div>

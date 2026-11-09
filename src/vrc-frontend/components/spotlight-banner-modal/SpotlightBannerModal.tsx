@@ -535,11 +535,11 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              variant="dark"
               disabled={saving}
               leftIcon={<Save className={s.saveIcon} />}
             >
-              <span>{saving ? t('commonSaving') : t('spotSaveApply')}</span>
+              <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
             </Button>
           </div>
         </form>

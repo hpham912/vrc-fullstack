@@ -472,8 +472,8 @@ export const VersesTab: React.FC<VersesTabProps> = ({
               {submitting
                 ? t('commonSaving')
                 : editingVerseId
-                ? t('adminVerseUpdate')
-                : t('adminVerseSave')}
+                ? t('commonSaveChanges')
+                : t('commonSave')}
             </span>
           </Button>
         </div>
