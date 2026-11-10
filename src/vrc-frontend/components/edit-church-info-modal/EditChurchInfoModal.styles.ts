@@ -1,61 +1,9 @@
+// The form itself moved to the shared ChurchInfoForm (also used by
+// the AdminPortal Church Info tab). Only the modal's own header icon
+// style remains here.
 export const editChurchInfoModalStyles = {
-  backdrop: "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto",
-  dialog: "bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-stone-200 overflow-hidden my-auto max-h-[92vh] flex flex-col",
-  header: "px-5 py-4 border-b border-stone-200 bg-stone-900 text-white flex items-center justify-between",
-  headerTitleRow: "flex items-center gap-2",
   headerIcon: "w-5 h-5 text-amber-400",
-  headerTitle: "font-serif font-bold text-base sm:text-lg",
-  headerSubtitle: "text-stone-300 text-xs font-medium",
-  closeBtn: "p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors",
-  closeIcon: "w-5 h-5",
-
-  alertBase: "mx-5 mt-4 p-3 rounded-2xl flex items-center gap-2 text-xs font-semibold",
-  alertSuccess: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60",
-  alertError: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
-  alertIconSuccess: "w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0",
-  alertIconError: "w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0",
-
-  form: "flex-1 overflow-y-auto p-5 space-y-5 text-xs text-stone-700",
-  sanctuaryBox: "p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/60 space-y-3",
-  sectionTitle: "font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5",
-  mapPinIcon: "w-4 h-4 text-amber-700 dark:text-amber-400",
-  clockIcon: "w-4 h-4 text-indigo-600 dark:text-indigo-400",
-  zoomIcon: "w-4 h-4 text-sky-600 dark:text-sky-400",
-  hintText: "text-caption text-stone-500",
-  fieldGroup: "space-y-1",
-  label: "block text-label font-bold text-stone-600",
-  labelWithRow: "block text-label font-bold text-stone-600 flex items-center justify-between",
-  mapLinksGroup: "flex items-center gap-2 text-caption",
-  googleMapLink: "text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-0.5 font-semibold",
-  appleMapLink: "text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-0.5 font-semibold",
-  externalIcon: "w-2.5 h-2.5",
-  inputMedium: "w-full px-3 py-2 bg-white rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium",
-  inputRegular: "w-full px-3 py-2 bg-white rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500",
-  gridTwoCols: "grid grid-cols-1 sm:grid-cols-2 gap-3",
-  gridTwoColsPt1: "grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1",
-
-  servicesSection: "space-y-3",
-  servicesHeader: "flex items-center justify-between",
-  emptyServicesBox: "p-6 rounded-2xl bg-stone-50 border border-dashed border-stone-300 text-center space-y-2",
-  emptyServicesText: "text-xs font-medium text-stone-600",
-  plusIconSm: "w-3.5 h-3.5",
-
-  serviceCard: "p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2.5",
-  serviceCardHeader: "flex items-center justify-between",
-  serviceCardTitle: "font-bold text-xs text-stone-900 flex items-center gap-1.5",
-  serviceCrossIcon: "w-3.5 h-3.5 text-amber-600 dark:text-amber-400",
-  deleteServiceBtn: "px-2 py-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors flex items-center gap-1 text-label font-semibold",
-  serviceGrid: "grid grid-cols-1 sm:grid-cols-2 gap-2.5",
-  serviceGridPt1: "grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1",
-  subFieldGroup: "space-y-0.5",
-  subLabel: "text-caption font-bold text-stone-500",
-  serviceInputSemibold: "w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs font-semibold",
-  serviceInputAmber: "w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs font-semibold text-amber-800",
-  serviceInputRegular: "w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs",
-  serviceInputIndigo: "w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs font-semibold text-indigo-700 dark:text-indigo-400",
-  serviceTextarea: "w-full px-2.5 py-1.5 bg-white rounded-lg border border-stone-300 text-xs leading-relaxed",
-
-  footer: "pt-3 border-t border-stone-200 flex items-center justify-end gap-2.5",
-  cancelBtn: "px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors",
-  submitBtn: "px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all disabled:opacity-50",
+  // Scrollable body inside the Modal (the shared Modal body has no
+  // padding, so this wrapper supplies it).
+  body: "flex-1 overflow-y-auto p-5",
 };

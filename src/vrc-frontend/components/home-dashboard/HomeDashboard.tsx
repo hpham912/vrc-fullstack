@@ -21,7 +21,7 @@ import {
   PenTool,
 } from 'lucide-react';
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
-import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal, LoadingShimmer } from '../../common-component/index.ts';
+import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal, LoadingShimmer, ZoomButton } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   formatDateLocale,
@@ -581,8 +581,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Footer Actions: Calendar button moved to the right */}
+              {/* Footer Actions: Zoom button next to the calendar button */}
               <div className={s.cardFooterRow}>
+                <ZoomButton event={nextUpcomingEvent} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation className="flex-1 justify-center" />
                 <CalendarButtons
                   event={nextUpcomingEvent}
                   stopPropagation

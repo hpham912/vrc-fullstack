@@ -10,6 +10,7 @@ import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx
 import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
 import { SermonsTab } from './tabs/sermons-tab/SermonsTab.tsx';
 import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
+import { ChurchInfoTab } from './tabs/church-info-tab/ChurchInfoTab.tsx';
 import {
   Calendar,
   BookOpen,
@@ -22,6 +23,7 @@ import {
   Users,
   Sliders,
   HeartHandshake,
+  Building2,
 } from 'lucide-react';
 
 interface AdminPortalProps {
@@ -209,6 +211,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <button
               type="button"
+              onClick={() => setActiveTab('church-info')}
+              className={`${s.mobileTabBtnBase} ${
+                activeTab === 'church-info' ? s.mobileTabActiveDark : s.mobileTabIdle
+              }`}
+            >
+              <Building2 className={s.tabIcon} />
+              <span className="truncate">{t('tabChurchInfo')}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('admin-accounts')}
               className={`${s.mobileTabBtnBase} ${
                 activeTab === 'admin-accounts' ? s.mobileTabActiveAmber : s.mobileTabIdle
@@ -290,6 +303,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('church-info')}
+            className={`${s.desktopTabBtnBase} ${
+              activeTab === 'church-info' ? s.desktopTabActiveDark : s.desktopTabIdle
+            }`}
+          >
+            <Building2 className={s.tabIcon} />
+            {t('tabChurchInfo')}
+          </button>
+
+          <button
             onClick={() => setActiveTab('admin-accounts')}
             className={`${s.desktopTabBtnBase} ${
               activeTab === 'admin-accounts' ? s.desktopTabActiveAmber : s.desktopTabIdleAmber
@@ -320,6 +343,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
           <SermonsTab sermons={sermons} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
+
+          <ChurchInfoTab activeTab={activeTab} churchInfo={churchInfo} onRefreshData={onRefreshData} />
 
           <AdminAccountsTab activeTab={activeTab} getToken={getToken} adminUser={adminUser} showFeedback={showFeedback} />
 

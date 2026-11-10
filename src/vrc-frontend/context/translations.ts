@@ -140,6 +140,7 @@ export const translations = {
   tabManageEvents: { vi: 'Quản Lý Sự Kiện', en: 'Manage Events' },
   tabVerses: { vi: 'Lời Chúa', en: 'Daily Verses' },
   tabSermons: { vi: 'Bài Giảng', en: 'Sermons' },
+  tabChurchInfo: { vi: 'Thông Tin Hội Thánh', en: 'Church Info' },
   tabAdminAccounts: { vi: 'Tài Khoản Quản Trị', en: 'Admin Accounts' },
   tabNotices: { vi: 'Thông Báo', en: 'Notices' },
 
@@ -310,7 +311,7 @@ export const translations = {
   homeSanctuary: { vi: 'Nhà Nguyện', en: 'Sanctuary' },
   homeDetails: { vi: 'Xem chi tiết', en: 'Details' },
   homeEditSchedule: { vi: 'Sửa Lịch', en: 'Edit Schedule' },
-  homeWeeklyServices: { vi: 'Lịch Nhóm & Thờ Phượng Hàng Tuần', en: 'Weekly Worship Services & Gatherings' },
+  homeWeeklyServices: { vi: 'Thông Tin Hội Thánh', en: 'Church Info' },
 
   // Youth section
   youthTitle: { vi: 'Mục Vụ Giới Trẻ VRC', en: 'VRC Youth & Young Adults' },
@@ -369,7 +370,7 @@ export const translations = {
   churchInfoSaved: { vi: 'Đã lưu thông tin nhà nguyện & lịch nhóm thành công!', en: 'Sanctuary & worship schedule saved successfully!' },
   churchInfoSaveFailed: { vi: 'Lỗi khi lưu thông tin', en: 'Error saving details' },
   churchInfoSubtitle: { vi: 'Chỉnh sửa thông tin xuất hiện trên trang chủ', en: 'Customize sanctuary location and service times on Home' },
-  churchInfoTitle: { vi: 'Cập Nhật Địa Điểm & Lịch Thờ Phượng', en: 'Sanctuary Location & Worship Times' },
+  churchInfoTitle: { vi: 'Thông Tin Hội Thánh', en: 'Church Info' },
   churchInfoSanctuary: { vi: 'Địa Điểm Nhà Nguyện (Sanctuary)', en: 'Sanctuary Location' },
   churchInfoName: { vi: 'Tên Nhà Nguyện / Tiêu Đề', en: 'Sanctuary Name' },
   churchInfoAddress: { vi: 'Địa Chỉ / Thành Phố', en: 'Street Address / City, State' },
