@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { modalStyles as s } from './Modal.styles.ts';
 
@@ -52,8 +53,15 @@ export const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose]);
 
   if (!shouldRender) return null;
+  if (typeof document === 'undefined') return null;
 
-  return (
+  // Portaled to document.body: a modal rendered inside another modal
+  // (e.g. ConfirmModal inside the AdminPortal) would otherwise be
+  // trapped by the parent dialog's scale/translate animation classes,
+  // which make it a containing block for fixed-position descendants —
+  // the nested modal then centers inside the parent instead of the
+  // viewport and gets clipped. Same pattern as NotificationModal.
+  return createPortal(
     <div
       className={`${s.backdropBase} ${isVisible ? s.backdropVisible : s.backdropHidden}`}
       onClick={onClose}
@@ -86,6 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         <div className={s.body}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
