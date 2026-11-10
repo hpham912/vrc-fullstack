@@ -4,8 +4,10 @@ export const zoomButtonStyles = {
   // remapped color. Design A (Hoang, 2026-11-10): a full-width bar,
   // taller with bigger text and icon, on its own row above the
   // calendar footer — the button's own design, impossible to miss.
-  zoomBtn: "inline-flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-sm font-bold transition-all shadow-2xs active:scale-[0.98]",
-  zoomIcon: "w-5 h-5 text-white flex-shrink-0",
+  // Text made smaller at Hoang's request (2026-11-10): text-xs with
+  // a w-4 icon, py-3 kept so the bar stays an easy tap target.
+  zoomBtn: "inline-flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-xs font-bold transition-all shadow-2xs active:scale-[0.98]",
+  zoomIcon: "w-4 h-4 text-white flex-shrink-0",
   modalIcon: "w-4 h-4",
   // The shared Modal body has no padding, so the content supplies it.
   infoBody: "p-6 space-y-4",
