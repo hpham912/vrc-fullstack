@@ -1,6 +1,6 @@
 export const adminPortalStyles = {
-  modalContainer: "flex flex-col max-h-[90vh]",
-  header: "p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800 flex-shrink-0",
+  modalContainer: "flex flex-col",
+  header: "p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800",
   headerTitle: "text-lg sm:text-xl font-serif font-bold text-white",
   headerSubtitle: "text-xs text-stone-400 mt-0.5 flex items-center gap-1.5 flex-wrap",
   adminName: "text-amber-400 font-semibold",
@@ -17,7 +17,7 @@ export const adminPortalStyles = {
   alertIconSuccess: "w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0",
   alertIconError: "w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0",
 
-  mobileTabSection: "sm:hidden p-3 bg-stone-50 border-b border-stone-200 space-y-2 flex-shrink-0",
+  mobileTabSection: "sm:hidden p-3 bg-stone-50 border-b border-stone-200 space-y-2",
   mobileTabGrid: "grid grid-cols-2 gap-1.5",
   mobileTabBtnBase: "px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5",
   mobileTabActiveDark: "bg-stone-900 text-white shadow-xs",
@@ -25,7 +25,7 @@ export const adminPortalStyles = {
   mobileTabIdle: "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200",
   mobileSpotlightBtn: "w-full py-2 px-3 bg-amber-500 hover:bg-amber-400 active:scale-98 text-stone-950 font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all",
 
-  desktopTabBar: "hidden sm:flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 dark:bg-stone-900/50 flex-shrink-0",
+  desktopTabBar: "hidden sm:flex items-center gap-2 px-6 pt-3 border-b border-stone-200 bg-stone-50/50 dark:bg-stone-900/50",
   desktopTabBtnBase: "px-3.5 py-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center gap-1.5",
   desktopTabActiveDark: "border-stone-900 text-stone-900 bg-white rounded-t-xl",
   desktopTabActiveAmber: "border-amber-600 text-amber-900 bg-white rounded-t-xl font-bold",
@@ -35,5 +35,5 @@ export const adminPortalStyles = {
   tabIcon: "w-3.5 h-3.5",
   tabIconAmber: "w-3.5 h-3.5 text-amber-500",
   tabIconAmber600: "w-3.5 h-3.5 text-amber-600 dark:text-amber-400",
-  contentBody: "p-4 sm:p-6 overflow-y-auto overflow-x-hidden flex-1 w-full max-w-full min-w-0",
+  contentBody: "p-4 sm:p-6 w-full max-w-full min-w-0",
 };
