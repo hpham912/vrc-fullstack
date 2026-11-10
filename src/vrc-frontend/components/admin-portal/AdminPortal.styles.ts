@@ -1,6 +1,6 @@
 export const adminPortalStyles = {
   modalContainer: "flex flex-col",
-  header: "p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800",
+  header: "sticky top-0 z-10 p-5 sm:p-6 bg-stone-950 text-white flex items-center justify-between border-b border-stone-800",
   headerTitle: "text-lg sm:text-xl font-serif font-bold text-white",
   headerSubtitle: "text-xs text-stone-400 mt-0.5 flex items-center gap-1.5 flex-wrap",
   adminName: "text-amber-400 font-semibold",
