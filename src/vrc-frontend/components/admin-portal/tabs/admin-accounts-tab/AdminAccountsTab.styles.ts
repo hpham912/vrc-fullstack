@@ -20,8 +20,19 @@ export const adminAccountsTabStyles = {
   usernameBadge: 'text-caption font-mono bg-stone-100 text-stone-600 px-2 py-0.5 rounded',
   selfBadge: 'text-caption font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded',
   email: 'text-label text-stone-500 mt-0.5',
+  // Per-admin actions (reset password + delete). The reset uses an amber
+  // key icon so it reads as a password action, not a second delete.
+  itemActions: 'flex items-center gap-1 flex-shrink-0',
+  resetBtn: 'p-1.5 text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors',
+  resetIcon: 'w-4 h-4',
   deleteBtn: 'p-1.5 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors',
   deleteIcon: 'w-4 h-4',
+  // Temporary code shown after a reset. The code is big and centered so
+  // the resetting admin can read it at a glance and share it.
+  codeBody: 'p-6 space-y-4',
+  codeMessage: 'text-sm text-stone-600',
+  codeBox: 'text-center font-mono text-3xl font-bold tracking-widest text-stone-900 bg-stone-100 rounded-xl py-4',
+  codeFooter: 'flex justify-end',
   passwordForm: 'p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3',
   titleIconMuted: 'w-4 h-4 text-stone-600',
   labelSemibold: 'block text-xs font-semibold text-stone-700 mb-1',

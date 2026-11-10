@@ -3,6 +3,7 @@ import { KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { AdminUser } from '../../../../types/index.ts';
+import { Button, ConfirmModal, Modal } from '../../../../common-component/index.ts';
 import { adminAccountsTabStyles as s } from './AdminAccountsTab.styles.ts';
 
 interface AdminAccount {
@@ -38,6 +39,9 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [resetTarget, setResetTarget] = useState<AdminAccount | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetCode, setResetCode] = useState<string | null>(null);
 
   const loadAdminAccounts = async () => {
     const token = getToken();
@@ -113,6 +117,36 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
     } catch (err: any) {
       showFeedback('error', err.message);
     }
+  };
+
+  // Reset another admin's password to a random 6-digit temporary code.
+  // On success the code is shown in a modal (stays open until closed)
+  // so the resetting admin can share it with the reset admin.
+  const handleResetPassword = async () => {
+    if (!resetTarget) return;
+
+    try {
+      setResetting(true);
+      const token = getToken();
+      const res = await fetch(apiUrl(`/api/auth/admins/${resetTarget.id}/reset-password`), {
+        method: 'POST',
+        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to reset password');
+
+      setResetCode(data.tempCode);
+    } catch (err: any) {
+      showFeedback('error', err.message);
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  // Close the temporary-code modal after a reset.
+  const closeResetCode = () => {
+    setResetCode(null);
+    setResetTarget(null);
   };
 
   // Change Password handler
@@ -264,13 +298,22 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
                 </div>
 
                 {!isSelf && (
-                  <button
-                    onClick={() => handleDeleteAdmin(adm.id, adm.username)}
-                    className={s.deleteBtn}
-                    title={t('deleteAdminBtn')}
-                  >
-                    <Trash2 className={s.deleteIcon} />
-                  </button>
+                  <div className={s.itemActions}>
+                    <button
+                      onClick={() => setResetTarget(adm)}
+                      className={s.resetBtn}
+                      title={t('resetPasswordBtn')}
+                    >
+                      <KeyRound className={s.resetIcon} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAdmin(adm.id, adm.username)}
+                      className={s.deleteBtn}
+                      title={t('deleteAdminBtn')}
+                    >
+                      <Trash2 className={s.deleteIcon} />
+                    </button>
+                  </div>
                 )}
               </div>
             );
@@ -325,6 +368,46 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
           </button>
         </div>
       </form>
+
+      {/* Confirm resetting another admin's password to a random code */}
+      <ConfirmModal
+        isOpen={resetTarget !== null && resetCode === null}
+        title={t('adminResetPasswordTitle')}
+        message={
+          resetTarget
+            ? t('adminResetPasswordMessage', { username: resetTarget.username })
+            : ''
+        }
+        confirmText={t('resetPasswordBtn')}
+        isDanger
+        loading={resetting}
+        onConfirm={handleResetPassword}
+        onCancel={() => setResetTarget(null)}
+      />
+
+      {/* Temporary code shown after a reset — stays open until closed
+          so the resetting admin can share it with the reset admin */}
+      <Modal
+        isOpen={resetCode !== null}
+        onClose={closeResetCode}
+        maxWidthClass="max-w-sm"
+        icon={<KeyRound className={s.resetIcon} />}
+        title={t('adminResetPasswordCodeTitle')}
+      >
+        <div className={s.codeBody}>
+          <p className={s.codeMessage}>
+            {resetTarget
+              ? t('adminResetPasswordCodeMessage', { username: resetTarget.username })
+              : ''}
+          </p>
+          <div className={s.codeBox}>{resetCode}</div>
+          <div className={s.codeFooter}>
+            <Button type="button" variant="dark" onClick={closeResetCode}>
+              {t('commonClose')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

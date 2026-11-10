@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { adminUsers } from '../../vrc-db/schema.ts';
@@ -205,6 +206,52 @@ router.delete('/admins/:id', requireAdmin, async (req: AuthRequest, res) => {
   } catch (error: any) {
     console.error('Delete admin error:', error);
     res.status(500).json({ error: 'Failed to delete admin account' });
+  }
+});
+
+// POST /api/auth/admins/:id/reset-password - Reset another admin's
+// password to a random 6-digit temporary code. Admin-only, and an admin
+// cannot reset their own password this way (use Change Password, which
+// requires the old password, instead).
+// The code is generated fresh for each reset and returned once in the
+// response, so the resetting admin can share it with the reset admin.
+// Only the hash is stored — the plain code is never saved. The reset
+// admin logs in with the code, then must change their password right
+// after logging in.
+router.post('/admins/:id/reset-password', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const currentAdminId = req.adminUser!.id;
+
+    if (!Number.isInteger(targetId) || targetId <= 0) {
+      return res.status(400).json({ error: 'Invalid admin id' });
+    }
+
+    if (targetId === currentAdminId) {
+      return res.status(400).json({ error: 'Bạn không thể đặt lại mật khẩu của chính mình — hãy dùng Đổi Mật Khẩu / Cannot reset your own password — use Change Password instead.' });
+    }
+
+    const target = await db.select().from(adminUsers).where(eq(adminUsers.id, targetId)).limit(1);
+    if (target.length === 0) {
+      return res.status(404).json({ error: 'Admin account not found' });
+    }
+
+    // 6 digits, 100000-999999. crypto.randomInt is uniform and
+    // unpredictable, unlike Math.random.
+    const tempCode = String(randomInt(100000, 1000000));
+    const { hash, salt } = AuthService.hashPassword(tempCode);
+    await db
+      .update(adminUsers)
+      .set({
+        passwordHash: hash,
+        passwordSalt: salt,
+      })
+      .where(eq(adminUsers.id, targetId));
+
+    res.json({ message: 'Đặt lại mật khẩu thành mã tạm thời thành công / Password reset to a temporary code successfully', tempCode });
+  } catch (error: any) {
+    console.error('Reset admin password error:', error);
+    res.status(500).json({ error: 'Failed to reset admin password' });
   }
 });
 
