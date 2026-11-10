@@ -647,8 +647,6 @@ function ChurchAppContent() {
         <div className={s.footerBottomRow}>
           <p>© {new Date().getFullYear()} {CHURCH_NAME.en} • Tempe, Arizona</p>
           <div className={s.footerMetaRight}>
-            <p>{t('footerPlatform')}</p>
-            <span className={s.footerDot}>•</span>
             <span className={s.footerVersion}>v{APP_VERSION} ({APP_BUILD_DATE})</span>
           </div>
         </div>

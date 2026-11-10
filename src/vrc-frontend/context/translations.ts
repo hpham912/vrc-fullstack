@@ -159,7 +159,6 @@ export const translations = {
 
   // Footer
   footerRights: { vi: 'Bảo lưu mọi quyền.', en: 'All rights reserved.' },
-  footerPlatform: { vi: 'Lưu trữ đám mây Cloud SQL PostgreSQL • Google Cloud Run', en: 'Reliable Cloud Storage • iOS Ready' },
 
   // Common actions (shared across screens — one key per phrase)
   commonEdit: { vi: 'Sửa', en: 'Edit' },

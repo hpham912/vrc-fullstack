@@ -48,7 +48,6 @@ export const appStyles = {
   footerBottomRow:
     'max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-600 text-label font-medium',
   footerMetaRight: 'flex items-center gap-2',
-  footerDot: 'text-stone-300',
   footerVersion: 'text-stone-500 font-mono text-caption',
   mobileVersionBar: 'md:hidden py-3 text-center text-caption text-stone-500 font-mono select-none',
   floatingPrayerBtn:
