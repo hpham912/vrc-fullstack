@@ -1,21 +1,17 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'org.vnrevivalchurch.app',
+  appId: 'org.vrcfamily.app',
   appName: 'Vietnamese Revival Church',
   webDir: 'dist',
   server: {
-    // Directly wraps the church webpage inside the iOS app shell
-    url: 'https://vrcfamily.ai.studio',
+    // No server.url: the app is bundled into the native shell (the web
+    // app is copied into the iOS/Android project by `cap sync`), so it
+    // loads offline and is a real app — not a wrapper around a website.
+    // Data still comes from the API at runtime (see VITE_API_BASE_URL).
     cleartext: false,
     androidScheme: 'https',
     iosScheme: 'https',
-    allowNavigation: [
-      'vietnamese-revival-church.ai.studio',
-      '*.ai.studio',
-      '*.run.app',
-      '*.google.com',
-    ],
   },
   ios: {
     contentInset: 'always',

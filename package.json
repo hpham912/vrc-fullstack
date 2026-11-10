@@ -11,10 +11,14 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "ios:init": "cap add ios",
-    "ios:sync": "vite build && cap sync ios",
-    "ios:open": "cap open ios"
+    "ios:sync": "VITE_API_BASE_URL=https://my.vrcfamily.org vite build && cap sync ios",
+    "ios:open": "cap open ios",
+    "android:init": "cap add android",
+    "android:sync": "VITE_API_BASE_URL=https://my.vrcfamily.org vite build && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
     "@capacitor/cli": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",

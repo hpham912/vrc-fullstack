@@ -19,6 +19,18 @@ export const apiUrl = (endpoint: string): string => {
 };
 
 export const getAppEnvHeader = (): string => {
+  // In a native Capacitor shell the page runs on localhost
+  // (capacitor://localhost), which is NOT the dev environment — so base
+  // the environment on the API base URL instead of the page host.
+  // A bundled release build points at the prod app URL
+  // (https://my.vrcfamily.org) and must use the prod database.
+  if (isNativeCapacitor) {
+    const apiHost = API_BASE.toLowerCase();
+    if (apiHost.includes('ais-dev') || apiHost.includes('localhost') || apiHost.includes('127.0.0.1')) {
+      return 'development';
+    }
+    return 'production';
+  }
   if (typeof window !== 'undefined') {
     const host = window.location.host.toLowerCase();
     if (host.includes('ais-dev') || host.includes('localhost') || host.includes('127.0.0.1')) {

@@ -18,7 +18,7 @@ English toggle.
 - **Bible text:** [apibible.wbem.org](https://apibible.wbem.org) — NIV (English) and
   Vietnamese 1925 only (see Rules)
 - **AI features:** Google Gemini API
-- **iOS app:** Capacitor (`org.vnrevivalchurch.app`)
+- **iOS app:** Capacitor (`org.vrcfamily.app`)
 
 ## Project structure
 

@@ -1,9 +1,8 @@
 {
-	"appId": "org.vnrevivalchurch.app",
+	"appId": "org.vrcfamily.app",
 	"appName": "Vietnamese Revival Church",
 	"webDir": "dist",
 	"server": {
-		"url": "https://vrcfamily.ai.studio",
 		"cleartext": false,
 		"androidScheme": "https",
 		"iosScheme": "https"
