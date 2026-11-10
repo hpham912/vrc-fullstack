@@ -17,7 +17,6 @@ English toggle.
 - **Auth / push:** Firebase (`firebase-admin`)
 - **Bible text:** [apibible.wbem.org](https://apibible.wbem.org) — NIV (English) and
   Vietnamese 1925 only (see Rules)
-- **AI features:** Google Gemini API
 - **iOS app:** Capacitor (`org.vrcfamily.app`)
 
 ## Project structure
@@ -84,7 +83,7 @@ npm run ios:sync # rebuild web + sync into the Capacitor iOS project
 ```
 
 Environment variables (see `.env.example`): `SQL_HOST`, `SQL_DB_NAME`,
-`SQL_ADMIN_USER`, `SQL_ADMIN_PASSWORD`, `GEMINI_API_KEY`, `APP_URL`,
+`SQL_ADMIN_USER`, `SQL_ADMIN_PASSWORD`, `APP_URL`,
 `VITE_API_BASE_URL` (only for iOS release builds).
 
 ## Deploying
