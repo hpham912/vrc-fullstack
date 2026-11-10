@@ -350,7 +350,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                 {/* Separator row for calendar button like today highlight */}
                 <div className={s.cardFooterRow}>
-                  <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation />
+                  <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation className="flex-1 justify-center" />
                   <CalendarButtons event={evt} stopPropagation variant="menu" />
                 </div>
               </div>
