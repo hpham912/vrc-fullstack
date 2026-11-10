@@ -581,10 +581,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             <div className={s.zoomSectionIcon}>
               <Video className={s.zoomSectionIconSvg} />
             </div>
-            <div className={s.zoomSectionText}>
-              <span className={s.zoomSectionTitle}>{t('eventZoomTitle')}</span>
-              <span className={s.zoomSectionDesc}>{t('eventZoomDesc')}</span>
-            </div>
+            <span className={s.zoomSectionTitle}>{t('eventZoomTitle')}</span>
             <button
               type="button"
               role="switch"
@@ -596,6 +593,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
               <span className={`${s.zoomSwitchKnob} ${eventHasZoom ? s.zoomSwitchKnobOn : ''}`} />
             </button>
           </div>
+          <p className={s.zoomSectionDesc}>{t('eventZoomDesc')}</p>
           {!churchInfo?.zoomMeetingId ? (
             <p className={s.zoomSectionHint}>{t('eventZoomNotSet')}</p>
           ) : eventHasZoom ? (
@@ -707,7 +705,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </p>
 
           <div className={s.previewZoomRow}>
-            <ZoomButton event={previewEvent} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} />
+            <ZoomButton event={previewEvent} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} className="w-full justify-center" />
           </div>
         </div>
       </div>

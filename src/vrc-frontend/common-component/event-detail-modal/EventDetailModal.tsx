@@ -66,7 +66,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, zoomM
             </div>
           </Card>
 
-          <ZoomButton event={event} meetingId={zoomMeetingId} passcode={zoomPasscode} />
+          <ZoomButton event={event} meetingId={zoomMeetingId} passcode={zoomPasscode} className="w-full justify-center" />
 
           <div className={s.detailDescBlock}>
             <h4 className={s.detailDescHeading}>{t('eventsDetailTitle')}</h4>

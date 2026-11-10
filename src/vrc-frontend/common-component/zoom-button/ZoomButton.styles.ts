@@ -1,12 +1,12 @@
 export const zoomButtonStyles = {
   // Zoom brand blue (#2D8CFF). Same in light and dark mode — the
   // explicit dark: twin states that, so the button never flips to a
-  // remapped color. Design A (Hoang, 2026-11-10): a full-width bar,
-  // taller with bigger text and icon, on its own row above the
-  // calendar footer — the button's own design, impossible to miss.
-  // Text made smaller at Hoang's request (2026-11-10): text-xs with
-  // a w-4 icon, py-3 kept so the bar stays an easy tap target.
-  zoomBtn: "inline-flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-xs font-bold transition-all shadow-2xs active:scale-[0.98]",
+  // remapped color. The button sits in the card footer next to the
+  // calendar button (Hoang, 2026-11-10), so its height matches the
+  // calendar button (py-1.5, sm:py-2) and its width is set by the
+  // parent (flex-1 on the card, w-full in details / the preview).
+  // Text is text-xs with a w-4 icon, per Hoang's request.
+  zoomBtn: "inline-flex items-center justify-center gap-2 px-4 py-1.5 sm:py-2 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-xs font-bold transition-all shadow-2xs active:scale-[0.98]",
   zoomIcon: "w-4 h-4 text-white flex-shrink-0",
   modalIcon: "w-4 h-4",
   // The shared Modal body has no padding, so the content supplies it.

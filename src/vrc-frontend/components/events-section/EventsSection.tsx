@@ -348,11 +348,9 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                   </div>
                 </div>
 
-                {/* Zoom bar: its own full-width row above the footer (design A) */}
-                <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation />
-
-                {/* Separator row for calendar button like today highlight */}
+                {/* Footer row: Zoom button next to the calendar button */}
                 <div className={s.cardFooterRow}>
+                  <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation className="flex-1 justify-center" />
                   <CalendarButtons event={evt} stopPropagation variant="menu" />
                 </div>
               </div>
