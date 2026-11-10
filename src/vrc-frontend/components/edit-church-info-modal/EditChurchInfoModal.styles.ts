@@ -20,6 +20,8 @@ export const editChurchInfoModalStyles = {
   sectionTitle: "font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5",
   mapPinIcon: "w-4 h-4 text-amber-700 dark:text-amber-400",
   clockIcon: "w-4 h-4 text-indigo-600 dark:text-indigo-400",
+  zoomIcon: "w-4 h-4 text-sky-600 dark:text-sky-400",
+  hintText: "text-caption text-stone-500",
   fieldGroup: "space-y-1",
   label: "block text-label font-bold text-stone-600",
   labelWithRow: "block text-label font-bold text-stone-600 flex items-center justify-between",

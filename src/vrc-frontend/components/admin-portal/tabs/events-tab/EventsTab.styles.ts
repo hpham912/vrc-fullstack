@@ -27,6 +27,8 @@ export const eventsTabStyles = {
   featuredRow: 'flex items-center pt-1',
   featuredLabel: 'flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700',
   checkbox: 'rounded border-stone-300 text-stone-900 focus:ring-stone-400',
+  zoomRow: 'flex flex-wrap items-center gap-2 pt-1',
+  previewZoomRow: 'flex items-center justify-end',
   submitRow: 'text-right pt-2 border-t border-stone-200',
   actionIcon: 'w-4 h-4',
   previewSection: 'space-y-2 w-full min-w-0',

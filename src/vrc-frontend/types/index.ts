@@ -16,6 +16,7 @@ export interface ChurchEvent {
   address?: string | null;
   imageUrl?: string | null;
   isFeatured: boolean;
+  hasZoom?: boolean;
   maxCapacity?: number | null;
   organizerName?: string | null;
   organizerEmail?: string | null;
@@ -163,6 +164,12 @@ export interface ChurchInfo {
   regionDescEn: string;
   headerVerse?: HeaderVerse;
   services: WeeklyService[];
+  // Church default Zoom meeting (used by the shared Zoom button on
+  // events). Optional — older saved church info has neither field.
+  // Never rendered anywhere in the app; only the admin edit form
+  // shows them so the admin can set them.
+  zoomMeetingId?: string;
+  zoomPasscode?: string;
   updatedAt?: string;
 }
 

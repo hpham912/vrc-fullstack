@@ -48,6 +48,12 @@ export interface ChurchInfoData {
   regionDescEn: string;
   headerVerse?: HeaderVerseData;
   services: WeeklyService[];
+  // Church default Zoom meeting (used by the shared Zoom button on
+  // events). Optional — older saved church info has neither field.
+  // Never rendered anywhere in the app; only the admin edit form
+  // shows them so the admin can set them.
+  zoomMeetingId?: string;
+  zoomPasscode?: string;
   updatedAt: string;
 }
 
@@ -189,7 +195,7 @@ router.get('/', async (req, res) => {
 // PUT /api/church-info - Update sanctuary address & worship schedules (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services, headerVerse } = req.body;
+    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services, headerVerse, zoomMeetingId, zoomPasscode } = req.body;
 
     if (!address || !sanctuaryName) {
       return res.status(400).json({ error: 'Sanctuary name and address are required.' });
@@ -227,6 +233,11 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       regionDescEn: regionDescEn ? String(regionDescEn).trim() : inMemoryChurchInfo.regionDescEn,
       headerVerse: cleanedHeaderVerse,
       services: cleanedServices,
+      // Zoom meeting ID is digits only ("599 7518611" -> "5997518611").
+      // An empty value clears the field; an absent field keeps the
+      // stored one. Never a hardcoded default here.
+      zoomMeetingId: zoomMeetingId !== undefined ? String(zoomMeetingId).replace(/\D/g, '') : (inMemoryChurchInfo.zoomMeetingId ?? ''),
+      zoomPasscode: zoomPasscode !== undefined ? String(zoomPasscode).trim() : (inMemoryChurchInfo.zoomPasscode ?? ''),
       updatedAt: new Date().toISOString(),
     };
 

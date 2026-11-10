@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users } from 'lucide-react';
+import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button } from '../../../../common-component/index.ts';
+import { Button, ZoomButton } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -70,6 +70,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const [eventLocation, setEventLocation] = useState('Main Sanctuary');
   const [eventAddress, setEventAddress] = useState(DEFAULT_EVENT_ADDRESS);
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
+  const [eventHasZoom, setEventHasZoom] = useState(false);
   const [eventOrganizer, setEventOrganizer] = useState(adminUser?.displayName || 'Pastoral Ministry Team');
   const [eventOrganizerEmail, setEventOrganizerEmail] = useState(adminUser?.email || 'contact@vrcfamily.org');
   const [editingEventAudit, setEditingEventAudit] = useState<{
@@ -92,6 +93,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEventLocation('Main Sanctuary');
     setEventAddress(DEFAULT_EVENT_ADDRESS);
     setEventIsFeatured(false);
+    setEventHasZoom(false);
     setEditingEventAudit(null);
   };
 
@@ -113,6 +115,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     const savedAddr = (evt.address || '').trim();
     setEventAddress(!savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : savedAddr);
     setEventIsFeatured(evt.isFeatured);
+    setEventHasZoom(evt.hasZoom || false);
     setEventOrganizer(evt.organizerName || '');
     setEventOrganizerEmail(evt.organizerEmail || '');
     setEditingEventAudit({
@@ -149,6 +152,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         location: eventLocation.trim(),
         address: eventAddress.trim() || defaultChurchAddr,
         isFeatured: eventIsFeatured,
+        hasZoom: eventHasZoom,
         organizerName: eventOrganizer.trim(),
         organizerEmail: eventOrganizerEmail.trim(),
       };
@@ -279,6 +283,25 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const previewWeekday = isNaN(previewDateObj.getTime())
     ? t('weekdaySunday')
     : previewDateObj.toLocaleDateString(previewLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' });
+
+  // The live preview's Zoom button uses the form's own date/time.
+  const previewEvent: ChurchEvent = {
+    id: editingEventId ?? 0,
+    title: eventTitleEn || eventTitleVi || '',
+    titleVi: eventTitleVi,
+    titleEn: eventTitleEn,
+    description: eventDescriptionEn || eventDescriptionVi || '',
+    descriptionVi: eventDescriptionVi,
+    descriptionEn: eventDescriptionEn,
+    category: eventCategory,
+    date: eventDate,
+    startTime: eventStartTime,
+    endTime: eventEndTime || null,
+    location: eventLocation,
+    address: eventAddress,
+    isFeatured: eventIsFeatured,
+    hasZoom: eventHasZoom,
+  };
 
   if (activeTab !== 'create-event' && activeTab !== 'manage-events') return null;
 
@@ -553,6 +576,23 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </label>
         </div>
 
+        <div className={s.zoomRow}>
+          <Button
+            type="button"
+            variant={eventHasZoom ? 'dark' : 'secondary'}
+            size="sm"
+            leftIcon={<Video className="w-3.5 h-3.5" />}
+            onClick={() => setEventHasZoom((prev) => !prev)}
+          >
+            <span>{eventHasZoom ? t('eventRemoveZoom') : t('eventAddZoom')}</span>
+          </Button>
+          {!churchInfo?.zoomMeetingId ? (
+            <span className={s.hintText}>{t('eventZoomNotSet')}</span>
+          ) : eventHasZoom ? (
+            <span className={s.hintText}>{t('eventZoomAdded')}</span>
+          ) : null}
+        </div>
+
         <div className={s.submitRow}>
           <Button
             type="submit"
@@ -655,6 +695,10 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           <p className={s.previewDesc}>
             {(previewLang === 'vi' ? (eventDescriptionVi || eventDescriptionEn) : (eventDescriptionEn || eventDescriptionVi)) || t('adminEventDescPlaceholder')}
           </p>
+
+          <div className={s.previewZoomRow}>
+            <ZoomButton event={previewEvent} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} />
+          </div>
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Building2,
   Plus,
+  Video,
 } from 'lucide-react';
 import { Modal, Card, Button, AdminActionButtons, AdminAddButton } from '../../common-component/index.ts';
 import { editChurchInfoModalStyles as s } from './EditChurchInfoModal.styles.ts';
@@ -49,6 +50,11 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
   const [regionDescEn, setRegionDescEn] = useState(
     safeInfo.regionDescEn || 'Serving Vietnamese communities across Phoenix East Valley'
   );
+  // Church default Zoom meeting (used by the shared Zoom button on
+  // events). Admin-only: these values are never rendered anywhere
+  // else in the app.
+  const [zoomMeetingId, setZoomMeetingId] = useState(safeInfo.zoomMeetingId || '');
+  const [zoomPasscode, setZoomPasscode] = useState(safeInfo.zoomPasscode || '');
 
   const [services, setServices] = useState<WeeklyService[]>(
     safeInfo.services ? [...safeInfo.services] : [...DEFAULT_CHURCH_INFO.services]
@@ -68,6 +74,8 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
       setEmail(current.email || 'htph@vrcfamily.org');
       setRegionDescVi(current.regionDescVi || 'Phục vụ cộng đồng người Việt tại Tempe, Phoenix, Mesa, Chandler & Gilbert');
       setRegionDescEn(current.regionDescEn || 'Serving Vietnamese communities across Phoenix East Valley');
+      setZoomMeetingId(current.zoomMeetingId || '');
+      setZoomPasscode(current.zoomPasscode || '');
       setServices(current.services ? JSON.parse(JSON.stringify(current.services)) : [...DEFAULT_CHURCH_INFO.services]);
     }
   }, [isOpen, churchInfo]);
@@ -160,6 +168,8 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
         regionDescEn: regionDescEn.trim(),
         headerVerse: safeInfo.headerVerse || DEFAULT_HEADER_VERSE,
         services: processedServices,
+        zoomMeetingId: zoomMeetingId.trim(),
+        zoomPasscode: zoomPasscode.trim(),
       };
 
       const res = await fetch(apiUrl('/api/church-info'), {
@@ -323,6 +333,46 @@ export const EditChurchInfoModal: React.FC<EditChurchInfoModalProps> = ({
                 />
               </div>
             </div>
+          </Card>
+
+          {/* Section: Church default Zoom meeting (admin-only) */}
+          <Card variant="warm" padding="md" className="space-y-3">
+            <h4 className={s.sectionTitle}>
+              <Video className={s.zoomIcon} />
+              <span>{t('churchInfoZoom')}</span>
+            </h4>
+
+            <div className={s.gridTwoColsPt1}>
+              <div className={s.fieldGroup}>
+                <label className={s.label}>
+                  {t('churchInfoZoomId')}
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={zoomMeetingId}
+                  onChange={(e) => setZoomMeetingId(e.target.value)}
+                  className={s.inputRegular}
+                  placeholder="e.g. 123 456 7890"
+                />
+              </div>
+              <div className={s.fieldGroup}>
+                <label className={s.label}>
+                  {t('churchInfoZoomPasscode')}
+                </label>
+                <input
+                  type="password"
+                  value={zoomPasscode}
+                  onChange={(e) => setZoomPasscode(e.target.value)}
+                  className={s.inputRegular}
+                  placeholder="e.g. 123456"
+                />
+              </div>
+            </div>
+
+            <p className={s.hintText}>
+              {t('churchInfoZoomHint')}
+            </p>
           </Card>
 
           {/* Section 2: Weekly Service Times */}

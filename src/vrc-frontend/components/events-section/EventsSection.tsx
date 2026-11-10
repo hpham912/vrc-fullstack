@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChurchEvent } from '../../types/index.ts';
+import { ChurchEvent, ChurchInfo } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import {
   Calendar,
@@ -36,6 +36,7 @@ import {
   Card,
   EventDetailModal,
   LoadingShimmer,
+  ZoomButton,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -51,6 +52,7 @@ import { eventsSectionStyles as s } from './EventsSection.styles.ts';
 
 interface EventsSectionProps {
   events: ChurchEvent[];
+  churchInfo?: ChurchInfo | null;
   isAdmin: boolean;
   onRefresh?: () => void;
   onOpenAdminPortal?: (tab?: string, eventToEdit?: ChurchEvent | null) => void;
@@ -67,6 +69,7 @@ const CATEGORIES = [
 
 export const EventsSection: React.FC<EventsSectionProps> = ({
   events,
+  churchInfo,
   isAdmin,
   onRefresh,
   onOpenAdminPortal,
@@ -347,6 +350,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
 
                 {/* Separator row for calendar button like today highlight */}
                 <div className={s.cardFooterRow}>
+                  <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation />
                   <CalendarButtons event={evt} stopPropagation variant="menu" />
                 </div>
               </div>
@@ -453,6 +457,8 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
       {/* Event Details Popup Modal */}
       <EventDetailModal
         event={selectedDetailEvent}
+        zoomMeetingId={churchInfo?.zoomMeetingId}
+        zoomPasscode={churchInfo?.zoomPasscode}
         onClose={() => setSelectedDetailEvent(null)}
       />
       {/* Common Confirmation Modal for Delete */}

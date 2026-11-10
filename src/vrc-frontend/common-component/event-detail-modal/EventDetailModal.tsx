@@ -2,17 +2,19 @@ import React from 'react';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { ChurchEvent } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Modal, Card, DirectionButtons, CalendarButtons } from '../index.ts';
+import { Modal, Card, DirectionButtons, CalendarButtons, ZoomButton } from '../index.ts';
 import { formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { getCategoryLabel } from '../../utils/categoryTheme.ts';
 import { eventDetailModalStyles as s } from './EventDetailModal.styles.ts';
 
 interface EventDetailModalProps {
   event: ChurchEvent | null;
+  zoomMeetingId?: string | null;
+  zoomPasscode?: string | null;
   onClose: () => void;
 }
 
-export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClose }) => {
+export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, zoomMeetingId, zoomPasscode, onClose }) => {
   const { language, t } = useLanguage();
 
   return (
@@ -74,6 +76,8 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, onClo
           </div>
 
           <CalendarButtons event={event} variant="full" />
+
+          <ZoomButton event={event} meetingId={zoomMeetingId} passcode={zoomPasscode} className="w-full justify-center" />
         </div>
       )}
     </Modal>

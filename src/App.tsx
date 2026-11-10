@@ -455,6 +455,7 @@ function ChurchAppContent() {
         {activeTab === 'events' && (
           <EventsSection
             events={events}
+            churchInfo={churchInfo}
             isAdmin={isAdmin}
             onRefresh={loadData}
             onOpenAdminPortal={openAdminWithTab}

@@ -49,6 +49,7 @@ export const events = pgTable('events', {
   address: text('address').default('Tempe, Arizona'),
   imageUrl: text('image_url'),
   isFeatured: boolean('is_featured').notNull().default(false),
+  hasZoom: boolean('has_zoom').notNull().default(false),
   maxCapacity: integer('max_capacity'),
   organizerName: text('organizer_name'),
   organizerEmail: text('organizer_email'),

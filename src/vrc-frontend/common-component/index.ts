@@ -13,3 +13,5 @@ export { LoadingShimmer } from './loading-shimmer/LoadingShimmer.tsx';
 export type { LoadingShimmerVariant } from './loading-shimmer/LoadingShimmer.tsx';
 export { YouTubePlayer } from './youtube-player/YouTubePlayer.tsx';
 export type { YouTubePlayerProps } from './youtube-player/YouTubePlayer.tsx';
+export { ZoomButton } from './zoom-button/ZoomButton.tsx';
+export type { ZoomButtonProps } from './zoom-button/ZoomButton.tsx';
