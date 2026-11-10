@@ -39,6 +39,16 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Dirty-check: the Create and Change Password buttons stay disabled
+  // until the admin has typed something (these are creation/change
+  // forms, so the baseline is an empty form).
+  const isCreateDirty =
+    newAdminUsername.trim() !== '' ||
+    newAdminPassword.trim() !== '' ||
+    newAdminDisplayName.trim() !== '' ||
+    newAdminEmail.trim() !== '';
+  const isPasswordDirty = oldPassword !== '' || newPassword !== '';
   const [resetTarget, setResetTarget] = useState<AdminAccount | null>(null);
   const [resetting, setResetting] = useState(false);
   const [resetCode, setResetCode] = useState<string | null>(null);
@@ -260,7 +270,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
         <div className={s.submitRow}>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !isCreateDirty}
             className={s.createBtn}
           >
             {submitting ? t('commonCreating') : t('createAdminBtn')}
@@ -361,7 +371,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
         <div className={s.submitRowRight}>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !isPasswordDirty}
             className={s.updateBtn}
           >
             {t('updatePasswordBtn')}

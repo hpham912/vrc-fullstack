@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
@@ -30,6 +30,47 @@ interface EventsTabProps {
   // while not editing: the child clears a fresh (non-editing) form.
   resetFormSignal: number;
 }
+
+// Form values, for dirty-checking: the Save button is only enabled
+// while the form differs from the last loaded values (a fresh form,
+// or the event being edited).
+type EventFormValues = {
+  titleVi: string;
+  titleEn: string;
+  descriptionVi: string;
+  descriptionEn: string;
+  category: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  address: string;
+  isFeatured: boolean;
+  hasZoom: boolean;
+  organizer: string;
+  organizerEmail: string;
+};
+
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+// The organizer fields are sticky — reset does not clear them, so the
+// fresh-form baseline keeps the current organizer values.
+const getDefaultEventValues = (organizer: string, organizerEmail: string): EventFormValues => ({
+  titleVi: '',
+  titleEn: '',
+  descriptionVi: '',
+  descriptionEn: '',
+  category: 'Worship',
+  date: getTodayStr(),
+  startTime: '03:00 PM',
+  endTime: '05:00 PM',
+  location: 'Main Sanctuary',
+  address: DEFAULT_EVENT_ADDRESS,
+  isFeatured: false,
+  hasZoom: false,
+  organizer,
+  organizerEmail,
+});
 
 // Events: add/edit form with live preview + manage list. Owns all event
 // form state, save/edit/delete, and its own submitting flag. Prefills
@@ -80,44 +121,69 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     updatedAt?: string | null;
   } | null>(null);
 
-  const resetEventForm = () => {
-    setEditingEventId(null);
-    setEventTitleVi('');
-    setEventTitleEn('');
-    setEventDescriptionVi('');
-    setEventDescriptionEn('');
-    setEventCategory('Worship');
-    setEventDate(new Date().toISOString().split('T')[0]);
-    setEventStartTime('03:00 PM');
-    setEventEndTime('05:00 PM');
-    setEventLocation('Main Sanctuary');
-    setEventAddress(DEFAULT_EVENT_ADDRESS);
-    setEventIsFeatured(false);
-    setEventHasZoom(false);
-    setEditingEventAudit(null);
+  // Last loaded values — the Save button is enabled only while the
+  // form differs from these.
+  const baselineRef = useRef<EventFormValues>(
+    getDefaultEventValues(
+      adminUser?.displayName || 'Pastoral Ministry Team',
+      adminUser?.email || 'contact@vrcfamily.org'
+    )
+  );
+
+  const applyEventValues = (values: EventFormValues) => {
+    setEventTitleVi(values.titleVi);
+    setEventTitleEn(values.titleEn);
+    setEventDescriptionVi(values.descriptionVi);
+    setEventDescriptionEn(values.descriptionEn);
+    setEventCategory(values.category);
+    setEventDate(values.date);
+    setEventStartTime(values.startTime);
+    setEventEndTime(values.endTime);
+    setEventLocation(values.location);
+    setEventAddress(values.address);
+    setEventIsFeatured(values.isFeatured);
+    setEventHasZoom(values.hasZoom);
+    setEventOrganizer(values.organizer);
+    setEventOrganizerEmail(values.organizerEmail);
   };
 
-  const handleEditEvent = (evt: ChurchEvent) => {
-    setEditingEventId(evt.id);
-    setEventTitleVi(evt.titleVi || evt.title || '');
-    setEventTitleEn(evt.titleEn || evt.title || '');
-    setEventDescriptionVi(evt.descriptionVi || evt.description || '');
-    setEventDescriptionEn(evt.descriptionEn || evt.description || '');
-    setEventCategory(evt.category);
-    setEventDate(evt.date);
-    setEventStartTime(evt.startTime);
-    setEventEndTime(evt.endTime || '');
-    setEventLocation(evt.location);
+  const getEventValuesFromItem = (evt: ChurchEvent): EventFormValues => {
     // If the event has no address, or its address is just the church
     // street address (the old default), show the new default instead.
     // A real offsite address is kept as-is.
     const churchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
     const savedAddr = (evt.address || '').trim();
-    setEventAddress(!savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : savedAddr);
-    setEventIsFeatured(evt.isFeatured);
-    setEventHasZoom(evt.hasZoom || false);
-    setEventOrganizer(evt.organizerName || '');
-    setEventOrganizerEmail(evt.organizerEmail || '');
+    return {
+      titleVi: evt.titleVi || evt.title || '',
+      titleEn: evt.titleEn || evt.title || '',
+      descriptionVi: evt.descriptionVi || evt.description || '',
+      descriptionEn: evt.descriptionEn || evt.description || '',
+      category: evt.category,
+      date: evt.date,
+      startTime: evt.startTime,
+      endTime: evt.endTime || '',
+      location: evt.location,
+      address: !savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : savedAddr,
+      isFeatured: evt.isFeatured,
+      hasZoom: evt.hasZoom || false,
+      organizer: evt.organizerName || '',
+      organizerEmail: evt.organizerEmail || '',
+    };
+  };
+
+  const resetEventForm = () => {
+    setEditingEventId(null);
+    const values = getDefaultEventValues(eventOrganizer, eventOrganizerEmail);
+    applyEventValues(values);
+    baselineRef.current = values;
+    setEditingEventAudit(null);
+  };
+
+  const handleEditEvent = (evt: ChurchEvent) => {
+    setEditingEventId(evt.id);
+    const values = getEventValuesFromItem(evt);
+    applyEventValues(values);
+    baselineRef.current = values;
     setEditingEventAudit({
       createdBy: evt.createdBy,
       createdAt: evt.createdAt,
@@ -126,6 +192,24 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     });
     onTabChange('create-event');
   };
+
+  // Dirty-check: any field differs from the last loaded values.
+  const baseline = baselineRef.current;
+  const isDirty =
+    eventTitleVi !== baseline.titleVi ||
+    eventTitleEn !== baseline.titleEn ||
+    eventDescriptionVi !== baseline.descriptionVi ||
+    eventDescriptionEn !== baseline.descriptionEn ||
+    eventCategory !== baseline.category ||
+    eventDate !== baseline.date ||
+    eventStartTime !== baseline.startTime ||
+    eventEndTime !== baseline.endTime ||
+    eventLocation !== baseline.location ||
+    eventAddress !== baseline.address ||
+    eventIsFeatured !== baseline.isFeatured ||
+    eventHasZoom !== baseline.hasZoom ||
+    eventOrganizer !== baseline.organizer ||
+    eventOrganizerEmail !== baseline.organizerEmail;
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -606,7 +690,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             type="submit"
             variant="dark"
             size="md"
-            disabled={submitting}
+            disabled={submitting || !isDirty}
             leftIcon={<Save className="w-3.5 h-3.5" />}
           >
             <span>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Edit3, Save, Sparkles, Trash2 } from 'lucide-react';
 import { DailyVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
@@ -26,6 +26,56 @@ interface VersesTabProps {
   churchInfo?: ChurchInfo | null;
   onOpenHeaderVerseEditor?: () => void;
 }
+
+// Form values, for dirty-checking: the Save button is only enabled
+// while the form differs from the last loaded values (a fresh form,
+// or the verse being edited).
+type VerseFormValues = {
+  date: string;
+  referenceVi: string;
+  referenceEn: string;
+  translationVi: string;
+  translationEn: string;
+  textVi: string;
+  textEn: string;
+  reflectionVi: string;
+  reflectionEn: string;
+  prayerVi: string;
+  prayerEn: string;
+  theme: string;
+};
+
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+const getDefaultVerseValues = (): VerseFormValues => ({
+  date: getTodayStr(),
+  referenceVi: '',
+  referenceEn: '',
+  translationVi: '1925',
+  translationEn: 'NIV',
+  textVi: '',
+  textEn: '',
+  reflectionVi: '',
+  reflectionEn: '',
+  prayerVi: '',
+  prayerEn: '',
+  theme: 'Revival & Faith',
+});
+
+const getVerseValuesFromItem = (v: DailyVerse): VerseFormValues => ({
+  date: v.date,
+  referenceVi: v.referenceVi || v.reference || '',
+  referenceEn: v.referenceEn || v.reference || '',
+  translationVi: v.translationVi || '1925',
+  translationEn: v.translationEn || v.translation || 'NIV',
+  textVi: v.verseTextVi || v.verseText || '',
+  textEn: v.verseTextEn || v.verseText || '',
+  reflectionVi: v.reflectionVi || v.reflection || '',
+  reflectionEn: v.reflectionEn || v.reflection || '',
+  prayerVi: v.prayerVi || v.prayer || '',
+  prayerEn: v.prayerEn || v.prayer || '',
+  theme: v.theme || 'Revival & Faith',
+});
 
 // Daily verses: form + published list. Owns all verse form state, the
 // fetch-from-Bible flow, save/edit/delete, and its own submitting flag.
@@ -72,20 +122,30 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Last loaded values — the Save button is enabled only while the
+  // form differs from these.
+  const baselineRef = useRef<VerseFormValues>(getDefaultVerseValues());
+
+  const applyVerseValues = (values: VerseFormValues) => {
+    setVerseDate(values.date);
+    setVerseReferenceVi(values.referenceVi);
+    setVerseReferenceEn(values.referenceEn);
+    setVerseTranslationVi(values.translationVi);
+    setVerseTranslationEn(values.translationEn);
+    setVerseTextVi(values.textVi);
+    setVerseTextEn(values.textEn);
+    setVerseReflectionVi(values.reflectionVi);
+    setVerseReflectionEn(values.reflectionEn);
+    setVersePrayerVi(values.prayerVi);
+    setVersePrayerEn(values.prayerEn);
+    setVerseTheme(values.theme);
+  };
+
   const resetVerseForm = () => {
     setEditingVerseId(null);
-    setVerseDate(new Date().toISOString().split('T')[0]);
-    setVerseReferenceVi('');
-    setVerseReferenceEn('');
-    setVerseTranslationVi('1925');
-    setVerseTranslationEn('NIV');
-    setVerseTextVi('');
-    setVerseTextEn('');
-    setVerseReflectionVi('');
-    setVerseReflectionEn('');
-    setVersePrayerVi('');
-    setVersePrayerEn('');
-    setVerseTheme('Revival & Faith');
+    const values = getDefaultVerseValues();
+    applyVerseValues(values);
+    baselineRef.current = values;
     setFetchedScriptureKey(null);
     setEditingVerseAudit(null);
   };
@@ -96,18 +156,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     // makes the save POST instead of PUT /api/verses/0, which would
     // 404). Don't rely on 0 being falsy here.
     setEditingVerseId(v.id > 0 ? v.id : null);
-    setVerseDate(v.date);
-    setVerseReferenceVi(v.referenceVi || v.reference || '');
-    setVerseReferenceEn(v.referenceEn || v.reference || '');
-    setVerseTranslationVi(v.translationVi || '1925');
-    setVerseTranslationEn(v.translationEn || v.translation || 'NIV');
-    setVerseTextVi(v.verseTextVi || v.verseText || '');
-    setVerseTextEn(v.verseTextEn || v.verseText || '');
-    setVerseReflectionVi(v.reflectionVi || v.reflection || '');
-    setVerseReflectionEn(v.reflectionEn || v.reflection || '');
-    setVersePrayerVi(v.prayerVi || v.prayer || '');
-    setVersePrayerEn(v.prayerEn || v.prayer || '');
-    setVerseTheme(v.theme || 'Revival & Faith');
+    const values = getVerseValuesFromItem(v);
+    applyVerseValues(values);
+    baselineRef.current = values;
     setFetchedScriptureKey(null);
     setEditingVerseAudit({
       createdBy: v.createdBy,
@@ -116,6 +167,24 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       updatedAt: v.updatedAt,
     });
   };
+
+  // Dirty-check: any field differs from the last loaded values. The
+  // Fetch-from-Bible fill counts as a change, since it writes the
+  // text and reference fields.
+  const baseline = baselineRef.current;
+  const isDirty =
+    verseDate !== baseline.date ||
+    verseReferenceVi !== baseline.referenceVi ||
+    verseReferenceEn !== baseline.referenceEn ||
+    verseTranslationVi !== baseline.translationVi ||
+    verseTranslationEn !== baseline.translationEn ||
+    verseTextVi !== baseline.textVi ||
+    verseTextEn !== baseline.textEn ||
+    verseReflectionVi !== baseline.reflectionVi ||
+    verseReflectionEn !== baseline.reflectionEn ||
+    versePrayerVi !== baseline.prayerVi ||
+    versePrayerEn !== baseline.prayerEn ||
+    verseTheme !== baseline.theme;
 
   // Fetch real EN + VI scripture text from POST /api/ai/fetch-scripture
   // (apibible: NIV English + Kinh Thánh 1925 Vietnamese) and fill both
@@ -465,7 +534,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             type="submit"
             variant="dark"
             size="md"
-            disabled={submitting}
+            disabled={submitting || !isDirty}
             leftIcon={<Save className="w-3.5 h-3.5" />}
           >
             <span>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Save, Video } from 'lucide-react';
 import { Sermon } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
@@ -21,6 +21,38 @@ interface SermonsTabProps {
   onRefreshData: () => void;
 }
 
+// Form values, for dirty-checking: the Save button is only enabled
+// while the form differs from the last loaded values (a fresh form,
+// or the sermon being edited).
+type SermonFormValues = {
+  youtubeUrl: string;
+  titleVi: string;
+  titleEn: string;
+  descVi: string;
+  descEn: string;
+  date: string;
+};
+
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+const getDefaultSermonValues = (): SermonFormValues => ({
+  youtubeUrl: '',
+  titleVi: '',
+  titleEn: '',
+  descVi: '',
+  descEn: '',
+  date: getTodayStr(),
+});
+
+const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => ({
+  youtubeUrl: sermon.youtubeUrl,
+  titleVi: sermon.titleVi,
+  titleEn: sermon.titleEn,
+  descVi: sermon.descriptionVi || '',
+  descEn: sermon.descriptionEn || '',
+  date: sermon.date,
+});
+
 // Sermons (Bài Giảng): form + published list. The admin pastes a YouTube
 // link — the video ID is extracted live and a thumbnail preview confirms
 // it is the right video before saving. The video itself is never stored;
@@ -39,10 +71,23 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
   const [sermonTitleEn, setSermonTitleEn] = useState('');
   const [sermonDescVi, setSermonDescVi] = useState('');
   const [sermonDescEn, setSermonDescEn] = useState('');
-  const [sermonDate, setSermonDate] = useState(new Date().toISOString().split('T')[0]);
+  const [sermonDate, setSermonDate] = useState(getTodayStr());
   const [submitting, setSubmitting] = useState(false);
   const [deleteTargetSermon, setDeleteTargetSermon] = useState<Sermon | null>(null);
   const [deletingSermon, setDeletingSermon] = useState(false);
+
+  // Last loaded values — the Save button is enabled only while the
+  // form differs from these.
+  const baselineRef = useRef<SermonFormValues>(getDefaultSermonValues());
+
+  const applySermonValues = (values: SermonFormValues) => {
+    setSermonYoutubeUrl(values.youtubeUrl);
+    setSermonTitleVi(values.titleVi);
+    setSermonTitleEn(values.titleEn);
+    setSermonDescVi(values.descVi);
+    setSermonDescEn(values.descEn);
+    setSermonDate(values.date);
+  };
 
   // Live-extract the video ID from whatever link is pasted, so the
   // thumbnail preview and the save validation share one source of truth.
@@ -51,23 +96,27 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
 
   const resetSermonForm = () => {
     setEditingSermonId(null);
-    setSermonYoutubeUrl('');
-    setSermonTitleVi('');
-    setSermonTitleEn('');
-    setSermonDescVi('');
-    setSermonDescEn('');
-    setSermonDate(new Date().toISOString().split('T')[0]);
+    const values = getDefaultSermonValues();
+    applySermonValues(values);
+    baselineRef.current = values;
   };
 
   const handleEditSermon = (sermon: Sermon) => {
     setEditingSermonId(sermon.id);
-    setSermonYoutubeUrl(sermon.youtubeUrl);
-    setSermonTitleVi(sermon.titleVi);
-    setSermonTitleEn(sermon.titleEn);
-    setSermonDescVi(sermon.descriptionVi || '');
-    setSermonDescEn(sermon.descriptionEn || '');
-    setSermonDate(sermon.date);
+    const values = getSermonValuesFromItem(sermon);
+    applySermonValues(values);
+    baselineRef.current = values;
   };
+
+  // Dirty-check: any field differs from the last loaded values.
+  const baseline = baselineRef.current;
+  const isDirty =
+    sermonYoutubeUrl !== baseline.youtubeUrl ||
+    sermonTitleVi !== baseline.titleVi ||
+    sermonTitleEn !== baseline.titleEn ||
+    sermonDescVi !== baseline.descVi ||
+    sermonDescEn !== baseline.descEn ||
+    sermonDate !== baseline.date;
 
   const handleSaveSermon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +284,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
             type="submit"
             variant="dark"
             size="md"
-            disabled={submitting}
+            disabled={submitting || !isDirty}
             leftIcon={<Save className="w-3.5 h-3.5" />}
           >
             <span>

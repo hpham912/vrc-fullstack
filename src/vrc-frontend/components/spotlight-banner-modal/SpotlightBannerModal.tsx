@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChurchEvent, ChurchInfo, SpotlightBannerConfig, SpotlightTheme } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
@@ -44,6 +44,42 @@ const THEME_OPTIONS: ThemeOption[] = [
   { key: 'special', labelVi: 'Giới Trẻ (Youth)', labelEn: 'Youth', icon: '✨', colorDot: 'bg-emerald-600' },
   { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: '🏛️', colorDot: 'bg-stone-700' },
 ];
+
+// Form values, for dirty-checking: the Save button is only enabled
+// while the form differs from the banner it opened with.
+type SpotlightFormValues = {
+  theme: SpotlightTheme;
+  selectedEventId: number | null;
+  badgeVi: string;
+  badgeEn: string;
+  subtitle: string;
+  subtitleVi: string;
+  subtitleEn: string;
+  quoteRef: string;
+};
+
+const DEFAULT_SPOTLIGHT_SUBTITLE = 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"';
+
+const getSpotlightValues = (
+  initialConfig: SpotlightBannerConfig | null | undefined,
+  events: ChurchEvent[],
+  todayStr: string
+): SpotlightFormValues => {
+  const savedSubtitle = initialConfig?.subtitle || DEFAULT_SPOTLIGHT_SUBTITLE;
+  const existingId = initialConfig?.selectedEventId ?? null;
+  const isPast = existingId ? events.some((e) => e.id === existingId && e.date < todayStr) : false;
+  const savedRef = savedSubtitle.split(' - ')[0]?.trim() || '';
+  return {
+    theme: initialConfig?.theme || 'thanksgiving',
+    selectedEventId: isPast ? null : existingId,
+    badgeVi: initialConfig?.badgeVi || initialConfig?.badge || '',
+    badgeEn: initialConfig?.badgeEn || initialConfig?.badge || '',
+    subtitle: savedSubtitle,
+    subtitleVi: initialConfig?.subtitleVi || savedSubtitle,
+    subtitleEn: initialConfig?.subtitleEn || savedSubtitle,
+    quoteRef: savedRef.includes(':') ? savedRef : '',
+  };
+};
 
 export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   isOpen,
@@ -101,20 +137,22 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     .filter((e) => e.date >= todayStr)
     .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
+  // Last loaded values — the Save button is enabled only while the
+  // form differs from these.
+  const baselineRef = useRef<SpotlightFormValues>(getSpotlightValues(initialConfig, events, todayStr));
+
   useEffect(() => {
     if (isOpen) {
-      setTheme(initialConfig?.theme || 'thanksgiving');
-      const existingId = initialConfig?.selectedEventId ?? null;
-      const isPast = existingId ? events.some((e) => e.id === existingId && e.date < todayStr) : false;
-      setSelectedEventId(isPast ? null : existingId);
-      setBadgeVi(initialConfig?.badgeVi || initialConfig?.badge || '');
-      setBadgeEn(initialConfig?.badgeEn || initialConfig?.badge || '');
-      const savedSubtitle = initialConfig?.subtitle || 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"';
-      setSubtitle(savedSubtitle);
-      setSubtitleVi(initialConfig?.subtitleVi || savedSubtitle);
-      setSubtitleEn(initialConfig?.subtitleEn || savedSubtitle);
-      const savedRef = savedSubtitle.split(' - ')[0]?.trim() || '';
-      setQuoteRef(savedRef.includes(':') ? savedRef : '');
+      const values = getSpotlightValues(initialConfig, events, todayStr);
+      setTheme(values.theme);
+      setSelectedEventId(values.selectedEventId);
+      setBadgeVi(values.badgeVi);
+      setBadgeEn(values.badgeEn);
+      setSubtitle(values.subtitle);
+      setSubtitleVi(values.subtitleVi);
+      setSubtitleEn(values.subtitleEn);
+      setQuoteRef(values.quoteRef);
+      baselineRef.current = values;
       setFetchedQuoteKey(null);
     }
   }, [isOpen, initialConfig, events, todayStr]);
@@ -158,6 +196,20 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // Dirty-check: any saved field differs from the banner it opened
+  // with. Fetch-from-Bible counts as a change, since it writes the
+  // quote fields. The quote reference is only a fetch input (it is
+  // not saved), so changing it alone does not enable Save.
+  const baseline = baselineRef.current;
+  const isDirty =
+    theme !== baseline.theme ||
+    selectedEventId !== baseline.selectedEventId ||
+    badgeVi !== baseline.badgeVi ||
+    badgeEn !== baseline.badgeEn ||
+    subtitle !== baseline.subtitle ||
+    subtitleVi !== baseline.subtitleVi ||
+    subtitleEn !== baseline.subtitleEn;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -536,7 +588,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             <Button
               type="submit"
               variant="dark"
-              disabled={saving}
+              disabled={saving || !isDirty}
               leftIcon={<Save className={s.saveIcon} />}
             >
               <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>

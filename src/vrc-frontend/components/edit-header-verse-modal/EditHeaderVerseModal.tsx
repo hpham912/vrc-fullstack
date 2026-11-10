@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChurchInfo, DailyVerse, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -16,6 +16,26 @@ interface EditHeaderVerseModalProps {
   allVerses?: DailyVerse[];
   onSaveSuccess?: () => void;
 }
+
+// Form values, for dirty-checking: the Save button is only enabled
+// while the form differs from the header verse it opened with.
+type HeaderVerseFormValues = {
+  textVi: string;
+  textEn: string;
+  referenceVi: string;
+  referenceEn: string;
+  translationVi: string;
+  translationEn: string;
+};
+
+const getHeaderVerseValues = (hv: HeaderVerse): HeaderVerseFormValues => ({
+  textVi: hv.verseTextVi || '',
+  textEn: hv.verseTextEn || '',
+  referenceVi: hv.referenceVi || '',
+  referenceEn: hv.referenceEn || '',
+  translationVi: hv.translationVi || '1925',
+  translationEn: hv.translationEn || 'NIV',
+});
 
 export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   isOpen,
@@ -44,6 +64,10 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   // Preview language toggle inside modal
   const [previewLang, setPreviewLang] = useState<'vi' | 'en'>(language);
 
+  // Last loaded values — the Save button is enabled only while the
+  // form differs from these.
+  const baselineRef = useRef<HeaderVerseFormValues>(getHeaderVerseValues(currentHeaderVerse));
+
   // Sync state when modal opens or churchInfo updates
   useEffect(() => {
     if (isOpen) {
@@ -54,12 +78,25 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
       setReferenceEn(active.referenceEn || '');
       setTranslationVi(active.translationVi || '1925');
       setTranslationEn(active.translationEn || 'NIV');
+      baselineRef.current = getHeaderVerseValues(active);
       setFeedback(null);
       setPreviewLang(language);
     }
   }, [isOpen, churchInfo, language]);
 
   if (!isOpen) return null;
+
+  // Dirty-check: any field differs from the header verse it opened
+  // with. Fetch-from-Bible and quick-pick count as changes, since
+  // they write the text and reference fields.
+  const baseline = baselineRef.current;
+  const isDirty =
+    verseTextVi !== baseline.textVi ||
+    verseTextEn !== baseline.textEn ||
+    referenceVi !== baseline.referenceVi ||
+    referenceEn !== baseline.referenceEn ||
+    translationVi !== baseline.translationVi ||
+    translationEn !== baseline.translationEn;
 
   // Fetch via Bible API (apibible: NIV English + 1925 Vietnamese)
   const handleFetchFromBibleApi = async (e?: React.FormEvent) => {
@@ -349,7 +386,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
             type="submit"
             variant="dark"
             size="md"
-            disabled={saving || fetchingApi}
+            disabled={saving || fetchingApi || !isDirty}
             leftIcon={
               saving ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
