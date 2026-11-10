@@ -576,20 +576,30 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </label>
         </div>
 
-        <div className={s.zoomRow}>
-          <Button
-            type="button"
-            variant={eventHasZoom ? 'dark' : 'secondary'}
-            size="sm"
-            leftIcon={<Video className="w-3.5 h-3.5" />}
-            onClick={() => setEventHasZoom((prev) => !prev)}
-          >
-            <span>{eventHasZoom ? t('eventRemoveZoom') : t('eventAddZoom')}</span>
-          </Button>
+        <div className={s.zoomSection}>
+          <div className={s.zoomSectionHead}>
+            <div className={s.zoomSectionIcon}>
+              <Video className={s.zoomSectionIconSvg} />
+            </div>
+            <div className={s.zoomSectionText}>
+              <span className={s.zoomSectionTitle}>{t('eventZoomTitle')}</span>
+              <span className={s.zoomSectionDesc}>{t('eventZoomDesc')}</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={eventHasZoom}
+              aria-label={t('eventZoomTitle')}
+              onClick={() => setEventHasZoom((prev) => !prev)}
+              className={`${s.zoomSwitch} ${eventHasZoom ? s.zoomSwitchOn : s.zoomSwitchOff}`}
+            >
+              <span className={`${s.zoomSwitchKnob} ${eventHasZoom ? s.zoomSwitchKnobOn : ''}`} />
+            </button>
+          </div>
           {!churchInfo?.zoomMeetingId ? (
-            <span className={s.hintText}>{t('eventZoomNotSet')}</span>
+            <p className={s.zoomSectionHint}>{t('eventZoomNotSet')}</p>
           ) : eventHasZoom ? (
-            <span className={s.hintText}>{t('eventZoomAdded')}</span>
+            <p className={s.zoomSectionHint}>{t('eventZoomAdded')}</p>
           ) : null}
         </div>
 

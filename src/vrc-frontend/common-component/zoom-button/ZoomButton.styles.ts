@@ -1,9 +1,11 @@
 export const zoomButtonStyles = {
   // Zoom brand blue (#2D8CFF). Same in light and dark mode — the
   // explicit dark: twin states that, so the button never flips to a
-  // remapped color.
-  zoomBtn: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-xs font-semibold transition-all shadow-2xs active:scale-95",
-  zoomIcon: "w-3.5 h-3.5 text-white flex-shrink-0",
+  // remapped color. Design A (Hoang, 2026-11-10): a full-width bar,
+  // taller with bigger text and icon, on its own row above the
+  // calendar footer — the button's own design, impossible to miss.
+  zoomBtn: "inline-flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-sm font-bold transition-all shadow-2xs active:scale-[0.98]",
+  zoomIcon: "w-5 h-5 text-white flex-shrink-0",
   modalIcon: "w-4 h-4",
   // The shared Modal body has no padding, so the content supplies it.
   infoBody: "p-6 space-y-4",

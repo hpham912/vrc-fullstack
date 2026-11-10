@@ -27,7 +27,24 @@ export const eventsTabStyles = {
   featuredRow: 'flex items-center pt-1',
   featuredLabel: 'flex items-center gap-2 cursor-pointer text-xs font-semibold text-stone-700',
   checkbox: 'rounded border-stone-300 text-stone-900 focus:ring-stone-400',
-  zoomRow: 'flex flex-wrap items-center gap-2 pt-1',
+  // Zoom section (design A, Hoang 2026-11-10): its own bordered
+  // section in the event form — icon + title/desc on the left, a
+  // toggle switch on the right, hint below. The switch knob stays
+  // white in both modes (arbitrary hex + dark twin), because the
+  // remap palette would turn a plain bg-white dark.
+  zoomSection: 'rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950',
+  zoomSectionHead: 'flex items-center gap-3',
+  zoomSectionIcon: 'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#2D8CFF] dark:bg-[#2D8CFF]',
+  zoomSectionIconSvg: 'h-5 w-5 text-white',
+  zoomSectionText: 'min-w-0 flex-1',
+  zoomSectionTitle: 'block text-sm font-bold text-stone-950 dark:text-stone-50',
+  zoomSectionDesc: 'block text-xs text-stone-600 dark:text-stone-400',
+  zoomSectionHint: 'mt-2 text-caption text-stone-500 dark:text-stone-400',
+  zoomSwitch: 'relative h-7 w-12 flex-shrink-0 rounded-full transition-colors',
+  zoomSwitchOn: 'bg-[#2D8CFF] dark:bg-[#2D8CFF]',
+  zoomSwitchOff: 'bg-stone-300 dark:bg-stone-700',
+  zoomSwitchKnob: 'absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-[#ffffff] dark:bg-[#ffffff] shadow transition-transform',
+  zoomSwitchKnobOn: 'translate-x-5',
   previewZoomRow: 'flex items-center justify-end',
   submitRow: 'text-right pt-2 border-t border-stone-200',
   actionIcon: 'w-4 h-4',
