@@ -55,4 +55,22 @@ router.delete('/', requireAdmin, async (req: AuthRequest, res) => {
   }
 });
 
+// Admin deletes one notification by id.
+router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'Invalid notification id' });
+    }
+    const deleted = await BackendNotificationService.deleteById(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    res.json({ message: 'Notification deleted', id: deleted.id });
+  } catch (error: any) {
+    console.error('Failed to delete notification:', error);
+    res.status(500).json({ error: 'Failed to delete notification' });
+  }
+});
+
 export default router;

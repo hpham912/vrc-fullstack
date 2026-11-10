@@ -4,7 +4,7 @@ import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { formatNotificationDate } from '../../utils/dateFormatter.ts';
 import { NotificationClient } from '../../services/notificationClient.ts';
-import { Calendar, BookOpen, Megaphone } from 'lucide-react';
+import { Calendar, BookOpen, Megaphone, Trash2, Save } from 'lucide-react';
 import { Button, LoadingShimmer, ConfirmModal, AdminAddButton, AdminActionButtons } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
@@ -36,6 +36,8 @@ export const NotificationList: React.FC<NotificationListProps> = ({
   const [addError, setAddError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AppNotification | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleAddNotification = async () => {
     const title = addTitle.trim();
@@ -63,6 +65,17 @@ export const NotificationList: React.FC<NotificationListProps> = ({
     const ok = await NotificationClient.clearAll(getToken());
     setClearing(false);
     setShowClearConfirm(false);
+    if (ok) {
+      onNotificationAdded?.();
+    }
+  };
+
+  const handleDeleteOne = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const ok = await NotificationClient.deleteOne(deleteTarget.id, getToken());
+    setDeleting(false);
+    setDeleteTarget(null);
     if (ok) {
       onNotificationAdded?.();
     }
@@ -101,18 +114,16 @@ export const NotificationList: React.FC<NotificationListProps> = ({
 
   return (
     <>
-      {/* Admin toolbar: post a notice / clear all. The add and delete
-          buttons are the shared app-wide designs (AdminAddButton and the
-          AdminActionButtons delete), not one-off styles. */}
+      {/* Admin toolbar: post a notice. The add button is the shared
+          app-wide AdminAddButton, same as the Events / Scripture /
+          Sermons tabs. Clear-all lives below the list as its own
+          button, not here — it must not look like a per-item delete. */}
       {isAdmin && (
         <div className={s.toolbar}>
           <AdminAddButton
             onClick={() => setShowAddForm((prev) => !prev)}
             title={t('notifAddBtn')}
           />
-          {notifications.length > 0 && (
-            <AdminActionButtons onDelete={() => setShowClearConfirm(true)} />
-          )}
         </div>
       )}
 
@@ -149,12 +160,13 @@ export const NotificationList: React.FC<NotificationListProps> = ({
             </Button>
             <Button
               type="button"
-              variant="darkAmber"
+              variant="dark"
               size="sm"
               onClick={handleAddNotification}
               disabled={addSaving}
+              leftIcon={<Save className="w-3.5 h-3.5" />}
             >
-              {addSaving ? t('commonSaving') : t('notifAddPost')}
+              {addSaving ? t('commonSaving') : t('commonSave')}
             </Button>
           </div>
         </div>
@@ -190,7 +202,12 @@ export const NotificationList: React.FC<NotificationListProps> = ({
                       {badge.label}
                     </span>
                   </div>
-                  <span className={s.notifDateText}>{formattedDate}</span>
+                  <div className={s.notifItemTopRight}>
+                    <span className={s.notifDateText}>{formattedDate}</span>
+                    {isAdmin && (
+                      <AdminActionButtons onDelete={() => setDeleteTarget(item)} />
+                    )}
+                  </div>
                 </div>
 
                 <h4 className={s.notifTitle}>{item.title}</h4>
@@ -201,6 +218,35 @@ export const NotificationList: React.FC<NotificationListProps> = ({
           })
         )}
       </div>
+
+      {/* Admin: clear all — a distinct centered text button below the
+          list, not an icon in the toolbar. It must not look like the
+          per-item delete on each notification. */}
+      {isAdmin && notifications.length > 0 && (
+        <div className={s.clearAllRow}>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            onClick={() => setShowClearConfirm(true)}
+            leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+          >
+            {t('notifClearAll')}
+          </Button>
+        </div>
+      )}
+
+      {/* Admin: confirm deleting one notification */}
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title={t('notifDeleteTitle')}
+        message={t('notifDeleteMessage')}
+        confirmText={t('commonDelete')}
+        isDanger
+        loading={deleting}
+        onConfirm={handleDeleteOne}
+        onCancel={() => setDeleteTarget(null)}
+      />
 
       {/* Admin: confirm clearing all notifications */}
       <ConfirmModal

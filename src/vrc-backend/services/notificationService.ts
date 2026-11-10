@@ -78,6 +78,21 @@ export const BackendNotificationService = {
     }
   },
 
+  // Delete one notification by id (admin per-item delete). Returns the
+  // deleted row, or null when no notification with that id exists.
+  async deleteById(id: number) {
+    try {
+      const deleted = await db
+        .delete(notifications)
+        .where(eq(notifications.id, id))
+        .returning();
+      return deleted[0] || null;
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+      return null;
+    }
+  },
+
   async getRecent(limit = 10) {
     try {
       const list = await db
