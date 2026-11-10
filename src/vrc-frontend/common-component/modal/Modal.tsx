@@ -64,7 +64,16 @@ export const Modal: React.FC<ModalProps> = ({
   return createPortal(
     <div
       className={`${s.backdropBase} ${isVisible ? s.backdropVisible : s.backdropHidden}`}
-      onClick={onClose}
+      onClick={(e) => {
+        // Stop the tap here: this modal is portaled to document.body,
+        // but in React's tree it is still a child of whatever opened
+        // it — so without this, a backdrop tap bubbles up to that
+        // parent's click handler. On an event card that re-opens the
+        // event details right after the popup closes (the tap that
+        // dismisses this popup also opens the card underneath).
+        e.stopPropagation();
+        onClose();
+      }}
     >
       <div
         className={`${s.dialogBase} ${maxWidthClass} ${
