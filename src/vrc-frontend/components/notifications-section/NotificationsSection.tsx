@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppNotification } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { NotificationList } from '../notification-modal/NotificationList.tsx';
+import { AdminAddButton } from '../../common-component/index.ts';
 import { notificationsSectionStyles as s } from './NotificationsSection.styles.ts';
 
 interface NotificationsSectionProps {
@@ -26,12 +27,21 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
   isLoading = false,
 }) => {
   const { t } = useLanguage();
+  const [showAddForm, setShowAddForm] = useState(false);
 
   return (
     <div className={s.page}>
-      <div className={s.header}>
-        <span className={s.headerSubtitle}>{t('notifSubtitle')}</span>
-        <h1 className={s.headerTitle}>{t('notifTitle')}</h1>
+      <div className={s.headerRow}>
+        <div className="min-w-0">
+          <span className={s.headerSubtitle}>{t('notifSubtitle')}</span>
+          <h1 className={s.headerTitle}>{t('notifTitle')}</h1>
+        </div>
+        {isAdmin && (
+          <AdminAddButton
+            onClick={() => setShowAddForm((prev) => !prev)}
+            title={t('notifAddBtn')}
+          />
+        )}
       </div>
 
       <NotificationList
@@ -40,6 +50,8 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         isAdmin={isAdmin}
         onNotificationAdded={onNotificationAdded}
         isLoading={isLoading}
+        showAddForm={showAddForm}
+        onShowAddFormChange={setShowAddForm}
       />
     </div>
   );

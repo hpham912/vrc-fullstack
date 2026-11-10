@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
 import { Bell, X } from 'lucide-react';
-import { Button } from '../../common-component/index.ts';
+import { Button, AdminAddButton } from '../../common-component/index.ts';
 import { NotificationList } from './NotificationList.tsx';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
@@ -41,6 +41,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   anchorRef,
 }) => {
   const { t } = useLanguage();
+  const [showAddForm, setShowAddForm] = useState(false);
   // Desktop anchor position, measured from the bell button: the popup
   // sits directly below the bell, right edge aligned with the bell's
   // right edge. Null on mobile (full-screen panel) and whenever the
@@ -126,6 +127,12 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
             </div>
           </div>
           <div className={s.headerActions}>
+            {isAdmin && (
+              <AdminAddButton
+                onClick={() => setShowAddForm((prev) => !prev)}
+                title={t('notifAddBtn')}
+              />
+            )}
             <button
               onClick={onClose}
               className={s.closeIconBtn}
@@ -142,6 +149,8 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           isAdmin={isAdmin}
           onNotificationAdded={onNotificationAdded}
           isLoading={isLoading}
+          showAddForm={showAddForm}
+          onShowAddFormChange={setShowAddForm}
         />
 
         {/* Footer */}

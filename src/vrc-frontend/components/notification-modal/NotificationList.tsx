@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import { formatNotificationDate } from '../../utils/dateFormatter.ts';
 import { NotificationClient } from '../../services/notificationClient.ts';
 import { Calendar, BookOpen, Megaphone, Trash2, Save } from 'lucide-react';
-import { Button, LoadingShimmer, ConfirmModal, AdminAddButton, AdminActionButtons } from '../../common-component/index.ts';
+import { Button, LoadingShimmer, ConfirmModal, AdminActionButtons } from '../../common-component/index.ts';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
 interface NotificationListProps {
@@ -14,6 +14,11 @@ interface NotificationListProps {
   isAdmin?: boolean;
   onNotificationAdded?: () => void;
   isLoading?: boolean;
+  // The add-notice form is owned by the parent (the tab page header or
+  // the popup header holds the AdminAddButton next to the title, like
+  // the other tab pages). The list only renders the form itself.
+  showAddForm?: boolean;
+  onShowAddFormChange?: (show: boolean) => void;
 }
 
 // Shared notification list content, used by both the desktop popup
@@ -26,10 +31,11 @@ export const NotificationList: React.FC<NotificationListProps> = ({
   isAdmin,
   onNotificationAdded,
   isLoading = false,
+  showAddForm = false,
+  onShowAddFormChange,
 }) => {
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
-  const [showAddForm, setShowAddForm] = useState(false);
   const [addTitle, setAddTitle] = useState('');
   const [addBody, setAddBody] = useState('');
   const [addSaving, setAddSaving] = useState(false);
@@ -56,7 +62,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({
     }
     setAddTitle('');
     setAddBody('');
-    setShowAddForm(false);
+    onShowAddFormChange?.(false);
     onNotificationAdded?.();
   };
 
@@ -114,20 +120,9 @@ export const NotificationList: React.FC<NotificationListProps> = ({
 
   return (
     <>
-      {/* Admin toolbar: post a notice. The add button is the shared
-          app-wide AdminAddButton, same as the Events / Scripture /
-          Sermons tabs. Clear-all lives below the list as its own
-          button, not here — it must not look like a per-item delete. */}
-      {isAdmin && (
-        <div className={s.toolbar}>
-          <AdminAddButton
-            onClick={() => setShowAddForm((prev) => !prev)}
-            title={t('notifAddBtn')}
-          />
-        </div>
-      )}
-
-      {/* Admin: post a notice for all users */}
+      {/* Admin: post a notice for all users. The AdminAddButton lives in
+          the parent's header, next to the title (like the other tab
+          pages) — the list only renders the form itself. */}
       {isAdmin && showAddForm && (
         <div className={s.addForm}>
           <input
@@ -150,7 +145,7 @@ export const NotificationList: React.FC<NotificationListProps> = ({
               variant="secondary"
               size="sm"
               onClick={() => {
-                setShowAddForm(false);
+                onShowAddFormChange?.(false);
                 setAddTitle('');
                 setAddBody('');
                 setAddError('');
