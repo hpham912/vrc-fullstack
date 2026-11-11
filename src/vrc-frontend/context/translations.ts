@@ -441,7 +441,7 @@ export const translations = {
   adminEventDate: { vi: 'Ngày Diễn Ra *', en: 'Date *' },
   adminEventLocation: { vi: 'Phòng Nhóm / Nơi Chốn *', en: 'Location / Room *' },
   adminEventAddress: { vi: 'Địa Chỉ Cụ Thể (Chỉ Đường Google Maps)', en: 'Venue Address (Google Maps Directions)' },
-  adminEventAddressHint: { vi: 'Để trống = Địa chỉ Hội Thánh', en: 'Blank = Church Address' },
+  adminEventAddressHint: { vi: 'Để trống = Liên hệ Hội Thánh', en: 'Blank = Contact the Church' },
   adminEventUseChurchAddress: { vi: 'Dùng địa chỉ Hội Thánh', en: 'Use church address' },
   adminEventFeatured: { vi: 'Đánh dấu là sự kiện nổi bật (Featured)', en: 'Mark as Featured Event' },
   adminEventFeaturedBadge: { vi: 'NỔI BẬT', en: 'FEATURED' },

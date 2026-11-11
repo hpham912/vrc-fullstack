@@ -183,7 +183,13 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEditingEventId(evt.id);
     const values = getEventValuesFromItem(evt);
     applyEventValues(values);
-    baselineRef.current = values;
+    // Baseline keeps the RAW saved address, not the display default.
+    // When the saved address was the church street address (or empty),
+    // the form shows the new default ("Liên hệ Hội Thánh"), so the form
+    // IS dirty and Save is enabled — otherwise this fix could never be
+    // saved, because the form would think nothing changed and the detail
+    // view would keep showing the old street address.
+    baselineRef.current = { ...values, address: (evt.address || '').trim() };
     setEditingEventAudit({
       createdBy: evt.createdBy,
       createdAt: evt.createdAt,
@@ -221,7 +227,6 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     try {
       setSubmitting(true);
       const token = getToken();
-      const defaultChurchAddr = (churchInfo?.address || 'Tempe, Arizona').trim();
       const payload = {
         title: eventTitleEn.trim(),
         titleVi: eventTitleVi.trim(),
@@ -234,7 +239,10 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         startTime: eventStartTime,
         endTime: eventEndTime || null,
         location: eventLocation.trim(),
-        address: eventAddress.trim() || defaultChurchAddr,
+        // Empty address means "contact the church" — never the church
+        // street address. The street address is only saved when the admin
+        // explicitly taps "Use church address".
+        address: eventAddress.trim() || DEFAULT_EVENT_ADDRESS,
         isFeatured: eventIsFeatured,
         hasZoom: eventHasZoom,
         organizerName: eventOrganizer.trim(),
@@ -632,7 +640,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </div>
           <input
             type="text"
-            placeholder={churchInfo?.address || 'Tempe, Arizona'}
+            placeholder={DEFAULT_EVENT_ADDRESS}
             value={eventAddress}
             onChange={(e) => setEventAddress(e.target.value)}
             className={s.input}
