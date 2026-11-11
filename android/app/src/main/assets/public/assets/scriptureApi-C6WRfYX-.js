@@ -1,1 +1,0 @@
-import{q as e}from"./index-ZqlyHas9.js";async function t(t,n){try{return await e(`/api/ai/fetch-scripture`,{method:`POST`,headers:{"Content-Type":`application/json`,...n?{Authorization:`Bearer ${n}`}:{}},body:JSON.stringify({passage:t})})}catch(e){throw Error(e?.details?.error||e?.details?.message||e?.message||`Failed to fetch scripture`)}}export{t};
