@@ -252,6 +252,9 @@ function ChurchAppContent() {
         NotificationClient.scheduleEventReminders(events);
       }
     });
+    // Register this phone for remote push (FCM, Android). A tap on a
+    // push opens the app to the Notifications tab.
+    NotificationClient.registerPushNotifications();
 
     // Check periodically (every 5 minutes) in case an event reaches the 1-hour reminder window while user is in the app
     const interval = setInterval(() => {
@@ -280,6 +283,17 @@ function ChurchAppContent() {
     };
     window.addEventListener('vrc-toast-notification', handleToast);
     return () => window.removeEventListener('vrc-toast-notification', handleToast);
+  }, []);
+
+  // A tapped push notification opens the app to the Notifications tab
+  // (and refreshes, so the new notification is in the list).
+  useEffect(() => {
+    const handleOpenNotifications = () => {
+      setActiveTab('notifications');
+      loadData();
+    };
+    window.addEventListener('vrc-open-notifications', handleOpenNotifications);
+    return () => window.removeEventListener('vrc-open-notifications', handleOpenNotifications);
   }, []);
 
   const openAdminWithTab = (

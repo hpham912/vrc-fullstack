@@ -11,6 +11,7 @@ import notifRoutes from './routes/notifRoutes.ts';
 import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 import prayerRoutes from './routes/prayerRoutes.ts';
+import pushRoutes from './routes/pushRoutes.ts';
 import devotionalRoutes from './routes/devotionalRoutes.ts';
 
 import { dbContext } from '../vrc-db/index.ts';
@@ -59,6 +60,7 @@ export const createApp = () => {
   app.use('/api/spotlight', spotlightRoutes);
   app.use('/api/church-info', churchInfoRoutes);
   app.use('/api/prayers', prayerRoutes);
+  app.use('/api/push', pushRoutes);
   // Both routers share the /api/ai prefix with no overlapping paths:
   // devotional: /fetch-scripture, /generate-devotional
   app.use('/api/ai', devotionalRoutes);

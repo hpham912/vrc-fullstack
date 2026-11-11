@@ -106,6 +106,46 @@ export const parseEventDateTime = (dateStr: string, timeStr: string): Date | nul
 
 export const NotificationClient = {
   /**
+   * Register this phone for remote push notifications (FCM, Android only
+   * for now). Runs only in the native app: requests push permission,
+   * gets the FCM token, sends it to the backend, and opens the
+   * Notifications tab when a push is tapped. A push failure never breaks
+   * the app — notifications still appear in the in-app list.
+   */
+  async registerPushNotifications(): Promise<void> {
+    if (!isCapacitor()) return;
+    try {
+      const { PushNotifications } = await import('@capacitor/push-notifications');
+
+      const permission = await PushNotifications.requestPermissions();
+      if (permission.receive !== 'granted') return;
+
+      // FCM token (re)generated — send it to the backend every time so
+      // the stored token stays current.
+      PushNotifications.addListener('registration', async (token) => {
+        try {
+          await fetch(apiUrl('/api/push/register'), {
+            method: 'POST',
+            headers: apiHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ token: token.value, platform: 'android' }),
+          });
+        } catch (err) {
+          console.warn('Failed to register push token with backend:', err);
+        }
+      });
+
+      // Tapping a push opens the app to the Notifications tab.
+      PushNotifications.addListener('pushNotificationActionPerformed', () => {
+        window.dispatchEvent(new CustomEvent('vrc-open-notifications'));
+      });
+
+      await PushNotifications.register();
+    } catch (err) {
+      console.warn('Push notification registration failed:', err);
+    }
+  },
+
+  /**
    * Check current notification permission status ('granted', 'denied', 'prompt')
    * In webapp/browser, defaults to 'granted' as requested (auto-enabled).
    */

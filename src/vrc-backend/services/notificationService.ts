@@ -1,6 +1,7 @@
 import { db } from '../../vrc-db/index.ts';
 import { notifications, events } from '../../vrc-db/schema.ts';
 import { desc, eq, and, inArray } from 'drizzle-orm';
+import { PushService } from './pushService.ts';
 
 // Keep only the 10 latest notifications (same rule as daily verses).
 async function enforceMaxTenNotifications() {
@@ -40,7 +41,16 @@ export const BackendNotificationService = {
         })
         .returning();
       await enforceMaxTenNotifications();
-      return inserted[0];
+      const created = inserted[0];
+      // Push to phones (fire-and-forget: a push failure never breaks
+      // notification creation). Covers events, verses, and announcements —
+      // every caller goes through here.
+      PushService.sendPushToAll(title, body, {
+        type,
+        targetId: String(targetId || ''),
+        notificationId: String(created.id),
+      });
+      return created;
     } catch (err) {
       console.error('Failed to log push notification to PostgreSQL:', err);
       return null;

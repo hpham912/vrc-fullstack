@@ -165,3 +165,14 @@ export const spotlight = pgTable('spotlight', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Push notification device tokens (FCM). One row per phone that opted in
+// to push. The app registers its FCM token here on launch; the backend
+// sends a push to all tokens whenever a notification is created.
+export const deviceTokens = pgTable('device_tokens', {
+  id: serial('id').primaryKey(),
+  token: text('token').notNull().unique(),
+  platform: text('platform').notNull().default('android'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
