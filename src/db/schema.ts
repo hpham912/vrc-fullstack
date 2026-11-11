@@ -146,9 +146,13 @@ export const notifications = pgTable('notifications', {
 // config document, one row per database (id is always 1). The dev and
 // prod databases are separate, so there is no dev/prod split here.
 // Moved from Firestore 2026-11-10 so all app data lives in Postgres.
+// The document is one jsonb column (not explicit columns) because it is
+// a nested config object — headerVerse plus a services array — that is
+// always read and written as a whole.
 export const churchInfo = pgTable('church_info', {
   id: integer('id').primaryKey(),
   data: jsonb('data').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
@@ -157,6 +161,7 @@ export const churchInfo = pgTable('church_info', {
 export const spotlight = pgTable('spotlight', {
   id: integer('id').primaryKey(),
   data: jsonb('data').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
