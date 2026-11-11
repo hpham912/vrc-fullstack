@@ -1,6 +1,6 @@
 {
 	"appId": "org.vrcfamily.app",
-	"appName": "Vietnamese Revival Church",
+	"appName": "PhucHung AZ",
 	"webDir": "dist",
 	"server": {
 		"cleartext": false,

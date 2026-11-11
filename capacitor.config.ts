@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'org.vrcfamily.app',
-  appName: 'Vietnamese Revival Church',
+  appName: 'PhucHung AZ',
   webDir: 'dist',
   server: {
     // No server.url: the app is bundled into the native shell (the web
