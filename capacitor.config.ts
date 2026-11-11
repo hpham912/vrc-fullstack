@@ -21,6 +21,12 @@ const config: CapacitorConfig = {
     allowsLinkPreview: false,
     scrollEnabled: true,
   },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
+  },
 };
+
 
 export default config;

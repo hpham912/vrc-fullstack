@@ -131,6 +131,23 @@ export const NotificationClient = {
       const permission = await PushNotifications.requestPermissions();
       if (permission.receive !== 'granted') return;
 
+      // On Android 8.0+, create a high-importance channel so notifications
+      // produce sound, vibration, and a heads-up pop-over alert.
+      if (platform === 'android') {
+        try {
+          await PushNotifications.createChannel({
+            id: 'vrc_notifications',
+            name: 'Church Notifications',
+            description: 'Notifications for Church Events, Daily Scripture, and Announcements',
+            importance: 5,
+            visibility: 1,
+            vibration: true,
+          });
+        } catch (channelErr) {
+          console.warn('Could not create notification channel:', channelErr);
+        }
+      }
+
       // FCM token (re)generated — send it to the backend every time so
       // the stored token stays current.
       PushNotifications.addListener('registration', async (token) => {
@@ -150,10 +167,25 @@ export const NotificationClient = {
         window.dispatchEvent(new CustomEvent('vrc-open-notifications'));
       });
 
+      // If the app is open in the foreground when a push arrives, show the
+      // in-app toast notification so the user sees it immediately.
+      PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        window.dispatchEvent(
+          new CustomEvent('vrc-toast-notification', {
+            detail: {
+              title: notification.title || 'Notification',
+              message: notification.body || '',
+              type: notification.data?.type || 'announcement',
+            },
+          })
+        );
+      });
+
       await PushNotifications.register();
     } catch (err) {
       console.warn('Push notification registration failed:', err);
     }
+
   },
 
   /**

@@ -110,8 +110,16 @@ export const PushService = {
         tokens,
         notification: { title, body },
         data,
-        android: { priority: 'high' },
+        android: {
+          priority: 'high',
+          notification: {
+            channelId: 'vrc_notifications',
+            sound: 'default',
+            priority: 'high',
+          },
+        },
       });
+
 
       // Drop tokens FCM says are gone (app uninstalled / token expired).
       const invalidTokens: string[] = [];
