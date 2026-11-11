@@ -1,14 +1,8 @@
 import { Router } from 'express';
-import fs from 'fs';
-import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
-import { FirestoreChurchService } from '../services/firestoreService.ts';
-import { getAppEnvironment } from '../utils/appEnvironment.ts';
+import { ConfigService } from '../services/configService.ts';
 
 const router = Router();
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const CHURCH_INFO_FILE = path.join(DATA_DIR, 'church-info.json');
 
 export interface WeeklyService {
   id: string;
@@ -100,92 +94,30 @@ export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
 
 let inMemoryChurchInfo: ChurchInfoData = { ...DEFAULT_CHURCH_INFO };
 
-// Fallback local storage file
-function loadLocalChurchInfo(): ChurchInfoData {
-  try {
-    if (fs.existsSync(CHURCH_INFO_FILE)) {
-      const content = fs.readFileSync(CHURCH_INFO_FILE, 'utf-8');
-      inMemoryChurchInfo = JSON.parse(content);
-      return inMemoryChurchInfo;
-    }
-  } catch (err) {
-    console.warn('Local church-info file read failed:', err);
-  }
-  return inMemoryChurchInfo;
-}
-
-function saveLocalChurchInfo(data: ChurchInfoData): void {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    fs.writeFileSync(CHURCH_INFO_FILE, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('Local church-info file save failed:', err);
-  }
-}
-
-// Initial warm-up from Firestore
-(async () => {
-  try {
-    const firestoreData = await FirestoreChurchService.getChurchInfo();
-    if (firestoreData && firestoreData.sanctuaryName) {
-      const sanitizedAddress = (!firestoreData.address || firestoreData.address.toLowerCase().includes('tempe, arizona') || firestoreData.address.toLowerCase() === 'tempe, az' || firestoreData.address.toLowerCase() === 'tempe az')
-        ? DEFAULT_CHURCH_INFO.address
-        : firestoreData.address;
-      inMemoryChurchInfo = {
-        ...DEFAULT_CHURCH_INFO,
-        ...firestoreData,
-        address: sanitizedAddress,
-        googleMapsUrl: sanitizedAddress === DEFAULT_CHURCH_INFO.address ? DEFAULT_CHURCH_INFO.googleMapsUrl : (firestoreData.googleMapsUrl || DEFAULT_CHURCH_INFO.googleMapsUrl),
-        services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
-          ? firestoreData.services
-          : DEFAULT_CHURCH_INFO.services,
-      };
-      saveLocalChurchInfo(inMemoryChurchInfo);
-      // Persist full schema to Firestore
-      await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
-      console.log('Church info loaded from Firestore:', inMemoryChurchInfo.sanctuaryName, 'address:', inMemoryChurchInfo.address);
-    } else {
-      loadLocalChurchInfo();
-      await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo);
-    }
-  } catch (e) {
-    console.warn('Error during church info initial sync:', e);
-    loadLocalChurchInfo();
-  }
-})();
-
 // GET /api/church-info - Get sanctuary address & weekly worship schedules
 router.get('/', async (req, res) => {
   try {
-    const env = getAppEnvironment(req);
-    // Query Firestore for latest persistent cloud state
-    const firestoreData = await FirestoreChurchService.getChurchInfo(env);
-    if (firestoreData && firestoreData.sanctuaryName) {
-      const sanitizedAddress = (!firestoreData.address || firestoreData.address.toLowerCase().includes('tempe, arizona') || firestoreData.address.toLowerCase() === 'tempe, az' || firestoreData.address.toLowerCase() === 'tempe az')
+    // Read from Postgres for the latest persistent state. The dev and
+    // prod databases are separate, so there is no env split here.
+    const storedData = await ConfigService.getChurchInfo();
+    if (storedData && storedData.sanctuaryName) {
+      const sanitizedAddress = (!storedData.address || storedData.address.toLowerCase().includes('tempe, arizona') || storedData.address.toLowerCase() === 'tempe, az' || storedData.address.toLowerCase() === 'tempe az')
         ? DEFAULT_CHURCH_INFO.address
-        : firestoreData.address;
+        : storedData.address;
       inMemoryChurchInfo = {
         ...DEFAULT_CHURCH_INFO,
-        ...firestoreData,
+        ...storedData,
         address: sanitizedAddress,
-        googleMapsUrl: sanitizedAddress === DEFAULT_CHURCH_INFO.address ? DEFAULT_CHURCH_INFO.googleMapsUrl : (firestoreData.googleMapsUrl || DEFAULT_CHURCH_INFO.googleMapsUrl),
-        services: Array.isArray(firestoreData.services) && firestoreData.services.length > 0
-          ? firestoreData.services
+        googleMapsUrl: sanitizedAddress === DEFAULT_CHURCH_INFO.address ? DEFAULT_CHURCH_INFO.googleMapsUrl : (storedData.googleMapsUrl || DEFAULT_CHURCH_INFO.googleMapsUrl),
+        services: Array.isArray(storedData.services) && storedData.services.length > 0
+          ? storedData.services
           : inMemoryChurchInfo.services,
       };
-      saveLocalChurchInfo(inMemoryChurchInfo);
       return res.json(inMemoryChurchInfo);
     }
 
-    // Fallback to in-memory/local
-    const local = loadLocalChurchInfo();
-    if (!local.address || local.address.toLowerCase().includes('tempe, arizona') || local.address.toLowerCase() === 'tempe, az' || local.address.toLowerCase() === 'tempe az') {
-      local.address = DEFAULT_CHURCH_INFO.address;
-      local.googleMapsUrl = DEFAULT_CHURCH_INFO.googleMapsUrl;
-    }
-    res.json(local);
+    // Fallback to in-memory (defaults on a fresh database)
+    res.json(inMemoryChurchInfo);
   } catch (err: any) {
     console.error('Failed to get church info:', err);
     res.json(inMemoryChurchInfo);
@@ -242,11 +174,9 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     };
 
     inMemoryChurchInfo = updated;
-    saveLocalChurchInfo(updated);
 
-    // Save to Firestore for permanent cross-instance cloud persistence
-    const env = getAppEnvironment(req);
-    await FirestoreChurchService.saveChurchInfo(updated, env);
+    // Save to Postgres for permanent cross-instance persistence
+    await ConfigService.saveChurchInfo(updated);
 
     res.json(updated);
   } catch (err: any) {
@@ -279,10 +209,7 @@ router.put('/header-verse', requireAdmin, async (req: AuthRequest, res) => {
       updatedAt: new Date().toISOString(),
     };
 
-    saveLocalChurchInfo(inMemoryChurchInfo);
-
-    const env = getAppEnvironment(req);
-    await FirestoreChurchService.saveChurchInfo(inMemoryChurchInfo, env);
+    await ConfigService.saveChurchInfo(inMemoryChurchInfo);
 
     res.json(inMemoryChurchInfo);
   } catch (err: any) {

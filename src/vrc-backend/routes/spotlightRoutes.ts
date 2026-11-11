@@ -1,14 +1,8 @@
 import { Router } from 'express';
-import fs from 'fs';
-import path from 'path';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
-import { FirestoreChurchService } from '../services/firestoreService.ts';
-import { getAppEnvironment } from '../utils/appEnvironment.ts';
+import { ConfigService } from '../services/configService.ts';
 
 const router = Router();
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const SPOTLIGHT_FILE = path.join(DATA_DIR, 'spotlight.json');
 
 export interface SpotlightData {
   mode: 'auto' | 'event' | 'custom';
@@ -60,63 +54,19 @@ export const DEFAULT_SPOTLIGHT: SpotlightData = {
 
 let inMemorySpotlight: SpotlightData = { ...DEFAULT_SPOTLIGHT };
 
-// Fallback local file caching
-function loadLocalSpotlight(): SpotlightData {
-  try {
-    if (fs.existsSync(SPOTLIGHT_FILE)) {
-      const content = fs.readFileSync(SPOTLIGHT_FILE, 'utf-8');
-      inMemorySpotlight = JSON.parse(content);
-      return inMemorySpotlight;
-    }
-  } catch (err) {
-    console.warn('Local spotlight file read failed:', err);
-  }
-  return inMemorySpotlight;
-}
-
-function saveLocalSpotlight(data: SpotlightData): void {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    fs.writeFileSync(SPOTLIGHT_FILE, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('Local spotlight file save failed:', err);
-  }
-}
-
-// Initial warm-up from Firestore
-(async () => {
-  try {
-    const firestoreData = await FirestoreChurchService.getSpotlight();
-    if (firestoreData && firestoreData.title) {
-      inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...firestoreData };
-      saveLocalSpotlight(inMemorySpotlight);
-      console.log('Spotlight loaded from Firestore:', inMemorySpotlight.theme, inMemorySpotlight.title);
-    } else {
-      loadLocalSpotlight();
-      await FirestoreChurchService.saveSpotlight(inMemorySpotlight);
-    }
-  } catch (e) {
-    console.warn('Error during spotlight initial sync:', e);
-    loadLocalSpotlight();
-  }
-})();
-
 // GET /api/spotlight - Get current hero banner configuration
 router.get('/', async (req, res) => {
   try {
-    const env = getAppEnvironment(req);
-    // Read from Firestore for latest persistent cloud state
-    const firestoreData = await FirestoreChurchService.getSpotlight(env);
-    if (firestoreData && firestoreData.title) {
-      inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...firestoreData };
-      saveLocalSpotlight(inMemorySpotlight);
+    // Read from Postgres for the latest persistent state. The dev and
+    // prod databases are separate, so there is no env split here.
+    const storedData = await ConfigService.getSpotlight();
+    if (storedData && storedData.title) {
+      inMemorySpotlight = { ...DEFAULT_SPOTLIGHT, ...storedData };
       return res.json(inMemorySpotlight);
     }
 
-    const local = loadLocalSpotlight();
-    res.json(local);
+    // Fallback to in-memory (defaults on a fresh database)
+    res.json(inMemorySpotlight);
   } catch (err: any) {
     console.error('Failed to get spotlight:', err);
     res.json(inMemorySpotlight);
@@ -126,7 +76,6 @@ router.get('/', async (req, res) => {
 // PUT /api/spotlight - Update hero banner configuration (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const env = getAppEnvironment(req);
     const {
       mode,
       selectedEventId,
@@ -194,10 +143,9 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     };
 
     inMemorySpotlight = updated;
-    saveLocalSpotlight(updated);
 
-    // Save to Firestore with env isolation
-    await FirestoreChurchService.saveSpotlight(updated, env);
+    // Save to Postgres for permanent cross-instance persistence
+    await ConfigService.saveSpotlight(updated);
 
     res.json(updated);
   } catch (err: any) {

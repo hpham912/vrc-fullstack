@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -139,5 +140,23 @@ export const notifications = pgTable('notifications', {
   type: text('type').notNull(), // 'event' | 'verse' | 'announcement'
   targetId: integer('target_id'),
   createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Church info (sanctuary, contact, Zoom, worship schedule) — a single
+// config document, one row per database (id is always 1). The dev and
+// prod databases are separate, so there is no dev/prod split here.
+// Moved from Firestore 2026-11-10 so all app data lives in Postgres.
+export const churchInfo = pgTable('church_info', {
+  id: integer('id').primaryKey(),
+  data: jsonb('data').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Home hero banner / spotlight — a single config document, one row per
+// database (id is always 1). Moved from Firestore 2026-11-10.
+export const spotlight = pgTable('spotlight', {
+  id: integer('id').primaryKey(),
+  data: jsonb('data').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
