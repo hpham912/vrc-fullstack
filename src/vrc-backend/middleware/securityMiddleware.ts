@@ -48,9 +48,23 @@ export const aiRateLimiter = rateLimiter({
   message: 'Devotional generator rate limit reached. Please wait a moment.',
 });
 
+// Only these origins may call the API. The native app runs on
+// https://localhost (both Android and iOS use the https scheme), the
+// website runs on my.vrcfamily.org / vrcfamily.org, and the localhost
+// ports are for local development. Anything else gets no CORS headers,
+// so a browser on a random website cannot call the API.
+const ALLOWED_ORIGINS = [
+  'https://my.vrcfamily.org',
+  'https://vrcfamily.org',
+  'https://localhost',
+  'capacitor://localhost',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
 // Production-ready CORS configuration allowing iOS Capacitor, local simulators, and web preview
 export const corsMiddleware = cors({
-  origin: true,
+  origin: ALLOWED_ORIGINS,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'X-App-Env'],
