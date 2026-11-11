@@ -74,7 +74,22 @@ export const PushService = {
   // created (event, verse, announcement). Fire-and-forget: a push failure
   // never breaks notification creation. Invalid tokens (app uninstalled)
   // are removed so they stop being retried.
+  //
+  // Android and iOS share this one send path — FCM multicast delivers to
+  // both (on iOS it routes through Apple Push). The `platform` column in
+  // device_tokens is the record of which phone is which; use
+  // sendPushToPlatform to target just one side (for example, to test
+  // iOS alone when it is added).
   async sendPushToAll(
+    title: string,
+    body: string,
+    data: Record<string, string>
+  ): Promise<void> {
+    await this.sendPushToPlatform(null, title, body, data);
+  },
+
+  async sendPushToPlatform(
+    platform: 'android' | 'ios' | null,
     title: string,
     body: string,
     data: Record<string, string>
@@ -82,9 +97,12 @@ export const PushService = {
     const messenger = getMessenger();
     if (!messenger) return;
     try {
-      const rows = await db
-        .select({ token: deviceTokens.token })
-        .from(deviceTokens);
+      const rows = platform
+        ? await db
+            .select({ token: deviceTokens.token })
+            .from(deviceTokens)
+            .where(eq(deviceTokens.platform, platform))
+        : await db.select({ token: deviceTokens.token }).from(deviceTokens);
       const tokens = rows.map((row) => row.token).filter(Boolean);
       if (tokens.length === 0) return;
 

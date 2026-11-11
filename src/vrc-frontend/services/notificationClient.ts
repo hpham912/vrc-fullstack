@@ -106,16 +106,27 @@ export const parseEventDateTime = (dateStr: string, timeStr: string): Date | nul
 
 export const NotificationClient = {
   /**
-   * Register this phone for remote push notifications (FCM, Android only
-   * for now). Runs only in the native app: requests push permission,
-   * gets the FCM token, sends it to the backend, and opens the
-   * Notifications tab when a push is tapped. A push failure never breaks
-   * the app — notifications still appear in the in-app list.
+   * Register this phone for remote push notifications (FCM). Runs only in
+   * the native app: requests push permission, gets the FCM token, sends
+   * it to the backend, and opens the Notifications tab when a push is
+   * tapped. A push failure never breaks the app — notifications still
+   * appear in the in-app list.
+   *
+   * Android and iOS share this exact flow — the same Capacitor plugin,
+   * the same registration, the same backend endpoint. FCM delivers to
+   * both (on iOS it routes through Apple Push). Only the native config
+   * differs: Android needs google-services.json, iOS needs the APNS key
+   * in Firebase plus the push capability. The `platform` value stored
+   * in device_tokens is how the backend knows which phone is which.
    */
   async registerPushNotifications(): Promise<void> {
     if (!isCapacitor()) return;
     try {
       const { PushNotifications } = await import('@capacitor/push-notifications');
+      const { Capacitor } = await import('@capacitor/core');
+      // 'android' or 'ios' — detected, not hardcoded, so the same code
+      // registers correctly when the iOS app is added later.
+      const platform = Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
 
       const permission = await PushNotifications.requestPermissions();
       if (permission.receive !== 'granted') return;
@@ -127,7 +138,7 @@ export const NotificationClient = {
           await fetch(apiUrl('/api/push/register'), {
             method: 'POST',
             headers: apiHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ token: token.value, platform: 'android' }),
+            body: JSON.stringify({ token: token.value, platform }),
           });
         } catch (err) {
           console.warn('Failed to register push token with backend:', err);
