@@ -32,10 +32,14 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
 }) => {
   const { language, t } = useLanguage();
   const formattedDate = date ? formatDateLocale(date, language) : '';
-  // A Reel is vertical; any other Facebook video is landscape. The
-  // frame fits the video so the play button stays big and tappable,
-  // and only a Reel gets the bigger modal — a landscape video does
-  // not need the extra width.
+  // The frame is always the wide 16:9 frame, like YouTube. A /reel/
+  // link does NOT mean the video is vertical — a Reel can hold a
+  // landscape video, and a tall 9:16 frame then leaves a big black
+  // area under it (the video only fills the top). The link, the
+  // embed and the page give no reliable way to tell a video's real
+  // orientation, so 16:9 is the safe frame for every Facebook video.
+  // Only a Reel gets the bigger modal — a landscape video does not
+  // need the extra width.
   const isReel = isFacebookReelUrl(videoUrl);
 
   return (
@@ -49,9 +53,7 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
         <iframe
           src={getFacebookEmbedUrl(videoUrl)}
           title={title}
-          className={
-            isReel ? facebookPlayerStyles.frameReel : facebookPlayerStyles.frameVideo
-          }
+          className={facebookPlayerStyles.frameVideo}
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           allowFullScreen
         />
