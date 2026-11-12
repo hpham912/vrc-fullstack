@@ -19,3 +19,5 @@ export { ZoomButton } from './zoom-button/ZoomButton.tsx';
 export type { ZoomButtonProps } from './zoom-button/ZoomButton.tsx';
 export { SegmentedControl } from './segmented-control/SegmentedControl.tsx';
 export type { SegmentedControlProps, SegmentedControlOption } from './segmented-control/SegmentedControl.tsx';
+export { Badge } from './badge/Badge.tsx';
+export type { BadgeProps, BadgeTone } from './badge/Badge.tsx';

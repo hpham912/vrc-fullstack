@@ -51,20 +51,27 @@ export interface DailyVerse {
   updatedAt?: string | null;
 }
 
-export interface Sermon {
+export interface Video {
   id: number;
   platform: 'youtube' | 'facebook';
   videoUrl: string;
   videoId: string | null;
   // Tall (vertical) Facebook video, picked by the admin when adding
-  // the sermon — the player uses it to pick the frame and modal size.
-  // YouTube sermons are always wide, so this is false for them.
+  // the video — the player uses it to pick the frame and modal size.
+  // YouTube videos are always wide, so this is false for them.
   isVertical?: boolean;
+  // The video category: 'sermon', 'singing', 'reel', 'other', or a
+  // custom name the admin typed in the video form. Stored as typed —
+  // never validated against a fixed list.
+  category: string;
+  // Who presents the video — the pastor for a sermon, the choir /
+  // singer for a singing. Blank for reels.
+  presenter?: string | null;
   titleVi: string;
   titleEn: string;
   descriptionVi?: string | null;
   descriptionEn?: string | null;
-  date: string; // YYYY-MM-DD (the Sunday worship date)
+  date: string; // YYYY-MM-DD (the video date)
   createdBy?: string | null;
   updatedBy?: string | null;
   createdAt?: string;

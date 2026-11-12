@@ -9,7 +9,7 @@ import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDashboard.tsx';
 import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
-import { SermonsSection } from './vrc-frontend/components/sermons-section/SermonsSection.tsx';
+import { VideosSection } from './vrc-frontend/components/videos-section/VideosSection.tsx';
 import { NotificationsSection } from './vrc-frontend/components/notifications-section/NotificationsSection.tsx';
 import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
@@ -41,7 +41,7 @@ const EditHeaderVerseModal = lazy(() =>
 );
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
 import { Button, LoadingShimmer } from './vrc-frontend/common-component/index.ts';
-import { ChurchEvent, DailyVerse, Sermon, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
+import { ChurchEvent, DailyVerse, Video, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
 import { Plus, ArrowRight, Pencil } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
@@ -49,7 +49,7 @@ import {
   Home,
   Calendar,
   BookOpen,
-  Video,
+  Video as VideoIcon,
   ShieldCheck,
   Bell,
   X,
@@ -99,7 +99,7 @@ function ChurchAppContent() {
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
-  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [toastNotification, setToastNotification] = useState<{ id?: any; title: string; body: string } | null>(null);
 
@@ -161,15 +161,15 @@ function ChurchAppContent() {
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
-  const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
 
   const loadData = async () => {
     try {
       const headers = apiHeaders();
-      const [eventsRes, versesRes, sermonsRes, spotlightRes, churchInfoRes, notifs] = await Promise.all([
+      const [eventsRes, versesRes, videosRes, spotlightRes, churchInfoRes, notifs] = await Promise.all([
         fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
         fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
-        fetch(apiUrl('/api/sermons'), { cache: 'no-store', headers }),
+        fetch(apiUrl('/api/videos'), { cache: 'no-store', headers }),
         fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
         fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
         NotificationClient.fetchRecent(),
@@ -186,10 +186,10 @@ function ChurchAppContent() {
         }
       };
 
-      const [rawEvents, rawVerses, rawSermons, spotlightData, churchInfoData] = await Promise.all([
+      const [rawEvents, rawVerses, rawVideos, spotlightData, churchInfoData] = await Promise.all([
         safeJson(eventsRes),
         safeJson(versesRes),
-        safeJson(sermonsRes),
+        safeJson(videosRes),
         safeJson(spotlightRes),
         safeJson(churchInfoRes),
       ]);
@@ -202,10 +202,10 @@ function ChurchAppContent() {
         setAllVerses(rawVerses.slice(0, 10));
       }
 
-      // Sermons are a growing archive (one per Sunday), never pruned —
-      // the backend already orders them newest first.
-      if (Array.isArray(rawSermons)) {
-        setSermons(rawSermons);
+      // Videos are pruned to the last 2 months by the backend — the
+      // backend already orders them newest first.
+      if (Array.isArray(rawVideos)) {
+        setVideos(rawVideos);
       }
       // Today's verse is the verse dated today, falling back to the latest
       // verse — the same rule GET /api/verses/today used, computed here from
@@ -304,12 +304,12 @@ function ChurchAppContent() {
     eventToEdit?: ChurchEvent | null,
     verseToEdit?: DailyVerse | null,
     focused = true,
-    sermonToEdit?: Sermon | null,
+    videoToEdit?: Video | null,
   ) => {
     setAdminPortalTab(tab);
     setEditingEvent(eventToEdit || null);
     setEditingVerse(verseToEdit || null);
-    setEditingSermon(sermonToEdit || null);
+    setEditingVideo(videoToEdit || null);
     setAdminFocusedMode(focused);
     setAdminPortalOpen(true);
   };
@@ -318,7 +318,7 @@ function ChurchAppContent() {
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'sermons', label: t('navSermons'), icon: Video },
+    { id: 'videos', label: t('navVideos'), icon: VideoIcon },
   ];
 
   return (
@@ -508,13 +508,13 @@ function ChurchAppContent() {
           </div>
         )}
 
-        {activeTab === 'sermons' && (
-          <SermonsSection
-            sermons={sermons}
+        {activeTab === 'videos' && (
+          <VideosSection
+            videos={videos}
             isLoading={isLoading}
             isAdmin={isAdmin}
-            onOpenAdminPortal={(tab, sermon) =>
-              openAdminWithTab(tab, null, null, true, sermon)
+            onOpenAdminPortal={(tab, video) =>
+              openAdminWithTab(tab, null, null, true, video)
             }
             onRefresh={loadData}
           />
@@ -549,7 +549,7 @@ function ChurchAppContent() {
         </button>
       )}
 
-      {/* Native iOS Bottom Tab Bar: Home, Events, Scripture, Sermons, Notifications */}
+      {/* Native iOS Bottom Tab Bar: Home, Events, Scripture, Video, Notifications */}
       <IosTabBar
         activeTab={activeTab}
         setActiveTab={handleTabChange}
@@ -615,18 +615,18 @@ function ChurchAppContent() {
           <AdminPortal
             events={events}
             allVerses={allVerses}
-            sermons={sermons}
+            videos={videos}
             churchInfo={churchInfo}
             initialTab={adminPortalTab}
             focusedMode={adminFocusedMode}
             initialEvent={editingEvent}
             initialVerse={editingVerse}
-            initialSermon={editingSermon}
+            initialVideo={editingVideo}
             onClose={() => {
               setAdminPortalOpen(false);
               setEditingEvent(null);
               setEditingVerse(null);
-              setEditingSermon(null);
+              setEditingVideo(null);
             }}
             onRefreshData={loadData}
             onOpenSpotlightEditor={() => {
@@ -663,8 +663,8 @@ function ChurchAppContent() {
             <button onClick={() => setActiveTab('verse')} className={s.footerLinkBtn}>
               {t('navVerse')}
             </button>
-            <button onClick={() => setActiveTab('sermons')} className={s.footerLinkBtn}>
-              {t('navSermons')}
+            <button onClick={() => setActiveTab('videos')} className={s.footerLinkBtn}>
+              {t('navVideos')}
             </button>
           </div>
         </div>

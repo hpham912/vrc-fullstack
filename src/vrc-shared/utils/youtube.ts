@@ -1,4 +1,4 @@
-// YouTube helpers for sermons (Bài Giảng): extract the 11-char video ID
+// YouTube helpers for videos (Video tab): extract the 11-char video ID
 // from any YouTube link shape, and build embed / thumbnail / watch URLs.
 // The video itself is never stored — it streams from YouTube, so the app
 // only ever keeps the link, the video ID, and the bilingual title +
@@ -6,7 +6,7 @@
 //
 // SHARED by the frontend and the backend (vrc-shared): the phone app uses
 // these to show the thumbnail preview when an admin pastes a link and to
-// build the thumbnail / embed URLs for the sermon cards and player; the
+// build the thumbnail / embed URLs for the video cards and player; the
 // server uses extractYouTubeVideoId to validate a link on save and store
 // the video ID. One copy here — both sides import it — so the regex and
 // URL shapes can never drift apart.

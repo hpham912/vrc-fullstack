@@ -23,7 +23,7 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
 }) => {
   const { t } = useLanguage();
 
-  // Exactly 5 mobile bottom tabs: Home, Events, Scripture, Sermons,
+  // Exactly 5 mobile bottom tabs: Home, Events, Scripture, Video,
   // Notifications. Notifications is a real tab page on mobile
   // (NotificationsSection), so the bell navigates like any other tab.
   // Tapping it while already on Notifications stays there — it never
@@ -33,7 +33,7 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
     { id: 'home', label: t('navHome'), icon: Home },
     { id: 'events', label: t('navEvents'), icon: Calendar },
     { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'sermons', label: t('navSermons'), icon: Video },
+    { id: 'videos', label: t('navVideos'), icon: Video },
     { id: 'notifications', label: t('navNotifications'), icon: Bell },
   ];
 

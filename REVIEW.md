@@ -81,7 +81,7 @@ you would not want to own in production.
   restates the code instead of explaining why.
 - [ ] **No single-character variables (R3).** No `s`, `e`, `t`, `v`,
   `p`, `i`, … Use full names (`event`, `verse`, `prayer`,
-  `sermonsSectionStyles`).
+  `videosSectionStyles`).
   - Exception, grandfathered: the `s` styles alias (`import { …Styles
     as s }`) exists in older files. New files use the full styles
     object name, never an alias (R5).

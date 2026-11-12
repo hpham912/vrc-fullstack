@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChurchEvent, ChurchInfo, DailyVerse, Sermon } from '../../types/index.ts';
+import { ChurchEvent, ChurchInfo, DailyVerse, Video } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { APP_VERSION } from '../../constants/version.ts';
@@ -8,13 +8,13 @@ import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
 import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
 import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
-import { SermonsTab } from './tabs/sermons-tab/SermonsTab.tsx';
+import { VideosTab } from './tabs/videos-tab/VideosTab.tsx';
 import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
 import { ChurchInfoTab } from './tabs/church-info-tab/ChurchInfoTab.tsx';
 import {
   Calendar,
   BookOpen,
-  Video,
+  Video as VideoIcon,
   Plus,
   X,
   CheckCircle2,
@@ -29,13 +29,13 @@ import {
 interface AdminPortalProps {
   events: ChurchEvent[];
   allVerses: DailyVerse[];
-  sermons: Sermon[];
+  videos: Video[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
   focusedMode?: boolean;
   initialEvent?: ChurchEvent | null;
   initialVerse?: DailyVerse | null;
-  initialSermon?: Sermon | null;
+  initialVideo?: Video | null;
   onClose: () => void;
   onRefreshData: () => void;
   onOpenSpotlightEditor?: () => void;
@@ -45,13 +45,13 @@ interface AdminPortalProps {
 export const AdminPortal: React.FC<AdminPortalProps> = ({
   events,
   allVerses,
-  sermons,
+  videos,
   churchInfo,
   initialTab = 'create-event',
   focusedMode = false,
   initialEvent,
   initialVerse,
-  initialSermon,
+  initialVideo,
   onClose,
   onRefreshData,
   onOpenSpotlightEditor,
@@ -202,13 +202,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <button
               type="button"
-              onClick={() => setActiveTab('sermons')}
+              onClick={() => setActiveTab('videos')}
               className={`${s.mobileTabBtnBase} ${
-                activeTab === 'sermons' ? s.mobileTabActiveDark : s.mobileTabIdle
+                activeTab === 'videos' ? s.mobileTabActiveDark : s.mobileTabIdle
               }`}
             >
-              <Video className={s.tabIcon} />
-              <span className="truncate">{t('tabSermons')} ({sermons.length})</span>
+              <VideoIcon className={s.tabIcon} />
+              <span className="truncate">{t('tabVideos')} ({videos.length})</span>
             </button>
 
             <button
@@ -295,13 +295,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('sermons')}
+            onClick={() => setActiveTab('videos')}
             className={`${s.desktopTabBtnBase} ${
-              activeTab === 'sermons' ? s.desktopTabActiveDark : s.desktopTabIdle
+              activeTab === 'videos' ? s.desktopTabActiveDark : s.desktopTabIdle
             }`}
           >
-            <Video className={s.tabIcon} />
-            {t('tabSermons')} ({sermons.length})
+            <VideoIcon className={s.tabIcon} />
+            {t('tabVideos')} ({videos.length})
           </button>
 
           <button
@@ -344,7 +344,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
-          <SermonsTab sermons={sermons} activeTab={activeTab} initialSermon={initialSermon} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
+          <VideosTab videos={videos} activeTab={activeTab} initialVideo={initialVideo} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
 
           <ChurchInfoTab activeTab={activeTab} churchInfo={churchInfo} onRefreshData={onRefreshData} />
 

@@ -88,27 +88,36 @@ export const dailyVerses = pgTable('daily_verses', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// Sunday worship sermon videos (Bài Giảng) — hosted on YouTube or
-// Facebook, the app stores NO video data: only the link, the platform,
-// bilingual title + description, and the Sunday worship date. Only the
-// last 2 months are kept — older sermons are pruned by the sermons API
-// (see pruneSermonsOlderThanTwoMonths in sermonRoutes.ts).
-export const sermons = pgTable('sermons', {
+// Videos (Video tab) — sermon videos, singings, reels about the
+// church, and any other video — hosted on YouTube or Facebook, the
+// app stores NO video data: only the link, the platform, bilingual
+// title + description, the category, the presenter, and the date.
+// Only the last 2 months are kept — older videos are pruned by the
+// videos API (see pruneVideosOlderThanTwoMonths in videoRoutes.ts).
+export const videos = pgTable('videos', {
   id: serial('id').primaryKey(),
   platform: text('platform').notNull().default('youtube'),
   videoUrl: text('video_url').notNull(),
   videoId: text('video_id'),
   // Tall (vertical) or wide (landscape) Facebook video — the admin
-  // picks it when adding the sermon, because a Facebook link does not
+  // picks it when adding the video, because a Facebook link does not
   // say which it is (a /reel/ link can hold a landscape video). The
   // player uses it to pick the frame (tall 9:16 or wide 16:9) and the
-  // modal size. YouTube sermons are always wide (false).
+  // modal size. YouTube videos are always wide (false).
   isVertical: boolean('is_vertical').notNull().default(false),
+  // The video category: 'sermon', 'singing', 'reel', 'other', or a
+  // custom name the admin typed in the video form. Plain TEXT with
+  // no check constraint, on purpose — a custom category is any
+  // string, so the database must not restrict it to a fixed list.
+  category: text('category').notNull().default('sermon'),
+  // Who presents the video — the pastor for a sermon, the choir /
+  // singer for a singing. Blank for reels.
+  presenter: text('presenter'),
   titleVi: text('title_vi').notNull(),
   titleEn: text('title_en').notNull(),
   descriptionVi: text('description_vi'),
   descriptionEn: text('description_en'),
-  date: text('date').notNull(), // YYYY-MM-DD (the Sunday worship date)
+  date: text('date').notNull(), // YYYY-MM-DD (the video date)
   createdBy: text('created_by'),
   updatedBy: text('updated_by'),
   createdAt: timestamp('created_at').defaultNow(),
