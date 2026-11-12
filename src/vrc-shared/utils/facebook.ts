@@ -26,8 +26,11 @@ export function extractFacebookVideoUrl(url: string): string | null {
   }
   const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
   const path = parsed.pathname;
-  // fb.watch short links resolve to a video on Facebook's side, and the
-  // embed accepts them as-is.
+  // fb.watch short links and /share/v|/share/r links are accepted here
+  // so the admin can paste them, but they do NOT play in Facebook's
+  // video embed (it shows "Video Unavailable") — the server resolves
+  // them to the real video URL (from the share page's og:url) before
+  // storing, so the embed gets a /watch, /videos or /reel link.
   if (host === 'fb.watch') {
     return clean;
   }

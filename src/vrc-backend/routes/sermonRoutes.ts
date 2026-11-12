@@ -20,6 +20,63 @@ async function pruneSermonsOlderThanTwoMonths() {
   await db.delete(sermons).where(lt(sermons.date, cutoffStr));
 }
 
+// A Facebook share link (/share/v/<code>, /share/r/<code>) or fb.watch
+// short link is a redirect that only resolves in a real browser — the
+// video embed plugin cannot play it, so it shows "Video Unavailable"
+// even though the video itself is public and "Watch on Facebook"
+// works. The share page carries the real video URL in its og:url /
+// canonical link, so resolve the pasted link to that URL before
+// storing it. If the page cannot be fetched or has no usable video
+// URL, the original link is kept — "Watch on Facebook" still works,
+// even if the embed does not. A 5s timeout keeps a slow Facebook
+// from stalling the save.
+async function resolveFacebookVideoUrl(videoUrl: string): Promise<string> {
+  let parsed: URL;
+  try {
+    parsed = new URL(videoUrl);
+  } catch {
+    return videoUrl;
+  }
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+  const path = parsed.pathname;
+  const isShareLink =
+    (host === 'facebook.com' || host === 'm.facebook.com') &&
+    /^\/share\/[vr]\/[\w-]+/.test(path);
+  const isShortLink = host === 'fb.watch';
+  if (!isShareLink && !isShortLink) return videoUrl;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(videoUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      },
+      redirect: 'follow',
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return videoUrl;
+    const html = await response.text();
+    // og:url and the canonical link both carry the real video URL.
+    // Either attribute may come first, so both orders are matched.
+    const ogMatch =
+      html.match(/property=["']og:url["'][^>]*content=["']([^"']+)["']/i) ||
+      html.match(/content=["']([^"']+)["'][^>]*property=["']og:url["']/i);
+    const canonicalMatch =
+      html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)["']/i) ||
+      html.match(/href=["']([^"']+)["'][^>]*rel=["']canonical["']/i);
+    const resolved = ogMatch?.[1] || canonicalMatch?.[1];
+    if (resolved && extractFacebookVideoUrl(resolved)) {
+      return resolved;
+    }
+    return videoUrl;
+  } catch {
+    return videoUrl;
+  }
+}
+
 // GET /api/sermons - List all sermons from the active database (Dev DB or
 // Prod DB), newest Sunday first. Only the last 2 months are kept —
 // anything older is deleted by the prune below.
@@ -77,7 +134,7 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     } = req.body;
 
     const finalPlatform = platform === 'facebook' ? 'facebook' : 'youtube';
-    const cleanVideoUrl = String(videoUrl || '').trim();
+    let cleanVideoUrl = String(videoUrl || '').trim();
     const finalTitleVi = String(titleVi || '').trim();
     const finalTitleEn = String(titleEn || '').trim();
     const finalDescVi = String(descriptionVi || '').trim() || null;
@@ -90,6 +147,10 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
           error: 'A valid Facebook video link is required.',
         });
       }
+      // A share/short link does not play in the embed — resolve it to
+      // the real video URL first (a plain /watch, /videos or /reel
+      // link passes through untouched).
+      cleanVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
     } else {
       videoId = extractYouTubeVideoId(cleanVideoUrl);
       if (!cleanVideoUrl || !videoId) {
@@ -184,6 +245,9 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         if (!cleanVideoUrl || !extractFacebookVideoUrl(cleanVideoUrl)) {
           return res.status(400).json({ error: 'A valid Facebook video link is required.' });
         }
+        // A share/short link does not play in the embed — resolve it
+        // to the real video URL first.
+        cleanVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
         videoId = null;
       } else {
         const extracted = extractYouTubeVideoId(cleanVideoUrl);
