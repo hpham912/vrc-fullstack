@@ -42,7 +42,7 @@
     text-rendering: optimizeLegibility;
     overflow-x: clip;
     color: #1c1917;
-    background-color: #efedea;
+    background-color: #f6f4f2;
   }
 
   body {
@@ -127,7 +127,7 @@ html.theme-new #root {
 }
 
 /* App root container (base bg) → the new theme page color */
-html.theme-new .bg-\[\#efedea\] {
+html.theme-new .bg-\[\#f6f4f2\] {
   background-color: #f2f5fa !important;
 }
 
@@ -259,7 +259,7 @@ html.dark .bg-white {
   border-color: rgba(68, 64, 60, 0.5) !important;
 }
 
-html.dark .bg-\[\#efedea\] {
+html.dark .bg-\[\#f6f4f2\] {
   background-color: #0c0a09 !important;
 }
 
