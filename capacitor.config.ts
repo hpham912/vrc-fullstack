@@ -30,6 +30,7 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       launchAutoHide: true,
       backgroundColor: '#FFFFFF',
+      androidScaleType: 'FIT_CENTER',
       showSpinner: false,
     },
     PushNotifications: {
