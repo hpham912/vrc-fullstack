@@ -245,17 +245,7 @@ function ChurchAppContent() {
   };
 
   useEffect(() => {
-    loadData().finally(() => {
-      // Fullscreen splash (shown from main.tsx): hide once the app has
-      // loaded so the lockup gives way to the home screen.
-      if (typeof window !== 'undefined') {
-        import('@capacitor/splash-screen')
-          .then(({ SplashScreen }) => {
-            SplashScreen.hide().catch(() => {});
-          })
-          .catch(() => {});
-      }
-    });
+    loadData();
     // Prompt permission so notifications are enabled by default
     NotificationClient.requestPermission().then((granted) => {
       if (granted && events.length > 0) {
