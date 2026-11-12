@@ -94,8 +94,10 @@ export const dailyVerses = pgTable('daily_verses', {
 // pruned (unlike the 10-latest verses / notifications).
 export const sermons = pgTable('sermons', {
   id: serial('id').primaryKey(),
-  youtubeUrl: text('youtube_url').notNull(),
-  videoId: text('video_id').notNull(),
+  platform: text('platform').notNull().default('youtube'),
+  youtubeUrl: text('youtube_url'),
+  videoId: text('video_id'),
+  facebookUrl: text('facebook_url'),
   titleVi: text('title_vi').notNull(),
   titleEn: text('title_en').notNull(),
   descriptionVi: text('description_vi'),

@@ -23,6 +23,8 @@ export const sermonsTabStyles = {
   list: 'divide-y divide-stone-100 dark:divide-stone-800 border border-stone-200 rounded-xl overflow-hidden bg-white',
   item: 'p-3 flex items-center gap-3 text-xs',
   itemThumb: 'w-20 aspect-video rounded-lg object-cover border border-stone-200 flex-shrink-0',
+  itemThumbFb:
+    'bg-[#1877f2] text-white flex items-center justify-center text-2xl font-extrabold',
   itemBody: 'min-w-0 flex-1',
   itemTitle: 'font-serif font-bold text-stone-950 line-clamp-1 block',
   itemDate: 'text-stone-600 font-semibold',

@@ -11,6 +11,14 @@ export const sermonsSectionStyles = {
   thumbWrap:
     'relative flex-shrink-0 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800',
   thumbImg: 'w-full h-full object-cover',
+  platformBadge:
+    'absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white',
+  platformBadgeYt: 'bg-red-600',
+  platformBadgeFb: 'bg-[#1877f2]',
+  fbThumb:
+    'w-full h-full bg-[#1877f2] flex flex-col items-center justify-center gap-0.5 text-white',
+  fbThumbIcon: 'text-3xl font-extrabold leading-none',
+  fbThumbLabel: 'text-[10px] font-semibold opacity-90',
   playBadge:
     'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-950/70 flex items-center justify-center',
   playIcon: 'w-4 h-4 text-white fill-white ml-0.5',

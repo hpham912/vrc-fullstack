@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Video, Play, Calendar } from 'lucide-react';
 import { Sermon } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Card, LoadingShimmer, AdminAddButton, YouTubePlayer } from '../../common-component/index.ts';
+import { Card, LoadingShimmer, AdminAddButton, YouTubePlayer, FacebookPlayer } from '../../common-component/index.ts';
 import { getYouTubeThumbnailUrl } from '../../../vrc-shared/utils/youtube.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { sermonsSectionStyles as s } from './SermonsSection.styles.ts';
@@ -15,9 +15,10 @@ interface SermonsSectionProps {
 }
 
 // Full-page Sermons tab (Bài Giảng): a list of Sunday worship sermon
-// videos. The videos live on YouTube — the app stores only the link,
-// so each card shows YouTube's thumbnail and tapping it opens the
-// embedded YouTube player in a modal, inside the app.
+// videos. The videos live on YouTube or Facebook — the app stores only
+// the link, so each card shows YouTube's thumbnail (or a Facebook
+// placeholder, since Facebook gives no free thumbnail) and tapping it
+// opens the matching embedded player in a modal, inside the app.
 export const SermonsSection: React.FC<SermonsSectionProps> = ({
   sermons,
   isLoading = false,
@@ -63,6 +64,10 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
           {sermons.map((sermon) => {
             const title = getSermonTitle(sermon);
             const description = getSermonDescription(sermon);
+            // Rows saved before the Facebook column existed have no
+            // platform — they are YouTube sermons.
+            const platform = sermon.platform || 'youtube';
+            const isFacebook = platform === 'facebook';
             return (
               <div
                 key={sermon.id}
@@ -75,12 +80,26 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
                 }}
               >
                 <div className={s.thumbWrap}>
-                  <img
-                    src={getYouTubeThumbnailUrl(sermon.videoId)}
-                    alt={title}
-                    loading="lazy"
-                    className={s.thumbImg}
-                  />
+                  {isFacebook ? (
+                    <div className={s.fbThumb} aria-label={title}>
+                      <span className={s.fbThumbIcon}>f</span>
+                      <span className={s.fbThumbLabel}>Facebook</span>
+                    </div>
+                  ) : (
+                    <img
+                      src={sermon.videoId ? getYouTubeThumbnailUrl(sermon.videoId) : ''}
+                      alt={title}
+                      loading="lazy"
+                      className={s.thumbImg}
+                    />
+                  )}
+                  <span
+                    className={`${s.platformBadge} ${
+                      isFacebook ? s.platformBadgeFb : s.platformBadgeYt
+                    }`}
+                  >
+                    {isFacebook ? 'Facebook' : 'YouTube'}
+                  </span>
                   <span className={s.playBadge}>
                     <Play className={s.playIcon} />
                   </span>
@@ -100,18 +119,33 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
         </div>
       )}
 
-      {/* Video player: the shared YouTubePlayer modal. The video streams
-          from YouTube, so the app never downloads or stores it. */}
-      {selectedSermon && (
-        <YouTubePlayer
-          isOpen={Boolean(selectedSermon)}
-          onClose={() => setSelectedSermon(null)}
-          videoId={selectedSermon.videoId}
-          title={getSermonTitle(selectedSermon)}
-          description={getSermonDescription(selectedSermon)}
-          date={selectedSermon.date}
-        />
-      )}
+      {/* Video player: the shared YouTubePlayer or FacebookPlayer modal,
+          matching the sermon's platform. The video streams from its
+          platform, so the app never downloads or stores it. */}
+      {selectedSermon &&
+        (selectedSermon.platform || 'youtube') === 'facebook' &&
+        selectedSermon.facebookUrl ? (
+          <FacebookPlayer
+            isOpen={Boolean(selectedSermon)}
+            onClose={() => setSelectedSermon(null)}
+            videoUrl={selectedSermon.facebookUrl}
+            title={getSermonTitle(selectedSermon)}
+            description={getSermonDescription(selectedSermon)}
+            date={selectedSermon.date}
+          />
+        ) : (
+          selectedSermon &&
+          selectedSermon.videoId && (
+            <YouTubePlayer
+              isOpen={Boolean(selectedSermon)}
+              onClose={() => setSelectedSermon(null)}
+              videoId={selectedSermon.videoId}
+              title={getSermonTitle(selectedSermon)}
+              description={getSermonDescription(selectedSermon)}
+              date={selectedSermon.date}
+            />
+          )
+        )}
     </div>
   );
 };

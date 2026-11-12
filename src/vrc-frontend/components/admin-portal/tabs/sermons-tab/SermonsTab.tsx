@@ -5,6 +5,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vrc-shared/utils/youtube.ts';
+import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { AdminActionButtons, Button, ConfirmModal } from '../../../../common-component/index.ts';
 import { sermonsTabStyles as s } from './SermonsTab.styles.ts';
@@ -23,9 +24,11 @@ interface SermonsTabProps {
 
 // Form values, for dirty-checking: the Save button is only enabled
 // while the form differs from the last loaded values (a fresh form,
-// or the sermon being edited).
+// or the sermon being edited). The video link is one field — the
+// platform (YouTube or Facebook) is detected from the pasted link.
 type SermonFormValues = {
-  youtubeUrl: string;
+  videoUrl: string;
+  platform: 'youtube' | 'facebook';
   titleVi: string;
   titleEn: string;
   descVi: string;
@@ -36,7 +39,8 @@ type SermonFormValues = {
 const getTodayStr = () => new Date().toISOString().split('T')[0];
 
 const getDefaultSermonValues = (): SermonFormValues => ({
-  youtubeUrl: '',
+  videoUrl: '',
+  platform: 'youtube',
   titleVi: '',
   titleEn: '',
   descVi: '',
@@ -44,19 +48,28 @@ const getDefaultSermonValues = (): SermonFormValues => ({
   date: getTodayStr(),
 });
 
-const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => ({
-  youtubeUrl: sermon.youtubeUrl,
-  titleVi: sermon.titleVi,
-  titleEn: sermon.titleEn,
-  descVi: sermon.descriptionVi || '',
-  descEn: sermon.descriptionEn || '',
-  date: sermon.date,
-});
+const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => {
+  const platform = sermon.platform || 'youtube';
+  return {
+    videoUrl:
+      platform === 'facebook'
+        ? sermon.facebookUrl || ''
+        : sermon.youtubeUrl || '',
+    platform,
+    titleVi: sermon.titleVi,
+    titleEn: sermon.titleEn,
+    descVi: sermon.descriptionVi || '',
+    descEn: sermon.descriptionEn || '',
+    date: sermon.date,
+  };
+};
 
-// Sermons (Bài Giảng): form + published list. The admin pastes a YouTube
-// link — the video ID is extracted live and a thumbnail preview confirms
-// it is the right video before saving. The video itself is never stored;
-// only the link, bilingual title + description, and the Sunday date.
+// Sermons (Bài Giảng): form + published list. The admin pastes a
+// YouTube or Facebook link — the platform is detected from the link
+// and a preview confirms it is the right video before saving (a
+// thumbnail for YouTube; a Facebook badge for Facebook, which gives
+// no free thumbnail). The video itself is never stored; only the
+// link, platform, bilingual title + description, and the Sunday date.
 export const SermonsTab: React.FC<SermonsTabProps> = ({
   sermons,
   activeTab,
@@ -66,7 +79,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const [editingSermonId, setEditingSermonId] = useState<number | null>(null);
-  const [sermonYoutubeUrl, setSermonYoutubeUrl] = useState('');
+  const [sermonVideoUrl, setSermonVideoUrl] = useState('');
   const [sermonTitleVi, setSermonTitleVi] = useState('');
   const [sermonTitleEn, setSermonTitleEn] = useState('');
   const [sermonDescVi, setSermonDescVi] = useState('');
@@ -81,7 +94,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
   const baselineRef = useRef<SermonFormValues>(getDefaultSermonValues());
 
   const applySermonValues = (values: SermonFormValues) => {
-    setSermonYoutubeUrl(values.youtubeUrl);
+    setSermonVideoUrl(values.videoUrl);
     setSermonTitleVi(values.titleVi);
     setSermonTitleEn(values.titleEn);
     setSermonDescVi(values.descVi);
@@ -89,10 +102,19 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
     setSermonDate(values.date);
   };
 
-  // Live-extract the video ID from whatever link is pasted, so the
-  // thumbnail preview and the save validation share one source of truth.
-  const previewVideoId = extractYouTubeVideoId(sermonYoutubeUrl);
-  const youtubeUrlInvalid = sermonYoutubeUrl.trim() !== '' && !previewVideoId;
+  // Detect the platform from whatever link is pasted, so the preview
+  // and the save validation share one source of truth. YouTube wins
+  // when a link somehow matches both (it never does in practice).
+  const previewYouTubeId = extractYouTubeVideoId(sermonVideoUrl);
+  const previewFacebookUrl = !previewYouTubeId
+    ? extractFacebookVideoUrl(sermonVideoUrl)
+    : null;
+  const previewPlatform: 'youtube' | 'facebook' | null = previewYouTubeId
+    ? 'youtube'
+    : previewFacebookUrl
+    ? 'facebook'
+    : null;
+  const videoUrlInvalid = sermonVideoUrl.trim() !== '' && !previewPlatform;
 
   const resetSermonForm = () => {
     setEditingSermonId(null);
@@ -108,10 +130,11 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
     baselineRef.current = values;
   };
 
-  // Dirty-check: any field differs from the last loaded values.
+  // Dirty-check: any field differs from the last loaded values. The
+  // platform is derived from the link, so it follows the URL.
   const baseline = baselineRef.current;
   const isDirty =
-    sermonYoutubeUrl !== baseline.youtubeUrl ||
+    sermonVideoUrl !== baseline.videoUrl ||
     sermonTitleVi !== baseline.titleVi ||
     sermonTitleEn !== baseline.titleEn ||
     sermonDescVi !== baseline.descVi ||
@@ -120,7 +143,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
 
   const handleSaveSermon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!previewVideoId || !sermonTitleVi.trim() || !sermonTitleEn.trim() || !sermonDate) {
+    if (!previewPlatform || !sermonTitleVi.trim() || !sermonTitleEn.trim() || !sermonDate) {
       showFeedback('error', t('adminSermonFillRequired'));
       return;
     }
@@ -140,7 +163,11 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          youtubeUrl: sermonYoutubeUrl.trim(),
+          platform: previewPlatform,
+          youtubeUrl:
+            previewPlatform === 'youtube' ? sermonVideoUrl.trim() : undefined,
+          facebookUrl:
+            previewPlatform === 'facebook' ? sermonVideoUrl.trim() : undefined,
           titleVi: sermonTitleVi.trim(),
           titleEn: sermonTitleEn.trim(),
           descriptionVi: sermonDescVi.trim() || null,
@@ -202,24 +229,32 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
             type="text"
             required
             placeholder={t('adminSermonUrlPlaceholder')}
-            value={sermonYoutubeUrl}
-            onChange={(e) => setSermonYoutubeUrl(e.target.value)}
+            value={sermonVideoUrl}
+            onChange={(e) => setSermonVideoUrl(e.target.value)}
             className={s.input}
           />
-          {youtubeUrlInvalid && (
+          {videoUrlInvalid && (
             <p className={s.invalidMsg}>{t('adminSermonUrlInvalid')}</p>
           )}
-          {previewVideoId && (
+          {previewYouTubeId && (
             <div className={s.previewBox}>
               <span className={s.previewLabel}>
                 <Video className={s.previewIcon} />
                 <span>{t('adminSermonPreview')}</span>
               </span>
               <img
-                src={getYouTubeThumbnailUrl(previewVideoId)}
+                src={getYouTubeThumbnailUrl(previewYouTubeId)}
                 alt=""
                 className={s.previewThumb}
               />
+            </div>
+          )}
+          {previewFacebookUrl && (
+            <div className={s.previewBox}>
+              <span className={s.previewLabel}>
+                <Video className={s.previewIcon} />
+                <span>{t('adminSermonPreviewFacebook')}</span>
+              </span>
             </div>
           )}
         </div>
@@ -307,14 +342,21 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
           {sermons.map((sermon) => {
             const title =
               language === 'vi' ? sermon.titleVi || sermon.titleEn : sermon.titleEn || sermon.titleVi;
+            const isFacebook = (sermon.platform || 'youtube') === 'facebook';
             return (
               <div key={sermon.id} className={s.item}>
-                <img
-                  src={getYouTubeThumbnailUrl(sermon.videoId)}
-                  alt=""
-                  loading="lazy"
-                  className={s.itemThumb}
-                />
+                {isFacebook ? (
+                  <div className={`${s.itemThumb} ${s.itemThumbFb}`} aria-label={title}>
+                    <span>f</span>
+                  </div>
+                ) : (
+                  <img
+                    src={sermon.videoId ? getYouTubeThumbnailUrl(sermon.videoId) : ''}
+                    alt=""
+                    loading="lazy"
+                    className={s.itemThumb}
+                  />
+                )}
                 <div className={s.itemBody}>
                   <span className={s.itemTitle}>{title}</span>
                   <span className={s.itemDate}>{formatDateLocale(sermon.date, language)}</span>

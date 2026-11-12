@@ -53,8 +53,10 @@ export interface DailyVerse {
 
 export interface Sermon {
   id: number;
-  youtubeUrl: string;
-  videoId: string;
+  platform: 'youtube' | 'facebook';
+  youtubeUrl: string | null;
+  videoId: string | null;
+  facebookUrl?: string | null;
   titleVi: string;
   titleEn: string;
   descriptionVi?: string | null;
