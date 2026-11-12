@@ -12,6 +12,7 @@ import {
   Moon,
   Sun,
   Type,
+  Palette,
 } from 'lucide-react';
 import { NotificationModal } from '../notification-modal/NotificationModal.tsx';
 import { SegmentedControl } from '../../common-component/index.ts';
@@ -97,6 +98,22 @@ export const Navbar: React.FC<NavbarProps> = ({
         return true;
       }
       return false;
+    } catch {
+      return false;
+    }
+  });
+
+  // New theme (navy + gold) — try-out theme based on the Event tab
+  // design. Same mechanism as dark mode: a .theme-new class on <html>
+  // remaps the shared utilities in index.css (one place, whole app).
+  // Stored separately from vrc_theme (dark/light).
+  const [isNewTheme, setIsNewTheme] = useState(() => {
+    try {
+      const enabled = localStorage.getItem('vrc_color_theme') === 'new';
+      if (enabled) {
+        document.documentElement.classList.add('theme-new');
+      }
+      return enabled;
     } catch {
       return false;
     }
@@ -287,6 +304,33 @@ export const Navbar: React.FC<NavbarProps> = ({
                         }`}
                       >
                         {isLargeFont ? 'ON' : 'OFF'}
+                      </span>
+                    </button>
+
+                    {/* New Theme Toggle (navy + gold) */}
+                    <button
+                      onClick={() => {
+                        const next = !isNewTheme;
+                        setIsNewTheme(next);
+                        document.documentElement.classList.toggle('theme-new', next);
+                        try {
+                          localStorage.setItem('vrc_color_theme', next ? 'new' : 'classic');
+                        } catch {}
+                      }}
+                      className={s.settingsToggleItem}
+                      role="switch"
+                      aria-checked={isNewTheme}
+                    >
+                      <div className={s.settingsItemLeft}>
+                        <Palette className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300 flex-shrink-0" />
+                        <span>{t('navNewTheme')}</span>
+                      </div>
+                      <span
+                        className={`${s.settingsFontBadgeBase} ${
+                          isNewTheme ? s.settingsFontBadgeOn : s.settingsFontBadgeOff
+                        }`}
+                      >
+                        {isNewTheme ? 'ON' : 'OFF'}
                       </span>
                     </button>
 
