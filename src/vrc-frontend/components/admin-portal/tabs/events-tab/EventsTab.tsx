@@ -6,7 +6,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, ZoomButton } from '../../../../common-component/index.ts';
+import { Button, SegmentedControl, ZoomButton } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -716,22 +716,15 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       <div className={s.previewSection}>
         <div className={s.previewHeader}>
           <span>{t('headerVersePreview')}</span>
-          <div className={s.previewLangToggle}>
-            <button
-              type="button"
-              onClick={() => setPreviewLang('vi')}
-              className={previewLang === 'vi' ? s.previewLangBtnActive : s.previewLangBtnIdle}
-            >
-              Tiếng Việt
-            </button>
-            <button
-              type="button"
-              onClick={() => setPreviewLang('en')}
-              className={previewLang === 'en' ? s.previewLangBtnActive : s.previewLangBtnIdle}
-            >
-              English
-            </button>
-          </div>
+          <SegmentedControl
+            options={[
+              { value: 'vi', label: 'Tiếng Việt' },
+              { value: 'en', label: 'English' },
+            ]}
+            value={previewLang}
+            onChange={setPreviewLang}
+            size="sm"
+          />
         </div>
 
         <div className={`${s.previewCard} ${previewTheme.cardBg}`}>

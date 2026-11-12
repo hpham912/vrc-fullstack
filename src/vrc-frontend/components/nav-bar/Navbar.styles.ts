@@ -23,11 +23,6 @@ export const navbarStyles = {
   mobileLangBtn:
     'sm:hidden px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-300 text-xs font-bold text-stone-900 flex items-center gap-1 shadow-2xs',
   mobileLangText: 'text-meta font-mono font-bold',
-  desktopLangGroup:
-    'hidden sm:flex items-center bg-stone-100 p-1 rounded-xl border border-stone-300 text-xs font-bold shadow-2xs',
-  desktopLangBtnBase: 'px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-label',
-  desktopLangBtnActive: 'bg-white text-stone-950 shadow-xs font-bold',
-  desktopLangBtnInactive: 'text-stone-600 hover:text-stone-950 font-semibold',
   settingsWrapper: 'relative',
   settingsBtnBase:
     'relative z-50 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border transition-all active:scale-95 cursor-pointer',

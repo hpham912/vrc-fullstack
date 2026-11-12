@@ -19,9 +19,6 @@ export const editHeaderVerseModalStyles = {
   previewCard:
     'p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-900/80 border border-stone-200/80 dark:border-stone-800 space-y-2',
   previewHeader: 'flex items-center justify-between text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider',
-  previewLangToggle: 'flex items-center gap-1 bg-stone-200/80 dark:bg-stone-800 p-0.5 rounded-lg text-caption',
-  previewLangBtnActive: 'px-2 py-0.5 rounded-md bg-white dark:bg-stone-700 text-stone-950 dark:text-white font-bold shadow-2xs',
-  previewLangBtnIdle: 'px-2 py-0.5 rounded-md text-stone-500 dark:text-stone-400 font-medium',
   previewBox:
     'p-3.5 rounded-xl bg-white dark:bg-[#161412] border border-stone-200/60 dark:border-stone-800/60 text-center space-y-1',
   previewQuote:

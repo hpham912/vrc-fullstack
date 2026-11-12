@@ -14,6 +14,7 @@ import {
   Type,
 } from 'lucide-react';
 import { NotificationModal } from '../notification-modal/NotificationModal.tsx';
+import { SegmentedControl } from '../../common-component/index.ts';
 import { AppNotification } from '../../types/index.ts';
 import { navbarStyles as s } from './Navbar.styles.ts';
 
@@ -192,26 +193,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className={s.mobileLangText}>{language === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
-            {/* Language Switcher: Desktop Pill */}
-            <div className={s.desktopLangGroup}>
-              <button
-                onClick={() => setLanguage('vi')}
-                className={`${s.desktopLangBtnBase} ${
-                  language === 'vi' ? s.desktopLangBtnActive : s.desktopLangBtnInactive
-                }`}
-                title="Tiếng Việt"
-              >
-                <span>VI</span>
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`${s.desktopLangBtnBase} ${
-                  language === 'en' ? s.desktopLangBtnActive : s.desktopLangBtnInactive
-                }`}
-                title="English"
-              >
-                <span>EN</span>
-              </button>
+            {/* Language Switcher: Desktop Pill (hidden on mobile, where
+                the compact VI/EN button above is used instead) */}
+            <div className="hidden sm:block">
+              <SegmentedControl
+                options={[
+                  { value: 'vi', label: 'VI' },
+                  { value: 'en', label: 'EN' },
+                ]}
+                value={language}
+                onChange={setLanguage}
+                size="sm"
+                ariaLabel="Language"
+              />
             </div>
 
             {/* Settings Dropdown (Font Size + Login/Logout) */}

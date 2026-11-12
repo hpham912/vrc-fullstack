@@ -3,7 +3,7 @@ import { ChurchInfo, DailyVerse, HeaderVerse, DEFAULT_HEADER_VERSE } from '../..
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
-import { Button } from '../../common-component/index.ts';
+import { Button, SegmentedControl } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -291,22 +291,15 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
         <div className={s.previewCard}>
           <div className={s.previewHeader}>
             <span>{t('headerVersePreview')}</span>
-            <div className={s.previewLangToggle}>
-              <button
-                type="button"
-                onClick={() => setPreviewLang('vi')}
-                className={previewLang === 'vi' ? s.previewLangBtnActive : s.previewLangBtnIdle}
-              >
-                Tiếng Việt
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewLang('en')}
-                className={previewLang === 'en' ? s.previewLangBtnActive : s.previewLangBtnIdle}
-              >
-                English
-              </button>
-            </div>
+            <SegmentedControl
+              options={[
+                { value: 'vi', label: 'Tiếng Việt' },
+                { value: 'en', label: 'English' },
+              ]}
+              value={previewLang}
+              onChange={setPreviewLang}
+              size="sm"
+            />
           </div>
 
           <div className={s.previewBox}>

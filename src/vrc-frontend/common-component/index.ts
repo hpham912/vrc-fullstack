@@ -17,3 +17,5 @@ export { FacebookPlayer } from './facebook-player/FacebookPlayer.tsx';
 export type { FacebookPlayerProps } from './facebook-player/FacebookPlayer.tsx';
 export { ZoomButton } from './zoom-button/ZoomButton.tsx';
 export type { ZoomButtonProps } from './zoom-button/ZoomButton.tsx';
+export { SegmentedControl } from './segmented-control/SegmentedControl.tsx';
+export type { SegmentedControlProps, SegmentedControlOption } from './segmented-control/SegmentedControl.tsx';

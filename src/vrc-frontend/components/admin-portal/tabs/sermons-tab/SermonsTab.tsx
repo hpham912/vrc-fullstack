@@ -7,7 +7,7 @@ import { getErrorMessage } from '../../../../utils/errors.ts';
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vrc-shared/utils/youtube.ts';
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
-import { AdminActionButtons, Button, ConfirmModal } from '../../../../common-component/index.ts';
+import { AdminActionButtons, Button, ConfirmModal, SegmentedControl } from '../../../../common-component/index.ts';
 import { sermonsTabStyles as s } from './SermonsTab.styles.ts';
 
 interface SermonsTabProps {
@@ -280,22 +280,15 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
         {previewPlatform === 'facebook' && (
           <div className={s.field}>
             <label className={s.label}>{t('adminSermonShape')}</label>
-            <div className={s.shapeRow}>
-              <button
-                type="button"
-                onClick={() => setSermonIsVertical(true)}
-                className={`${s.shapeBtn} ${sermonIsVertical ? s.shapeBtnActive : ''}`}
-              >
-                {t('adminSermonShapeTall')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSermonIsVertical(false)}
-                className={`${s.shapeBtn} ${!sermonIsVertical ? s.shapeBtnActive : ''}`}
-              >
-                {t('adminSermonShapeWide')}
-              </button>
-            </div>
+            <SegmentedControl
+              options={[
+                { value: 'tall', label: t('adminSermonShapeTall') },
+                { value: 'wide', label: t('adminSermonShapeWide') },
+              ]}
+              value={sermonIsVertical ? 'tall' : 'wide'}
+              onChange={(next) => setSermonIsVertical(next === 'tall')}
+              ariaLabel={t('adminSermonShape')}
+            />
           </div>
         )}
 
