@@ -135,13 +135,8 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
                 </div>
 
                 <div className={s.cardBody}>
-                  <h3 className={s.cardTitle}>{title}</h3>
-                  {description && <p className={s.cardDesc}>{description}</p>}
-                  <div className={s.cardDateRow}>
-                    <span className={s.cardDateLeft}>
-                      <Calendar className={s.cardDateIcon} />
-                      <span>{formatDateLocale(sermon.date, language)}</span>
-                    </span>
+                  <div className={s.cardHeaderRow}>
+                    <h3 className={s.cardTitle}>{title}</h3>
                     {isAdmin && (
                       <span
                         className={s.adminActionRow}
@@ -153,6 +148,11 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
                         />
                       </span>
                     )}
+                  </div>
+                  {description && <p className={s.cardDesc}>{description}</p>}
+                  <div className={s.cardDateRow}>
+                    <Calendar className={s.cardDateIcon} />
+                    <span>{formatDateLocale(sermon.date, language)}</span>
                   </div>
                 </div>
               </div>
