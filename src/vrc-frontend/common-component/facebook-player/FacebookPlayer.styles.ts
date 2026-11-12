@@ -6,7 +6,9 @@
 // a Reel is vertical 9:16, so it gets a tall centered frame (a wide
 // 16:9 frame would shrink it to a narrow strip and hide the play
 // button); any other Facebook video is landscape, so it gets the
-// wide 16:9 frame like YouTube.
+// wide 16:9 frame like YouTube. Only a Reel gets the bigger modal
+// (max-w-4xl, set in the component); a landscape video uses the
+// normal max-w-2xl modal.
 export const facebookPlayerStyles = {
   body: 'p-6 space-y-3',
   frameReel: 'mx-auto aspect-[9/16] h-[60vh] max-h-[560px] w-auto max-w-full rounded-xl bg-stone-950 border-0',

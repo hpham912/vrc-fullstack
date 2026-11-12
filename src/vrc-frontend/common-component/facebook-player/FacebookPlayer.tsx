@@ -33,11 +33,18 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
   const { language, t } = useLanguage();
   const formattedDate = date ? formatDateLocale(date, language) : '';
   // A Reel is vertical; any other Facebook video is landscape. The
-  // frame fits the video so the play button stays big and tappable.
+  // frame fits the video so the play button stays big and tappable,
+  // and only a Reel gets the bigger modal — a landscape video does
+  // not need the extra width.
   const isReel = isFacebookReelUrl(videoUrl);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidthClass="max-w-4xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      maxWidthClass={isReel ? 'max-w-4xl' : 'max-w-2xl'}
+    >
       <div className={facebookPlayerStyles.body}>
         <iframe
           src={getFacebookEmbedUrl(videoUrl)}
