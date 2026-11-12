@@ -36,7 +36,9 @@ export function extractFacebookVideoUrl(url: string): string | null {
   }
   if (host !== 'facebook.com' && host !== 'm.facebook.com') return null;
   // A watch page needs a video id (?v=...); the other shapes carry the
-  // id in the path. A post link may hold a video, so it is accepted too.
+  // id in the path. A post link may hold a video, so it is accepted too
+  // — including the slugged form /<page>/posts/<slug>/<id>, which is
+  // what a share link usually resolves to.
   if (path === '/watch' || path.startsWith('/watch/')) {
     return parsed.searchParams.get('v') ? clean : null;
   }
@@ -44,7 +46,7 @@ export function extractFacebookVideoUrl(url: string): string | null {
     /\/videos\/\d+/.test(path) ||
     /^\/reel\/\d+/.test(path) ||
     /^\/share\/[vr]\/[\w-]+/.test(path) ||
-    /\/posts\/\d+/.test(path)
+    /\/posts\/([^/]+\/)?\d+/.test(path)
   ) {
     return clean;
   }
