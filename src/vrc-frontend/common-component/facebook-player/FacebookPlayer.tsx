@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, ExternalLink } from 'lucide-react';
 import { Modal } from '../modal/Modal.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { getFacebookEmbedUrl, getFacebookWatchUrl } from '../../../vrc-shared/utils/facebook.ts';
+import { getFacebookEmbedUrl, getFacebookWatchUrl, isFacebookReelUrl } from '../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { facebookPlayerStyles } from './FacebookPlayer.styles.ts';
 
@@ -32,6 +32,9 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
 }) => {
   const { language, t } = useLanguage();
   const formattedDate = date ? formatDateLocale(date, language) : '';
+  // A Reel is vertical; any other Facebook video is landscape. The
+  // frame fits the video so the play button stays big and tappable.
+  const isReel = isFacebookReelUrl(videoUrl);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidthClass="max-w-4xl">
@@ -39,7 +42,9 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
         <iframe
           src={getFacebookEmbedUrl(videoUrl)}
           title={title}
-          className={facebookPlayerStyles.frame}
+          className={
+            isReel ? facebookPlayerStyles.frameReel : facebookPlayerStyles.frameVideo
+          }
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           allowFullScreen
         />

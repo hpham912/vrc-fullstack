@@ -26,20 +26,25 @@ export function extractFacebookVideoUrl(url: string): string | null {
   }
   const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
   const path = parsed.pathname;
-  // Only Reels are accepted (for now). fb.watch short links and
-  // /share/v|/share/r links are accepted here so the admin can paste
-  // them, but they do NOT play in Facebook's video embed — the server
-  // resolves them to the real video URL (from the share page's og:url)
-  // before storing, and rejects them if they do not resolve to a
-  // Reel. Other Facebook video shapes (/watch, /videos, /posts) are
-  // not accepted.
+  // fb.watch short links and /share/v|/share/r links are accepted here
+  // so the admin can paste them, but they do NOT play in Facebook's
+  // video embed — the server resolves them to the real video URL
+  // (from the share page's og:url) before storing. Any public Facebook
+  // video works: Reels, watch pages, videos, and posts that hold one.
   if (host === 'fb.watch') {
     return clean;
   }
   if (host !== 'facebook.com' && host !== 'm.facebook.com') return null;
+  // A watch page needs a video id (?v=...); the other shapes carry the
+  // id in the path. A post link may hold a video, so it is accepted too.
+  if (path === '/watch' || path.startsWith('/watch/')) {
+    return parsed.searchParams.get('v') ? clean : null;
+  }
   if (
+    /\/videos\/\d+/.test(path) ||
     /^\/reel\/\d+/.test(path) ||
-    /^\/share\/[vr]\/[\w-]+/.test(path)
+    /^\/share\/[vr]\/[\w-]+/.test(path) ||
+    /\/posts\/\d+/.test(path)
   ) {
     return clean;
   }
