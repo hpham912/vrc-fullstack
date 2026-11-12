@@ -40,9 +40,9 @@ export const homeDashboardStyles = {
   quickIconSanctuary:
     'w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-stone-100 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/50 flex items-center justify-center text-stone-800 dark:text-stone-300 mb-1 group-hover:scale-105 group-hover:bg-stone-900 group-hover:text-white transition-all shadow-2xs',
   quickCardTitle: 'text-xs sm:text-sm font-bold text-stone-950 dark:text-stone-100 leading-snug tracking-tight',
-  quickCardSub: 'text-caption sm:text-label text-stone-600 dark:text-stone-400 font-medium mt-0.5 line-clamp-1',
+  quickCardSub: 'text-caption sm:text-label text-stone-800 dark:text-stone-400 font-medium mt-0.5 line-clamp-1',
   upcomingSection: 'space-y-2.5',
-  viewAllBtn: 'text-xs font-semibold text-amber-800 hover:text-amber-900 flex items-center gap-1',
+  viewAllBtn: 'text-xs font-semibold text-amber-900 hover:text-amber-950 flex items-center gap-1',
   eventCardBase:
     'rounded-2xl p-3.5 sm:p-5 transition-all duration-150 space-y-3 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
   cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
@@ -82,7 +82,7 @@ export const homeDashboardStyles = {
   verseQuote: 'font-serif italic text-xs sm:text-sm text-stone-900 dark:text-stone-100 leading-relaxed font-medium',
   verseFooter: 'pt-1 flex items-center justify-between',
   verseTrans: 'text-xs text-stone-700 dark:text-stone-400 font-semibold',
-  verseReadBtn: 'text-xs font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1',
+  verseReadBtn: 'text-xs font-bold text-amber-900 hover:text-amber-950 flex items-center gap-1',
   // Contact card (last card on Home): address, phone, email, worship hours, socials.
   contactCard: 'space-y-4',
   contactHeader: 'flex items-center justify-between gap-2',
@@ -95,14 +95,14 @@ export const homeDashboardStyles = {
   contactIconChip:
     'w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-500/25 flex items-center justify-center text-amber-700 dark:text-amber-400 flex-shrink-0',
   contactTextCol: 'min-w-0 space-y-0.5 flex-1',
-  contactLabel: 'text-caption font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block',
+  contactLabel: 'text-caption font-bold uppercase tracking-wider text-stone-700 dark:text-stone-400 block',
   contactValue: 'text-xs font-semibold text-stone-900 dark:text-stone-100 leading-snug break-words',
   contactValueLink:
     'text-xs font-semibold text-stone-900 dark:text-stone-100 leading-snug break-words hover:text-amber-800 dark:hover:text-amber-300 transition-colors',
   contactDirections: 'pt-1.5 flex flex-wrap items-center gap-2',
   contactDivider: 'border-t border-stone-100 dark:border-stone-800',
   contactSocials: 'space-y-2',
-  contactSocialLabel: 'text-caption font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400',
+  contactSocialLabel: 'text-caption font-bold uppercase tracking-wider text-stone-700 dark:text-stone-400',
   socialCircles: 'flex items-center gap-2.5',
   socialCircleYoutube:
     'w-11 h-11 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all active:scale-95 cursor-pointer flex-shrink-0',

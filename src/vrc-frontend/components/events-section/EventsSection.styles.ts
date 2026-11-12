@@ -1,6 +1,6 @@
 export const eventsSectionStyles = {
   section:
-    'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 max-w-full overflow-x-clip box-border',
+    'py-6 sm:py-12 px-3.5 sm:px-6 max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300 w-full min-w-0 overflow-x-clip box-border',
   headerRow: 'flex items-center justify-between gap-3 min-w-0 w-full',
   headerSubtitle: 'text-caption sm:text-label font-bold uppercase tracking-widest text-amber-700 block mb-0.5',
   headerTitle: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
@@ -9,7 +9,7 @@ export const eventsSectionStyles = {
   searchWrapper: 'relative w-full min-w-0',
   searchIcon: 'w-4 h-4 text-stone-500 dark:text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none',
   searchInput:
-    'w-full max-w-full box-border pl-10 pr-4 py-2.5 bg-stone-100 hover:bg-stone-100/90 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-300 dark:border-stone-700 rounded-2xl text-xs sm:text-sm text-stone-950 dark:text-stone-50 placeholder:text-stone-500 dark:placeholder:text-stone-400 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:bg-white dark:focus:bg-stone-850 transition-all shadow-2xs',
+    'w-full max-w-full box-border pl-10 pr-4 py-2.5 bg-stone-100 hover:bg-stone-100/90 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-300 dark:border-stone-700 rounded-2xl text-xs sm:text-sm text-stone-950 dark:text-stone-50 placeholder:text-stone-700 dark:placeholder:text-stone-400 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:bg-white dark:focus:bg-stone-850 transition-all shadow-2xs',
   filterRow: 'flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 px-0.5 w-full max-w-full',
   filterPillBase:
     'flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 flex-shrink-0',
@@ -17,7 +17,7 @@ export const eventsSectionStyles = {
   filterPillInactive: 'bg-white text-stone-700 hover:text-stone-950 border border-stone-300 shadow-2xs hover:bg-stone-50 dark:bg-stone-900/80 dark:text-stone-300 dark:border-stone-800 dark:hover:bg-stone-800 dark:hover:text-stone-100',
   emptyBox: 'py-12 sm:py-16 text-center bg-white dark:bg-[#161412] rounded-3xl border border-stone-200/70 dark:border-stone-800 p-8 shadow-xs',
   emptyTitle: 'font-serif font-bold text-stone-900 dark:text-stone-100 text-base',
-  emptySub: 'text-stone-500 dark:text-stone-400 text-xs mt-1',
+  emptySub: 'text-stone-700 dark:text-stone-400 text-xs mt-1',
   listContainer: 'space-y-4',
   eventCardBase:
     'rounded-2xl p-3.5 sm:p-4 transition-all duration-150 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
@@ -43,10 +43,10 @@ export const eventsSectionStyles = {
   pastSection:
     'pt-8 sm:pt-10 border-t border-stone-200 dark:border-stone-800 space-y-4 w-full min-w-0 max-w-full overflow-hidden',
   pastHeaderRow: 'flex flex-wrap items-center justify-between gap-2 min-w-0 w-full',
-  pastLabel: 'inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400',
-  pastSub: 'text-xs text-stone-500 dark:text-stone-400',
+  pastLabel: 'inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-800 dark:text-stone-400',
+  pastSub: 'text-xs text-stone-700 dark:text-stone-400',
   pastCountBadge:
-    'text-label font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800 whitespace-nowrap',
+    'text-label font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-800 dark:text-stone-300 border border-stone-200 dark:border-stone-800 whitespace-nowrap',
   pastCard:
     'rounded-2xl p-3.5 sm:p-4 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border select-none border border-stone-200/80 dark:border-stone-800 bg-stone-100/70 dark:bg-[#161412] opacity-75 cursor-default',
   pastCategoryPill:
@@ -56,14 +56,14 @@ export const eventsSectionStyles = {
   pastDateBox:
     'flex-shrink-0 w-14 sm:w-16 py-2 px-1 text-center rounded-2xl shadow-2xs border border-stone-300/70 dark:border-stone-800 flex flex-col items-center justify-center select-none bg-stone-200/60 dark:bg-stone-900/90 self-start',
   pastDateBoxWeekday:
-    'block text-label font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-500 dark:text-stone-400',
+    'block text-label font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-400',
   pastDateBoxDay:
-    'block text-xl sm:text-2xl font-bold text-stone-700 dark:text-stone-300 leading-none my-1',
+    'block text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-300 leading-none my-1',
   pastDateBoxMonth:
-    'block text-caption sm:text-label font-semibold uppercase tracking-wider leading-tight text-stone-500 dark:text-stone-400',
-  pastTitle: 'text-base sm:text-lg font-bold text-stone-700 dark:text-stone-300 leading-snug break-words',
-  pastTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400',
-  pastLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-400 truncate',
+    'block text-caption sm:text-label font-semibold uppercase tracking-wider leading-tight text-stone-700 dark:text-stone-400',
+  pastTitle: 'text-base sm:text-lg font-bold text-stone-900 dark:text-stone-300 leading-snug break-words',
+  pastTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-400',
+  pastLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-400 truncate',
   detailMetaCard: 'space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800',
   detailGoogleBtn:
     'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-label font-bold shadow-2xs transition-all',

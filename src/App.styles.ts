@@ -46,10 +46,10 @@ export const appStyles = {
   footerLinksGroup: 'flex items-center gap-4 text-xs font-semibold text-stone-700',
   footerLinkBtn: 'hover:text-stone-950 transition-colors',
   footerBottomRow:
-    'max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-600 text-label font-medium',
+    'max-w-4xl mx-auto mt-4 pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-stone-800 text-label font-medium',
   footerMetaRight: 'flex items-center gap-2',
-  footerVersion: 'text-stone-500 font-mono text-caption',
-  mobileVersionBar: 'md:hidden py-3 text-center text-caption text-stone-500 font-mono select-none',
+  footerVersion: 'text-stone-700 font-mono text-caption',
+  mobileVersionBar: 'md:hidden py-3 text-center text-caption text-stone-700 font-mono select-none',
   floatingPrayerBtn:
     'fixed bottom-[100px] sm:bottom-14 right-3.5 sm:right-6 z-40 group flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-stone-900/65 hover:bg-stone-900/80 active:scale-95 text-amber-100 border border-white/20 backdrop-blur-md shadow-xl transition-all cursor-pointer select-none animate-in fade-in zoom-in-95 duration-200',
   floatingPrayerIconBox:
