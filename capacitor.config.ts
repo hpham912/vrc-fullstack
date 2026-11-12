@@ -22,6 +22,16 @@ const config: CapacitorConfig = {
     scrollEnabled: true,
   },
   plugins: {
+    // Fullscreen splash (the lockup) while the app loads. Android 12+
+    // forces the system splash icon into a circle, so the system splash
+    // is kept blank (transparent icon, white bg) and this plugin shows
+    // the fullscreen image instead.
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#FFFFFF',
+      showSpinner: false,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
