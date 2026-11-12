@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Video, Play, Calendar } from 'lucide-react';
 import { Sermon } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { Card, LoadingShimmer, AdminAddButton, YouTubePlayer, FacebookPlayer } from '../../common-component/index.ts';
+import { useAuth } from '../../context/AuthContext.tsx';
+import { apiFetch } from '../../utils/api.ts';
+import { Card, LoadingShimmer, AdminAddButton, AdminActionButtons, ConfirmModal, YouTubePlayer, FacebookPlayer } from '../../common-component/index.ts';
 import { getYouTubeThumbnailUrl } from '../../../vrc-shared/utils/youtube.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { sermonsSectionStyles as s } from './SermonsSection.styles.ts';
@@ -11,7 +13,8 @@ interface SermonsSectionProps {
   sermons: Sermon[];
   isLoading?: boolean;
   isAdmin?: boolean;
-  onOpenAdminPortal?: (tab?: string) => void;
+  onOpenAdminPortal?: (tab?: string, sermon?: Sermon | null) => void;
+  onRefresh?: () => void;
 }
 
 // Full-page Sermons tab (Bài Giảng): a list of Sunday worship sermon
@@ -24,9 +27,35 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
   isLoading = false,
   isAdmin = false,
   onOpenAdminPortal,
+  onRefresh,
 }) => {
   const { language, t } = useLanguage();
+  const { getToken } = useAuth();
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
+  const [deleteTargetSermon, setDeleteTargetSermon] = useState<Sermon | null>(null);
+  const [deletingSermon, setDeletingSermon] = useState(false);
+
+  // Delete from the card, same as the Events page: a confirm modal,
+  // then DELETE /api/sermons/:id, then reload the list. The sermon
+  // stays visible if the delete fails, so the failure is obvious.
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetSermon) return;
+    try {
+      setDeletingSermon(true);
+      const token = getToken();
+      await apiFetch(`/api/sermons/${deleteTargetSermon.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDeleteTargetSermon(null);
+      onRefresh?.();
+    } catch (err) {
+      console.error('Failed to delete sermon:', err);
+      setDeleteTargetSermon(null);
+    } finally {
+      setDeletingSermon(false);
+    }
+  };
 
   const getSermonTitle = (sermon: Sermon) =>
     language === 'vi' ? sermon.titleVi || sermon.titleEn : sermon.titleEn || sermon.titleVi;
@@ -109,8 +138,21 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
                   <h3 className={s.cardTitle}>{title}</h3>
                   {description && <p className={s.cardDesc}>{description}</p>}
                   <div className={s.cardDateRow}>
-                    <Calendar className={s.cardDateIcon} />
-                    <span>{formatDateLocale(sermon.date, language)}</span>
+                    <span className={s.cardDateLeft}>
+                      <Calendar className={s.cardDateIcon} />
+                      <span>{formatDateLocale(sermon.date, language)}</span>
+                    </span>
+                    {isAdmin && (
+                      <span
+                        className={s.adminActionRow}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <AdminActionButtons
+                          onEdit={() => onOpenAdminPortal?.('sermons', sermon)}
+                          onDelete={() => setDeleteTargetSermon(sermon)}
+                        />
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -145,6 +187,25 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
             />
           )
         )}
+      {/* Common Confirmation Modal for Delete (same as the Events page) */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetSermon)}
+        title={t('adminSermonDeleteTitle')}
+        message={
+          deleteTargetSermon
+            ? t('adminSermonDeleteConfirm', {
+                title:
+                  (language === 'vi'
+                    ? deleteTargetSermon.titleVi
+                    : deleteTargetSermon.titleEn) || '',
+              })
+            : ''
+        }
+        confirmText={t('commonDelete')}
+        loading={deletingSermon}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTargetSermon(null)}
+      />
     </div>
   );
 };

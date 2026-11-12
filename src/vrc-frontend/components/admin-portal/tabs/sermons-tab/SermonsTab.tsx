@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Save, Video } from 'lucide-react';
 import { Sermon } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
@@ -17,6 +17,9 @@ interface SermonsTabProps {
   // a half-typed form or an in-progress edit survives switching to
   // another tab and back, exactly as before the split.
   activeTab: string;
+  // A sermon to edit, when the portal was opened from a sermon card
+  // on the public Bài Giảng page (same as initialEvent for events).
+  initialSermon?: Sermon | null;
   getToken: () => string | null;
   showFeedback: (type: 'success' | 'error', message: string) => void;
   onRefreshData: () => void;
@@ -70,6 +73,7 @@ const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => {
 export const SermonsTab: React.FC<SermonsTabProps> = ({
   sermons,
   activeTab,
+  initialSermon,
   getToken,
   showFeedback,
   onRefreshData,
@@ -126,6 +130,14 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
     applySermonValues(values);
     baselineRef.current = values;
   };
+
+  // Opened from a sermon card on the public Bài Giảng page: load
+  // that sermon into the form for editing (same as initialEvent).
+  useEffect(() => {
+    if (initialSermon) {
+      handleEditSermon(initialSermon);
+    }
+  }, [initialSermon]);
 
   // Dirty-check: any field differs from the last loaded values. The
   // platform is derived from the link, so it follows the URL.

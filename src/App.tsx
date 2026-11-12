@@ -161,6 +161,7 @@ function ChurchAppContent() {
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
+  const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
 
   const loadData = async () => {
     try {
@@ -302,11 +303,13 @@ function ChurchAppContent() {
     tab = 'create-event',
     eventToEdit?: ChurchEvent | null,
     verseToEdit?: DailyVerse | null,
-    focused = true
+    focused = true,
+    sermonToEdit?: Sermon | null,
   ) => {
     setAdminPortalTab(tab);
     setEditingEvent(eventToEdit || null);
     setEditingVerse(verseToEdit || null);
+    setEditingSermon(sermonToEdit || null);
     setAdminFocusedMode(focused);
     setAdminPortalOpen(true);
   };
@@ -510,7 +513,10 @@ function ChurchAppContent() {
             sermons={sermons}
             isLoading={isLoading}
             isAdmin={isAdmin}
-            onOpenAdminPortal={openAdminWithTab}
+            onOpenAdminPortal={(tab, sermon) =>
+              openAdminWithTab(tab, null, null, true, sermon)
+            }
+            onRefresh={loadData}
           />
         )}
 
@@ -615,10 +621,12 @@ function ChurchAppContent() {
             focusedMode={adminFocusedMode}
             initialEvent={editingEvent}
             initialVerse={editingVerse}
+            initialSermon={editingSermon}
             onClose={() => {
               setAdminPortalOpen(false);
               setEditingEvent(null);
               setEditingVerse(null);
+              setEditingSermon(null);
             }}
             onRefreshData={loadData}
             onOpenSpotlightEditor={() => {

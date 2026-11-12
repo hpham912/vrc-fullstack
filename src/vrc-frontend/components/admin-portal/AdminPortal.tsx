@@ -35,6 +35,7 @@ interface AdminPortalProps {
   focusedMode?: boolean;
   initialEvent?: ChurchEvent | null;
   initialVerse?: DailyVerse | null;
+  initialSermon?: Sermon | null;
   onClose: () => void;
   onRefreshData: () => void;
   onOpenSpotlightEditor?: () => void;
@@ -50,6 +51,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   focusedMode = false,
   initialEvent,
   initialVerse,
+  initialSermon,
   onClose,
   onRefreshData,
   onOpenSpotlightEditor,
@@ -342,7 +344,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
-          <SermonsTab sermons={sermons} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
+          <SermonsTab sermons={sermons} activeTab={activeTab} initialSermon={initialSermon} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
 
           <ChurchInfoTab activeTab={activeTab} churchInfo={churchInfo} onRefreshData={onRefreshData} />
 
