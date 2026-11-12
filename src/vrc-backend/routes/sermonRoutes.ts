@@ -1,18 +1,31 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { sermons } from '../../vrc-db/schema.ts';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, lt } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { extractYouTubeVideoId } from '../../vrc-shared/utils/youtube.ts';
 import { extractFacebookVideoUrl } from '../../vrc-shared/utils/facebook.ts';
 
 const router = Router();
 
+// Keep only the last 2 months of sermons: delete anything older than
+// 2 months before today. The sermon date is a YYYY-MM-DD string, so a
+// plain string comparison orders it correctly. Runs on every list read
+// and after every save (same pattern as the verses 10-latest prune),
+// so the table never holds a video older than 2 months.
+async function pruneSermonsOlderThanTwoMonths() {
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - 2);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  await db.delete(sermons).where(lt(sermons.date, cutoffStr));
+}
+
 // GET /api/sermons - List all sermons from the active database (Dev DB or
-// Prod DB), newest Sunday first. A growing archive — never pruned to 10
-// like verses / notifications.
+// Prod DB), newest Sunday first. Only the last 2 months are kept —
+// anything older is deleted by the prune below.
 router.get('/', async (_req, res) => {
   try {
+    await pruneSermonsOlderThanTwoMonths();
     const allSermons = await db
       .select()
       .from(sermons)
@@ -110,6 +123,15 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         updatedBy: actorName,
       })
       .returning();
+
+    // Drop anything older than 2 months now that a new sermon is in.
+    // A prune failure must not turn a successful save into an error
+    // (the sermon is already stored), so it is logged, not thrown.
+    try {
+      await pruneSermonsOlderThanTwoMonths();
+    } catch (pruneError) {
+      console.error('Failed to prune old sermons:', pruneError);
+    }
 
     res.status(201).json(newSermon[0]);
   } catch (error: any) {

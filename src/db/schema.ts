@@ -88,10 +88,11 @@ export const dailyVerses = pgTable('daily_verses', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// Sunday worship sermon videos (Bài Giảng) — hosted on YouTube, the app
-// stores NO video data: only the YouTube link / video ID, bilingual title
-// + description, and the Sunday worship date. A growing archive, never
-// pruned (unlike the 10-latest verses / notifications).
+// Sunday worship sermon videos (Bài Giảng) — hosted on YouTube or
+// Facebook, the app stores NO video data: only the link, the platform,
+// bilingual title + description, and the Sunday worship date. Only the
+// last 2 months are kept — older sermons are pruned by the sermons API
+// (see pruneSermonsOlderThanTwoMonths in sermonRoutes.ts).
 export const sermons = pgTable('sermons', {
   id: serial('id').primaryKey(),
   platform: text('platform').notNull().default('youtube'),
