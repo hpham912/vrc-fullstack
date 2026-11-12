@@ -11,6 +11,10 @@ export const sermonsTabStyles = {
     'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white resize-none',
   fieldGrid: 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0',
   field: 'w-full min-w-0',
+  shapeRow: 'flex gap-2 w-full sm:w-2/3',
+  shapeBtn:
+    'flex-1 px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs font-bold text-stone-700 hover:border-stone-500',
+  shapeBtnActive: 'bg-stone-950 text-white border-stone-950 hover:border-stone-950',
   dateField: 'w-full sm:w-1/3 min-w-0',
   invalidMsg: 'text-xs font-semibold text-rose-600 mt-1.5',
   previewBox: 'mt-2.5 space-y-1.5',

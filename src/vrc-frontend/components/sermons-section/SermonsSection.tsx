@@ -173,6 +173,7 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
             title={getSermonTitle(selectedSermon)}
             description={getSermonDescription(selectedSermon)}
             date={selectedSermon.date}
+            isVertical={selectedSermon.isVertical}
           />
         ) : (
           selectedSermon &&

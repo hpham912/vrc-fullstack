@@ -56,6 +56,10 @@ export interface Sermon {
   platform: 'youtube' | 'facebook';
   videoUrl: string;
   videoId: string | null;
+  // Tall (vertical) Facebook video, picked by the admin when adding
+  // the sermon — the player uses it to pick the frame and modal size.
+  // YouTube sermons are always wide, so this is false for them.
+  isVertical?: boolean;
   titleVi: string;
   titleEn: string;
   descriptionVi?: string | null;

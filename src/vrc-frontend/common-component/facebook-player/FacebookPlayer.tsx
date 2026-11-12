@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, ExternalLink } from 'lucide-react';
 import { Modal } from '../modal/Modal.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { getFacebookEmbedUrl, getFacebookWatchUrl, isFacebookReelUrl } from '../../../vrc-shared/utils/facebook.ts';
+import { getFacebookEmbedUrl, getFacebookWatchUrl } from '../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { facebookPlayerStyles } from './FacebookPlayer.styles.ts';
 
@@ -13,6 +13,11 @@ export interface FacebookPlayerProps {
   title: string;
   description?: string;
   date?: string | null;
+  // Tall (vertical) video, picked by the admin when the sermon was
+  // added — a Facebook link does not say which shape a video is.
+  // A tall video gets the tall 9:16 frame and the bigger modal; a
+  // wide video gets the wide 16:9 frame and the normal modal.
+  isVertical?: boolean;
 }
 
 // Shared Facebook video player: a modal with the embedded Facebook
@@ -29,31 +34,25 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
   title,
   description,
   date,
+  isVertical = false,
 }) => {
   const { language, t } = useLanguage();
   const formattedDate = date ? formatDateLocale(date, language) : '';
-  // The frame is always the wide 16:9 frame, like YouTube. A /reel/
-  // link does NOT mean the video is vertical — a Reel can hold a
-  // landscape video, and a tall 9:16 frame then leaves a big black
-  // area under it (the video only fills the top). The link, the
-  // embed and the page give no reliable way to tell a video's real
-  // orientation, so 16:9 is the safe frame for every Facebook video.
-  // Only a Reel gets the bigger modal — a landscape video does not
-  // need the extra width.
-  const isReel = isFacebookReelUrl(videoUrl);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      maxWidthClass={isReel ? 'max-w-4xl' : 'max-w-2xl'}
+      maxWidthClass={isVertical ? 'max-w-4xl' : 'max-w-2xl'}
     >
       <div className={facebookPlayerStyles.body}>
         <iframe
           src={getFacebookEmbedUrl(videoUrl)}
           title={title}
-          className={facebookPlayerStyles.frameVideo}
+          className={
+            isVertical ? facebookPlayerStyles.frameReel : facebookPlayerStyles.frameVideo
+          }
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           allowFullScreen
         />

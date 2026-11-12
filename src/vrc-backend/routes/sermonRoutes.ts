@@ -125,7 +125,9 @@ router.get('/:id', async (req, res) => {
 // platform, bilingual title + description, and the Sunday date are
 // stored. videoUrl is the one link for every platform; videoId is the
 // YouTube video ID (for the thumbnail + embed) and is null for other
-// platforms, which have no such ID.
+// platforms, which have no such ID. isVertical is the admin's
+// Tall/Wide pick for a Facebook video (a link does not say which it
+// is); YouTube sermons are always wide.
 router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const {
@@ -136,9 +138,11 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       descriptionVi,
       descriptionEn,
       date,
+      isVertical,
     } = req.body;
 
     const finalPlatform = platform === 'facebook' ? 'facebook' : 'youtube';
+    const finalIsVertical = finalPlatform === 'facebook' ? Boolean(isVertical) : false;
     let cleanVideoUrl = String(videoUrl || '').trim();
     const finalTitleVi = String(titleVi || '').trim();
     const finalTitleEn = String(titleEn || '').trim();
@@ -185,6 +189,7 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
         platform: finalPlatform,
         videoUrl: cleanVideoUrl,
         videoId,
+        isVertical: finalIsVertical,
         titleVi: finalTitleVi,
         titleEn: finalTitleEn,
         descriptionVi: finalDescVi,
@@ -228,6 +233,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       descriptionVi,
       descriptionEn,
       date,
+      isVertical,
     } = req.body;
 
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
@@ -245,6 +251,15 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
     const targetPlatform =
       platform === 'facebook' || platform === 'youtube' ? platform : existing[0].platform;
     const switchingPlatform = targetPlatform !== existing[0].platform;
+
+    // Tall/Wide only applies to Facebook — YouTube is always wide.
+    // On edit, an omitted value keeps the stored one.
+    let finalIsVertical: boolean | undefined;
+    if (targetPlatform === 'facebook') {
+      finalIsVertical = isVertical !== undefined ? Boolean(isVertical) : undefined;
+    } else {
+      finalIsVertical = false;
+    }
 
     // A new link must be a valid one for its platform; otherwise keep
     // the stored link untouched. Switching platforms requires the new
@@ -292,6 +307,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         platform: targetPlatform,
         videoUrl: cleanVideoUrl,
         videoId,
+        isVertical: finalIsVertical,
         titleVi: titleVi !== undefined ? String(titleVi).trim() : undefined,
         titleEn: titleEn !== undefined ? String(titleEn).trim() : undefined,
         descriptionVi: descriptionVi !== undefined ? String(descriptionVi).trim() || null : undefined,

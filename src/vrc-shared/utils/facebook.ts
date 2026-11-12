@@ -53,21 +53,6 @@ export function extractFacebookVideoUrl(url: string): string | null {
   return null;
 }
 
-// True only for a direct Reel link (facebook.com/reel/<id>). Used by
-// the server to check that a share link resolved to a Reel, not to
-// some other Facebook video shape.
-export function isFacebookReelUrl(url: string): boolean {
-  let parsed: URL;
-  try {
-    parsed = new URL((url || '').trim());
-  } catch {
-    return false;
-  }
-  const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
-  if (host !== 'facebook.com' && host !== 'm.facebook.com') return false;
-  return /^\/reel\/\d+/.test(parsed.pathname);
-}
-
 export function getFacebookEmbedUrl(videoUrl: string): string {
   return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
     videoUrl,

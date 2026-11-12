@@ -29,9 +29,11 @@ interface SermonsTabProps {
 // while the form differs from the last loaded values (a fresh form,
 // or the sermon being edited). The video link is one field — the
 // platform (YouTube or Facebook) is detected from the pasted link.
+// isVertical is the admin's Tall/Wide pick for a Facebook video.
 type SermonFormValues = {
   videoUrl: string;
   platform: 'youtube' | 'facebook';
+  isVertical: boolean;
   titleVi: string;
   titleEn: string;
   descVi: string;
@@ -44,6 +46,7 @@ const getTodayStr = () => new Date().toISOString().split('T')[0];
 const getDefaultSermonValues = (): SermonFormValues => ({
   videoUrl: '',
   platform: 'youtube',
+  isVertical: false,
   titleVi: '',
   titleEn: '',
   descVi: '',
@@ -56,6 +59,7 @@ const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => {
   return {
     videoUrl: sermon.videoUrl || '',
     platform,
+    isVertical: platform === 'facebook' ? Boolean(sermon.isVertical) : false,
     titleVi: sermon.titleVi,
     titleEn: sermon.titleEn,
     descVi: sermon.descriptionVi || '',
@@ -81,6 +85,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
   const { t, language } = useLanguage();
   const [editingSermonId, setEditingSermonId] = useState<number | null>(null);
   const [sermonVideoUrl, setSermonVideoUrl] = useState('');
+  const [sermonIsVertical, setSermonIsVertical] = useState(false);
   const [sermonTitleVi, setSermonTitleVi] = useState('');
   const [sermonTitleEn, setSermonTitleEn] = useState('');
   const [sermonDescVi, setSermonDescVi] = useState('');
@@ -96,6 +101,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
 
   const applySermonValues = (values: SermonFormValues) => {
     setSermonVideoUrl(values.videoUrl);
+    setSermonIsVertical(values.isVertical);
     setSermonTitleVi(values.titleVi);
     setSermonTitleEn(values.titleEn);
     setSermonDescVi(values.descVi);
@@ -144,6 +150,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
   const baseline = baselineRef.current;
   const isDirty =
     sermonVideoUrl !== baseline.videoUrl ||
+    sermonIsVertical !== baseline.isVertical ||
     sermonTitleVi !== baseline.titleVi ||
     sermonTitleEn !== baseline.titleEn ||
     sermonDescVi !== baseline.descVi ||
@@ -174,6 +181,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
         body: JSON.stringify({
           platform: previewPlatform,
           videoUrl: sermonVideoUrl.trim(),
+          isVertical: previewPlatform === 'facebook' ? sermonIsVertical : false,
           titleVi: sermonTitleVi.trim(),
           titleEn: sermonTitleEn.trim(),
           descriptionVi: sermonDescVi.trim() || null,
@@ -264,6 +272,32 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
             </div>
           )}
         </div>
+
+        {/* Tall / Wide: a Facebook link does not say whether the video
+            is vertical or landscape (a /reel/ link can hold a
+            landscape video), so the admin picks the shape and the
+            player uses it for the frame and modal size. */}
+        {previewPlatform === 'facebook' && (
+          <div className={s.field}>
+            <label className={s.label}>{t('adminSermonShape')}</label>
+            <div className={s.shapeRow}>
+              <button
+                type="button"
+                onClick={() => setSermonIsVertical(true)}
+                className={`${s.shapeBtn} ${sermonIsVertical ? s.shapeBtnActive : ''}`}
+              >
+                {t('adminSermonShapeTall')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSermonIsVertical(false)}
+                className={`${s.shapeBtn} ${!sermonIsVertical ? s.shapeBtnActive : ''}`}
+              >
+                {t('adminSermonShapeWide')}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className={s.fieldGrid}>
           <div className={s.field}>

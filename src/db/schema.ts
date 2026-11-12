@@ -98,6 +98,12 @@ export const sermons = pgTable('sermons', {
   platform: text('platform').notNull().default('youtube'),
   videoUrl: text('video_url').notNull(),
   videoId: text('video_id'),
+  // Tall (vertical) or wide (landscape) Facebook video — the admin
+  // picks it when adding the sermon, because a Facebook link does not
+  // say which it is (a /reel/ link can hold a landscape video). The
+  // player uses it to pick the frame (tall 9:16 or wide 16:9) and the
+  // modal size. YouTube sermons are always wide (false).
+  isVertical: boolean('is_vertical').notNull().default(false),
   titleVi: text('title_vi').notNull(),
   titleEn: text('title_en').notNull(),
   descriptionVi: text('description_vi'),

@@ -2,16 +2,16 @@
 // modal player any screen can use to show a Facebook video. Same shape
 // as the YouTube player (YouTubePlayer.styles.ts) so the two players
 // look identical — body padding matches the other modals (p-6) so
-// content never touches the modal edges. The frame is the wide 16:9
-// frame for every Facebook video, like YouTube: a /reel/ link does
-// NOT mean the video is vertical (a Reel can hold a landscape video),
-// and a tall 9:16 frame then leaves a big black area under the video.
-// The link, the embed and the page give no reliable way to tell a
-// video's real orientation, so 16:9 is the safe frame for all of them.
-// Only a Reel gets the bigger modal (max-w-4xl, set in the component);
-// a landscape video uses the normal max-w-2xl modal.
+// content never touches the modal edges. The frame follows the
+// sermon's Tall/Wide choice (isVertical prop): a tall video gets the
+// tall 9:16 frame and the bigger modal (max-w-4xl, set in the
+// component), a wide video gets the wide 16:9 frame and the normal
+// max-w-2xl modal. The shape is the admin's pick, not the link — a
+// /reel/ link can hold a landscape video, and the link gives no
+// reliable way to tell a video's real orientation.
 export const facebookPlayerStyles = {
   body: 'p-6 space-y-3',
+  frameReel: 'mx-auto aspect-[9/16] h-[60vh] max-h-[560px] w-auto max-w-full rounded-xl bg-stone-950 border-0',
   frameVideo: 'w-full aspect-video rounded-xl bg-stone-950 border-0',
   desc: 'text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-line break-words',
   meta: 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-stone-500 dark:text-stone-400',

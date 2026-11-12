@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS sermons (
   platform TEXT NOT NULL DEFAULT 'youtube',
   video_url TEXT NOT NULL,
   video_id TEXT,
+  is_vertical BOOLEAN NOT NULL DEFAULT FALSE,
   title_vi TEXT NOT NULL,
   title_en TEXT NOT NULL,
   description_vi TEXT,
