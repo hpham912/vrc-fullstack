@@ -160,7 +160,6 @@ export const VideosSection: React.FC<VideosSectionProps> = ({
                   {isFacebook ? (
                     <div className={videosSectionStyles.fbThumb} aria-label={title}>
                       <span className={videosSectionStyles.fbThumbIcon}>f</span>
-                      <span className={videosSectionStyles.fbThumbLabel}>Facebook</span>
                     </div>
                   ) : (
                     <img
@@ -173,15 +172,17 @@ export const VideosSection: React.FC<VideosSectionProps> = ({
                   <span className={videosSectionStyles.playBadge}>
                     <Play className={videosSectionStyles.playIcon} />
                   </span>
+                  <span className={videosSectionStyles.platformBadgeOverlay}>
+                    <Badge tone={isFacebook ? 'blue' : 'red'}>
+                      {isFacebook ? 'Facebook' : 'YouTube'}
+                    </Badge>
+                  </span>
                 </div>
 
                 <div className={videosSectionStyles.cardBody}>
                   <div className={videosSectionStyles.badgesRow}>
                     <Badge tone={getVideoCategoryTone(category)}>
                       {getVideoCategoryLabel(category, t)}
-                    </Badge>
-                    <Badge tone={isFacebook ? 'blue' : 'red'}>
-                      {isFacebook ? 'Facebook' : 'YouTube'}
                     </Badge>
                   </div>
                   <div className={videosSectionStyles.cardHeaderRow}>

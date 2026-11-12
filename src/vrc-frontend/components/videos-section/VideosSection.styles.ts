@@ -1,7 +1,8 @@
 // Video tab page: one uniform card color for every video — no
 // per-item color variants like the event cards have. The category
-// and platform labels on each card are the shared Badge component
-// (see common-component/badge), not hand-built spans here.
+// label above each card title and the platform label overlaid on the
+// thumbnail (Design A, Hoang's pick) are both the shared Badge
+// component (see common-component/badge), not hand-built spans here.
 export const videosSectionStyles = {
   page: 'max-w-4xl mx-auto px-3.5 sm:px-6 py-6 sm:py-12',
   headerRow: 'flex items-center justify-between gap-3 min-w-0 w-full mb-4',
@@ -17,10 +18,10 @@ export const videosSectionStyles = {
   fbThumb:
     'w-full h-full bg-[#1877f2] flex flex-col items-center justify-center gap-0.5 text-white',
   fbThumbIcon: 'text-3xl font-extrabold leading-none',
-  fbThumbLabel: 'text-[10px] font-semibold opacity-90',
   playBadge:
     'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-950/70 flex items-center justify-center',
   playIcon: 'w-4 h-4 text-white fill-white ml-0.5',
+  platformBadgeOverlay: 'absolute left-2 bottom-2 drop-shadow-md',
   cardBody: 'flex-1 min-w-0',
   badgesRow: 'flex items-center gap-1.5 flex-wrap mb-1.5',
   cardHeaderRow: 'flex items-start justify-between gap-2',
