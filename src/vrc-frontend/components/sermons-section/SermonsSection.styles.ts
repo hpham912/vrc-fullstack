@@ -7,7 +7,7 @@ export const sermonsSectionStyles = {
   headerTitle: 'text-2xl sm:text-3xl font-serif font-bold text-stone-900',
   listContainer: 'space-y-3',
   sermonCard:
-    'flex items-start gap-3 sm:gap-4 rounded-2xl bg-white dark:bg-[#161412] border border-stone-200/90 dark:border-stone-800 shadow-2xs p-3 sm:p-3.5 cursor-pointer transition-all active:scale-[0.99] hover:border-amber-300 dark:hover:border-amber-700/60 w-full min-w-0',
+    'flex items-start gap-3 sm:gap-4 rounded-2xl bg-white dark:bg-[#161412] border border-stone-200/90 dark:border-stone-800 shadow-sm p-3 sm:p-3.5 cursor-pointer transition-all active:scale-[0.99] hover:border-amber-300 dark:hover:border-amber-700/60 w-full min-w-0',
   thumbWrap:
     'relative flex-shrink-0 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800',
   thumbImg: 'w-full h-full object-cover',

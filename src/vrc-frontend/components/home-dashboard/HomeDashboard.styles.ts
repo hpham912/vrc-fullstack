@@ -30,7 +30,7 @@ export const homeDashboardStyles = {
   sectionSubHint: 'text-xs text-stone-600 font-semibold',
   quickGrid: 'grid grid-cols-3 gap-2.5 sm:gap-4',
   quickCard:
-    'group flex flex-col items-center justify-center text-center p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#161412] border border-stone-200/80 dark:border-stone-800 shadow-2xs hover:shadow-xs hover:border-amber-300 dark:hover:border-amber-500/40 active:scale-95 transition-all cursor-pointer',
+    'group flex flex-col items-center justify-center text-center p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#161412] border border-stone-200/80 dark:border-stone-800 shadow-sm hover:shadow-md hover:border-amber-300 dark:hover:border-amber-500/40 active:scale-95 transition-all cursor-pointer',
   quickIconEvents:
     'w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/40 flex items-center justify-center text-indigo-700 dark:text-indigo-400 mb-1 group-hover:scale-105 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-2xs',
   quickIconVerse:
@@ -44,7 +44,7 @@ export const homeDashboardStyles = {
   upcomingSection: 'space-y-2.5',
   viewAllBtn: 'text-xs font-semibold text-amber-900 hover:text-amber-950 flex items-center gap-1',
   eventCardBase:
-    'rounded-2xl p-3.5 sm:p-5 transition-all duration-150 space-y-3 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none',
+    'rounded-2xl p-3.5 sm:p-5 transition-all duration-150 space-y-3 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none shadow-sm',
   cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
   badgeGroup: 'flex items-center gap-1.5 flex-wrap min-w-0',
   categoryBadgeBase: 'inline-flex items-center gap-1 text-label font-bold px-2.5 py-0.5 rounded-full',
@@ -76,7 +76,7 @@ export const homeDashboardStyles = {
   serviceTitle: 'text-sm font-serif font-bold text-stone-950 dark:text-stone-100 leading-snug pt-0.5',
   serviceDesc: 'text-xs text-stone-700 dark:text-stone-400 leading-relaxed font-medium',
   verseSection:
-    'bg-gradient-to-r from-amber-50/70 via-stone-50 to-amber-50/40 dark:from-[#1b1510] dark:via-[#161310] dark:to-[#18140f] rounded-3xl border border-amber-200/60 dark:border-amber-500/25 p-4 sm:p-5 shadow-2xs space-y-2.5',
+    'bg-gradient-to-r from-amber-50/70 via-stone-50 to-amber-50/40 dark:from-[#1b1510] dark:via-[#161310] dark:to-[#18140f] rounded-3xl border border-amber-200/60 dark:border-amber-500/25 p-4 sm:p-5 shadow-sm space-y-2.5',
   verseLabel: 'text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-400 flex items-center gap-1.5',
   verseRef: 'text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-300',
   verseQuote: 'font-serif italic text-xs sm:text-sm text-stone-900 dark:text-stone-100 leading-relaxed font-medium',
