@@ -298,7 +298,6 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
               ]}
               value={previewLang}
               onChange={setPreviewLang}
-              size="sm"
             />
           </div>
 

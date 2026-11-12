@@ -10,28 +10,25 @@ export interface SegmentedControlProps<T extends string> {
   options: SegmentedControlOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  // 'sm': small pill buttons in a container (language pickers).
-  // 'md': larger standalone buttons, dark active state (Tall/Wide).
-  size?: 'sm' | 'md';
   ariaLabel?: string;
 }
 
 // Shared segmented control: a row of options where exactly one is
 // selected. Replaces the hand-built two-button pickers in the
-// Sermons admin form (Tall/Wide), the Events admin preview (language)
-// and the Navbar desktop language pill. The caller owns the state —
-// this only renders the row and reports the tap.
+// Sermons admin form (Tall/Wide), the Events admin preview (language),
+// the header-verse editor preview (language) and the Navbar desktop
+// language pill. The caller owns the state — this only renders the
+// row and reports the tap. One look everywhere, so the pickers can
+// never drift apart.
 export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
-  size = 'md',
   ariaLabel,
 }: SegmentedControlProps<T>) {
-  const isSmall = size === 'sm';
   return (
     <div
-      className={isSmall ? segmentedControlStyles.containerSm : segmentedControlStyles.containerMd}
+      className={segmentedControlStyles.container}
       role="group"
       aria-label={ariaLabel}
     >
@@ -43,11 +40,9 @@ export function SegmentedControl<T extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             aria-pressed={active}
-            className={
-              isSmall
-                ? `${segmentedControlStyles.btnSm} ${active ? segmentedControlStyles.btnSmActive : segmentedControlStyles.btnSmIdle}`
-                : `${segmentedControlStyles.btnMd} ${active ? segmentedControlStyles.btnMdActive : segmentedControlStyles.btnMdIdle}`
-            }
+            className={`${segmentedControlStyles.btn} ${
+              active ? segmentedControlStyles.btnActive : segmentedControlStyles.btnIdle
+            }`}
           >
             {option.label}
           </button>

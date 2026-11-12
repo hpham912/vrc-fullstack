@@ -723,7 +723,6 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             ]}
             value={previewLang}
             onChange={setPreviewLang}
-            size="sm"
           />
         </div>
 

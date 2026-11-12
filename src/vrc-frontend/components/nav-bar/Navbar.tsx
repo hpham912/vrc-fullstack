@@ -203,7 +203,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ]}
                 value={language}
                 onChange={setLanguage}
-                size="sm"
                 ariaLabel="Language"
               />
             </div>
