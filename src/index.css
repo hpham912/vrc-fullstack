@@ -42,7 +42,7 @@
     text-rendering: optimizeLegibility;
     overflow-x: clip;
     color: #1c1917;
-    background-color: #fdfcfb;
+    background-color: #efedea;
   }
 
   body {
@@ -124,6 +124,11 @@ html.theme-new body {
 
 html.theme-new #root {
   background-color: #f2f5fa;
+}
+
+/* App root container (base bg) → the new theme page color */
+html.theme-new .bg-\[\#efedea\] {
+  background-color: #f2f5fa !important;
 }
 
 /* Cards stay white, borders go to the theme line color */
@@ -254,7 +259,7 @@ html.dark .bg-white {
   border-color: rgba(68, 64, 60, 0.5) !important;
 }
 
-html.dark .bg-\[\#FDFCFB\] {
+html.dark .bg-\[\#efedea\] {
   background-color: #0c0a09 !important;
 }
 
