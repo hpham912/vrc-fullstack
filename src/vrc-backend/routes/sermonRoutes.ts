@@ -4,7 +4,7 @@ import { sermons } from '../../vrc-db/schema.ts';
 import { eq, desc, lt } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { extractYouTubeVideoId } from '../../vrc-shared/utils/youtube.ts';
-import { extractFacebookVideoUrl } from '../../vrc-shared/utils/facebook.ts';
+import { extractFacebookVideoUrl, isFacebookReelUrl } from '../../vrc-shared/utils/facebook.ts';
 
 const router = Router();
 
@@ -26,16 +26,17 @@ async function pruneSermonsOlderThanTwoMonths() {
 // even though the video itself is public and "Watch on Facebook"
 // works. The share page carries the real video URL in its og:url /
 // canonical link, so resolve the pasted link to that URL before
-// storing it. If the page cannot be fetched or has no usable video
-// URL, the original link is kept — "Watch on Facebook" still works,
-// even if the embed does not. A 5s timeout keeps a slow Facebook
-// from stalling the save.
-async function resolveFacebookVideoUrl(videoUrl: string): Promise<string> {
+// storing it. Only Reels are accepted: a share link that resolves to
+// a non-Reel (or cannot be fetched at all) returns null, so the save
+// is rejected instead of storing a link the embed cannot play. A
+// direct /reel/ link passes through untouched. A 5s timeout keeps a
+// slow Facebook from stalling the save.
+async function resolveFacebookVideoUrl(videoUrl: string): Promise<string | null> {
   let parsed: URL;
   try {
     parsed = new URL(videoUrl);
   } catch {
-    return videoUrl;
+    return null;
   }
   const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
   const path = parsed.pathname;
@@ -43,7 +44,10 @@ async function resolveFacebookVideoUrl(videoUrl: string): Promise<string> {
     (host === 'facebook.com' || host === 'm.facebook.com') &&
     /^\/share\/[vr]\/[\w-]+/.test(path);
   const isShortLink = host === 'fb.watch';
-  if (!isShareLink && !isShortLink) return videoUrl;
+  // A direct Reel link needs no resolving.
+  if (!isShareLink && !isShortLink) {
+    return isFacebookReelUrl(videoUrl) ? videoUrl : null;
+  }
 
   try {
     const controller = new AbortController();
@@ -57,7 +61,7 @@ async function resolveFacebookVideoUrl(videoUrl: string): Promise<string> {
       redirect: 'follow',
     });
     clearTimeout(timeout);
-    if (!response.ok) return videoUrl;
+    if (!response.ok) return null;
     const html = await response.text();
     // og:url and the canonical link both carry the real video URL.
     // Either attribute may come first, so both orders are matched.
@@ -68,12 +72,12 @@ async function resolveFacebookVideoUrl(videoUrl: string): Promise<string> {
       html.match(/rel=["']canonical["'][^>]*href=["']([^"']+)["']/i) ||
       html.match(/href=["']([^"']+)["'][^>]*rel=["']canonical["']/i);
     const resolved = ogMatch?.[1] || canonicalMatch?.[1];
-    if (resolved && extractFacebookVideoUrl(resolved)) {
+    if (resolved && isFacebookReelUrl(resolved)) {
       return resolved;
     }
-    return videoUrl;
+    return null;
   } catch {
-    return videoUrl;
+    return null;
   }
 }
 
@@ -144,13 +148,19 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     if (finalPlatform === 'facebook') {
       if (!cleanVideoUrl || !extractFacebookVideoUrl(cleanVideoUrl)) {
         return res.status(400).json({
-          error: 'A valid Facebook video link is required.',
+          error: 'Only Facebook Reels are allowed.',
         });
       }
       // A share/short link does not play in the embed — resolve it to
-      // the real video URL first (a plain /watch, /videos or /reel
-      // link passes through untouched).
-      cleanVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
+      // the real Reel URL first (a direct /reel/ link passes through
+      // untouched). A link that does not resolve to a Reel is rejected.
+      const resolvedVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
+      if (!resolvedVideoUrl) {
+        return res.status(400).json({
+          error: 'Only Facebook Reels are allowed.',
+        });
+      }
+      cleanVideoUrl = resolvedVideoUrl;
     } else {
       videoId = extractYouTubeVideoId(cleanVideoUrl);
       if (!cleanVideoUrl || !videoId) {
@@ -243,11 +253,16 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       cleanVideoUrl = String(videoUrl || '').trim();
       if (targetPlatform === 'facebook') {
         if (!cleanVideoUrl || !extractFacebookVideoUrl(cleanVideoUrl)) {
-          return res.status(400).json({ error: 'A valid Facebook video link is required.' });
+          return res.status(400).json({ error: 'Only Facebook Reels are allowed.' });
         }
         // A share/short link does not play in the embed — resolve it
-        // to the real video URL first.
-        cleanVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
+        // to the real Reel URL first. A link that does not resolve to
+        // a Reel is rejected.
+        const resolvedVideoUrl = await resolveFacebookVideoUrl(cleanVideoUrl);
+        if (!resolvedVideoUrl) {
+          return res.status(400).json({ error: 'Only Facebook Reels are allowed.' });
+        }
+        cleanVideoUrl = resolvedVideoUrl;
         videoId = null;
       } else {
         const extracted = extractYouTubeVideoId(cleanVideoUrl);
@@ -260,7 +275,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(400).json({
         error:
           targetPlatform === 'facebook'
-            ? 'A valid Facebook video link is required.'
+            ? 'Only Facebook Reels are allowed.'
             : 'A valid YouTube link is required.',
       });
     } else if (targetPlatform === 'facebook') {

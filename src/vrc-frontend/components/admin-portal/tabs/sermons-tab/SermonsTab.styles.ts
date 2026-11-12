@@ -13,6 +13,7 @@ export const sermonsTabStyles = {
   field: 'w-full min-w-0',
   dateField: 'w-full sm:w-1/3 min-w-0',
   invalidMsg: 'text-xs font-semibold text-rose-600 mt-1.5',
+  hintMsg: 'text-xs font-semibold text-amber-700 dark:text-amber-400 mt-1.5',
   previewBox: 'mt-2.5 space-y-1.5',
   previewLabel: 'text-label font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5',
   previewIcon: 'w-3.5 h-3.5 text-red-600',

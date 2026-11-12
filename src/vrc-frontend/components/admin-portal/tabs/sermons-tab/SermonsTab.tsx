@@ -117,6 +117,21 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
     : null;
   const videoUrlInvalid = sermonVideoUrl.trim() !== '' && !previewPlatform;
 
+  // A Facebook link of any shape (Reel, share link, watch page, ...):
+  // show the Reels-only note under the field so the admin knows the
+  // rule as soon as they paste. A non-Reel Facebook link is invalid
+  // (videoUrlInvalid above) and cannot be saved.
+  const isFacebookLink = (() => {
+    try {
+      const host = new URL(sermonVideoUrl.trim()).hostname
+        .toLowerCase()
+        .replace(/^www\./, '');
+      return host === 'facebook.com' || host === 'm.facebook.com' || host === 'fb.watch';
+    } catch {
+      return false;
+    }
+  })();
+
   const resetSermonForm = () => {
     setEditingSermonId(null);
     const values = getDefaultSermonValues();
@@ -241,6 +256,9 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
           />
           {videoUrlInvalid && (
             <p className={s.invalidMsg}>{t('adminSermonUrlInvalid')}</p>
+          )}
+          {isFacebookLink && (
+            <p className={s.hintMsg}>{t('adminSermonFacebookReelOnly')}</p>
           )}
           {previewYouTubeId && (
             <div className={s.previewBox}>

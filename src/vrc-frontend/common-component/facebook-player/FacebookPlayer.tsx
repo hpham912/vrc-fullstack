@@ -34,7 +34,7 @@ export const FacebookPlayer: React.FC<FacebookPlayerProps> = ({
   const formattedDate = date ? formatDateLocale(date, language) : '';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidthClass="max-w-2xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidthClass="max-w-4xl">
       <div className={facebookPlayerStyles.body}>
         <iframe
           src={getFacebookEmbedUrl(videoUrl)}

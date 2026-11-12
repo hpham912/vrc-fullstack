@@ -12,9 +12,9 @@ export const sermonsSectionStyles = {
     'relative flex-shrink-0 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800',
   thumbImg: 'w-full h-full object-cover',
   platformBadge:
-    'absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white',
-  platformBadgeYt: 'bg-red-600',
-  platformBadgeFb: 'bg-[#1877f2]',
+    'absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold',
+  platformBadgeYt: 'bg-red-600 text-white',
+  platformBadgeFb: 'bg-white text-[#1877f2] ring-1 ring-black/10',
   fbThumb:
     'w-full h-full bg-[#1877f2] flex flex-col items-center justify-center gap-0.5 text-white',
   fbThumbIcon: 'text-3xl font-extrabold leading-none',
