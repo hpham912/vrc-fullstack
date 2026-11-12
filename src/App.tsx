@@ -252,9 +252,11 @@ function ChurchAppContent() {
         NotificationClient.scheduleEventReminders(events);
       }
     });
-    // Register this phone for remote push (FCM, Android). A tap on a
-    // push opens the app to the Notifications tab.
-    NotificationClient.registerPushNotifications();
+    // Remote push (FCM) is DEFERRED — Firebase is not initialized in the
+    // Android build, so calling register() here crashes the app on launch
+    // (FirebaseApp not initialized). Local reminders above still work.
+    // Re-enable this line once Firebase is set up and verified.
+    // NotificationClient.registerPushNotifications();
 
     // Check periodically (every 5 minutes) in case an event reaches the 1-hour reminder window while user is in the app
     const interval = setInterval(() => {
