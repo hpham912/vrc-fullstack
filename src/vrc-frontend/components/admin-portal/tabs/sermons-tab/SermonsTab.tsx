@@ -51,10 +51,7 @@ const getDefaultSermonValues = (): SermonFormValues => ({
 const getSermonValuesFromItem = (sermon: Sermon): SermonFormValues => {
   const platform = sermon.platform || 'youtube';
   return {
-    videoUrl:
-      platform === 'facebook'
-        ? sermon.facebookUrl || ''
-        : sermon.youtubeUrl || '',
+    videoUrl: sermon.videoUrl || '',
     platform,
     titleVi: sermon.titleVi,
     titleEn: sermon.titleEn,
@@ -164,10 +161,7 @@ export const SermonsTab: React.FC<SermonsTabProps> = ({
         },
         body: JSON.stringify({
           platform: previewPlatform,
-          youtubeUrl:
-            previewPlatform === 'youtube' ? sermonVideoUrl.trim() : undefined,
-          facebookUrl:
-            previewPlatform === 'facebook' ? sermonVideoUrl.trim() : undefined,
+          videoUrl: sermonVideoUrl.trim(),
           titleVi: sermonTitleVi.trim(),
           titleEn: sermonTitleEn.trim(),
           descriptionVi: sermonDescVi.trim() || null,

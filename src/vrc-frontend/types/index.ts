@@ -54,9 +54,8 @@ export interface DailyVerse {
 export interface Sermon {
   id: number;
   platform: 'youtube' | 'facebook';
-  youtubeUrl: string | null;
+  videoUrl: string;
   videoId: string | null;
-  facebookUrl?: string | null;
   titleVi: string;
   titleEn: string;
   descriptionVi?: string | null;

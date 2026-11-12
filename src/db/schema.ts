@@ -96,9 +96,8 @@ export const dailyVerses = pgTable('daily_verses', {
 export const sermons = pgTable('sermons', {
   id: serial('id').primaryKey(),
   platform: text('platform').notNull().default('youtube'),
-  youtubeUrl: text('youtube_url'),
+  videoUrl: text('video_url').notNull(),
   videoId: text('video_id'),
-  facebookUrl: text('facebook_url'),
   titleVi: text('title_vi').notNull(),
   titleEn: text('title_en').notNull(),
   descriptionVi: text('description_vi'),

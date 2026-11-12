@@ -61,14 +61,14 @@ router.get('/:id', async (req, res) => {
 // POST /api/sermons - Create new sermon in PostgreSQL (Admin only).
 // The video lives on YouTube or Facebook — only the link, the
 // platform, bilingual title + description, and the Sunday date are
-// stored. A YouTube sermon keeps its link + video ID; a Facebook
-// sermon keeps its link (there is no video ID to extract).
+// stored. videoUrl is the one link for every platform; videoId is the
+// YouTube video ID (for the thumbnail + embed) and is null for other
+// platforms, which have no such ID.
 router.post('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const {
       platform,
-      youtubeUrl,
-      facebookUrl,
+      videoUrl,
       titleVi,
       titleEn,
       descriptionVi,
@@ -77,8 +77,7 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     } = req.body;
 
     const finalPlatform = platform === 'facebook' ? 'facebook' : 'youtube';
-    const cleanYoutubeUrl = String(youtubeUrl || '').trim();
-    const cleanFacebookUrl = String(facebookUrl || '').trim();
+    const cleanVideoUrl = String(videoUrl || '').trim();
     const finalTitleVi = String(titleVi || '').trim();
     const finalTitleEn = String(titleEn || '').trim();
     const finalDescVi = String(descriptionVi || '').trim() || null;
@@ -86,14 +85,14 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
 
     let videoId: string | null = null;
     if (finalPlatform === 'facebook') {
-      if (!cleanFacebookUrl || !extractFacebookVideoUrl(cleanFacebookUrl)) {
+      if (!cleanVideoUrl || !extractFacebookVideoUrl(cleanVideoUrl)) {
         return res.status(400).json({
           error: 'A valid Facebook video link is required.',
         });
       }
     } else {
-      videoId = extractYouTubeVideoId(cleanYoutubeUrl);
-      if (!cleanYoutubeUrl || !videoId) {
+      videoId = extractYouTubeVideoId(cleanVideoUrl);
+      if (!cleanVideoUrl || !videoId) {
         return res.status(400).json({
           error: 'A valid YouTube link is required.',
         });
@@ -111,9 +110,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       .insert(sermons)
       .values({
         platform: finalPlatform,
-        youtubeUrl: finalPlatform === 'youtube' ? cleanYoutubeUrl : null,
+        videoUrl: cleanVideoUrl,
         videoId,
-        facebookUrl: finalPlatform === 'facebook' ? cleanFacebookUrl : null,
         titleVi: finalTitleVi,
         titleEn: finalTitleEn,
         descriptionVi: finalDescVi,
@@ -151,8 +149,7 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
 
     const {
       platform,
-      youtubeUrl,
-      facebookUrl,
+      videoUrl,
       titleVi,
       titleEn,
       descriptionVi,
@@ -180,42 +177,40 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
     // the stored link untouched. Switching platforms requires the new
     // platform's link, or the sermon would end up with no video at all.
     let videoId: string | null | undefined;
-    let cleanYoutubeUrl: string | null | undefined;
-    let cleanFacebookUrl: string | null | undefined;
-    if (targetPlatform === 'facebook') {
-      if (facebookUrl !== undefined) {
-        cleanFacebookUrl = String(facebookUrl || '').trim();
-        if (!cleanFacebookUrl || !extractFacebookVideoUrl(cleanFacebookUrl)) {
+    let cleanVideoUrl: string | undefined;
+    if (videoUrl !== undefined) {
+      cleanVideoUrl = String(videoUrl || '').trim();
+      if (targetPlatform === 'facebook') {
+        if (!cleanVideoUrl || !extractFacebookVideoUrl(cleanVideoUrl)) {
           return res.status(400).json({ error: 'A valid Facebook video link is required.' });
         }
-      } else if (switchingPlatform) {
-        return res.status(400).json({ error: 'A valid Facebook video link is required.' });
-      }
-      // Switching to Facebook clears the YouTube link and video ID.
-      cleanYoutubeUrl = null;
-      videoId = null;
-    } else {
-      if (youtubeUrl !== undefined) {
-        cleanYoutubeUrl = String(youtubeUrl || '').trim();
-        const extracted = extractYouTubeVideoId(cleanYoutubeUrl);
-        if (!cleanYoutubeUrl || !extracted) {
+        videoId = null;
+      } else {
+        const extracted = extractYouTubeVideoId(cleanVideoUrl);
+        if (!cleanVideoUrl || !extracted) {
           return res.status(400).json({ error: 'A valid YouTube link is required.' });
         }
         videoId = extracted;
-      } else if (switchingPlatform) {
-        return res.status(400).json({ error: 'A valid YouTube link is required.' });
       }
-      // Switching to YouTube clears the Facebook link.
-      cleanFacebookUrl = null;
+    } else if (switchingPlatform) {
+      return res.status(400).json({
+        error:
+          targetPlatform === 'facebook'
+            ? 'A valid Facebook video link is required.'
+            : 'A valid YouTube link is required.',
+      });
+    } else if (targetPlatform === 'facebook') {
+      // Same platform, no new link: clear the YouTube video ID (a
+      // Facebook sermon has none).
+      videoId = null;
     }
 
     const updated = await db
       .update(sermons)
       .set({
         platform: targetPlatform,
-        youtubeUrl: cleanYoutubeUrl,
+        videoUrl: cleanVideoUrl,
         videoId,
-        facebookUrl: cleanFacebookUrl,
         titleVi: titleVi !== undefined ? String(titleVi).trim() : undefined,
         titleEn: titleEn !== undefined ? String(titleEn).trim() : undefined,
         descriptionVi: descriptionVi !== undefined ? String(descriptionVi).trim() || null : undefined,

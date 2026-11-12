@@ -123,12 +123,11 @@ export const SermonsSection: React.FC<SermonsSectionProps> = ({
           matching the sermon's platform. The video streams from its
           platform, so the app never downloads or stores it. */}
       {selectedSermon &&
-        (selectedSermon.platform || 'youtube') === 'facebook' &&
-        selectedSermon.facebookUrl ? (
+        (selectedSermon.platform || 'youtube') === 'facebook' ? (
           <FacebookPlayer
             isOpen={Boolean(selectedSermon)}
             onClose={() => setSelectedSermon(null)}
-            videoUrl={selectedSermon.facebookUrl}
+            videoUrl={selectedSermon.videoUrl}
             title={getSermonTitle(selectedSermon)}
             description={getSermonDescription(selectedSermon)}
             date={selectedSermon.date}
