@@ -173,7 +173,7 @@ export const VideosSection: React.FC<VideosSectionProps> = ({
                     <Play className={videosSectionStyles.playIcon} />
                   </span>
                   <span className={videosSectionStyles.platformBadgeOverlay}>
-                    <Badge tone={isFacebook ? 'blue' : 'red'}>
+                    <Badge tone={isFacebook ? 'facebook' : 'youtube'}>
                       {isFacebook ? 'Facebook' : 'YouTube'}
                     </Badge>
                   </span>

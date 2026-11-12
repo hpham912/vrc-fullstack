@@ -1,7 +1,7 @@
 import React from 'react';
 import { badgeStyles } from './Badge.styles.ts';
 
-export type BadgeTone = 'amber' | 'emerald' | 'violet' | 'stone' | 'rose' | 'red' | 'blue';
+export type BadgeTone = 'amber' | 'emerald' | 'violet' | 'stone' | 'rose' | 'red' | 'blue' | 'youtube' | 'facebook';
 
 export interface BadgeProps {
   tone?: BadgeTone;
