@@ -22,6 +22,13 @@ ALTER TABLE sermons
 ALTER TABLE sermons
   ADD COLUMN IF NOT EXISTS video_url TEXT;
 
+-- video_id is YouTube-only (the thumbnail + embed need it). A
+-- Facebook sermon has no video ID, so the column must accept NULL.
+-- (The old Facebook migration dropped this NOT NULL too; if that file
+-- was never run, this line does it.)
+ALTER TABLE sermons
+  ALTER COLUMN video_id DROP NOT NULL;
+
 -- Backfill video_url from whichever URL column the table has. (The
 -- Facebook migration may or may not have run yet, so the facebook_url
 -- column may or may not exist.)
