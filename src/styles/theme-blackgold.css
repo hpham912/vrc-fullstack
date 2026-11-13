@@ -1,0 +1,186 @@
+/* =========================================================================
+   THEME: BLACK & GOLD (Classic Warm Stone / Obsidian & Amber Gold)
+   Edit the CSS variables below to adjust colors for the classic style.
+   ========================================================================= */
+
+html.theme-blackgold:not(.dark) {
+  --bg-page: #fdfcfb;
+  --bg-card: #ffffff;
+  --text-ink: #1c1917;
+  --text-muted: #57534e;
+  --accent-amber: #d97706;
+  --accent-amber-deep: #92400e;
+}
+
+html.dark:not(.theme-bluegold) {
+  color-scheme: dark;
+  --bg-page: #0c0a09;
+  --bg-card: #171412;
+  --bg-surface: #211e1b;
+  --bg-surface-hover: #2c2724;
+  --bg-bar: rgba(18, 16, 14, 0.94);
+  --bg-menu: #1a1715;
+  --border-subtle: rgba(68, 64, 60, 0.5);
+  --border-divider: rgba(68, 64, 60, 0.45);
+  --border-dialog: rgba(68, 64, 60, 0.55);
+  --border-strong: rgba(87, 83, 78, 0.6);
+  --text-heading: #fafaf9;
+  --text-body: #f5f5f4;
+  --text-secondary: #d6d3d1;
+  --text-muted: #a8a29e;
+  --text-placeholder: #78716c;
+  --accent-gold-bright: #fde68a;
+  --accent-gold: #fcd34d;
+  --accent-amber: #fbbf24;
+  --accent-amber-strong: #f59e0b;
+  --bg-amber-tint: rgba(120, 53, 15, 0.25);
+  --border-amber-tint: rgba(245, 158, 11, 0.25);
+  --bg-tab-pill: rgba(180, 83, 9, 0.28);
+}
+
+/* --- Dark Mode Implementation (Warm Obsidian & Amber) --- */
+html.dark:not(.theme-bluegold),
+html.dark:not(.theme-bluegold) body {
+  background-color: var(--bg-page) !important;
+  color: var(--text-body) !important;
+}
+
+html.dark:not(.theme-bluegold) #root {
+  background-color: var(--bg-page);
+}
+
+/* Header & Bottom Navigation Bar */
+html.dark:not(.theme-bluegold) header,
+html.dark:not(.theme-bluegold) nav[class*="fixed"],
+html.dark:not(.theme-bluegold) .bg-white\/95 {
+  background-color: var(--bg-bar) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+/* Base Cards & Page Canvas */
+html.dark:not(.theme-bluegold) .bg-white {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark:not(.theme-bluegold) .bg-\[\#FDFCFB\] {
+  background-color: var(--bg-page) !important;
+}
+
+/* Text Hierarchy */
+html.dark:not(.theme-bluegold) .text-stone-950,
+html.dark:not(.theme-bluegold) .text-stone-900 {
+  color: var(--text-heading) !important;
+}
+
+html.dark:not(.theme-bluegold) .text-stone-800 {
+  color: var(--text-body) !important;
+}
+
+html.dark:not(.theme-bluegold) .text-stone-700,
+html.dark:not(.theme-bluegold) .text-stone-600 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark:not(.theme-bluegold) .text-stone-500 {
+  color: var(--text-muted) !important;
+}
+
+/* Sub-surfaces & Hover States */
+html.dark:not(.theme-bluegold) .bg-stone-50,
+html.dark:not(.theme-bluegold) .bg-stone-100,
+html.dark:not(.theme-bluegold) .bg-stone-100\/80 {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark:not(.theme-bluegold) .hover\:bg-stone-50:hover,
+html.dark:not(.theme-bluegold) .hover\:bg-stone-100:hover,
+html.dark:not(.theme-bluegold) .hover\:bg-stone-200:hover,
+html.dark:not(.theme-bluegold) .hover\:bg-stone-200\/70:hover {
+  background-color: var(--bg-surface-hover) !important;
+}
+
+/* Borders */
+html.dark:not(.theme-bluegold) .border-stone-100,
+html.dark:not(.theme-bluegold) .border-stone-200,
+html.dark:not(.theme-bluegold) .border-stone-200\/60,
+html.dark:not(.theme-bluegold) .border-stone-200\/70,
+html.dark:not(.theme-bluegold) .border-stone-200\/80,
+html.dark:not(.theme-bluegold) .border-stone-300 {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Settings Menu */
+html.dark:not(.theme-bluegold) .settingsMenu,
+html.dark:not(.theme-bluegold) div[class*="settingsMenu"] {
+  background-color: var(--bg-menu) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-body) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7) !important;
+}
+
+html.dark:not(.theme-bluegold) .settingsDivider,
+html.dark:not(.theme-bluegold) div[class*="settingsDivider"] {
+  border-color: var(--border-divider) !important;
+}
+
+/* Modals & Dialogs */
+html.dark:not(.theme-bluegold) [role="dialog"],
+html.dark:not(.theme-bluegold) .bg-white.rounded-3xl,
+html.dark:not(.theme-bluegold) .bg-white.rounded-2xl {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-dialog) !important;
+}
+
+/* Form Controls */
+html.dark:not(.theme-bluegold) input,
+html.dark:not(.theme-bluegold) textarea,
+html.dark:not(.theme-bluegold) select {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-heading) !important;
+  border-color: var(--border-strong) !important;
+}
+
+html.dark:not(.theme-bluegold) input::placeholder,
+html.dark:not(.theme-bluegold) textarea::placeholder {
+  color: var(--text-placeholder) !important;
+}
+
+/* iOS Bottom Tab Bar Active Tint */
+html.dark:not(.theme-bluegold) nav button.text-amber-900 {
+  color: var(--accent-amber-strong) !important;
+}
+
+html.dark:not(.theme-bluegold) .iconBoxActive,
+html.dark:not(.theme-bluegold) nav button .bg-amber-100\/90 {
+  background-color: var(--bg-tab-pill) !important;
+  color: var(--accent-gold-bright) !important;
+}
+
+/* Amber Text & Verse Contrast in Dark Mode */
+html.dark:not(.theme-bluegold) .text-amber-950 {
+  color: var(--accent-gold-bright) !important;
+}
+
+html.dark:not(.theme-bluegold) .text-amber-900 {
+  color: var(--accent-gold) !important;
+}
+
+html.dark:not(.theme-bluegold) .text-amber-800 {
+  color: var(--accent-amber) !important;
+}
+
+html.dark:not(.theme-bluegold) .bg-amber-50,
+html.dark:not(.theme-bluegold) .bg-amber-50\/80,
+html.dark:not(.theme-bluegold) .bg-amber-50\/90,
+html.dark:not(.theme-bluegold) .bg-amber-100,
+html.dark:not(.theme-bluegold) .bg-amber-200\/95 {
+  background-color: var(--bg-amber-tint) !important;
+  border-color: var(--border-amber-tint) !important;
+}
+
+/* Event Cards in Dark Mode */
+html.dark:not(.theme-bluegold) [class*="eventCardBase"] {
+  border-color: var(--border-divider) !important;
+}

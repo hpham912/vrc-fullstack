@@ -103,17 +103,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   });
 
-  // New theme (navy + gold) — try-out theme based on the Event tab
-  // design. Same mechanism as dark mode: a .theme-new class on <html>
-  // remaps the shared utilities in index.css (one place, whole app).
-  // Stored separately from vrc_theme (dark/light).
+  // Color theme: Blue & Gold (theme-bluegold) vs Classic Black & Gold (theme-blackgold).
+  // Both themes have dedicated CSS files in src/styles/ (imported by index.css).
   const [isNewTheme, setIsNewTheme] = useState(() => {
     try {
-      const enabled = localStorage.getItem('vrc_color_theme') === 'new';
-      if (enabled) {
-        document.documentElement.classList.add('theme-new');
-      }
-      return enabled;
+      const stored = localStorage.getItem('vrc_color_theme');
+      return stored === 'new' || stored === 'bluegold' || document.documentElement.classList.contains('theme-bluegold');
     } catch {
       return false;
     }
@@ -307,14 +302,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </span>
                     </button>
 
-                    {/* New Theme Toggle (navy + gold) */}
+                    {/* Blue & Gold vs Black & Gold Theme Toggle */}
                     <button
                       onClick={() => {
                         const next = !isNewTheme;
                         setIsNewTheme(next);
-                        document.documentElement.classList.toggle('theme-new', next);
+                        document.documentElement.classList.toggle('theme-bluegold', next);
+                        document.documentElement.classList.toggle('theme-blackgold', !next);
                         try {
-                          localStorage.setItem('vrc_color_theme', next ? 'new' : 'classic');
+                          localStorage.setItem('vrc_color_theme', next ? 'bluegold' : 'blackgold');
                         } catch {}
                       }}
                       className={s.settingsToggleItem}

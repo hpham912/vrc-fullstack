@@ -19,6 +19,12 @@
           if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
           }
+          var colorTheme = localStorage.getItem('vrc_color_theme');
+          if (colorTheme === 'new' || colorTheme === 'bluegold') {
+            document.documentElement.classList.add('theme-bluegold');
+          } else {
+            document.documentElement.classList.add('theme-blackgold');
+          }
           var font = localStorage.getItem('vrc_large_font');
           if (font === '1') {
             document.documentElement.classList.add('large-font');
