@@ -1,5 +1,5 @@
 /* =========================================================================
-   THEME: BLUE & GOLD (Navy + Gold, Light & Midnight Navy Dark Modes)
+   THEME: BLUE & GOLD (Navy + Gold, Light & Midnight Slate Dark Modes)
    Edit the CSS variables below to adjust colors in one place.
    ========================================================================= */
 
@@ -21,7 +21,12 @@ html.theme-bluegold:not(.dark) {
   --text-on-navy: #ffffff;
 
   --navy: #0d2d64;
+  --navy-hover: #153d82;
+  --navy-pill-glass: rgba(13, 45, 100, 0.88);
+  --navy-pill-glass-hover: rgba(13, 45, 100, 0.96);
+
   --gold-tint: #f3e5b8;
+  --gold-tint-hover: #ecda9c;
   --gold-tint-border: #e3b93b;
   --gold-cta: #d4a92a;
   --gold-cta-hover: #e0b83e;
@@ -30,11 +35,13 @@ html.theme-bluegold:not(.dark) {
   --gold-deep: #8c6706;
 
   --accent-blue: #1d6fb8;
+  --accent-blue-hover: #175996;
   --accent-red: #b3402a;
   --accent-red-tint: #fdeedc;
   --accent-teal: #0e7c86;
   --accent-orange: #c2570c;
   --accent-orange-bg: #d97316;
+  --ring-focus: rgba(13, 45, 100, 0.25);
 }
 
 html.theme-bluegold:not(.dark),
@@ -43,15 +50,13 @@ html.theme-bluegold:not(.dark) body {
   color: var(--text-ink) !important;
 }
 
-html.theme-bluegold:not(.dark) #root {
-  background-color: var(--bg-page);
-}
-
+html.theme-bluegold:not(.dark) #root,
 html.theme-bluegold:not(.dark) .bg-\[\#FDFCFB\] {
   background-color: var(--bg-page) !important;
 }
 
 html.theme-bluegold:not(.dark) .bg-white,
+html.theme-bluegold:not(.dark) .bg-white\/90,
 html.theme-bluegold:not(.dark) .bg-stone-100\/70 {
   background-color: var(--bg-card) !important;
   border-color: var(--border-line) !important;
@@ -80,15 +85,25 @@ html.theme-bluegold:not(.dark) .bg-stone-900\/95 .text-stone-400 {
 }
 
 html.theme-bluegold:not(.dark) .bg-stone-50,
+html.theme-bluegold:not(.dark) .bg-stone-50\/50,
+html.theme-bluegold:not(.dark) .bg-stone-50\/80,
+html.theme-bluegold:not(.dark) .bg-stone-50\/90,
 html.theme-bluegold:not(.dark) .bg-stone-100,
-html.theme-bluegold:not(.dark) .bg-stone-100\/80 {
+html.theme-bluegold:not(.dark) .bg-stone-100\/80,
+html.theme-bluegold:not(.dark) .bg-stone-200,
+html.theme-bluegold:not(.dark) .bg-stone-200\/60,
+html.theme-bluegold:not(.dark) .bg-stone-200\/80,
+html.theme-bluegold:not(.dark) .bg-stone-300 {
   background-color: var(--bg-surface) !important;
   border-color: var(--border-line) !important;
 }
 
 html.theme-bluegold:not(.dark) .hover\:bg-stone-50:hover,
 html.theme-bluegold:not(.dark) .hover\:bg-stone-100:hover,
-html.theme-bluegold:not(.dark) .hover\:bg-stone-200:hover {
+html.theme-bluegold:not(.dark) .hover\:bg-stone-200:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-stone-200\/60:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-stone-200\/70:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-stone-300:hover {
   background-color: var(--bg-surface-hover) !important;
 }
 
@@ -97,13 +112,46 @@ html.theme-bluegold:not(.dark) .border-stone-200,
 html.theme-bluegold:not(.dark) .border-stone-200\/60,
 html.theme-bluegold:not(.dark) .border-stone-200\/70,
 html.theme-bluegold:not(.dark) .border-stone-200\/80,
-html.theme-bluegold:not(.dark) .border-stone-300 {
+html.theme-bluegold:not(.dark) .border-stone-200\/90,
+html.theme-bluegold:not(.dark) .border-stone-300,
+html.theme-bluegold:not(.dark) .border-stone-300\/70,
+html.theme-bluegold:not(.dark) .border-stone-300\/90 {
   border-color: var(--border-line) !important;
 }
 
 html.theme-bluegold:not(.dark) .bg-stone-950,
 html.theme-bluegold:not(.dark) .bg-stone-900 {
   background-color: var(--navy) !important;
+  border-color: var(--navy) !important;
+}
+
+html.theme-bluegold:not(.dark) .bg-stone-950:hover,
+html.theme-bluegold:not(.dark) .bg-stone-900:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-stone-800:hover {
+  background-color: var(--navy-hover) !important;
+}
+
+html.theme-bluegold:not(.dark) .bg-stone-900\/65 {
+  background-color: var(--navy-pill-glass) !important;
+  border-color: rgba(243, 229, 184, 0.35) !important;
+}
+
+html.theme-bluegold:not(.dark) .hover\:bg-stone-900\/80:hover {
+  background-color: var(--navy-pill-glass-hover) !important;
+}
+
+/* Dark/Gradient Modal Headers in Light Mode → Navy Gradient */
+html.theme-bluegold:not(.dark) .bg-gradient-to-r.from-stone-900.via-stone-800.to-amber-950 {
+  background-image: linear-gradient(90deg, var(--navy) 0%, var(--navy-hover) 100%) !important;
+}
+
+html.theme-bluegold:not(.dark) .bg-gradient-to-r.from-amber-700.to-amber-800 {
+  background-image: linear-gradient(90deg, var(--accent-blue) 0%, var(--navy) 100%) !important;
+  border-color: var(--accent-blue) !important;
+}
+
+html.theme-bluegold:not(.dark) .border-stone-900,
+html.theme-bluegold:not(.dark) .border-amber-600 {
   border-color: var(--navy) !important;
 }
 
@@ -116,6 +164,9 @@ html.theme-bluegold:not(.dark) .text-amber-600 {
 }
 
 html.theme-bluegold:not(.dark) .bg-amber-50,
+html.theme-bluegold:not(.dark) .bg-amber-50\/50,
+html.theme-bluegold:not(.dark) .bg-amber-50\/60,
+html.theme-bluegold:not(.dark) .bg-amber-50\/70,
 html.theme-bluegold:not(.dark) .bg-amber-50\/80,
 html.theme-bluegold:not(.dark) .bg-amber-50\/90,
 html.theme-bluegold:not(.dark) .bg-amber-100,
@@ -123,6 +174,31 @@ html.theme-bluegold:not(.dark) .bg-amber-100\/80,
 html.theme-bluegold:not(.dark) .bg-amber-100\/90 {
   background-color: var(--gold-tint) !important;
   border-color: var(--gold-tint-border) !important;
+}
+
+html.theme-bluegold:not(.dark) .hover\:bg-amber-50:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-amber-50\/50:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-amber-100:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-amber-100\/90:hover {
+  background-color: var(--gold-tint-hover) !important;
+}
+
+html.theme-bluegold:not(.dark) .border-amber-200\/50,
+html.theme-bluegold:not(.dark) .border-amber-200\/60,
+html.theme-bluegold:not(.dark) .border-amber-200\/70,
+html.theme-bluegold:not(.dark) .border-amber-200\/80,
+html.theme-bluegold:not(.dark) .border-amber-200\/90,
+html.theme-bluegold:not(.dark) .border-amber-300,
+html.theme-bluegold:not(.dark) .border-amber-300\/60,
+html.theme-bluegold:not(.dark) .border-amber-300\/80,
+html.theme-bluegold:not(.dark) .border-amber-400 {
+  border-color: var(--gold-tint-border) !important;
+}
+
+html.theme-bluegold:not(.dark) .hover\:border-amber-300:hover,
+html.theme-bluegold:not(.dark) .hover\:border-amber-300\/80:hover,
+html.theme-bluegold:not(.dark) .hover\:border-amber-400\/60:hover {
+  border-color: var(--gold-cta-border) !important;
 }
 
 html.theme-bluegold:not(.dark) .bg-amber-500 {
@@ -134,9 +210,16 @@ html.theme-bluegold:not(.dark) .bg-amber-500.hover\:bg-amber-400:hover {
   background-color: var(--gold-cta-hover) !important;
 }
 
-html.theme-bluegold:not(.dark) .bg-amber-600 {
+html.theme-bluegold:not(.dark) .bg-amber-600,
+html.theme-bluegold:not(.dark) .bg-amber-700 {
   background-color: var(--navy) !important;
   border-color: var(--navy) !important;
+}
+
+html.theme-bluegold:not(.dark) .hover\:bg-amber-700:hover,
+html.theme-bluegold:not(.dark) .hover\:bg-amber-800:hover {
+  background-color: var(--navy-hover) !important;
+  border-color: var(--navy-hover) !important;
 }
 
 html.theme-bluegold:not(.dark) .text-amber-500 {
@@ -240,13 +323,19 @@ html.theme-bluegold:not(.dark) select {
   border-color: var(--border-line) !important;
 }
 
+html.theme-bluegold:not(.dark) input:focus,
+html.theme-bluegold:not(.dark) textarea:focus,
+html.theme-bluegold:not(.dark) select:focus {
+  --tw-ring-color: var(--ring-focus) !important;
+}
+
 html.theme-bluegold:not(.dark) input::placeholder,
 html.theme-bluegold:not(.dark) textarea::placeholder {
   color: var(--text-muted) !important;
 }
 
 /* =========================================================================
-   DARK MODE (html.theme-bluegold.dark — Midnight Navy & Luminous Gold)
+   DARK MODE (html.theme-bluegold.dark — Midnight Slate & Luminous Gold)
    ========================================================================= */
 html.theme-bluegold.dark {
   color-scheme: dark;
@@ -258,11 +347,15 @@ html.theme-bluegold.dark {
   --bg-navy-elevated: #1f293d;
   --bg-surface: #232f45;
   --bg-surface-hover: #2d3b54;
+  --bg-btn-elevated: #27344c;
+  --bg-btn-elevated-hover: #32425e;
   --bg-nav-track: #161f30;
   --bg-nav-active: #27344c;
   --bg-bar: rgba(18, 25, 38, 0.94);
   --bg-bar-ring: #121926;
   --bg-menu: #1c2639;
+  --bg-pill-glass: rgba(26, 35, 52, 0.9);
+  --bg-pill-glass-hover: rgba(35, 47, 69, 0.96);
 
   --border-line: #2a364d;
   --border-strong: #32405b;
@@ -274,15 +367,33 @@ html.theme-bluegold.dark {
   --text-secondary: #cbd5e1;
   --text-muted: #9aa8bf;
   --text-placeholder: #7e8ea8;
+  --text-on-bright: #0e1420;
 
   --accent-gold: #f5d061;
+  --accent-gold-hover: #fde68a;
   --accent-gold-btn: #e0b83e;
   --accent-blue-btn: #1d6fb8;
+  --accent-blue-btn-hover: #175996;
   --accent-red-dot: #e0523a;
+  --ring-focus: rgba(224, 184, 62, 0.35);
+
   --bg-gold-tint: rgba(224, 184, 62, 0.16);
+  --bg-gold-tint-hover: rgba(224, 184, 62, 0.24);
   --border-gold-tint: rgba(245, 208, 97, 0.34);
-  --border-gold-hover: rgba(245, 208, 97, 0.5);
+  --border-gold-hover: rgba(245, 208, 97, 0.55);
   --bg-tab-pill: rgba(224, 184, 62, 0.2);
+
+  --bg-emerald-tint: rgba(16, 185, 129, 0.14);
+  --border-emerald-tint: rgba(52, 211, 153, 0.32);
+  --text-emerald-soft: #6ee7b7;
+
+  --bg-indigo-tint: rgba(99, 102, 241, 0.16);
+  --border-indigo-tint: rgba(129, 140, 248, 0.32);
+  --text-indigo-soft: #a5b4fc;
+
+  --bg-rose-tint: rgba(244, 63, 94, 0.14);
+  --border-rose-tint: rgba(251, 113, 133, 0.32);
+  --text-rose-soft: #fda4af;
 }
 
 html.theme-bluegold.dark,
@@ -305,6 +416,13 @@ html.theme-bluegold.dark .bg-white\/95 {
   border-color: var(--border-line) !important;
 }
 
+/* Notification Dots (Header Bell & iOS Tab Bar) */
+html.theme-bluegold.dark header .bg-amber-600.ring-2.ring-white,
+html.theme-bluegold.dark nav[class*="fixed"] button .bg-amber-600 {
+  background-color: var(--accent-red-dot) !important;
+  --tw-ring-color: var(--bg-bar-ring) !important;
+}
+
 /* Cards & Dialog Surfaces */
 html.theme-bluegold.dark .bg-white,
 html.theme-bluegold.dark .dark\:bg-\[\#161412\],
@@ -316,20 +434,26 @@ html.theme-bluegold.dark .bg-white.rounded-2xl {
   border-color: var(--border-line) !important;
 }
 
-/* Warm / Verse Gradient Cards → Midnight Navy + Subtle Gold Glow */
+/* Warm / Verse / Youth Gradient Cards → Slate-Navy + Subtle Gold Accent */
 html.theme-bluegold.dark .dark\:from-\[\#1c1611\],
-html.theme-bluegold.dark .dark\:from-\[\#1b1510\] {
+html.theme-bluegold.dark .dark\:from-\[\#1b1510\],
+html.theme-bluegold.dark .bg-gradient-to-br.from-amber-50\/80.via-white.to-emerald-50\/50 {
   background-image: linear-gradient(135deg, var(--bg-card-grad-start) 0%, var(--bg-card) 55%, var(--bg-card-grad-end) 100%) !important;
   border-color: var(--border-gold-tint) !important;
 }
 
-/* Category Event Cards → lift near-black obsidian midpoints to Midnight Navy */
+html.theme-bluegold.dark .dark\:from-\[\#0f1d16\] {
+  background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, var(--bg-card) 55%, var(--bg-card-grad-end) 100%) !important;
+  border-color: var(--border-emerald-tint) !important;
+}
+
+/* Category Event Cards → lift near-black obsidian midpoints to Midnight Slate */
 html.theme-bluegold.dark [class*="eventCardBase"] {
   --tw-gradient-via: var(--bg-card);
   border-color: var(--border-event-card) !important;
 }
 
-/* Dark Modal Headers & Deep Navy Surfaces */
+/* Dark Modal Headers & Deep Slate Surfaces */
 html.theme-bluegold.dark .bg-stone-950,
 html.theme-bluegold.dark .dark\:bg-stone-950 {
   background-color: var(--bg-header-dark) !important;
@@ -347,11 +471,51 @@ html.theme-bluegold.dark .dark\:bg-stone-900\/50 {
   border-color: var(--border-line) !important;
 }
 
+/* Interactive Dark Buttons (Add +, Submit, Google Maps, Calendar) → Elevated Slate so they don't sink into cards */
+html.theme-bluegold.dark button.bg-stone-950:not(.dark\:bg-amber-500),
+html.theme-bluegold.dark button.bg-stone-900:not(.dark\:bg-amber-500),
+html.theme-bluegold.dark a.bg-stone-950,
+html.theme-bluegold.dark a.bg-stone-900 {
+  background-color: var(--bg-btn-elevated) !important;
+  border: 1px solid var(--border-input) !important;
+}
+
+html.theme-bluegold.dark button.bg-stone-950:not(.dark\:bg-amber-500):hover,
+html.theme-bluegold.dark button.bg-stone-900:not(.dark\:bg-amber-500):hover,
+html.theme-bluegold.dark a.bg-stone-950:hover,
+html.theme-bluegold.dark a.bg-stone-900:hover,
+html.theme-bluegold.dark .hover\:bg-stone-800:hover {
+  background-color: var(--bg-btn-elevated-hover) !important;
+}
+
+/* Floating Prayer Pill */
+html.theme-bluegold.dark .bg-stone-900\/65 {
+  background-color: var(--bg-pill-glass) !important;
+  border-color: var(--border-gold-tint) !important;
+}
+
+html.theme-bluegold.dark .hover\:bg-stone-900\/80:hover {
+  background-color: var(--bg-pill-glass-hover) !important;
+}
+
+/* Modal Gradient Headers (DirectionsModal) */
+html.theme-bluegold.dark .bg-gradient-to-r.from-stone-900.via-stone-800.to-amber-950 {
+  background-image: linear-gradient(90deg, var(--bg-header-dark) 0%, var(--bg-navy-elevated) 100%) !important;
+}
+
 /* Sub-surfaces, Pills, Inputs & Hover States */
+html.theme-bluegold.dark .bg-white\/90,
 html.theme-bluegold.dark .bg-stone-50,
+html.theme-bluegold.dark .bg-stone-50\/50,
+html.theme-bluegold.dark .bg-stone-50\/80,
+html.theme-bluegold.dark .bg-stone-50\/90,
 html.theme-bluegold.dark .bg-stone-100,
 html.theme-bluegold.dark .bg-stone-100\/80,
 html.theme-bluegold.dark .bg-stone-100\/70,
+html.theme-bluegold.dark .bg-stone-200,
+html.theme-bluegold.dark .bg-stone-200\/60,
+html.theme-bluegold.dark .bg-stone-200\/80,
+html.theme-bluegold.dark .bg-stone-300,
 html.theme-bluegold.dark .dark\:bg-stone-800,
 html.theme-bluegold.dark .dark\:bg-stone-800\/80,
 html.theme-bluegold.dark .dark\:bg-stone-800\/60,
@@ -365,20 +529,74 @@ html.theme-bluegold.dark .dark\:bg-stone-700\/50 {
 html.theme-bluegold.dark .hover\:bg-stone-50:hover,
 html.theme-bluegold.dark .hover\:bg-stone-100:hover,
 html.theme-bluegold.dark .hover\:bg-stone-200:hover,
+html.theme-bluegold.dark .hover\:bg-stone-200\/60:hover,
 html.theme-bluegold.dark .hover\:bg-stone-200\/70:hover,
+html.theme-bluegold.dark .hover\:bg-stone-300:hover,
 html.theme-bluegold.dark .dark\:hover\:bg-stone-800:hover,
 html.theme-bluegold.dark .dark\:hover\:bg-stone-850:hover,
 html.theme-bluegold.dark .dark\:hover\:bg-stone-700:hover {
   background-color: var(--bg-surface-hover) !important;
 }
 
+html.theme-bluegold.dark .hover\:bg-amber-50:hover,
+html.theme-bluegold.dark .hover\:bg-amber-50\/50:hover,
+html.theme-bluegold.dark .hover\:bg-amber-100:hover,
+html.theme-bluegold.dark .hover\:bg-amber-100\/90:hover,
 html.theme-bluegold.dark .dark\:hover\:bg-amber-950\/20:hover {
-  background-color: var(--bg-gold-tint) !important;
+  background-color: var(--bg-gold-tint-hover) !important;
 }
 
+html.theme-bluegold.dark .hover\:border-amber-300:hover,
+html.theme-bluegold.dark .hover\:border-amber-300\/80:hover,
+html.theme-bluegold.dark .hover\:border-amber-400\/60:hover,
 html.theme-bluegold.dark .dark\:hover\:border-amber-500\/40:hover,
 html.theme-bluegold.dark .dark\:hover\:border-amber-700\/60:hover {
   border-color: var(--border-gold-hover) !important;
+}
+
+/* Light-only Youth / Status Pastel Tints adapted for Dark Mode */
+html.theme-bluegold.dark .bg-emerald-50,
+html.theme-bluegold.dark .bg-emerald-50\/70,
+html.theme-bluegold.dark .bg-emerald-100,
+html.theme-bluegold.dark .hover\:bg-emerald-100:hover {
+  background-color: var(--bg-emerald-tint) !important;
+  border-color: var(--border-emerald-tint) !important;
+  color: var(--text-emerald-soft) !important;
+}
+
+html.theme-bluegold.dark .text-emerald-700,
+html.theme-bluegold.dark .text-emerald-800,
+html.theme-bluegold.dark .text-emerald-900 {
+  color: var(--text-emerald-soft) !important;
+}
+
+html.theme-bluegold.dark .bg-indigo-50,
+html.theme-bluegold.dark .bg-indigo-50\/70 {
+  background-color: var(--bg-indigo-tint) !important;
+  border-color: var(--border-indigo-tint) !important;
+}
+
+html.theme-bluegold.dark .text-indigo-700,
+html.theme-bluegold.dark .text-indigo-800 {
+  color: var(--text-indigo-soft) !important;
+}
+
+html.theme-bluegold.dark .bg-rose-50,
+html.theme-bluegold.dark .bg-rose-50\/70,
+html.theme-bluegold.dark .bg-rose-100,
+html.theme-bluegold.dark .hover\:bg-rose-50:hover,
+html.theme-bluegold.dark .hover\:bg-rose-100:hover,
+html.theme-bluegold.dark .bg-red-50,
+html.theme-bluegold.dark .hover\:bg-red-50:hover {
+  background-color: var(--bg-rose-tint) !important;
+  border-color: var(--border-rose-tint) !important;
+}
+
+html.theme-bluegold.dark .text-rose-600,
+html.theme-bluegold.dark .text-rose-700,
+html.theme-bluegold.dark .hover\:text-rose-700:hover,
+html.theme-bluegold.dark .text-red-600 {
+  color: var(--text-rose-soft) !important;
 }
 
 /* Desktop Segmented Nav */
@@ -399,7 +617,10 @@ html.theme-bluegold.dark .border-stone-200,
 html.theme-bluegold.dark .border-stone-200\/60,
 html.theme-bluegold.dark .border-stone-200\/70,
 html.theme-bluegold.dark .border-stone-200\/80,
+html.theme-bluegold.dark .border-stone-200\/90,
 html.theme-bluegold.dark .border-stone-300,
+html.theme-bluegold.dark .border-stone-300\/70,
+html.theme-bluegold.dark .border-stone-300\/90,
 html.theme-bluegold.dark .dark\:border-stone-800,
 html.theme-bluegold.dark .dark\:border-stone-800\/60,
 html.theme-bluegold.dark .dark\:border-stone-700,
@@ -407,6 +628,11 @@ html.theme-bluegold.dark .dark\:border-stone-700\/50,
 html.theme-bluegold.dark .dark\:border-stone-700\/60,
 html.theme-bluegold.dark .dark\:border-stone-600 {
   border-color: var(--border-line) !important;
+}
+
+html.theme-bluegold.dark .border-stone-900,
+html.theme-bluegold.dark .border-amber-600 {
+  border-color: var(--accent-gold) !important;
 }
 
 html.theme-bluegold.dark .divide-stone-100 > :not(:last-child),
@@ -451,13 +677,17 @@ html.theme-bluegold.dark div[class*="settingsDivider"] {
   border-color: var(--border-line) !important;
 }
 
-/* Form Controls */
+/* Form Controls (including focus states so focus:bg-white never flashes white) */
 html.theme-bluegold.dark input,
 html.theme-bluegold.dark textarea,
-html.theme-bluegold.dark select {
+html.theme-bluegold.dark select,
+html.theme-bluegold.dark input:focus,
+html.theme-bluegold.dark textarea:focus,
+html.theme-bluegold.dark select:focus {
   background-color: var(--bg-surface) !important;
   color: var(--text-heading) !important;
   border-color: var(--border-input) !important;
+  --tw-ring-color: var(--ring-focus) !important;
 }
 
 html.theme-bluegold.dark input::placeholder,
@@ -479,7 +709,16 @@ html.theme-bluegold.dark .dark\:text-amber-100 {
   color: var(--accent-gold) !important;
 }
 
+html.theme-bluegold.dark .hover\:text-amber-950:hover,
+html.theme-bluegold.dark .hover\:text-amber-900:hover,
+html.theme-bluegold.dark .hover\:text-amber-800:hover {
+  color: var(--accent-gold-hover) !important;
+}
+
 html.theme-bluegold.dark .bg-amber-50,
+html.theme-bluegold.dark .bg-amber-50\/50,
+html.theme-bluegold.dark .bg-amber-50\/60,
+html.theme-bluegold.dark .bg-amber-50\/70,
 html.theme-bluegold.dark .bg-amber-50\/80,
 html.theme-bluegold.dark .bg-amber-50\/90,
 html.theme-bluegold.dark .bg-amber-100,
@@ -497,6 +736,15 @@ html.theme-bluegold.dark .dark\:bg-amber-500\/20 {
   border-color: var(--border-gold-tint) !important;
 }
 
+html.theme-bluegold.dark .border-amber-200\/50,
+html.theme-bluegold.dark .border-amber-200\/60,
+html.theme-bluegold.dark .border-amber-200\/70,
+html.theme-bluegold.dark .border-amber-200\/80,
+html.theme-bluegold.dark .border-amber-200\/90,
+html.theme-bluegold.dark .border-amber-300,
+html.theme-bluegold.dark .border-amber-300\/60,
+html.theme-bluegold.dark .border-amber-300\/80,
+html.theme-bluegold.dark .border-amber-400,
 html.theme-bluegold.dark .dark\:border-amber-500\/25,
 html.theme-bluegold.dark .dark\:border-amber-500\/30,
 html.theme-bluegold.dark .dark\:border-amber-500\/50,
@@ -515,16 +763,35 @@ html.theme-bluegold.dark .dark\:bg-amber-500 {
   border-color: var(--accent-gold-btn) !important;
 }
 
+html.theme-bluegold.dark .bg-amber-500.hover\:bg-amber-400:hover {
+  background-color: var(--accent-gold) !important;
+}
+
+/* Dark Ink on ALL Bright Gradient/Gold/Emerald CTA Buttons (Spotlight Banner, Youth, Filter Pills) */
+html.theme-bluegold.dark [class*="bg-gradient-to-r"].text-stone-950,
+html.theme-bluegold.dark .bg-emerald-500.text-stone-950,
 html.theme-bluegold.dark .bg-amber-500.text-stone-950,
 html.theme-bluegold.dark .bg-amber-500 .text-stone-950,
 html.theme-bluegold.dark .dark\:bg-amber-500.dark\:text-stone-950,
 html.theme-bluegold.dark .dark\:bg-amber-500 .text-amber-400 {
-  color: var(--bg-page) !important;
+  color: var(--text-on-bright) !important;
 }
 
 html.theme-bluegold.dark .bg-amber-600,
+html.theme-bluegold.dark .bg-amber-700,
 html.theme-bluegold.dark .dark\:bg-amber-600 {
   background-color: var(--accent-blue-btn) !important;
+  border-color: var(--accent-blue-btn) !important;
+}
+
+html.theme-bluegold.dark .hover\:bg-amber-700:hover,
+html.theme-bluegold.dark .hover\:bg-amber-800:hover {
+  background-color: var(--accent-blue-btn-hover) !important;
+  border-color: var(--accent-blue-btn-hover) !important;
+}
+
+html.theme-bluegold.dark .bg-gradient-to-r.from-amber-700.to-amber-800 {
+  background-image: linear-gradient(90deg, var(--accent-blue-btn) 0%, var(--accent-blue-btn-hover) 100%) !important;
   border-color: var(--accent-blue-btn) !important;
 }
 
@@ -540,7 +807,3 @@ html.theme-bluegold.dark nav[class*="fixed"] button .bg-amber-100\/90 {
   border: 1px solid var(--border-gold-tint) !important;
 }
 
-html.theme-bluegold.dark nav[class*="fixed"] button .bg-amber-600 {
-  background-color: var(--accent-red-dot) !important;
-  --tw-ring-color: var(--bg-bar-ring) !important;
-}
