@@ -215,6 +215,115 @@ html.theme-new .bg-amber-400 {
   background-color: #c9a227 !important;
 }
 
+/* HTML redesign accent colors (from phuchung-az-app-redesign.html :root).
+   Color only — no layout change. Classic theme untouched; these rules are
+   scoped under html.theme-new:not(.dark). The :not(.dark) keeps dark mode
+   untouched — dark wins when both are on, and the dark block does not remap
+   these accent utilities, so without it the New Theme colors would leak
+   into dark mode. The core palette (navy/gold/bg/ink/muted/line)
+   was already in this block and matches the HTML exactly.
+   - Link blue #1d6fb8, Sunday/live red #b3402a, teal #0e7c86, orange #d97316.
+   - Light red tint #fdeedc is the HTML's n-event chip background. */
+html.theme-new:not(.dark) .text-blue-600,
+html.theme-new:not(.dark) .text-blue-700 {
+  color: #1d6fb8 !important;
+}
+html.theme-new:not(.dark) .bg-blue-50,
+html.theme-new:not(.dark) .bg-blue-100 {
+  background-color: #e8f0fb !important;
+  border-color: #dce4f0 !important;
+}
+html.theme-new:not(.dark) .bg-blue-500,
+html.theme-new:not(.dark) .bg-blue-600 {
+  background-color: #1d6fb8 !important;
+  border-color: #1d6fb8 !important;
+}
+html.theme-new:not(.dark) .text-red-600,
+html.theme-new:not(.dark) .text-red-700,
+html.theme-new:not(.dark) .text-red-800 {
+  color: #b3402a !important;
+}
+html.theme-new:not(.dark) .bg-red-50,
+html.theme-new:not(.dark) .bg-red-100 {
+  background-color: #fdeedc !important;
+  border-color: #dce4f0 !important;
+}
+html.theme-new:not(.dark) .bg-red-500,
+html.theme-new:not(.dark) .bg-red-600 {
+  background-color: #b3402a !important;
+  border-color: #b3402a !important;
+}
+html.theme-new:not(.dark) .text-teal-500,
+html.theme-new:not(.dark) .text-teal-600,
+html.theme-new:not(.dark) .text-teal-700 {
+  color: #0e7c86 !important;
+}
+html.theme-new:not(.dark) .bg-teal-500,
+html.theme-new:not(.dark) .bg-teal-600 {
+  background-color: #0e7c86 !important;
+  border-color: #0e7c86 !important;
+}
+html.theme-new:not(.dark) .text-orange-500,
+html.theme-new:not(.dark) .text-orange-600 {
+  color: #d97316 !important;
+}
+html.theme-new:not(.dark) .bg-orange-500,
+html.theme-new:not(.dark) .bg-orange-600 {
+  background-color: #d97316 !important;
+  border-color: #d97316 !important;
+}
+
+/* Gold-on-white fix, New Theme only (classic untouched).
+   Gold #c9a227 on white is 2.42 — too light to read. Most gold text/icons sit
+   on dark navy surfaces (gold on navy is 5.51, fine) and stay gold. Only the
+   two that sit on light surfaces turn navy here:
+   - Settings-menu moon icon (gold on the white menu). Unique hook: it is the
+     only element with both text-amber-500 and fill-amber-500/20.
+   - ConfirmModal warning icon (gold on the light amber tint). Unique hook:
+     it is the only w-8 h-8 box with bg-amber-500/20 + text-amber-400
+     (the NotificationModal bell icon is w-7 h-7 on a dark header, so it
+     keeps its gold). */
+html.theme-new:not(.dark) .text-amber-500.fill-amber-500\/20 {
+  color: #0d2d64 !important;
+}
+html.theme-new:not(.dark) .w-8.h-8.bg-amber-500\/20.text-amber-400 {
+  color: #0d2d64 !important;
+}
+
+/* PDF redesign accent colors (sampled from phuchung-az-app-redesign.pdf).
+   Color only — no layout change. Classic theme untouched; these rules are
+   scoped under html.theme-new:not(.dark).
+   - Thanksgiving spotlight → warm tan (#e8c9ad). The from-[#2a1306] gradient
+     is unique to the thanksgiving spotlight, so only that banner changes.
+     Text inside goes navy for readability on the light tan. */
+html.theme-new:not(.dark) .from-\[\#2a1306\] {
+  background-image: linear-gradient(to bottom right, #efdcc2, #e8c9ad 55%, #dec09e) !important;
+  border-color: #c9a227 !important;
+}
+
+html.theme-new:not(.dark) .from-\[\#2a1306\] .text-white,
+html.theme-new:not(.dark) .from-\[\#2a1306\] .text-amber-300 {
+  color: #0d2d64 !important;
+}
+
+/* - Daily verse card → slate blue (#607395). The from-amber-50/90 +
+     rounded-3xl combination is unique to the Card warmElevated variant,
+     which only DailyVerseCard uses, so other warm cards are untouched.
+     Verse text goes white, the citation goes gold-soft; the light chips
+     inside (buttons, badge, prayer box) keep their own surfaces. */
+html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl {
+  background-image: linear-gradient(to bottom right, #6b7fa6, #607395 55%, #55688a) !important;
+  border-color: #4e617f !important;
+}
+
+html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl .text-stone-950 {
+  color: #ffffff !important;
+}
+
+html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl .text-amber-800 {
+  color: #f3e5b8 !important;
+}
+
 /* Form controls keep a light surface with the theme line color */
 html.theme-new input,
 html.theme-new textarea,
