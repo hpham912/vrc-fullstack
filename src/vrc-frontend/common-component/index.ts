@@ -21,3 +21,6 @@ export { SegmentedControl } from './segmented-control/SegmentedControl.tsx';
 export type { SegmentedControlProps, SegmentedControlOption } from './segmented-control/SegmentedControl.tsx';
 export { Badge } from './badge/Badge.tsx';
 export type { BadgeProps, BadgeTone } from './badge/Badge.tsx';
+export { ReadAloudButton } from './read-aloud/ReadAloudButton.tsx';
+export type { ReadAloudButtonProps } from './read-aloud/ReadAloudButton.tsx';
+export { useReadAloud } from './read-aloud/useReadAloud.ts';

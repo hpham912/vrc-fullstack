@@ -3,8 +3,6 @@ import { DailyVerse } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
-  Volume2,
-  VolumeX,
   Share2,
   Copy,
   Check,
@@ -24,6 +22,7 @@ import {
   Card,
   Button,
   LoadingShimmer,
+  ReadAloudButton,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -52,7 +51,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   const { language, t } = useLanguage();
   const { getToken } = useAuth();
   const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(todayVerse);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [deleteTargetVerse, setDeleteTargetVerse] = useState<DailyVerse | null>(null);
@@ -108,27 +106,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       setSelectedVerse(todayVerse);
     }
   }, [todayVerse?.id, todayVerse?.updatedAt]);
-
-  const toggleSpeech = () => {
-    if (!verse) return;
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const textToRead = `${pick(verse.referenceVi, verse.referenceEn, verse.reference)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`;
-      const utterance = new SpeechSynthesisUtterance(textToRead);
-      utterance.lang = language === 'vi' ? 'vi-VN' : 'en-US';
-      utterance.rate = 0.9;
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      setIsSpeaking(true);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
   const copyToClipboard = () => {
     if (!verse) return;
@@ -232,14 +209,15 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
 
         {/* Action icons */}
         <div className={s.actionsRow}>
-          <button
-            onClick={toggleSpeech}
-            className={`${s.audioBtnBase} ${isSpeaking ? s.audioBtnActive : s.audioBtnInactive}`}
-            title={isSpeaking ? 'Stop audio' : 'Listen to scripture'}
-          >
-            {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-700" />}
-            <span>{isSpeaking ? t('pauseAudio') : t('listenAudio')}</span>
-          </button>
+          {/* Shared ReadAloudButton — reads the verse aloud in the app's
+              current language (English when English is selected,
+              Vietnamese when Vietnamese is selected). The key remounts
+              it when the verse changes, which stops any reading in
+              progress for the old verse. */}
+          <ReadAloudButton
+            key={verse.id}
+            text={`${pick(verse.referenceVi, verse.referenceEn, verse.reference)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`}
+          />
 
           <Button
             type="button"
@@ -350,10 +328,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
                     key={item.id}
                     onClick={() => {
                       setSelectedVerse(item);
-                      if (isSpeaking) {
-                        window.speechSynthesis.cancel();
-                        setIsSpeaking(false);
-                      }
                     }}
                     className={`${s.archiveItemBase} ${
                       isSelected ? s.archiveItemSelected : s.archiveItemUnselected

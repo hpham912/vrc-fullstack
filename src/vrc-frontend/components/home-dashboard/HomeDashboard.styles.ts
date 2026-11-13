@@ -62,7 +62,7 @@ export const homeDashboardStyles = {
   cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-300',
   cardLocationRow: 'flex items-center gap-1.5 text-xs text-stone-700 dark:text-stone-400 font-medium',
   cardDesc: 'text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed font-normal pt-1 line-clamp-3 sm:line-clamp-4',
-  cardFooterRow: 'pt-2.5 border-t border-stone-900/10 dark:border-stone-800 flex items-center justify-end gap-2 min-w-0 w-full',
+  cardFooterRow: 'pt-2.5 border-t border-stone-900/10 dark:border-stone-800 flex flex-wrap items-center justify-end gap-2 min-w-0 w-full',
   upcomingBtnsGroup: 'flex items-center gap-1.5 ml-auto',
   servicesCardHeader: 'flex items-center justify-between gap-2 pb-3 border-b border-stone-100 dark:border-stone-800',
   servicesUnifiedList:

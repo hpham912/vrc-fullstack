@@ -9,9 +9,6 @@ export const dailyVerseStyles = {
   desktopAddBtn:
     'hidden sm:flex w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
   actionsRow: 'flex flex-wrap items-center gap-1.5 sm:gap-2',
-  audioBtnBase: 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
-  audioBtnActive: 'bg-amber-600 text-white border-amber-600 animate-pulse',
-  audioBtnInactive: 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50',
   actionBtn:
     'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors',
   emptyCard: 'py-12 sm:py-16 text-center bg-white rounded-3xl border border-stone-200/70 p-8 shadow-sm',

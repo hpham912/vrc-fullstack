@@ -39,7 +39,7 @@ export const eventsSectionStyles = {
   cardTitle: 'text-base sm:text-lg font-bold text-stone-950 dark:text-stone-50 leading-snug break-words',
   cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-300',
   cardLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-300 truncate',
-  cardFooterRow: 'pt-2.5 border-t border-stone-900/10 dark:border-stone-800 flex items-center justify-end gap-2 min-w-0 w-full',
+  cardFooterRow: 'pt-2.5 border-t border-stone-900/10 dark:border-stone-800 flex flex-wrap items-center justify-end gap-2 min-w-0 w-full',
   pastSection:
     'pt-8 sm:pt-10 border-t border-stone-200 dark:border-stone-800 space-y-4 w-full min-w-0 max-w-full overflow-hidden',
   pastHeaderRow: 'flex flex-wrap items-center justify-between gap-2 min-w-0 w-full',
