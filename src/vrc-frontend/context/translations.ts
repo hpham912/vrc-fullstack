@@ -320,6 +320,12 @@ export const translations = {
   homeCustomizeBanner: { vi: 'Tuỳ Chỉnh Banner', en: 'Customize Feature' },
   homeViewEvents: { vi: 'Xem Sự Kiện', en: 'View Events' },
   homeDirections: { vi: 'Chỉ Đường', en: 'Directions' },
+  // Flip-clock countdown on the Home featured banner (Design F).
+  countdownStartsIn: { vi: 'Bắt đầu sau', en: 'Starts in' },
+  countdownDays: { vi: 'Ngày', en: 'Days' },
+  countdownHours: { vi: 'Giờ', en: 'Hours' },
+  countdownMinutes: { vi: 'Phút', en: 'Mins' },
+  countdownSeconds: { vi: 'Giây', en: 'Secs' },
   homeTapNavigate: { vi: 'Nhấn để điều hướng', en: 'Tap to navigate' },
   upcomingEventsUnit: { vi: 'sự kiện sắp tới', en: 'upcoming' },
   homeToday: { vi: 'Hôm nay', en: 'Today' },

@@ -24,3 +24,5 @@ export type { BadgeProps, BadgeTone } from './badge/Badge.tsx';
 export { ReadAloudButton } from './read-aloud/ReadAloudButton.tsx';
 export type { ReadAloudButtonProps } from './read-aloud/ReadAloudButton.tsx';
 export { useReadAloud } from './read-aloud/useReadAloud.ts';
+export { CountdownTimer } from './countdown/CountdownTimer.tsx';
+export type { CountdownTimerProps } from './countdown/CountdownTimer.tsx';

@@ -21,7 +21,7 @@ import {
   PenTool,
 } from 'lucide-react';
 import { DirectionsModal } from '../directions-modal/DirectionsModal.tsx';
-import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal, LoadingShimmer, ZoomButton } from '../../common-component/index.ts';
+import { DirectionButtons, CalendarButtons, Card, Button, EventDetailModal, LoadingShimmer, ZoomButton, CountdownTimer } from '../../common-component/index.ts';
 import { CHURCH_NAME } from '../../constants/church.ts';
 import {
   formatDateLocale,
@@ -32,6 +32,7 @@ import {
   getDayNumber,
 } from '../../utils/dateFormatter.ts';
 import { getCategoryTheme, getCategoryLabel } from '../../utils/categoryTheme.ts';
+import { getEventStartDate } from '../../utils/calendar.ts';
 import { homeDashboardStyles as s } from './HomeDashboard.styles.ts';
 
 interface HomeDashboardProps {
@@ -291,6 +292,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
     : (activeEvent ? (activeEvent.location || displayAddress) : (safeConfig.locationTag || displayAddress));
 
+  // Countdown target for the flip-clock on the featured banner —
+  // the featured event's start. Null when there is no featured
+  // event (the countdown hides itself).
+  const countdownTarget = activeEvent ? getEventStartDate(activeEvent) : null;
+
   if (isLoading) {
     return (
       <div className={s.container}>
@@ -365,6 +371,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || (displayLocationTag || '')) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || (displayLocationTag || ''))}</span>
             </span>
           </div>
+
+          {/* Flip-clock countdown (Design F) to the featured event's start */}
+          <CountdownTimer targetDate={countdownTarget} />
 
           {/* Action Buttons Row */}
           <div className={s.actionBtnsRow}>
