@@ -306,22 +306,28 @@ html.theme-new:not(.dark) .from-\[\#2a1306\] .text-amber-300 {
   color: #0d2d64 !important;
 }
 
-/* - Daily verse card → slate blue (#607395). The from-amber-50/90 +
-     rounded-3xl combination is unique to the Card warmElevated variant,
-     which only DailyVerseCard uses, so other warm cards are untouched.
-     Verse text goes white, the citation goes gold-soft; the light chips
-     inside (buttons, badge, prayer box) keep their own surfaces. */
-html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl {
-  background-image: linear-gradient(to bottom right, #6b7fa6, #607395 55%, #55688a) !important;
-  border-color: #4e617f !important;
+/* Home verse snippet = same color as the spotlight banner (Hoang 2026-11-12).
+   The banner keeps its tan; the Home "Daily Verse Snippet" card becomes the
+   same tan so the two read as one. Hook: the snippet is the only warm Card
+   rendered as a <section> (DirectionsModal + ChurchInfoForm warm cards are
+   <div>s), and warm is rounded-2xl while DailyVerseCard's warmElevated is
+   rounded-3xl, so this does not touch the Scripture tab verse card.
+   Text inside is already navy in the New Theme (amber-900/950 + stone-900
+   remap to navy), which reads well on tan — no text overrides needed. */
+html.theme-new:not(.dark) section.from-amber-50\/90.rounded-2xl {
+  background-image: linear-gradient(to bottom right, #efdcc2, #e8c9ad 55%, #dec09e) !important;
+  border-color: #c9a227 !important;
 }
 
-html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl .text-stone-950 {
-  color: #ffffff !important;
-}
-
-html.theme-new:not(.dark) .from-amber-50\/90.rounded-3xl .text-amber-800 {
-  color: #f3e5b8 !important;
+/* Past event cards: stand out like the Contact card (Hoang 2026-11-12).
+   Past cards are bg-stone-100/70 at 70% over the page, so they blend into
+   the #f2f5fa page. In the New Theme they become white like the Contact
+   card (Card default = bg-white), so the card reads as a distinct card.
+   opacity-75 stays, so past events still look muted/faded vs upcoming.
+   Hook: bg-stone-100/70 is used only by the past event card. */
+html.theme-new:not(.dark) .bg-stone-100\/70 {
+  background-color: #ffffff !important;
+  border-color: #dce4f0 !important;
 }
 
 /* Form controls keep a light surface with the theme line color */
