@@ -293,31 +293,10 @@ html.theme-new:not(.dark) .w-8.h-8.bg-amber-500\/20.text-amber-400 {
 /* PDF redesign accent colors (sampled from phuchung-az-app-redesign.pdf).
    Color only — no layout change. Classic theme untouched; these rules are
    scoped under html.theme-new:not(.dark).
-   - Thanksgiving spotlight → warm tan (#e8c9ad). The from-[#2a1306] gradient
-     is unique to the thanksgiving spotlight, so only that banner changes.
-     Text inside goes navy for readability on the light tan. */
-html.theme-new:not(.dark) .from-\[\#2a1306\] {
-  background-image: linear-gradient(to bottom right, #efdcc2, #e8c9ad 55%, #dec09e) !important;
-  border-color: #c9a227 !important;
-}
-
-html.theme-new:not(.dark) .from-\[\#2a1306\] .text-white,
-html.theme-new:not(.dark) .from-\[\#2a1306\] .text-amber-300 {
-  color: #0d2d64 !important;
-}
-
-/* Home verse snippet = same color as the spotlight banner (Hoang 2026-11-12).
-   The banner keeps its tan; the Home "Daily Verse Snippet" card becomes the
-   same tan so the two read as one. Hook: the snippet is the only warm Card
-   rendered as a <section> (DirectionsModal + ChurchInfoForm warm cards are
-   <div>s), and warm is rounded-2xl while DailyVerseCard's warmElevated is
-   rounded-3xl, so this does not touch the Scripture tab verse card.
-   Text inside is already navy in the New Theme (amber-900/950 + stone-900
-   remap to navy), which reads well on tan — no text overrides needed. */
-html.theme-new:not(.dark) section.from-amber-50\/90.rounded-2xl {
-  background-image: linear-gradient(to bottom right, #efdcc2, #e8c9ad 55%, #dec09e) !important;
-  border-color: #c9a227 !important;
-}
+   NOTE (Hoang 2026-11-12): the Thanksgiving spotlight tan was REVERTED —
+   the banner uses the old (classic dark brown) style again, so the
+   from-[#2a1306] tan rule is gone. Only the HTML accent colors below remain
+   from this PDF work. */
 
 /* Past event cards: stand out like the Contact card (Hoang 2026-11-12).
    Past cards are bg-stone-100/70 at 70% over the page, so they blend into
@@ -328,6 +307,18 @@ html.theme-new:not(.dark) section.from-amber-50\/90.rounded-2xl {
 html.theme-new:not(.dark) .bg-stone-100\/70 {
   background-color: #ffffff !important;
   border-color: #dce4f0 !important;
+}
+
+/* Top bar matches the page background (Hoang 2026-11-12).
+   In the New Theme the page is #f2f5fa but the fixed header stays white,
+   leaving a white bar on top of the page. Making the header the same
+   #f2f5fa as the page makes the background uniform all the way up to
+   the top bar. Hook: the header is the only <header> with bg-white/95
+   (the date boxes are <div>s, the bottom tab bar is a <nav>), so this
+   does not touch the date boxes or the tab bar. The header's border-b
+   (theme line #dce4f0) still gives a subtle divider. */
+html.theme-new:not(.dark) header.bg-white\/95 {
+  background-color: #f2f5fa !important;
 }
 
 /* Form controls keep a light surface with the theme line color */
