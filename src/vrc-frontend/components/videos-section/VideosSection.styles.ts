@@ -13,7 +13,7 @@ export const videosSectionStyles = {
   videoCard:
     'flex items-start gap-3 sm:gap-4 rounded-2xl bg-white dark:bg-[#161412] border border-stone-200/90 dark:border-stone-800 shadow-sm p-3 sm:p-3.5 cursor-pointer transition-all active:scale-[0.99] hover:border-amber-300 dark:hover:border-amber-700/60 w-full min-w-0',
   thumbWrap:
-    'relative flex-shrink-0 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800',
+    'relative flex-shrink-0 w-28 sm:w-44 aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800',
   thumbImg: 'w-full h-full object-cover',
   fbThumb:
     'w-full h-full bg-[#1877f2] flex flex-col items-center justify-center gap-0.5 text-white',
@@ -24,10 +24,10 @@ export const videosSectionStyles = {
   platformBadgeOverlay: 'absolute left-2 bottom-2 drop-shadow-md',
   cardBody: 'flex-1 min-w-0',
   badgesRow: 'flex items-center gap-1.5 flex-wrap mb-1.5',
-  cardHeaderRow: 'flex items-start justify-between gap-2',
+  cardHeaderRow: 'flex flex-wrap items-start justify-between gap-2',
   cardTitle: 'flex-1 min-w-0 text-sm sm:text-base font-bold text-stone-950 dark:text-stone-50 leading-snug break-words line-clamp-2',
   cardDesc: 'text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-snug line-clamp-2 mt-1 break-words',
-  cardDateRow: 'flex items-center gap-1.5 text-xs font-semibold text-stone-500 dark:text-stone-400 mt-1.5',
+  cardDateRow: 'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-semibold text-stone-500 dark:text-stone-400 mt-1.5',
   cardDateIcon: 'w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0',
   adminActionRow: 'flex items-center gap-1 flex-shrink-0',
   emptyIcon: 'w-10 h-10 text-stone-300 mx-auto mb-3',

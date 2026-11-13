@@ -8,7 +8,7 @@ export const dailyVerseStyles = {
     'sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
   desktopAddBtn:
     'hidden sm:flex w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
-  actionsRow: 'flex items-center gap-1.5 sm:gap-2',
+  actionsRow: 'flex flex-wrap items-center gap-1.5 sm:gap-2',
   audioBtnBase: 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
   audioBtnActive: 'bg-amber-600 text-white border-amber-600 animate-pulse',
   audioBtnInactive: 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50',
@@ -17,8 +17,8 @@ export const dailyVerseStyles = {
   emptyCard: 'py-12 sm:py-16 text-center bg-white rounded-3xl border border-stone-200/70 p-8 shadow-sm',
   mainCard: 'bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-12 shadow-sm space-y-6 sm:space-y-8',
   cardMetaRow:
-    'flex items-center justify-between text-xs text-stone-700 font-semibold pb-3 border-b border-stone-100',
-  dateGroup: 'flex items-center gap-2',
+    'flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-stone-700 font-semibold pb-3 border-b border-stone-100',
+  dateGroup: 'flex min-w-0 items-center gap-2',
   translationBadge:
     'font-bold text-stone-800 dark:text-stone-200 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-md text-xs border border-stone-200 dark:border-stone-700',
   editIconBtn: 'p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors',

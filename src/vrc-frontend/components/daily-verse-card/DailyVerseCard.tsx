@@ -27,6 +27,8 @@ import {
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import { formatDateLocale, formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { dailyVerseStyles as s } from './DailyVerseCard.styles.ts';
 
@@ -136,17 +138,42 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!verse) return;
-    if (navigator.share) {
-      navigator.share({
-        title: `Daily Scripture: ${pick(verse.referenceVi, verse.referenceEn, verse.reference)}`,
-        text: `"${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}" — ${pick(verse.referenceVi, verse.referenceEn, verse.reference)} (${pick(verse.translationVi, verse.translationEn, verse.translation)})`,
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
-      copyToClipboard();
+    const shareText = `"${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}" — ${pick(verse.referenceVi, verse.referenceEn, verse.reference)} (${pick(verse.translationVi, verse.translationEn, verse.translation)})`;
+    const shareTitle = `Daily Scripture: ${pick(verse.referenceVi, verse.referenceEn, verse.reference)}`;
+    // Native app: the Capacitor Share plugin opens the system share
+    // sheet. navigator.share is not available in the app's WebView,
+    // which is why Share used to fall back to copying.
+    // (Hoang will need `npx cap sync` on his Mac so the native plugin
+    // registers before the next app build; until then this falls
+    // through to the Web Share API / copy below.)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Share.share({
+          title: shareTitle,
+          text: shareText,
+          url: window.location.href,
+          dialogTitle: shareTitle,
+        });
+        return;
+      } catch {
+        // Plugin not synced yet or share failed — fall through to copy.
+      }
+    } else if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: window.location.href,
+        });
+        return;
+      } catch {
+        // User cancelled the web share sheet — do nothing, don't copy.
+        return;
+      }
     }
+    copyToClipboard();
   };
 
   if (!verse) {

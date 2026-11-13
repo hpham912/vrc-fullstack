@@ -499,10 +499,10 @@ function ChurchAppContent() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setActiveTab('events')}
-                className="underline"
-                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                className="underline whitespace-normal max-w-full text-center"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />}
               >
-                <span>{t('appUpcomingHint')}</span>
+                <span className="break-words">{t('appUpcomingHint')}</span>
               </Button>
             </div>
           </div>
