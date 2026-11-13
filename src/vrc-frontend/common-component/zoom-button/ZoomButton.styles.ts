@@ -8,6 +8,13 @@ export const zoomButtonStyles = {
   // Text is text-xs with a w-4 icon, per Hoang's request.
   zoomBtn: "inline-flex items-center justify-center gap-2 px-4 py-1.5 sm:py-2 rounded-xl bg-[#2D8CFF] hover:bg-[#1B7BF5] dark:bg-[#2D8CFF] dark:hover:bg-[#1B7BF5] text-white text-xs font-bold transition-all shadow-2xs active:scale-[0.98]",
   zoomIcon: "w-4 h-4 text-white flex-shrink-0",
+  // Short label in large-text mode on mobile only: the full "Join
+  // Zoom" / "Tham Gia Zoom" is too long at 22px root and gets cut
+  // off, so it shortens to just "Zoom". The `large-font` class is
+  // set on <html> by the Navbar when large text is on; `max-sm:`
+  // keeps this mobile-only (below the sm breakpoint).
+  labelFull: 'max-sm:[.large-font_&]:hidden',
+  labelShort: 'hidden max-sm:[.large-font_&]:inline',
   modalIcon: "w-4 h-4",
   // The shared Modal body has no padding, so the content supplies it.
   infoBody: "p-6 space-y-4",

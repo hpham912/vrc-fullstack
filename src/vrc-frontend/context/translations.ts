@@ -466,6 +466,10 @@ export const translations = {
   eventZoomAdded: { vi: 'Đã thêm Zoom — nút sẽ hiện trên thẻ sự kiện.', en: 'Zoom added — button shows on the event card.' },
   eventZoomNotSet: { vi: 'Chưa thiết lập Zoom trong thông tin hội thánh.', en: 'Zoom isn\'t set up in church info yet.' },
   zoomJoin: { vi: 'Tham Gia Zoom', en: 'Join Zoom' },
+  // Short label for the Zoom button in large-text mode on mobile
+  // only — "Join Zoom" is too long at 22px root, so it shortens to
+  // just "Zoom" (same in both languages).
+  zoomJoinShort: { vi: 'Zoom', en: 'Zoom' },
   zoomPasscodeLabel: { vi: 'Mật Khẩu Zoom', en: 'Zoom Passcode' },
   zoomPasscodeHint: { vi: 'Nhập mật khẩu này khi Zoom hỏi, rồi bấm Tham Gia Zoom.', en: 'Type this passcode when Zoom asks for it, then tap Join Zoom.' },
   zoomNotStartedTitle: { vi: 'Sự Kiện Chưa Bắt Đầu', en: 'Event Hasn\'t Started Yet' },

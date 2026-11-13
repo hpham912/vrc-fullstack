@@ -108,7 +108,8 @@ export const ZoomButton: React.FC<ZoomButtonProps> = ({
         className={`${zoomButtonStyles.zoomBtn} ${className}`.trim()}
       >
         <Video className={zoomButtonStyles.zoomIcon} />
-        <span>{t('zoomJoin')}</span>
+        <span className={zoomButtonStyles.labelFull}>{t('zoomJoin')}</span>
+        <span className={zoomButtonStyles.labelShort}>{t('zoomJoinShort')}</span>
       </button>
 
       <Modal
