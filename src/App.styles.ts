@@ -1,13 +1,12 @@
 export const appStyles = {
   pageWrapper:
     'min-h-screen bg-[#FDFCFB] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
-  // Pull-to-refresh indicator: a small spinner below the fixed header
-  // that fades in as the user drags down, and spins while the refresh
-  // runs. Centered with marginLeft (half its width) so the inline
-  // translateY (the pull follow) doesn't fight a Tailwind translate.
-  pullIndicator:
-    'fixed left-1/2 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-50 flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-stone-900 shadow-lg border border-stone-200 dark:border-stone-700 pointer-events-none transition-all duration-150',
-  pullIndicatorIcon: 'w-5 h-5 text-amber-700 dark:text-amber-400',
+  // Pull-to-refresh bar: the shared Loading (spinner + refresh text)
+  // shown in the gap below the fixed header while the user drags the
+  // content down. It stays fixed there; the content sliding down is
+  // what reveals it.
+  pullRefreshBar:
+    'fixed left-0 right-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-40 flex items-center justify-center py-3 pointer-events-none',
   heroSection:
     'border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 max-sm:[.large-font_&]:pb-5 sm:pb-9 px-4 max-sm:[.large-font_&]:px-3 sm:px-6',
   // Nav-only hero (non-Home tab, no admin): on mobile it is just enough

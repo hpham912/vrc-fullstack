@@ -30,5 +30,7 @@ export { useDataSync, SYNC_COLLECTIONS } from './data-sync/useDataSync.ts';
 export type { SyncCollection, SyncEntry, SyncSnapshot } from './data-sync/useDataSync.ts';
 export { useUnreadNotifications } from './data-sync/useUnreadNotifications.ts';
 export { usePullToRefresh } from './pull-to-refresh/usePullToRefresh.ts';
+export { Loading } from './loading/Loading.tsx';
+export type { LoadingProps } from './loading/Loading.tsx';
 export { NotificationBadge } from './notification-badge/NotificationBadge.tsx';
 export type { NotificationBadgeProps } from './notification-badge/NotificationBadge.tsx';

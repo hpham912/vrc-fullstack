@@ -40,10 +40,10 @@ const EditHeaderVerseModal = lazy(() =>
   )
 );
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
-import { Button, LoadingShimmer, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
+import { Button, LoadingShimmer, Loading, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
 import type { SyncCollection } from './vrc-frontend/common-component/index.ts';
 import { ChurchEvent, DailyVerse, Video, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight, Pencil, Loader2 } from 'lucide-react';
+import { Plus, ArrowRight, Pencil } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 import {
@@ -341,6 +341,16 @@ function ChurchAppContent() {
     refreshCollections(SYNC_COLLECTIONS),
   );
 
+  // Pull-to-refresh: the content below the fixed header slides down
+  // with the finger (the whole screen goes down), revealing the refresh
+  // bar above it. No transition while dragging (it follows the finger
+  // exactly); a short one on release so it springs back smoothly.
+  const isPulling = pullDistance > 0 && !isPullRefreshing;
+  const pullContentStyle: React.CSSProperties = {
+    transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined,
+    transition: isPulling ? 'none' : 'transform 200ms ease-out',
+  };
+
   // Unread notification count (the badge number). Viewing the list
   // clears it.
   const { unreadCount, markSeen } = useUnreadNotifications(notifications);
@@ -433,18 +443,24 @@ function ChurchAppContent() {
 
   return (
     <div className={s.pageWrapper}>
-      {/* Pull-to-refresh indicator (fades in as the user drags down). */}
+      {/* Pull-to-refresh bar: the shared Loading (spinner + refresh
+          text) shown in the gap below the header as the content slides
+          down. The text follows the pull: pull -> release -> refreshing. */}
       {(pullDistance > 0 || isPullRefreshing) && (
         <div
-          className={s.pullIndicator}
-          style={{
-            marginLeft: -18,
-            transform: `translateY(${Math.min(pullDistance * 0.2, 12)}px)`,
-            opacity: Math.min(pullDistance / 30, 1),
-          }}
+          className={s.pullRefreshBar}
+          style={{ opacity: Math.min(pullDistance / 30, 1) }}
           aria-hidden="true"
         >
-          <Loader2 className={`${s.pullIndicatorIcon} ${isPullRefreshing ? 'animate-spin' : ''}`} />
+          <Loading
+            text={
+              isPullRefreshing
+                ? t('refreshing')
+                : pullDistance >= 70
+                  ? t('releaseToRefresh')
+                  : t('pullToRefresh')
+            }
+          />
         </div>
       )}
       {/* iOS App Navigation Bar */}
@@ -468,7 +484,10 @@ function ChurchAppContent() {
       {/* Nav-only on non-Home tabs for non-admins: just enough top padding
           to clear the fixed header on mobile (no empty gap, nothing cut
           off); the desktop nav still shows on desktop. */}
-      <div className={activeTab === 'home' || isAdmin ? s.heroSection : s.heroSectionNavOnly}>
+      <div
+        className={activeTab === 'home' || isAdmin ? s.heroSection : s.heroSectionNavOnly}
+        style={pullContentStyle}
+      >
         <div className={s.heroInner}>
           {activeTab === 'home' && (
             <>
@@ -581,7 +600,7 @@ function ChurchAppContent() {
       </div>
 
       {/* Main Content Area */}
-      <main className={s.mainContent}>
+      <main className={s.mainContent} style={pullContentStyle}>
         {activeTab === 'home' && (
           <HomeDashboard
             events={events}
