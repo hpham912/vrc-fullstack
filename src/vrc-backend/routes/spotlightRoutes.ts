@@ -82,6 +82,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       isActive,
       theme,
       badge,
+      badgeVi,
+      badgeEn,
       title,
       subtitle,
       subtitleVi,
@@ -103,6 +105,11 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       : `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
 
     const rawBadge = badge ? String(badge).trim() : '';
+    // Per-language pill badge text: the editor sends these separately.
+    // Fall back to the combined badge when a side is absent, so older
+    // saves keep showing the same text in both languages.
+    const rawBadgeVi = badgeVi ? String(badgeVi).trim() : rawBadge;
+    const rawBadgeEn = badgeEn ? String(badgeEn).trim() : rawBadge;
     const rawTitle = isAuto ? '' : (title ? String(title).trim() : '');
     const rawSubtitle = subtitle ? String(subtitle).trim() : '';
     // Per-language quotes: the admin fetch fills these separately (VI 1925 +
@@ -119,8 +126,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       theme: theme || 'thanksgiving',
       badge: rawBadge,
-      badgeVi: rawBadge,
-      badgeEn: rawBadge,
+      badgeVi: rawBadgeVi,
+      badgeEn: rawBadgeEn,
       title: rawTitle,
       titleVi: rawTitle,
       titleEn: rawTitle,
