@@ -25,6 +25,7 @@ import {
   ReadAloudButton,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
+import { formatReferenceForSpeech } from '../../utils/referenceSpeech.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -216,7 +217,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
               progress for the old verse. */}
           <ReadAloudButton
             key={verse.id}
-            text={`${pick(verse.referenceVi, verse.referenceEn, verse.reference)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`}
+            text={`${formatReferenceForSpeech(pick(verse.referenceVi, verse.referenceEn, verse.reference), language)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`}
             className="flex-shrink-0"
           />
 
