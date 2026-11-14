@@ -10,7 +10,6 @@ export const iosTabBarStyles = {
   iconBase: 'w-5 h-5',
   iconActive: 'stroke-[2.5]',
   iconInactive: 'stroke-[2]',
-  notifDot: 'absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse',
   label:
     'text-label mt-0.5 tracking-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[76px] font-semibold',
 };

@@ -15,7 +15,7 @@ import {
   Palette,
 } from 'lucide-react';
 import { NotificationModal } from '../notification-modal/NotificationModal.tsx';
-import { SegmentedControl } from '../../common-component/index.ts';
+import { SegmentedControl, NotificationBadge } from '../../common-component/index.ts';
 import { AppNotification } from '../../types/index.ts';
 import { navbarStyles as s } from './Navbar.styles.ts';
 
@@ -25,6 +25,9 @@ interface NavbarProps {
   openAdminPortal?: () => void;
   openLoginModal: () => void;
   notifications: AppNotification[];
+  // Number of unread notifications (0 = no badge). The bell shows the
+  // count; opening the notifications popup clears it.
+  notificationCount?: number;
   onRequestNotificationPermission: () => void;
   onOpenNotifications?: () => void;
   isNotifOpen?: boolean;
@@ -39,6 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   openAdminPortal,
   openLoginModal,
   notifications,
+  notificationCount = 0,
   onRequestNotificationPermission,
   onOpenNotifications,
   isNotifOpen,
@@ -176,9 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Toggle notifications"
             >
               <Bell className="w-4 h-4" />
-              {notifications.length > 0 && (
-                <span className={s.notifDot} />
-              )}
+              <NotificationBadge count={notificationCount} className="absolute top-1 right-1" />
             </button>
 
             {/* Notification Modal (rendered if not handled by root app) */}

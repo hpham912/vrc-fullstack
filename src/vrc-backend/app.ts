@@ -13,6 +13,7 @@ import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 import prayerRoutes from './routes/prayerRoutes.ts';
 import pushRoutes from './routes/pushRoutes.ts';
 import devotionalRoutes from './routes/devotionalRoutes.ts';
+import syncRoutes from './routes/syncRoutes.ts';
 
 import { dbContext } from '../vrc-db/index.ts';
 import { getAppEnvironment } from './utils/appEnvironment.ts';
@@ -64,6 +65,8 @@ export const createApp = () => {
   // Both routers share the /api/ai prefix with no overlapping paths:
   // devotional: /fetch-scripture, /generate-devotional
   app.use('/api/ai', devotionalRoutes);
+  // Live-updates check: GET /api/sync (public, counts + timestamps only).
+  app.use('/api/sync', syncRoutes);
 
   // Structured 404 for unmatched API routes
   app.use('/api/*', (req, res) => {

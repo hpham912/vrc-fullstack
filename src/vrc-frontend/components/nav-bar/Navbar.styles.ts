@@ -19,7 +19,6 @@ export const navbarStyles = {
     'hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center rounded-xl active:scale-95 transition-all relative border',
   notifBtnActive: 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/30',
   notifBtnInactive: 'bg-stone-100/80 hover:bg-stone-200/70 text-stone-700 border-stone-200/70',
-  notifDot: 'absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600 ring-2 ring-white animate-pulse',
   mobileLangBtn:
     'sm:hidden px-2 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 active:scale-95 border border-stone-300 text-xs font-bold text-stone-900 flex items-center gap-1 shadow-2xs',
   mobileLangText: 'text-meta font-mono font-bold',

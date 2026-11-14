@@ -1,12 +1,15 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { Home, Calendar, BookOpen, Video, Bell } from 'lucide-react';
+import { NotificationBadge } from '../../common-component/index.ts';
 import { iosTabBarStyles as s } from './IosTabBar.styles.ts';
 
 interface IosTabBarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  hasNotifications?: boolean;
+  // Number of unread notifications (0 = no badge). The bell shows the
+  // count; opening the Notifications tab clears it.
+  notificationCount?: number;
   openAdminPortal?: () => void;
   openLoginModal?: () => void;
   // Ref to the <nav> so the app can measure the tab bar's real height
@@ -18,7 +21,7 @@ interface IosTabBarProps {
 export const IosTabBar: React.FC<IosTabBarProps> = ({
   activeTab,
   setActiveTab,
-  hasNotifications = false,
+  notificationCount = 0,
   navRef,
 }) => {
   const { t } = useLanguage();
@@ -53,8 +56,8 @@ export const IosTabBar: React.FC<IosTabBarProps> = ({
             >
               <div className={`${s.iconBoxBase} ${isActive ? s.iconBoxActive : ''} relative`}>
                 <Icon className={`${s.iconBase} ${isActive ? s.iconActive : s.iconInactive}`} />
-                {isNotifTab && hasNotifications && (
-                  <span className={s.notifDot} />
+                {isNotifTab && (
+                  <NotificationBadge count={notificationCount} className="absolute top-0.5 right-0.5" />
                 )}
               </div>
               <span className={s.label}>

@@ -1,14 +1,21 @@
 export const appStyles = {
   pageWrapper:
     'min-h-screen bg-[#FDFCFB] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900 pb-20 md:pb-6 w-full max-w-full overflow-x-hidden min-w-0',
+  // Pull-to-refresh indicator: a small spinner below the fixed header
+  // that fades in as the user drags down, and spins while the refresh
+  // runs. Centered with marginLeft (half its width) so the inline
+  // translateY (the pull follow) doesn't fight a Tailwind translate.
+  pullIndicator:
+    'fixed left-1/2 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-50 flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-stone-900 shadow-lg border border-stone-200 dark:border-stone-700 pointer-events-none transition-all duration-150',
+  pullIndicatorIcon: 'w-5 h-5 text-amber-700 dark:text-amber-400',
   heroSection:
-    'border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
+    'bg-white dark:bg-[#161412] border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 sm:pb-9 px-4 sm:px-6',
   // Nav-only hero (non-Home tab, no admin): on mobile it is just enough
   // top padding to clear the fixed header (56px + safe area) — no extra
   // gap, and the content is not cut off under the header. On desktop it
   // keeps the full padding so the segmented nav sits below the header.
   heroSectionNavOnly:
-    'sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 sm:px-6 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] pb-0 sm:pt-28 sm:pb-9',
+    'bg-white dark:bg-[#161412] sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 sm:px-6 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] pb-0 sm:pt-28 sm:pb-9',
   heroInner: 'max-w-4xl mx-auto text-center space-y-3 sm:space-y-3.5',
   locationPill:
     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-label sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800',
@@ -37,7 +44,7 @@ export const appStyles = {
   desktopNavIcon: 'w-3.5 h-3.5 opacity-75',
   mainContent: 'flex-1 w-full max-w-full overflow-x-clip min-w-0',
   desktopFooter:
-    'hidden md:block border-t border-stone-200/80 py-8 px-4 text-stone-600 text-xs font-medium',
+    'hidden md:block bg-white border-t border-stone-200/80 py-8 px-4 text-stone-600 text-xs font-medium',
   footerTopRow: 'max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4',
   footerBrandGroup: 'flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2',
   footerBrandEn: 'font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5',

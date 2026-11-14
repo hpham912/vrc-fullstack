@@ -40,9 +40,10 @@ const EditHeaderVerseModal = lazy(() =>
   )
 );
 import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
-import { Button, LoadingShimmer } from './vrc-frontend/common-component/index.ts';
+import { Button, LoadingShimmer, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
+import type { SyncCollection } from './vrc-frontend/common-component/index.ts';
 import { ChurchEvent, DailyVerse, Video, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight, Pencil } from 'lucide-react';
+import { Plus, ArrowRight, Pencil, Loader2 } from 'lucide-react';
 import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
 import {
@@ -163,79 +164,154 @@ function ChurchAppContent() {
   const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
 
+  const safeJson = async (res: Response) => {
+    if (!res || !res.ok) return null;
+    const text = await res.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
+  // Refreshes only the given collections — each one is fetched and
+  // applied exactly the way loadData does it, so a live update shows
+  // the same data a full reload would. Used by the live sync (which
+  // re-fetches only what changed) and by loadData for the full load.
+  const refreshCollections = async (collections: SyncCollection[]) => {
+    const headers = apiHeaders();
+    const jobs: Promise<void>[] = [];
+
+    if (collections.includes('events')) {
+      jobs.push(
+        (async () => {
+          try {
+            const rawEvents = await safeJson(
+              await fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
+            );
+            if (Array.isArray(rawEvents)) {
+              setEvents(rawEvents);
+              // Automatically schedule 1-hour before event reminders.
+              if (rawEvents.length > 0) NotificationClient.scheduleEventReminders(rawEvents);
+            }
+          } catch (err) {
+            console.error('Error refreshing events:', err);
+          }
+        })(),
+      );
+    }
+
+    if (collections.includes('verses')) {
+      jobs.push(
+        (async () => {
+          try {
+            const rawVerses = await safeJson(
+              await fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
+            );
+            if (Array.isArray(rawVerses)) {
+              setAllVerses(rawVerses.slice(0, 10));
+              // Today's verse is the verse dated today, falling back to
+              // the latest verse — the same rule GET /api/verses/today
+              // used, computed here from the list we already fetched.
+              const now = new Date();
+              const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+                now.getDate(),
+              ).padStart(2, '0')}`;
+              const todayVerse = rawVerses.find((verse) => verse.date === todayStr) || rawVerses[0] || null;
+              setTodayVerse(todayVerse);
+            }
+          } catch (err) {
+            console.error('Error refreshing verses:', err);
+          }
+        })(),
+      );
+    }
+
+    if (collections.includes('videos')) {
+      jobs.push(
+        (async () => {
+          try {
+            const rawVideos = await safeJson(
+              await fetch(apiUrl('/api/videos'), { cache: 'no-store', headers }),
+            );
+            // Videos are pruned to the last 2 months by the backend — the
+            // backend already orders them newest first.
+            if (Array.isArray(rawVideos)) setVideos(rawVideos);
+          } catch (err) {
+            console.error('Error refreshing videos:', err);
+          }
+        })(),
+      );
+    }
+
+    if (collections.includes('spotlight')) {
+      jobs.push(
+        (async () => {
+          try {
+            const spotlightData = await safeJson(
+              await fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
+            );
+            if (spotlightData) {
+              setSpotlightConfig(spotlightData);
+              try {
+                localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData));
+              } catch {}
+            }
+          } catch (err) {
+            console.error('Error refreshing spotlight:', err);
+          }
+        })(),
+      );
+    }
+
+    if (collections.includes('churchInfo')) {
+      jobs.push(
+        (async () => {
+          try {
+            const churchInfoData = await safeJson(
+              await fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
+            );
+            if (churchInfoData) {
+              if (
+                !churchInfoData.address ||
+                churchInfoData.address.toLowerCase().includes('tempe, arizona') ||
+                churchInfoData.address.toLowerCase() === 'tempe, az' ||
+                churchInfoData.address.toLowerCase() === 'tempe az'
+              ) {
+                churchInfoData.address = CHURCH_NAME.address;
+              }
+              setChurchInfo(churchInfoData);
+              try {
+                localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData));
+              } catch {}
+            }
+          } catch (err) {
+            console.error('Error refreshing church info:', err);
+          }
+        })(),
+      );
+    }
+
+    if (collections.includes('notifications')) {
+      jobs.push(
+        (async () => {
+          try {
+            setNotifications(await NotificationClient.fetchRecent());
+          } catch (err) {
+            console.error('Error refreshing notifications:', err);
+          }
+        })(),
+      );
+    }
+
+    await Promise.all(jobs);
+  };
+
+  // Full load (and manual refresh): refreshes every collection.
   const loadData = async () => {
     try {
-      const headers = apiHeaders();
-      const [eventsRes, versesRes, videosRes, spotlightRes, churchInfoRes, notifs] = await Promise.all([
-        fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
-        fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
-        fetch(apiUrl('/api/videos'), { cache: 'no-store', headers }),
-        fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
-        fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
-        NotificationClient.fetchRecent(),
-      ]);
-
-      const safeJson = async (res: Response) => {
-        if (!res || !res.ok) return null;
-        const text = await res.text();
-        if (!text) return null;
-        try {
-          return JSON.parse(text);
-        } catch {
-          return null;
-        }
-      };
-
-      const [rawEvents, rawVerses, rawVideos, spotlightData, churchInfoData] = await Promise.all([
-        safeJson(eventsRes),
-        safeJson(versesRes),
-        safeJson(videosRes),
-        safeJson(spotlightRes),
-        safeJson(churchInfoRes),
-      ]);
-
-      if (Array.isArray(rawEvents)) {
-        setEvents(rawEvents);
-      }
-
-      if (Array.isArray(rawVerses)) {
-        setAllVerses(rawVerses.slice(0, 10));
-      }
-
-      // Videos are pruned to the last 2 months by the backend — the
-      // backend already orders them newest first.
-      if (Array.isArray(rawVideos)) {
-        setVideos(rawVideos);
-      }
-      // Today's verse is the verse dated today, falling back to the latest
-      // verse — the same rule GET /api/verses/today used, computed here from
-      // the list we already fetched instead of a second request.
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-        now.getDate()
-      ).padStart(2, '0')}`;
-      const todayVerse = Array.isArray(rawVerses)
-        ? rawVerses.find((verse) => verse.date === todayStr) || rawVerses[0] || null
-        : null;
-      setTodayVerse(todayVerse);
-
-      if (spotlightData) {
-        setSpotlightConfig(spotlightData);
-        try { localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData)); } catch {}
-      }
-      if (churchInfoData) {
-        if (!churchInfoData.address || churchInfoData.address.toLowerCase().includes('tempe, arizona') || churchInfoData.address.toLowerCase() === 'tempe, az' || churchInfoData.address.toLowerCase() === 'tempe az') {
-          churchInfoData.address = CHURCH_NAME.address;
-        }
-        setChurchInfo(churchInfoData);
-        try { localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData)); } catch {}
-      }
-      setNotifications(notifs);
-
-      // Automatically schedule 1-hour before event reminders for all upcoming events
-      if (Array.isArray(rawEvents) && rawEvents.length > 0) {
-        NotificationClient.scheduleEventReminders(rawEvents);
-      }
+      await refreshCollections(SYNC_COLLECTIONS);
     } catch (err) {
       console.error('Error fetching church data from database:', err);
     } finally {
@@ -244,6 +320,40 @@ function ChurchAppContent() {
       setIsLoading(false);
     }
   };
+
+  // Live updates: checks GET /api/sync and re-fetches only the
+  // collections that changed. No timer — it checks when the app comes
+  // back to the foreground and when the user switches tabs, and the
+  // user can pull down anywhere to reload right now.
+  const { checkNow } = useDataSync((changed) => {
+    refreshCollections(changed);
+  });
+
+  // Switching tabs re-checks for updates, so a tab always shows the
+  // latest the admin posted (the check itself is tiny; it only
+  // re-fetches what actually changed).
+  useEffect(() => {
+    checkNow();
+  }, [activeTab, checkNow]);
+
+  // Pull down from the top of any screen to reload everything now.
+  const { pullDistance, isRefreshing: isPullRefreshing } = usePullToRefresh(() =>
+    refreshCollections(SYNC_COLLECTIONS),
+  );
+
+  // Unread notification count (the badge number). Viewing the list
+  // clears it.
+  const { unreadCount, markSeen } = useUnreadNotifications(notifications);
+
+  // Opening the Notifications tab (mobile) or the notifications popup
+  // (desktop) means the user has seen the list — clear the count. It
+  // also re-runs when new notifications arrive while viewing, so they
+  // don't pile up as unread under the user's eyes.
+  useEffect(() => {
+    if (activeTab === 'notifications' || showNotifModal) {
+      markSeen();
+    }
+  }, [activeTab, showNotifModal, markSeen]);
 
   useEffect(() => {
     loadData();
@@ -323,6 +433,20 @@ function ChurchAppContent() {
 
   return (
     <div className={s.pageWrapper}>
+      {/* Pull-to-refresh indicator (fades in as the user drags down). */}
+      {(pullDistance > 0 || isPullRefreshing) && (
+        <div
+          className={s.pullIndicator}
+          style={{
+            marginLeft: -18,
+            transform: `translateY(${Math.min(pullDistance * 0.2, 12)}px)`,
+            opacity: Math.min(pullDistance / 30, 1),
+          }}
+          aria-hidden="true"
+        >
+          <Loader2 className={`${s.pullIndicatorIcon} ${isPullRefreshing ? 'animate-spin' : ''}`} />
+        </div>
+      )}
       {/* iOS App Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -330,6 +454,7 @@ function ChurchAppContent() {
         openAdminPortal={() => openAdminWithTab('admin-accounts', null, null, false)}
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
+        notificationCount={unreadCount}
         onRequestNotificationPermission={() => NotificationClient.requestPermission()}
         onOpenNotifications={() => {
           setShowNotifModal((prev) => !prev);
@@ -553,7 +678,7 @@ function ChurchAppContent() {
       <IosTabBar
         activeTab={activeTab}
         setActiveTab={handleTabChange}
-        hasNotifications={notifications.length > 0}
+        notificationCount={unreadCount}
         navRef={tabBarRef}
       />
 
