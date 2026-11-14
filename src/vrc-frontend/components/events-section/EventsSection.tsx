@@ -35,6 +35,7 @@ import {
   Button,
   Card,
   EventDetailModal,
+  FilterBar,
   LoadingShimmer,
   ZoomButton,
 } from '../../common-component/index.ts';
@@ -244,24 +245,17 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         />
       </div>
 
-      {/* Filter Category Pills */}
-      <div className={s.filterRow}>
-        {CATEGORIES.map(({ key, icon: Icon }) => {
-          const isSelected = selectedCategory === key;
-          return (
-            <button
-              key={key}
-              onClick={() => setSelectedCategory(key)}
-              className={`${s.filterPillBase} ${
-                isSelected ? s.filterPillActive : s.filterPillInactive
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-400' : 'text-stone-600'}`} />
-              <span>{getCategoryLabel(key)}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Filter Category Pills — shared FilterBar, scrolls sideways when long */}
+      <FilterBar
+        options={CATEGORIES.map(({ key, icon }) => ({
+          value: key,
+          label: getCategoryLabel(key),
+          icon,
+        }))}
+        value={selectedCategory}
+        onChange={setSelectedCategory}
+        ariaLabel={t('eventsFilterLabel')}
+      />
 
       {/* Events List (Current & Upcoming Events) */}
       {isLoading ? (

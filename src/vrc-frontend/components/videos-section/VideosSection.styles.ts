@@ -8,7 +8,6 @@ export const videosSectionStyles = {
   headerRow: 'flex items-center justify-between gap-3 min-w-0 w-full mb-4',
   headerSubtitle: 'text-caption sm:text-label font-bold uppercase tracking-widest text-amber-700 block mb-0.5',
   headerTitle: 'text-2xl sm:text-3xl max-sm:[.large-font_&]:text-xl font-serif font-bold text-stone-900 break-words',
-  filterRow: 'mb-3 overflow-x-auto pb-0.5',
   listContainer: 'space-y-3',
   videoCard:
     'flex items-start gap-3 max-sm:[.large-font_&]:gap-2.5 sm:gap-4 rounded-2xl bg-white dark:bg-[#161412] border border-stone-200/90 dark:border-stone-800 shadow-sm p-3 max-sm:[.large-font_&]:p-2.5 sm:p-3.5 cursor-pointer transition-all active:scale-[0.99] hover:border-amber-300 dark:hover:border-amber-700/60 w-full min-w-0',

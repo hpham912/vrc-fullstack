@@ -4,7 +4,7 @@ import { Video } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { apiFetch } from '../../utils/api.ts';
-import { Card, LoadingShimmer, AdminAddButton, AdminActionButtons, Badge, ConfirmModal, SegmentedControl, YouTubePlayer, FacebookPlayer } from '../../common-component/index.ts';
+import { Card, LoadingShimmer, AdminAddButton, AdminActionButtons, Badge, ConfirmModal, FilterBar, YouTubePlayer, FacebookPlayer } from '../../common-component/index.ts';
 import { getYouTubeThumbnailUrl } from '../../../vrc-shared/utils/youtube.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
 import { VIDEO_BUILTIN_CATEGORIES, getVideoCategoryLabel, getVideoCategoryTone, isBuiltinVideoCategory } from '../../utils/videoCategory.ts';
@@ -24,9 +24,9 @@ interface VideosSectionProps {
 // YouTube's thumbnail (or a Facebook placeholder, since Facebook
 // gives no free thumbnail) and tapping it opens the matching
 // embedded player in a modal, inside the app. The filter row above
-// the list is the shared SegmentedControl, with one option per
-// category present in the loaded videos (All first, then the
-// built-ins in picker order, then custom categories as typed).
+// the list is the shared FilterBar, with one pill per category
+// present in the loaded videos (All first, then the built-ins in
+// picker order, then custom categories as typed).
 export const VideosSection: React.FC<VideosSectionProps> = ({
   videos,
   isLoading = false,
@@ -111,20 +111,19 @@ export const VideosSection: React.FC<VideosSectionProps> = ({
       </div>
 
       {videos.length > 0 && (
-        <div className={videosSectionStyles.filterRow}>
-          <SegmentedControl
-            options={[
-              { value: 'all', label: t('videoCategoryAll') },
-              ...presentCategories.map((category) => ({
-                value: category,
-                label: getVideoCategoryLabel(category, t),
-              })),
-            ]}
-            value={effectiveFilter}
-            onChange={setCategoryFilter}
-            ariaLabel={t('videoCategoryAll')}
-          />
-        </div>
+        <FilterBar
+          options={[
+            { value: 'all', label: t('videoCategoryAll') },
+            ...presentCategories.map((category) => ({
+              value: category,
+              label: getVideoCategoryLabel(category, t),
+            })),
+          ]}
+          value={effectiveFilter}
+          onChange={setCategoryFilter}
+          ariaLabel={t('videoCategoryAll')}
+          className="mb-3"
+        />
       )}
 
       {isLoading ? (

@@ -217,6 +217,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           <ReadAloudButton
             key={verse.id}
             text={`${pick(verse.referenceVi, verse.referenceEn, verse.reference)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`}
+            className="flex-shrink-0"
           />
 
           <Button
@@ -224,6 +225,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             variant="outline"
             size="sm"
             onClick={copyToClipboard}
+            className="flex-shrink-0"
             leftIcon={copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-stone-400" />}
           >
             <span>{copied ? t('copied') : t('copyVerse')}</span>
@@ -234,6 +236,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             variant="outline"
             size="sm"
             onClick={handleShare}
+            className="flex-shrink-0"
             leftIcon={<Share2 className="w-3.5 h-3.5 text-stone-400" />}
           >
             <span>{t('shareVerse')}</span>
@@ -242,7 +245,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           {isAdmin && onOpenAdminPortal && (
             <AdminAddButton
               onClick={() => onOpenAdminPortal('verses')}
-              className="hidden sm:flex"
+              className="hidden sm:flex flex-shrink-0"
               title={t('verseAddTitle')}
             />
           )}

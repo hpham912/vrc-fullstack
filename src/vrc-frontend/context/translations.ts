@@ -81,6 +81,7 @@ export const translations = {
   catFellowship: { vi: 'Thông Công', en: 'Fellowship' },
   catSpecial: { vi: 'Đặc Biệt', en: 'Special' },
   searchPlaceholder: { vi: 'Tìm kiếm sự kiện...', en: 'Search events...' },
+  eventsFilterLabel: { vi: 'Lọc sự kiện theo loại', en: 'Filter events by category' },
   noEvents: { vi: 'Chưa có sự kiện nào', en: 'No scheduled events found' },
   noEventsSub: { vi: 'Vui lòng kiểm tra lại sau hoặc điều chỉnh bộ lọc.', en: 'Check back soon or adjust your search filter.' },
   calCalendar: { vi: 'Lịch', en: 'Calendar' },

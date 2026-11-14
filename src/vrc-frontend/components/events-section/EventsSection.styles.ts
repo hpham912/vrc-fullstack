@@ -12,11 +12,6 @@ export const eventsSectionStyles = {
   searchIcon: 'w-4 h-4 text-stone-500 dark:text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none',
   searchInput:
     'w-full max-w-full box-border pl-10 pr-4 py-2.5 bg-stone-100 hover:bg-stone-100/90 dark:bg-stone-900 dark:hover:bg-stone-850 border border-stone-300 dark:border-stone-700 rounded-2xl text-xs sm:text-sm text-stone-950 dark:text-stone-50 placeholder:text-stone-700 dark:placeholder:text-stone-400 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:bg-white dark:focus:bg-stone-850 transition-all shadow-2xs',
-  filterRow: 'flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 px-0.5 w-full max-w-full',
-  filterPillBase:
-    'flex items-center gap-1.5 py-1.5 max-sm:[.large-font_&]:py-1 px-3.5 max-sm:[.large-font_&]:px-3 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 flex-shrink-0',
-  filterPillActive: 'bg-stone-950 text-white shadow-xs ring-2 ring-stone-950/20 dark:bg-amber-500 dark:text-stone-950 dark:ring-amber-500/30',
-  filterPillInactive: 'bg-white text-stone-700 hover:text-stone-950 border border-stone-300 shadow-2xs hover:bg-stone-50 dark:bg-stone-900/80 dark:text-stone-300 dark:border-stone-800 dark:hover:bg-stone-800 dark:hover:text-stone-100',
   emptyBox: 'py-12 sm:py-16 text-center bg-white dark:bg-[#161412] rounded-3xl border border-stone-200/70 dark:border-stone-800 p-8 shadow-sm',
   emptyTitle: 'font-serif font-bold text-stone-900 dark:text-stone-100 text-base',
   emptySub: 'text-stone-700 dark:text-stone-400 text-xs mt-1',
