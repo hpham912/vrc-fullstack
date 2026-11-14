@@ -1,5 +1,5 @@
 export const prayerRequestModalStyles = {
-  body: 'p-6',
+  body: 'p-6 max-sm:[.large-font_&]:p-4',
   successWrapper: 'text-center py-6 space-y-3',
   successIcon: 'w-12 h-12 text-emerald-600 dark:text-emerald-400 mx-auto',
   successTitle: 'font-serif font-bold text-lg text-stone-900',
@@ -13,7 +13,7 @@ export const prayerRequestModalStyles = {
     'w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-xs sm:text-sm bg-white text-stone-950 placeholder:text-stone-500 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30',
   textarea:
     'w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-xs sm:text-sm bg-white text-stone-950 placeholder:text-stone-500 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-none',
-  footerRow: 'flex items-center justify-end gap-2 pt-2',
+  footerRow: 'flex flex-wrap items-center justify-end gap-2 pt-2',
   cancelBtn:
     'px-4 py-2 rounded-xl text-xs font-bold text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors',
   submitBtn:

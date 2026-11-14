@@ -73,6 +73,14 @@
     letter-spacing: -0.005em;
   }
 
+  /* =========================================================================
+     LARGER TEXT MODE (html.large-font -> root fontSize = 22px vs 18px)
+     Every rem-scaled layout scales 1.222x. When designing new screens:
+     1) Use `flex-wrap`, `min-w-0`, and `break-words` on rows/cards/footers.
+     2) Use `max-sm:[.large-font_&]:hidden` / `hidden max-sm:[.large-font_&]:inline`
+        for concise mobile large-text labels where long strings crowd or wrap.
+     3) Tighten horizontal card/modal paddings on mobile via `max-sm:[.large-font_&]`.
+     ========================================================================= */
   html.large-font body {
     font-weight: 600;
   }

@@ -10,7 +10,7 @@
 // /reel/ link can hold a landscape video, and the link gives no
 // reliable way to tell a video's real orientation.
 export const facebookPlayerStyles = {
-  body: 'p-6 space-y-3',
+  body: 'p-6 max-sm:[.large-font_&]:p-4 space-y-3',
   frameReel: 'mx-auto aspect-[9/16] h-[60vh] max-h-[560px] w-auto max-w-full rounded-xl bg-stone-950 border-0',
   frameVideo: 'w-full aspect-video rounded-xl bg-stone-950 border-0',
   desc: 'text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-line break-words',

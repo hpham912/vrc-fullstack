@@ -474,7 +474,8 @@ function ChurchAppContent() {
             <>
           <div className={s.locationPill}>
             <CrossIcon className={s.locationIcon} />
-            <span>{t('heroLocation')}</span>
+            <span className={s.labelFull}>{t('heroLocation')}</span>
+            <span className={s.labelShort}>{t('heroLocationShort')}</span>
           </div>
 
           <div className={s.titleWrapper}>

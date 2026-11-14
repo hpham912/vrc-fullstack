@@ -369,7 +369,8 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 <span>{t('eventsPastTitle')}</span>
               </div>
               <p className={s.pastSub}>
-                {t('eventsPastSub')}
+                <span className={s.labelFull}>{t('eventsPastSub')}</span>
+                <span className={s.labelShort}>{t('eventsPastSubShort')}</span>
               </p>
             </div>
             <span className={s.pastCountBadge}>

@@ -383,7 +383,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               className={bannerTheme.btnPrimary}
               rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
             >
-              <span>{t('homeViewEvents')}</span>
+              <span className={s.labelFull}>{t('homeViewEvents')}</span>
+              <span className={s.labelShort}>{t('homeViewEventsShort')}</span>
             </Button>
             <Button
               type="button"
@@ -430,7 +431,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('navEvents')}
             </span>
             <span className={s.quickCardSub}>
-              {upcomingEvents.length} {t('upcomingEventsUnit')}
+              {upcomingEvents.length}{' '}
+              <span className={s.labelFull}>{t('upcomingEventsUnit')}</span>
+              <span className={s.labelShort}>{t('upcomingEventsUnitShort')}</span>
             </span>
           </Card>
 
@@ -477,7 +480,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {t('homeSanctuary')}
             </span>
             <span className={s.quickCardSub}>
-              Tempe, Arizona
+              <span className={s.labelFull}>Tempe, Arizona</span>
+              <span className={s.labelShort}>Tempe, AZ</span>
             </span>
           </Card>
         </div>
@@ -512,7 +516,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 className="text-xs font-semibold"
                 rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
               >
-                <span>{t('viewAllEvents')}</span>
+                <span className={s.labelFull}>{t('viewAllEvents')}</span>
+                <span className={s.labelShort}>{t('viewAllEventsShort')}</span>
               </Button>
             </div>
 
@@ -607,8 +612,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <Card as="section" variant="default" padding="md" className="space-y-3.5">
           <div className={s.servicesCardHeader}>
             <h2 className={s.sectionHeading}>
-              <Clock className="w-4 h-4 text-amber-600" />
-              <span>{t('homeWeeklyServices')}</span>
+              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span className={s.labelFull}>{t('homeWeeklyServices')}</span>
+              <span className={s.labelShort}>{t('homeWeeklyServicesShort')}</span>
             </h2>
             {isAdmin && onOpenChurchInfoEditor && (
               <Button
@@ -694,7 +700,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               className="text-xs font-semibold"
               rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
             >
-              <span>{t('readTodayVerse')}</span>
+              <span className={s.labelFull}>{t('readTodayVerse')}</span>
+              <span className={s.labelShort}>{t('readTodayVerseShort')}</span>
             </Button>
           </div>
         </Card>

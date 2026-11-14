@@ -18,7 +18,7 @@
 export const segmentedControlStyles = {
   container:
     'flex w-fit items-center bg-stone-100 dark:bg-stone-800 p-1 rounded-xl border border-stone-300 dark:border-stone-700 text-xs font-bold shadow-2xs',
-  btn: 'px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-label',
+  btn: 'px-2 py-1 max-sm:[.large-font_&]:px-2 max-sm:[.large-font_&]:text-[13px] rounded-lg transition-all flex items-center gap-1 text-label',
   btnActive: 'bg-white dark:bg-stone-950 text-stone-950 dark:text-white shadow-xs font-bold',
   btnIdle:
     'text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white font-semibold',

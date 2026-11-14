@@ -256,7 +256,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
       <Card variant="warmElevated" padding="lg" className="space-y-6">
         <div className={s.cardMetaRow}>
           <div className={s.dateGroup}>
-            <Calendar className="w-4 h-4 text-amber-700" />
+            <Calendar className="w-4 h-4 text-amber-700 flex-shrink-0" />
             <span>{verseDateFormatted}</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -312,11 +312,14 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             onClick={() => setShowArchive(!showArchive)}
             className={s.archiveToggleBtn}
           >
-            <span className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-700" />
-              <span>{t('browseArchive')} ({allVerses.length})</span>
+            <span className="flex items-center gap-2 min-w-0">
+              <BookOpen className="w-4 h-4 text-amber-700 flex-shrink-0" />
+              <span>
+                <span className={s.labelFull}>{t('browseArchive')}</span>
+                <span className={s.labelShort}>{t('browseArchiveShort')}</span> ({allVerses.length})
+              </span>
             </span>
-            {showArchive ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {showArchive ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
           </button>
 
           {showArchive && (

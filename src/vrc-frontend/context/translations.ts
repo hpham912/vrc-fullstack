@@ -26,7 +26,9 @@ export const translations = {
   weeklyScheduleTitle: { vi: 'Lịch Thờ Phượng & Sinh Hoạt', en: 'Weekly Service Schedule' },
   todayHighlight: { vi: 'Nổi Bật Hôm Nay', en: "Today's Highlight" },
   viewAllEvents: { vi: 'Xem Tất Cả Sự Kiện', en: 'View All Events' },
+  viewAllEventsShort: { vi: 'Xem Tất Cả', en: 'View All' },
   readTodayVerse: { vi: 'Đọc Lời Chúa Hôm Nay', en: "Read Today's Verse" },
+  readTodayVerseShort: { vi: 'Đọc Tiếp', en: 'Read Verse' },
   youthMinistryTitle: { vi: 'Mục Vụ Giới Trẻ', en: 'Youth Ministry' },
   youthMinistryTag: { vi: 'Thế Hệ Phục Hưng • Revival Youth', en: 'Revival Youth Generation' },
   youthVerseText: { vi: 'Chớ để người ta khinh con vì trẻ tuổi; nhưng hãy làm gương cho các tín đồ... (1 Ti-mô-thê 4:12)', en: 'Don’t let anyone look down on you because you are young, but set an example for the believers... (1 Timothy 4:12)' },
@@ -39,6 +41,7 @@ export const translations = {
 
   // Hero Section
   heroLocation: { vi: 'Tempe, Arizona • Giờ nhóm: 3:00 PM – 5:00 PM', en: 'Tempe, Arizona • Sunday Worship: 3:00 PM – 5:00 PM' },
+  heroLocationShort: { vi: 'Tempe, AZ • 3:00 – 5:00 PM', en: 'Tempe, AZ • Sun 3:00 PM' },
   heroSubtitle: {
     vi: 'Cộng đồng Cơ Đốc thờ phượng Chúa, cùng nhau tấn tới trong đức tin và phục vụ tại Tempe, Arizona.',
     en: 'A welcoming community of faith, worshipping God, growing together in Scripture, and serving in Tempe, Arizona.',
@@ -102,6 +105,7 @@ export const translations = {
   reflectionTitle: { vi: 'Suy Gẫm Mục Vụ', en: 'Pastoral Reflection' },
   prayerTitle: { vi: 'Lời Cầu Nguyện Hôm Nay', en: "Today's Prayer" },
   browseArchive: { vi: 'Xem Các Ngày Trước', en: 'Browse Past Verses' },
+  browseArchiveShort: { vi: 'Các Ngày Trước', en: 'Past Verses' },
   loadingScripture: { vi: 'Đang tải Lời Chúa...', en: 'Loading scripture...' },
   loading: { vi: 'Đang tải...', en: 'Loading...' },
 
@@ -297,6 +301,7 @@ export const translations = {
   eventsUnit: { vi: 'sự kiện', en: 'events' },
   eventsPastTitle: { vi: 'Sự Kiện Đã Diễn Ra', en: 'Past Events' },
   eventsPastSub: { vi: 'Lưu trữ 3 sự kiện gần nhất đã hoàn tất', en: 'Archive of the 3 most recent concluded gatherings' },
+  eventsPastSubShort: { vi: '3 sự kiện gần nhất', en: '3 recent past events' },
   eventsConcluded: { vi: 'Đã Diễn Ra', en: 'Concluded' },
   eventsDetailTitle: { vi: 'Chi Tiết Sự Kiện', en: 'Event Details' },
   eventsDeleteTitle: { vi: 'Xóa Sự Kiện?', en: 'Delete Event?' },
@@ -319,6 +324,7 @@ export const translations = {
   homeFeaturedEvent: { vi: 'Sự Kiện Nổi Bật', en: 'Featured Event' },
   homeCustomizeBanner: { vi: 'Tuỳ Chỉnh Banner', en: 'Customize Feature' },
   homeViewEvents: { vi: 'Xem Sự Kiện', en: 'View Events' },
+  homeViewEventsShort: { vi: 'Sự Kiện', en: 'Events' },
   homeDirections: { vi: 'Chỉ Đường', en: 'Directions' },
   // Flip-clock countdown on the Home featured banner (Design F).
   countdownStartsIn: { vi: 'Bắt đầu sau', en: 'Starts in' },
@@ -328,12 +334,14 @@ export const translations = {
   countdownSeconds: { vi: 'Giây', en: 'Secs' },
   homeTapNavigate: { vi: 'Nhấn để điều hướng', en: 'Tap to navigate' },
   upcomingEventsUnit: { vi: 'sự kiện sắp tới', en: 'upcoming' },
+  upcomingEventsUnitShort: { vi: 'sắp tới', en: 'upcoming' },
   homeToday: { vi: 'Hôm nay', en: 'Today' },
   homeFridayTime: { vi: 'Thứ Sáu 6:30 PM', en: 'Fridays 6:30 PM' },
   homeSanctuary: { vi: 'Nhà Nguyện', en: 'Sanctuary' },
   homeDetails: { vi: 'Xem chi tiết', en: 'Details' },
   homeEditSchedule: { vi: 'Sửa Lịch', en: 'Edit Schedule' },
   homeWeeklyServices: { vi: 'Lịch Nhóm & Thờ Phượng Hàng Tuần', en: 'Weekly Worship Services & Gatherings' },
+  homeWeeklyServicesShort: { vi: 'Lịch Nhóm Hàng Tuần', en: 'Weekly Services' },
 
   // Youth section
   youthTitle: { vi: 'Mục Vụ Giới Trẻ VRC', en: 'VRC Youth & Young Adults' },

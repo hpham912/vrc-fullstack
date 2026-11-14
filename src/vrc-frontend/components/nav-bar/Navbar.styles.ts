@@ -29,14 +29,14 @@ export const navbarStyles = {
   settingsBtnInactive: 'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300',
   settingsBackdrop: 'fixed inset-0 z-40 bg-transparent cursor-pointer',
   settingsMenu:
-    'absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs overflow-hidden select-none',
+    'absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl border border-stone-200 shadow-xl py-1.5 z-50 text-xs overflow-hidden select-none',
   settingsToggleItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer transition-colors',
-  settingsItemLeft: 'flex items-center gap-2.5',
+    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between gap-2 text-stone-800 font-semibold cursor-pointer transition-colors',
+  settingsItemLeft: 'flex items-center gap-2.5 min-w-0',
   settingsItemIcon: 'w-4 h-4 text-amber-600 flex-shrink-0',
   settingsItemIconMuted: 'w-4 h-4 text-stone-600 flex-shrink-0',
   settingsFontItem:
-    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between text-stone-800 font-semibold cursor-pointer transition-colors',
+    'w-full px-3.5 py-2.5 text-left hover:bg-stone-50 flex items-center justify-between gap-2 text-stone-800 font-semibold cursor-pointer transition-colors',
   settingsFontBadgeBase: 'px-2 py-0.5 rounded-full text-caption font-bold tracking-wide transition-all',
   settingsFontBadgeOn: 'bg-amber-100 text-amber-950 font-bold',
   settingsFontBadgeOff: 'bg-stone-100 text-stone-500 font-medium',

@@ -1,5 +1,5 @@
 export const eventDetailModalStyles = {
-  detailModalBody: 'p-6 space-y-4 text-stone-900 dark:text-stone-100',
+  detailModalBody: 'p-6 max-sm:[.large-font_&]:p-4 space-y-4 max-sm:[.large-font_&]:space-y-3 text-stone-900 dark:text-stone-100',
   detailCard: 'space-y-2 text-xs',
   detailDateRow: 'flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-100',
   detailIcon: 'w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0',

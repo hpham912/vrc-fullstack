@@ -3,7 +3,7 @@
 // matches the other modals (p-6, same as DirectionsModal) so content
 // never touches the modal edges.
 export const youtubePlayerStyles = {
-  body: 'p-6 space-y-3',
+  body: 'p-6 max-sm:[.large-font_&]:p-4 space-y-3',
   frame: 'w-full aspect-video rounded-xl bg-stone-950 border-0',
   desc: 'text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-line break-words',
   meta: 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-stone-500 dark:text-stone-400',
