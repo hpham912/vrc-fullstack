@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext.tsx';
 import { Modal, Card, DirectionButtons, CalendarButtons, ZoomButton } from '../index.ts';
 import { formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { getCategoryLabel } from '../../utils/categoryTheme.ts';
+import { getDisplayAddress } from '../../utils/eventAddress.ts';
 import { eventDetailModalStyles as s } from './EventDetailModal.styles.ts';
 
 interface EventDetailModalProps {
@@ -55,7 +56,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, zoomM
                       : (event.locationEn || event.locationVi || event.location)}
                   </p>
                   {event.address && (
-                    <p className={s.detailAddress}>{event.address}</p>
+                    <p className={s.detailAddress}>{getDisplayAddress(event.address, t)}</p>
                   )}
                 </div>
               </div>

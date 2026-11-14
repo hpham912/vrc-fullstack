@@ -190,10 +190,10 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     applyEventValues(values);
     // Baseline keeps the RAW saved address, not the display default.
     // When the saved address was the church street address (or empty),
-    // the form shows the new default ("Liên hệ Hội Thánh"), so the form
-    // IS dirty and Save is enabled — otherwise this fix could never be
-    // saved, because the form would think nothing changed and the detail
-    // view would keep showing the old street address.
+    // the form shows the new default ("Liên lạc Ban Chấp Hành Hội Thánh"),
+    // so the form IS dirty and Save is enabled — otherwise this fix could
+    // never be saved, because the form would think nothing changed and the
+    // detail view would keep showing the old street address.
     baselineRef.current = { ...values, address: (evt.address || '').trim() };
     setEditingEventAudit({
       createdBy: evt.createdBy,

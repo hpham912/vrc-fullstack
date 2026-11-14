@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { MapPin, Navigation, Copy, Check } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { CHURCH_NAME, DEFAULT_EVENT_ADDRESS } from '../../constants/church.ts';
+import { CHURCH_NAME } from '../../constants/church.ts';
+import { isPlaceholderAddress, getDisplayAddress } from '../../utils/eventAddress.ts';
 import { Modal, Card, DirectionButtons, Button } from '../../common-component/index.ts';
 import { directionsModalStyles as s } from './DirectionsModal.styles.ts';
 
@@ -31,17 +32,18 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
     trimmedAddress.toLowerCase().includes('tempe, arizona') ||
     trimmedAddress.toLowerCase() === 'tempe, az' ||
     trimmedAddress.toLowerCase() === 'tempe az';
-  // The default placeholder ("Liên hệ Hội Thánh") and an empty address mean
-  // there is no street address to route to — the map-app prompt and the
-  // buttons are hidden entirely (see hasRoutableAddress below). A vague
-  // "Tempe" address still resolves to the church street address.
+  // The placeholder address ("contact the church board") and an empty
+  // address mean there is no street address to route to — the map-app
+  // prompt and the buttons are hidden entirely (see
+  // hasRoutableAddress below). A vague "Tempe" address still resolves
+  // to the church street address.
   const cleanAddress = (
-    trimmedAddress && trimmedAddress !== DEFAULT_EVENT_ADDRESS && isTempeOnly
+    trimmedAddress && !isPlaceholderAddress(trimmedAddress) && isTempeOnly
       ? fallbackAddress
       : trimmedAddress
   ).trim();
   const hasRoutableAddress =
-    Boolean(cleanAddress) && cleanAddress !== DEFAULT_EVENT_ADDRESS;
+    Boolean(cleanAddress) && !isPlaceholderAddress(cleanAddress);
 
   const handleCopy = async () => {
     try {
@@ -81,7 +83,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
                 </p>
               )}
               <p className={s.destAddress}>
-                {cleanAddress}
+                {getDisplayAddress(cleanAddress, t)}
               </p>
             </div>
           </div>
