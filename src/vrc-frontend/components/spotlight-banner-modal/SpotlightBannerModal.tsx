@@ -15,7 +15,13 @@ import {
   Palette,
   Zap,
   Check,
+  Wheat,
+  TreePine,
+  Cross,
+  Flame,
+  Landmark,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Modal, Button } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
@@ -32,17 +38,17 @@ interface ThemeOption {
   key: SpotlightTheme;
   labelVi: string;
   labelEn: string;
-  icon: string;
+  icon: LucideIcon;
   colorDot: string;
 }
 
 const THEME_OPTIONS: ThemeOption[] = [
-  { key: 'thanksgiving', labelVi: 'Lễ Tạ Ơn (Thanksgiving)', labelEn: 'Thanksgiving', icon: '🍂', colorDot: 'bg-amber-500' },
-  { key: 'christmas', labelVi: 'Lễ Giáng Sinh (Christmas)', labelEn: 'Christmas', icon: '🎄', colorDot: 'bg-red-600' },
-  { key: 'easter', labelVi: 'Đại Lễ Phục Sinh (Easter)', labelEn: 'Easter', icon: '✝️', colorDot: 'bg-purple-600' },
-  { key: 'revival', labelVi: 'Đại Hội Bồi Linh (Revival)', labelEn: 'Revival', icon: '🔥', colorDot: 'bg-blue-600' },
-  { key: 'special', labelVi: 'Giới Trẻ (Youth)', labelEn: 'Youth', icon: '✨', colorDot: 'bg-emerald-600' },
-  { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: '🏛️', colorDot: 'bg-stone-700' },
+  { key: 'thanksgiving', labelVi: 'Lễ Tạ Ơn (Thanksgiving)', labelEn: 'Thanksgiving', icon: Wheat, colorDot: 'bg-amber-500' },
+  { key: 'christmas', labelVi: 'Lễ Giáng Sinh (Christmas)', labelEn: 'Christmas', icon: TreePine, colorDot: 'bg-red-600' },
+  { key: 'easter', labelVi: 'Đại Lễ Phục Sinh (Easter)', labelEn: 'Easter', icon: Cross, colorDot: 'bg-purple-600' },
+  { key: 'revival', labelVi: 'Đại Hội Bồi Linh (Revival)', labelEn: 'Revival', icon: Flame, colorDot: 'bg-blue-600' },
+  { key: 'special', labelVi: 'Giới Trẻ (Youth)', labelEn: 'Youth', icon: Sparkles, colorDot: 'bg-emerald-600' },
+  { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: Landmark, colorDot: 'bg-stone-700' },
 ];
 
 // Form values, for dirty-checking: the Save button is only enabled
@@ -367,7 +373,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                     }`}
                   >
                     <div className={s.themeBtnContent}>
-                      <span className={s.themeBtnIcon}>{opt.icon}</span>
+                      <opt.icon className={s.themeBtnIcon} />
                       <span className={s.themeBtnText}>
                         {language === 'vi' ? opt.labelVi : opt.labelEn}
                       </span>

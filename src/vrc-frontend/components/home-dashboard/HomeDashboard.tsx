@@ -167,22 +167,67 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     };
   };
 
-  // Design E (Hoang's pick): one bright navy + gold look for the
-  // featured banner, in both the New Theme and Classic — the dark
-  // per-holiday gradients were too dark and blended into the page.
-  // The explicit hex colors below are outside the index.css remap
-  // palette, so this look is the same in both app themes and in dark
-  // mode. The theme picker still saves a theme, but the banner renders
-  // this one look for every theme.
-  const getBannerThemeClasses = (_theme: SpotlightTheme = 'thanksgiving') => {
-    return {
-      wrapper: 'bg-gradient-to-br from-[#143A75] via-[#0D2D64] to-[#081F47] border-2 border-[#E3B93B] ring-4 ring-[#C9A227]/20 shadow-2xl',
-      glow1: 'bg-[#E3B93B]/30',
-      glow2: 'bg-[#4a8ac9]/25',
-      badgeText: 'bg-[#E3B93B] text-[#0D2D64] border-[#E3B93B]',
-      btnPrimary: 'bg-[#E3B93B] hover:bg-[#F0D060] text-[#0D2D64] font-bold shadow-lg shadow-[#E3B93B]/25',
-      highlightTag: 'text-[#E3B93B]',
-    };
+  // Compute theme background styling and iconic motifs for the spotlight / holiday banner
+  const getBannerThemeClasses = (theme: SpotlightTheme = 'thanksgiving') => {
+    switch (theme) {
+      case 'thanksgiving':
+        return {
+          wrapper: 'bg-gradient-to-br from-[#2a1306] via-[#1c120c] to-[#3a1a08] border-amber-500/70 shadow-2xl ring-1 ring-amber-400/20',
+          glow1: 'bg-amber-500/35',
+          glow2: 'bg-orange-500/25',
+          badgeText: 'text-amber-200 border-amber-400/50 bg-amber-950/70',
+          btnPrimary: 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold shadow-lg shadow-amber-500/20',
+          highlightTag: 'text-amber-300',
+        };
+      case 'christmas':
+        return {
+          wrapper: 'bg-gradient-to-br from-[#2b080c] via-[#0e1d14] to-[#1a0a10] border-emerald-500/80 shadow-2xl ring-1 ring-red-400/40 shadow-[0_0_40px_rgba(220,38,38,0.2)]',
+          glow1: 'bg-red-600/30',
+          glow2: 'bg-emerald-600/30',
+          badgeText: 'text-amber-200 border-amber-300/50 bg-red-950/75',
+          btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-stone-950 font-bold shadow-lg shadow-amber-400/25',
+          highlightTag: 'text-red-300',
+        };
+      case 'easter':
+        return {
+          wrapper: 'bg-gradient-to-br from-[#200d33] via-[#181124] to-[#2c131a] border-purple-500/70 shadow-2xl ring-1 ring-amber-400/25',
+          glow1: 'bg-purple-500/30',
+          glow2: 'bg-amber-500/25',
+          badgeText: 'text-amber-200 border-purple-400/50 bg-purple-950/70',
+          btnPrimary: 'bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-stone-950 font-bold shadow-lg shadow-amber-400/20',
+          highlightTag: 'text-purple-300',
+        };
+      case 'revival':
+        return {
+          wrapper: 'bg-gradient-to-br from-[#0c1833] via-[#131124] to-[#360e15] border-cyan-400/70 shadow-2xl ring-1 ring-rose-400/30',
+          glow1: 'bg-cyan-500/30',
+          glow2: 'bg-rose-500/30',
+          badgeText: 'text-cyan-200 border-cyan-400/50 bg-blue-950/70',
+          btnPrimary: 'bg-gradient-to-r from-cyan-400 to-blue-400 hover:from-cyan-300 hover:to-blue-300 text-stone-950 font-bold shadow-lg shadow-cyan-400/20',
+          highlightTag: 'text-cyan-300',
+        };
+      case 'special':
+        return {
+          wrapper: 'bg-gradient-to-br from-[#092b23] via-[#101e2b] to-[#2a0e36] border-teal-400/70 shadow-2xl ring-1 ring-teal-400/25',
+          glow1: 'bg-teal-500/35',
+          glow2: 'bg-purple-500/30',
+          badgeText: 'text-teal-200 border-teal-400/50 bg-teal-950/70',
+          btnPrimary: 'bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-stone-950 font-bold shadow-lg shadow-teal-400/20',
+          highlightTag: 'text-teal-300',
+        };
+      default:
+        // Design E (Hoang's pick) — only the Classic theme gets the
+        // bright navy + gold look. The holiday themes above keep their
+        // own colors so each one still looks different.
+        return {
+          wrapper: 'bg-gradient-to-br from-[#143A75] via-[#0D2D64] to-[#081F47] border-2 border-[#E3B93B] ring-4 ring-[#C9A227]/20 shadow-2xl',
+          glow1: 'bg-[#E3B93B]/30',
+          glow2: 'bg-[#4a8ac9]/25',
+          badgeText: 'bg-[#E3B93B] text-[#0D2D64] border-[#E3B93B]',
+          btnPrimary: 'bg-[#E3B93B] hover:bg-[#F0D060] text-[#0D2D64] font-bold shadow-lg shadow-[#E3B93B]/25',
+          highlightTag: 'text-[#E3B93B]',
+        };
+    }
   };
 
   // Determine active theme: If theme is set to thanksgiving/christmas/easter/revival/special, ALWAYS honor it!

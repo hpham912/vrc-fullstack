@@ -26,7 +26,7 @@ export const spotlightBannerModalStyles = {
   themeBtnSelected: "border-amber-600 ring-2 ring-amber-500 bg-amber-50/90 text-amber-950 font-bold shadow-xs",
   themeBtnIdle: "border-stone-200 bg-stone-50/80 dark:bg-stone-800/80 hover:bg-white dark:hover:bg-stone-800 text-stone-800 hover:border-stone-300",
   themeBtnContent: "flex items-center gap-2 truncate",
-  themeBtnIcon: "text-base flex-shrink-0",
+  themeBtnIcon: "w-5 h-5 flex-shrink-0",
   themeBtnText: "text-xs truncate",
   colorDotBase: "w-2.5 h-2.5 rounded-full flex-shrink-0",
   colorDotSelected: "ring-2 ring-white shadow-xs",
