@@ -12,7 +12,7 @@ export const homeDashboardStyles = {
   customizeBtn:
     'inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 active:scale-95 text-white rounded-xl text-xs font-bold border border-white/30 transition-all shadow-xs cursor-pointer z-20',
   heroTitleGroup: 'space-y-1.5',
-  heroTitle: 'text-xl sm:text-3xl max-sm:[.large-font_&]:text-lg font-serif font-bold tracking-tight text-white leading-tight break-words',
+  heroTitle: 'text-2xl sm:text-3xl max-sm:[.large-font_&]:text-xl font-serif font-bold tracking-tight text-white leading-tight break-words',
   heroSubtitleBox:
     'p-2.5 sm:p-3 rounded-2xl bg-black/35 border border-white/15 text-stone-100 text-xs sm:text-sm italic font-serif leading-relaxed max-w-2xl',
   heroDesc: 'text-xs sm:text-sm text-stone-100 font-medium leading-relaxed max-w-xl pt-0.5 whitespace-pre-line',
