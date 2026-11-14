@@ -20,10 +20,10 @@
             document.documentElement.classList.add('dark');
           }
           var colorTheme = localStorage.getItem('vrc_color_theme');
-          if (colorTheme === 'new' || colorTheme === 'bluegold') {
-            document.documentElement.classList.add('theme-bluegold');
-          } else {
+          if (colorTheme === 'blackgold') {
             document.documentElement.classList.add('theme-blackgold');
+          } else {
+            document.documentElement.classList.add('theme-bluegold');
           }
           var font = localStorage.getItem('vrc_large_font');
           if (font === '1') {

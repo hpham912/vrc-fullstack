@@ -292,7 +292,7 @@ export const translations = {
   navSettings: { vi: 'Cài đặt', en: 'Settings' },
   navDarkMode: { vi: 'Chế độ tối', en: 'Dark Mode' },
   navLargerText: { vi: 'Cỡ chữ lớn (A+)', en: 'Larger Text (A+)' },
-  navNewTheme: { vi: 'Giao diện mới', en: 'New Theme' },
+  navLegacyTheme: { vi: 'Giao diện cũ', en: 'Legacy Theme' },
 
   // Daily verse card
   verseAddTitle: { vi: 'Thêm Câu Kinh Thánh', en: 'Add Scripture' },

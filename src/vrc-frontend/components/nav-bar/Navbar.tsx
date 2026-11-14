@@ -107,12 +107,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   });
 
-  // Color theme: Blue & Gold (theme-bluegold) vs Classic Black & Gold (theme-blackgold).
+  // Color theme: Default Blue & Gold (theme-bluegold) vs Legacy Black & Gold (theme-blackgold).
   // Both themes have dedicated CSS files in src/styles/ (imported by index.css).
-  const [isNewTheme, setIsNewTheme] = useState(() => {
+  const [isLegacyTheme, setIsLegacyTheme] = useState(() => {
     try {
       const stored = localStorage.getItem('vrc_color_theme');
-      return stored === 'new' || stored === 'bluegold' || document.documentElement.classList.contains('theme-bluegold');
+      return stored === 'blackgold' || document.documentElement.classList.contains('theme-blackgold');
     } catch {
       return false;
     }
@@ -304,31 +304,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </span>
                     </button>
 
-                    {/* Blue & Gold vs Black & Gold Theme Toggle */}
+                    {/* Legacy Black & Gold vs Default Blue & Gold Theme Toggle */}
                     <button
                       onClick={() => {
-                        const next = !isNewTheme;
-                        setIsNewTheme(next);
-                        document.documentElement.classList.toggle('theme-bluegold', next);
-                        document.documentElement.classList.toggle('theme-blackgold', !next);
+                        const next = !isLegacyTheme;
+                        setIsLegacyTheme(next);
+                        document.documentElement.classList.toggle('theme-blackgold', next);
+                        document.documentElement.classList.toggle('theme-bluegold', !next);
                         try {
-                          localStorage.setItem('vrc_color_theme', next ? 'bluegold' : 'blackgold');
+                          localStorage.setItem('vrc_color_theme', next ? 'blackgold' : 'bluegold');
                         } catch {}
                       }}
                       className={s.settingsToggleItem}
                       role="switch"
-                      aria-checked={isNewTheme}
+                      aria-checked={isLegacyTheme}
                     >
                       <div className={s.settingsItemLeft}>
                         <Palette className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300 flex-shrink-0" />
-                        <span>{t('navNewTheme')}</span>
+                        <span>{t('navLegacyTheme')}</span>
                       </div>
                       <span
                         className={`${s.settingsFontBadgeBase} ${
-                          isNewTheme ? s.settingsFontBadgeOn : s.settingsFontBadgeOff
+                          isLegacyTheme ? s.settingsFontBadgeOn : s.settingsFontBadgeOff
                         }`}
                       >
-                        {isNewTheme ? 'ON' : 'OFF'}
+                        {isLegacyTheme ? 'ON' : 'OFF'}
                       </span>
                     </button>
 
