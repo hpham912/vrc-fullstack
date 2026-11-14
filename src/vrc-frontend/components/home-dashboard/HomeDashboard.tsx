@@ -74,7 +74,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
   // Directions routing modal state
   const [directionsModalOpen, setDirectionsModalOpen] = React.useState(false);
-  const [directionsTarget, setDirectionsTarget] = React.useState({ name: '', address: '' });
+  const [directionsTarget, setDirectionsTarget] = React.useState<{ name: string; address: string; location?: string }>({ name: '', address: '' });
   const [selectedDetailEvent, setSelectedDetailEvent] = React.useState<ChurchEvent | null>(null);
 
   // Current date in YYYY-MM-DD
@@ -612,6 +612,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         onClose={() => setDirectionsModalOpen(false)}
         destinationName={directionsTarget.name}
         address={directionsTarget.address}
+        location={directionsTarget.location}
       />
 
       {/* Event Details Popup Modal */}

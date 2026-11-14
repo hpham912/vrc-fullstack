@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, Navigation, Copy, Check } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { CHURCH_NAME } from '../../constants/church.ts';
+import { CHURCH_NAME, DEFAULT_EVENT_ADDRESS } from '../../constants/church.ts';
 import { Modal, Card, DirectionButtons, Button } from '../../common-component/index.ts';
 import { directionsModalStyles as s } from './DirectionsModal.styles.ts';
 
@@ -10,6 +10,7 @@ interface DirectionsModalProps {
   onClose: () => void;
   destinationName?: string;
   address?: string;
+  location?: string;
 }
 
 export const DirectionsModal: React.FC<DirectionsModalProps> = ({
@@ -17,6 +18,7 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
   onClose,
   destinationName = CHURCH_NAME.en,
   address = CHURCH_NAME.address,
+  location,
 }) => {
   const { language, t } = useLanguage();
   const [copied, setCopied] = useState(false);
@@ -24,7 +26,22 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
   if (!isOpen) return null;
 
   const fallbackAddress = CHURCH_NAME.address;
-  const cleanAddress = (address && !address.toLowerCase().includes('tempe, arizona') && address.toLowerCase() !== 'tempe, az' && address.toLowerCase() !== 'tempe az' ? address : fallbackAddress).trim();
+  const trimmedAddress = (address || '').trim();
+  const isTempeOnly =
+    trimmedAddress.toLowerCase().includes('tempe, arizona') ||
+    trimmedAddress.toLowerCase() === 'tempe, az' ||
+    trimmedAddress.toLowerCase() === 'tempe az';
+  // The default placeholder ("Liên hệ Hội Thánh") and an empty address mean
+  // there is no street address to route to — the map-app prompt and the
+  // buttons are hidden entirely (see hasRoutableAddress below). A vague
+  // "Tempe" address still resolves to the church street address.
+  const cleanAddress = (
+    trimmedAddress && trimmedAddress !== DEFAULT_EVENT_ADDRESS && isTempeOnly
+      ? fallbackAddress
+      : trimmedAddress
+  ).trim();
+  const hasRoutableAddress =
+    Boolean(cleanAddress) && cleanAddress !== DEFAULT_EVENT_ADDRESS;
 
   const handleCopy = async () => {
     try {
@@ -58,6 +75,11 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
               <p className={s.destName}>
                 {destinationName}
               </p>
+              {location?.trim() && (
+                <p className={s.destAddress}>
+                  {location.trim()}
+                </p>
+              )}
               <p className={s.destAddress}>
                 {cleanAddress}
               </p>
@@ -88,16 +110,20 @@ export const DirectionsModal: React.FC<DirectionsModalProps> = ({
           </div>
         </Card>
 
-        <p className={s.promptText}>
-          {t('dirChooseApp')}
-        </p>
+        {hasRoutableAddress && (
+          <>
+            <p className={s.promptText}>
+              {t('dirChooseApp')}
+            </p>
 
-        {/* Common Reusable Map Choices */}
-        <DirectionButtons
-          address={cleanAddress}
-          variant="detailed"
-          onSelect={onClose}
-        />
+            {/* Common Reusable Map Choices */}
+            <DirectionButtons
+              address={cleanAddress}
+              variant="detailed"
+              onSelect={onClose}
+            />
+          </>
+        )}
       </div>
 
       {/* Footer */}

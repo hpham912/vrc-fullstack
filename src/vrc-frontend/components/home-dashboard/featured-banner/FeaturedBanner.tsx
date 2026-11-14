@@ -25,7 +25,7 @@ interface FeaturedBannerProps {
   isAdmin: boolean;
   onOpenSpotlightEditor?: () => void;
   onNavigateTab: (tab: string) => void;
-  onOpenDirections: (target: { name: string; address: string }) => void;
+  onOpenDirections: (target: { name: string; address: string; location?: string }) => void;
 }
 
 // Compute theme background styling and iconic motifs for the spotlight / holiday banner.
@@ -259,6 +259,7 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
               onOpenDirections({
                 name: displayTitle,
                 address: displayAddress,
+                location: activeEvent?.location,
               });
             }}
             leftIcon={<Navigation className="w-3.5 h-3.5 text-amber-300" />}
