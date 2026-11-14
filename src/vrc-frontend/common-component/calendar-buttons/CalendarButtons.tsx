@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CalendarPlus, ChevronDown, Download } from 'lucide-react';
 import { ChurchEvent } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { getGoogleCalendarUrl, downloadIcsFile } from '../../utils/calendar.ts';
+import { getGoogleCalendarUrl, getOutlookCalendarUrl, downloadIcsFile } from '../../utils/calendar.ts';
 import { calendarButtonsStyles as s } from './CalendarButtons.styles.ts';
 
 interface CalendarButtonsProps {
@@ -11,6 +11,7 @@ interface CalendarButtonsProps {
   showIcal?: boolean;
   gcalLabel?: string;
   icalLabel?: string;
+  outlookLabel?: string;
   stopPropagation?: boolean;
   className?: string;
 }
@@ -21,6 +22,7 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
   showIcal = true,
   gcalLabel,
   icalLabel,
+  outlookLabel,
   stopPropagation = false,
   className = '',
 }) => {
@@ -90,6 +92,20 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
                   <span>Apple</span>
                 </button>
               )}
+              <a
+                href={getOutlookCalendarUrl(event)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  handleStop(e);
+                  setMenuOpen(false);
+                }}
+                className={s.menuItem}
+                role="menuitem"
+              >
+                <CalendarPlus className={s.menuItemOutlookIcon} />
+                <span>Outlook</span>
+              </a>
             </div>
           </>
         )}
@@ -123,6 +139,16 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
             <span>{icalLabel || 'Apple'}</span>
           </button>
         )}
+        <a
+          href={getOutlookCalendarUrl(event)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleStop}
+          className={s.fullOutlookBtn}
+        >
+          <CalendarPlus className={s.fullOutlookIcon} />
+          <span>{outlookLabel || 'Outlook'}</span>
+        </a>
       </div>
     );
   }
@@ -152,6 +178,16 @@ export const CalendarButtons: React.FC<CalendarButtonsProps> = ({
           <span>{icalLabel || 'iCal'}</span>
         </button>
       )}
+      <a
+        href={getOutlookCalendarUrl(event)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={handleStop}
+        className={s.compactOutlookBtn}
+      >
+        <CalendarPlus className={s.compactOutlookIcon} />
+        <span>{outlookLabel || 'Outlook'}</span>
+      </a>
     </div>
   );
 };

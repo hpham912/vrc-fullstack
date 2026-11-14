@@ -64,6 +64,30 @@ export function getGoogleCalendarUrl(event: ChurchEvent): string {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=${location}`;
 }
 
+// Generates an Outlook (Microsoft 365 / Outlook.com / Exchange Online)
+// web link for a church event — opens a new event pre-filled in Outlook
+// on the web, the same way the Google link opens Google Calendar.
+// The .ics download (Apple button) is the fallback for Outlook desktop
+// and on-premises Exchange, which the web link cannot reach.
+export function getOutlookCalendarUrl(event: ChurchEvent): string {
+  const start = getEventStartDate(event);
+  const end = getEventEndDate(event);
+  if (!start || !end) return 'https://outlook.live.com/calendar/0/';
+  // Local time as ISO (no timezone suffix) so Outlook reads the same
+  // wall-clock time the event was entered with — toISOString() would
+  // shift it to UTC.
+  const toLocalIso = (date: Date): string => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  };
+  const subject = encodeURIComponent(event.title);
+  const body = encodeURIComponent(
+    `${event.description}\n\nLocation: ${event.location}${event.address ? `, ${event.address}` : ''}`
+  );
+  const location = encodeURIComponent(`${event.location}${event.address ? `, ${event.address}` : ''}`);
+  return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${subject}&startdt=${encodeURIComponent(toLocalIso(start))}&enddt=${encodeURIComponent(toLocalIso(end))}&body=${body}&location=${location}`;
+}
+
 // Downloads an .ics iCalendar file for Apple Calendar, Outlook, etc.
 export function downloadIcsFile(event: ChurchEvent) {
   const cleanDate = event.date.replace(/-/g, '');
