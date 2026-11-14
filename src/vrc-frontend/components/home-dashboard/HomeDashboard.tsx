@@ -167,30 +167,39 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     };
   };
 
-  // Compute theme background styling and iconic motifs for the spotlight / holiday banner
+  // Compute theme background styling and iconic motifs for the spotlight / holiday banner.
+  // Every theme uses the same border design (Hoang's pick from Classic / Design E):
+  // a 2px solid border + a 4px ring halo, in that theme's own accent color.
+  // Dark mode gets a darker gradient (same hue, darker stops) so the banner
+  // reads darker when the app is dark; the border + text stay bright.
   const getBannerThemeClasses = (theme: SpotlightTheme = 'thanksgiving') => {
     switch (theme) {
       case 'thanksgiving':
+        // Redesigned (Hoang): more orange and a bit lighter so it is easier to see.
         return {
-          wrapper: 'bg-gradient-to-br from-[#2a1306] via-[#1c120c] to-[#3a1a08] border-amber-500/70 shadow-2xl ring-1 ring-amber-400/20',
-          glow1: 'bg-amber-500/35',
-          glow2: 'bg-orange-500/25',
+          wrapper: 'bg-gradient-to-br from-[#8a4a16] via-[#5c2e0b] to-[#9c5a1a] dark:from-[#5a2f0e] dark:via-[#3a1d06] dark:to-[#6b3d10] border-2 border-orange-400 ring-4 ring-orange-400/20 shadow-2xl',
+          glow1: 'bg-orange-500/40',
+          glow2: 'bg-amber-500/30',
           badgeText: 'text-amber-200 border-amber-400/50 bg-amber-950/70',
-          btnPrimary: 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold shadow-lg shadow-amber-500/20',
+          btnPrimary: 'bg-gradient-to-r from-orange-500 to-amber-400 hover:from-orange-400 hover:to-amber-300 text-stone-950 font-bold shadow-lg shadow-orange-500/20',
           highlightTag: 'text-amber-300',
         };
       case 'christmas':
+        // Redesigned (Hoang): more green and red, and the two glow orbs are
+        // stronger so they read as blurry Christmas lights (soft light
+        // behind a mirror). The glows are the banner's two blurred circles
+        // (top-right = glow1, bottom-left = glow2).
         return {
-          wrapper: 'bg-gradient-to-br from-[#2b080c] via-[#0e1d14] to-[#1a0a10] border-emerald-500/80 shadow-2xl ring-1 ring-red-400/40 shadow-[0_0_40px_rgba(220,38,38,0.2)]',
-          glow1: 'bg-red-600/30',
-          glow2: 'bg-emerald-600/30',
+          wrapper: 'bg-gradient-to-br from-[#991b1b] via-[#166534] to-[#991b1b] dark:from-[#5f1414] dark:via-[#0f3d20] dark:to-[#5f1414] border-2 border-red-500 ring-4 ring-red-500/20 shadow-2xl shadow-[0_0_40px_rgba(220,38,38,0.2)]',
+          glow1: 'bg-red-500/50',
+          glow2: 'bg-emerald-500/50',
           badgeText: 'text-amber-200 border-amber-300/50 bg-red-950/75',
           btnPrimary: 'bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-stone-950 font-bold shadow-lg shadow-amber-400/25',
           highlightTag: 'text-red-300',
         };
       case 'easter':
         return {
-          wrapper: 'bg-gradient-to-br from-[#200d33] via-[#181124] to-[#2c131a] border-purple-500/70 shadow-2xl ring-1 ring-amber-400/25',
+          wrapper: 'bg-gradient-to-br from-[#200d33] via-[#181124] to-[#2c131a] dark:from-[#150822] dark:via-[#0f0a18] dark:to-[#1d0c12] border-2 border-purple-400 ring-4 ring-purple-400/20 shadow-2xl',
           glow1: 'bg-purple-500/30',
           glow2: 'bg-amber-500/25',
           badgeText: 'text-amber-200 border-purple-400/50 bg-purple-950/70',
@@ -199,7 +208,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         };
       case 'revival':
         return {
-          wrapper: 'bg-gradient-to-br from-[#0c1833] via-[#131124] to-[#360e15] border-cyan-400/70 shadow-2xl ring-1 ring-rose-400/30',
+          wrapper: 'bg-gradient-to-br from-[#0c1833] via-[#131124] to-[#360e15] dark:from-[#081022] dark:via-[#0c0a18] dark:to-[#240910] border-2 border-cyan-400 ring-4 ring-cyan-400/20 shadow-2xl',
           glow1: 'bg-cyan-500/30',
           glow2: 'bg-rose-500/30',
           badgeText: 'text-cyan-200 border-cyan-400/50 bg-blue-950/70',
@@ -208,7 +217,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         };
       case 'special':
         return {
-          wrapper: 'bg-gradient-to-br from-[#092b23] via-[#101e2b] to-[#2a0e36] border-teal-400/70 shadow-2xl ring-1 ring-teal-400/25',
+          wrapper: 'bg-gradient-to-br from-[#092b23] via-[#101e2b] to-[#2a0e36] dark:from-[#061d17] dark:via-[#0a141d] dark:to-[#1c0924] border-2 border-teal-400 ring-4 ring-teal-400/20 shadow-2xl',
           glow1: 'bg-teal-500/35',
           glow2: 'bg-purple-500/30',
           badgeText: 'text-teal-200 border-teal-400/50 bg-teal-950/70',
@@ -220,7 +229,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         // bright navy + gold look. The holiday themes above keep their
         // own colors so each one still looks different.
         return {
-          wrapper: 'bg-gradient-to-br from-[#143A75] via-[#0D2D64] to-[#081F47] border-2 border-[#E3B93B] ring-4 ring-[#C9A227]/20 shadow-2xl',
+          wrapper: 'bg-gradient-to-br from-[#143A75] via-[#0D2D64] to-[#081F47] dark:from-[#0c2347] dark:via-[#081a33] dark:to-[#040d1a] border-2 border-[#E3B93B] ring-4 ring-[#C9A227]/20 shadow-2xl',
           glow1: 'bg-[#E3B93B]/30',
           glow2: 'bg-[#4a8ac9]/25',
           badgeText: 'bg-[#E3B93B] text-[#0D2D64] border-[#E3B93B]',
