@@ -16,7 +16,6 @@ import {
   ArrowRight,
   Sliders,
   CalendarPlus,
-  Compass,
   Navigation,
   PenTool,
 } from 'lucide-react';
@@ -398,7 +397,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 setDirectionsModalOpen(true);
               }}
               leftIcon={<Navigation className="w-3.5 h-3.5 text-amber-300" />}
-              rightIcon={<Compass className="w-3 h-3 text-stone-200" />}
             >
               <span>{t('homeDirections')}</span>
             </Button>
