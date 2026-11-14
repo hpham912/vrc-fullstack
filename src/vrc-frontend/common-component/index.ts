@@ -21,6 +21,8 @@ export { SegmentedControl } from './segmented-control/SegmentedControl.tsx';
 export type { SegmentedControlProps, SegmentedControlOption } from './segmented-control/SegmentedControl.tsx';
 export { Badge } from './badge/Badge.tsx';
 export type { BadgeProps, BadgeTone } from './badge/Badge.tsx';
+export { BannerBadge } from './banner-badge/BannerBadge.tsx';
+export type { BannerBadgeProps } from './banner-badge/BannerBadge.tsx';
 export { FilterBar } from './filter-bar/FilterBar.tsx';
 export type { FilterBarProps, FilterBarOption } from './filter-bar/FilterBar.tsx';
 export { ReadAloudButton } from './read-aloud/ReadAloudButton.tsx';

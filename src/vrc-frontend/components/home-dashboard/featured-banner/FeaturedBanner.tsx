@@ -8,7 +8,7 @@ import {
   Sliders,
   Navigation,
 } from 'lucide-react';
-import { Button, CountdownTimer } from '../../../common-component/index.ts';
+import { Button, CountdownTimer, BannerBadge } from '../../../common-component/index.ts';
 import { CHURCH_NAME } from '../../../constants/church.ts';
 import {
   formatDateLocale,
@@ -188,9 +188,9 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
       <div className={s.heroContent}>
         {/* Top Row: Clean Themed Badge Pill + Admin Customizer Button */}
         <div className={s.heroTopRow}>
-          <div className={`${s.heroBadgeBase} ${bannerTheme.badgeText}`}>
-            <span className="truncate">{language === 'vi' ? (spotlightConfig?.badgeVi || (displayBadge || '')) : (spotlightConfig?.badgeEn || (displayBadge || ''))}</span>
-          </div>
+          <BannerBadge className={bannerTheme.badgeText}>
+            {language === 'vi' ? (spotlightConfig?.badgeVi || (displayBadge || '')) : (spotlightConfig?.badgeEn || (displayBadge || ''))}
+          </BannerBadge>
 
           {isAdmin && onOpenSpotlightEditor && (
             <Button

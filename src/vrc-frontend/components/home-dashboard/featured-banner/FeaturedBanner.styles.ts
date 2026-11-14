@@ -5,8 +5,6 @@ export const featuredBannerStyles = {
   glowBottomLeft: 'absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 rounded-full blur-3xl pointer-events-none',
   heroContent: 'relative z-10 space-y-3.5 max-sm:[.large-font_&]:space-y-3',
   heroTopRow: 'flex items-center justify-between gap-2',
-  heroBadgeBase:
-    'inline-flex items-center px-3 max-sm:[.large-font_&]:px-2.5 py-1 rounded-full backdrop-blur-md border text-label font-semibold max-w-[calc(100%-80px)] sm:max-w-none truncate',
   heroTitleGroup: 'space-y-1.5',
   heroTitle: 'text-2xl sm:text-3xl max-sm:[.large-font_&]:text-xl font-serif font-bold tracking-tight text-white leading-tight break-words',
   heroSubtitleBox:
