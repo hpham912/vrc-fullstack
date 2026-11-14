@@ -168,6 +168,12 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
     ? (activeEvent ? (activeEvent.location || displayAddress) : displayAddress)
     : (activeEvent ? (activeEvent.location || displayAddress) : (spotlightConfig.locationTag || displayAddress));
 
+  // The venue name in the current app language — the location chip
+  // and the Directions button both use this, so they stay in sync.
+  const displayLocation = language === 'vi'
+    ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || (displayLocationTag || ''))
+    : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || (displayLocationTag || ''));
+
   // Countdown target for the flip-clock on the featured banner —
   // the featured event's start. Null when there is no featured
   // event (the countdown hides itself).
@@ -232,7 +238,7 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
           )}
           <span className={s.metaChip}>
             <MapPin className={s.metaChipIcon} />
-            <span>{language === 'vi' ? (activeEvent?.locationVi || spotlightConfig?.locationTagVi || (displayLocationTag || '')) : (activeEvent?.locationEn || spotlightConfig?.locationTagEn || (displayLocationTag || ''))}</span>
+            <span>{displayLocation}</span>
           </span>
         </div>
 
@@ -259,7 +265,7 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
               onOpenDirections({
                 name: displayTitle,
                 address: displayAddress,
-                location: activeEvent?.location,
+                location: displayLocation || undefined,
               });
             }}
             leftIcon={<Navigation className="w-3.5 h-3.5 text-amber-300" />}

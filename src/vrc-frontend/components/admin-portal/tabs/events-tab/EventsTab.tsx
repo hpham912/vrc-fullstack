@@ -43,7 +43,8 @@ type EventFormValues = {
   date: string;
   startTime: string;
   endTime: string;
-  location: string;
+  locationVi: string;
+  locationEn: string;
   address: string;
   isFeatured: boolean;
   hasZoom: boolean;
@@ -64,7 +65,8 @@ const getDefaultEventValues = (organizer: string, organizerEmail: string): Event
   date: getTodayStr(),
   startTime: '03:00 PM',
   endTime: '05:00 PM',
-  location: 'Main Sanctuary',
+  locationVi: 'Main Sanctuary',
+  locationEn: 'Main Sanctuary',
   address: DEFAULT_EVENT_ADDRESS,
   isFeatured: false,
   hasZoom: false,
@@ -108,7 +110,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
   const [eventStartTime, setEventStartTime] = useState('03:00 PM');
   const [eventEndTime, setEventEndTime] = useState('05:00 PM');
-  const [eventLocation, setEventLocation] = useState('Main Sanctuary');
+  const [eventLocationVi, setEventLocationVi] = useState('Main Sanctuary');
+  const [eventLocationEn, setEventLocationEn] = useState('Main Sanctuary');
   const [eventAddress, setEventAddress] = useState(DEFAULT_EVENT_ADDRESS);
   const [eventIsFeatured, setEventIsFeatured] = useState(false);
   const [eventHasZoom, setEventHasZoom] = useState(false);
@@ -139,7 +142,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     setEventDate(values.date);
     setEventStartTime(values.startTime);
     setEventEndTime(values.endTime);
-    setEventLocation(values.location);
+    setEventLocationVi(values.locationVi);
+    setEventLocationEn(values.locationEn);
     setEventAddress(values.address);
     setEventIsFeatured(values.isFeatured);
     setEventHasZoom(values.hasZoom);
@@ -162,7 +166,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       date: evt.date,
       startTime: evt.startTime,
       endTime: evt.endTime || '',
-      location: evt.location,
+      locationVi: evt.locationVi || evt.location,
+      locationEn: evt.locationEn || evt.location,
       address: !savedAddr || savedAddr === churchAddr ? DEFAULT_EVENT_ADDRESS : savedAddr,
       isFeatured: evt.isFeatured,
       hasZoom: evt.hasZoom || false,
@@ -210,7 +215,8 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     eventDate !== baseline.date ||
     eventStartTime !== baseline.startTime ||
     eventEndTime !== baseline.endTime ||
-    eventLocation !== baseline.location ||
+    eventLocationVi !== baseline.locationVi ||
+    eventLocationEn !== baseline.locationEn ||
     eventAddress !== baseline.address ||
     eventIsFeatured !== baseline.isFeatured ||
     eventHasZoom !== baseline.hasZoom ||
@@ -219,7 +225,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eventTitleVi.trim() || !eventTitleEn.trim() || !eventDescriptionVi.trim() || !eventDescriptionEn.trim() || !eventDate || !eventStartTime || !eventLocation) {
+    if (!eventTitleVi.trim() || !eventTitleEn.trim() || !eventDescriptionVi.trim() || !eventDescriptionEn.trim() || !eventDate || !eventStartTime || !eventLocationVi.trim() || !eventLocationEn.trim()) {
       showFeedback('error', t('adminEventFillBoth'));
       return;
     }
@@ -238,7 +244,9 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         date: eventDate,
         startTime: eventStartTime,
         endTime: eventEndTime || null,
-        location: eventLocation.trim(),
+        location: eventLocationEn.trim(),
+        locationVi: eventLocationVi.trim(),
+        locationEn: eventLocationEn.trim(),
         // Empty address means "contact the church" — never the church
         // street address. The street address is only saved when the admin
         // explicitly taps "Use church address".
@@ -274,7 +282,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       // Dispatch local/push notification
       NotificationClient.triggerNotification(
         `New Church Event: ${eventTitleEn.trim()}`,
-        `${eventDate} • ${eventStartTime} at ${eventLocation.trim()}`
+        `${eventDate} • ${eventStartTime} at ${eventLocationEn.trim()}`
       );
 
       resetEventForm();
@@ -389,7 +397,9 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     date: eventDate,
     startTime: eventStartTime,
     endTime: eventEndTime || null,
-    location: eventLocation,
+    location: eventLocationEn,
+    locationVi: eventLocationVi,
+    locationEn: eventLocationEn,
     address: eventAddress,
     isFeatured: eventIsFeatured,
     hasZoom: eventHasZoom,
@@ -426,7 +436,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                       )}
                     </div>
                     <p className={s.itemDetails}>
-                      {evt.date} • {evt.startTime} • {evt.location}{evt.address && evt.address !== evt.location ? ` • ${evt.address}` : ''}
+                      {evt.date} • {evt.startTime} • {(language === 'vi' ? (evt.locationVi || evt.location) : (evt.locationEn || evt.location))}{evt.address && evt.address !== evt.location ? ` • ${evt.address}` : ''}
                     </p>
                   </div>
 
@@ -616,14 +626,28 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 
           <div className={s.field}>
             <label className={s.label}>
-              {t('adminEventLocation')}
+              {t('adminEventLocationVi')}
             </label>
             <input
               type="text"
               required
               placeholder="Main Sanctuary, Fellowship Hall..."
-              value={eventLocation}
-              onChange={(e) => setEventLocation(e.target.value)}
+              value={eventLocationVi}
+              onChange={(e) => setEventLocationVi(e.target.value)}
+              className={s.input}
+            />
+          </div>
+
+          <div className={s.field}>
+            <label className={s.label}>
+              {t('adminEventLocationEn')}
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Main Sanctuary, Fellowship Hall..."
+              value={eventLocationEn}
+              onChange={(e) => setEventLocationEn(e.target.value)}
               className={s.input}
             />
           </div>
@@ -776,7 +800,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 <span className={s.previewMetaItem}>
                   <MapPin className={s.previewMetaIcon} />
                   <span className={s.previewLocation}>
-                    {eventLocation || 'Main Sanctuary'} • {eventAddress.trim() || churchInfo?.address || 'Tempe, AZ'}
+                    {(previewLang === 'vi' ? (eventLocationVi || eventLocationEn) : (eventLocationEn || eventLocationVi)) || 'Main Sanctuary'} • {eventAddress.trim() || churchInfo?.address || 'Tempe, AZ'}
                   </span>
                 </span>
               </div>

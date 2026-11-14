@@ -149,6 +149,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       startTime,
       endTime,
       location,
+      locationVi,
+      locationEn,
       address,
       imageUrl,
       isFeatured,
@@ -162,9 +164,11 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
     const finalTitleVi = String(titleVi || title || titleEn || '').trim();
     const finalDescEn = String(descriptionEn || description || descriptionVi || '').trim();
     const finalDescVi = String(descriptionVi || description || descriptionEn || '').trim();
-    const finalLocation = String(location || '').trim();
+    const finalLocationVi = String(locationVi || location || locationEn || '').trim();
+    const finalLocationEn = String(locationEn || location || locationVi || '').trim();
+    const finalLocation = finalLocationEn;
 
-    if (!finalTitleEn || !finalTitleVi || !finalDescEn || !finalDescVi || !date || !startTime || !finalLocation) {
+    if (!finalTitleEn || !finalTitleVi || !finalDescEn || !finalDescVi || !date || !startTime || !finalLocationVi || !finalLocationEn) {
       return res.status(400).json({
         error: 'Vietnamese and English titles, descriptions, date, start time, and location are required.',
       });
@@ -184,8 +188,8 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       startTime,
       endTime: endTime || null,
       location: finalLocation,
-      locationVi: finalLocation,
-      locationEn: finalLocation,
+      locationVi: finalLocationVi,
+      locationEn: finalLocationEn,
       address: address ? String(address).trim() : 'Tempe, Arizona',
       imageUrl: imageUrl || null,
       isFeatured: Boolean(isFeatured),
@@ -248,6 +252,8 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       startTime,
       endTime,
       location,
+      locationVi,
+      locationEn,
       address,
       imageUrl,
       isFeatured,
@@ -273,6 +279,11 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         : description !== undefined
         ? String(description).trim()
         : undefined;
+    const finalLocationVi =
+      locationVi !== undefined ? String(locationVi).trim() : location !== undefined ? String(location).trim() : undefined;
+    const finalLocationEn =
+      locationEn !== undefined ? String(locationEn).trim() : location !== undefined ? String(location).trim() : undefined;
+    const finalLocation = finalLocationEn;
     const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
 
     const updated = await db
@@ -288,9 +299,9 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
         date,
         startTime,
         endTime,
-        location: location ? String(location).trim() : undefined,
-        locationVi: location ? String(location).trim() : undefined,
-        locationEn: location ? String(location).trim() : undefined,
+        location: finalLocation,
+        locationVi: finalLocationVi,
+        locationEn: finalLocationEn,
         address: address ? String(address).trim() : undefined,
         imageUrl,
         isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : undefined,
