@@ -204,7 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={s.mobileLangBtn}
               title="Switch language"
             >
-              <span className={s.mobileLangText}>{language === 'vi' ? 'English' : 'Tiếng Việt'}</span>
+              <span className={s.mobileLangText}>{language === 'vi' ? 'EN' : 'VI'}</span>
             </button>
 
             {/* Language Switcher: Desktop Pill (hidden on mobile, where
