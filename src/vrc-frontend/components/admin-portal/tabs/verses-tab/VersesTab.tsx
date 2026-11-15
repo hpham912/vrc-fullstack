@@ -397,6 +397,34 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         </p>
       </section>
 
+      {/* Verse Pool */}
+      <section className={versesTabStyles.section}>
+        <div className={versesTabStyles.poolHead}>
+          <h3 className={versesTabStyles.sectionTitle}>{t('poolListTitle')}</h3>
+          <span className={versesTabStyles.poolCount}>{t('poolCount', { count: pool?.length ?? 0 })}</span>
+        </div>
+        {loadingPool ? (
+          <Loading text={t('loading')} />
+        ) : pool && pool.length > 0 ? (
+          <FilterBar
+            options={poolOptions}
+            value={editingPoolId ? String(editingPoolId) : ''}
+            onChange={(value) => {
+              const found = pool.find((poolVerse) => String(poolVerse.id) === value);
+              if (found) handleEditPoolVerse(found);
+            }}
+            onRemove={(value) => {
+              const found = pool.find((poolVerse) => String(poolVerse.id) === value);
+              if (found) setRemoveTarget(found);
+            }}
+            removeLabel={(label) => t('poolRemoveAria', { ref: label })}
+            ariaLabel={t('poolListTitle')}
+          />
+        ) : (
+          <p className={versesTabStyles.emptyText}>{t('poolEmpty')}</p>
+        )}
+      </section>
+
       {/* Add a Verse / Edit a pool verse */}
       <section className={versesTabStyles.section}>
         <div className={versesTabStyles.formHeader}>
@@ -537,34 +565,6 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             </Button>
           )}
         </div>
-      </section>
-
-      {/* Verse Pool */}
-      <section className={versesTabStyles.section}>
-        <div className={versesTabStyles.poolHead}>
-          <h3 className={versesTabStyles.sectionTitle}>{t('poolListTitle')}</h3>
-          <span className={versesTabStyles.poolCount}>{t('poolCount', { count: pool?.length ?? 0 })}</span>
-        </div>
-        {loadingPool ? (
-          <Loading text={t('loading')} />
-        ) : pool && pool.length > 0 ? (
-          <FilterBar
-            options={poolOptions}
-            value={editingPoolId ? String(editingPoolId) : ''}
-            onChange={(value) => {
-              const found = pool.find((poolVerse) => String(poolVerse.id) === value);
-              if (found) handleEditPoolVerse(found);
-            }}
-            onRemove={(value) => {
-              const found = pool.find((poolVerse) => String(poolVerse.id) === value);
-              if (found) setRemoveTarget(found);
-            }}
-            removeLabel={(label) => t('poolRemoveAria', { ref: label })}
-            ariaLabel={t('poolListTitle')}
-          />
-        ) : (
-          <p className={versesTabStyles.emptyText}>{t('poolEmpty')}</p>
-        )}
       </section>
 
       {/* Common Confirmation Modal for Remove */}

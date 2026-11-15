@@ -503,7 +503,7 @@ export const translations = {
   poolListTitle: { vi: 'Danh Sách Câu', en: 'Verse Pool' },
   poolCount: { vi: '{count} câu trong danh sách', en: '{count} verses in the pool' },
   poolFull: { vi: 'Danh sách đã đầy (20 câu). Hãy xóa một câu trước khi thêm câu mới.', en: 'The verse pool is full (20 verses). Delete a verse before adding a new one.' },
-  poolEmpty: { vi: 'Chưa có câu nào trong danh sách. Thêm câu đầu tiên ở trên.', en: 'The pool is empty. Add the first verse above.' },
+  poolEmpty: { vi: 'Chưa có câu nào trong danh sách. Thêm câu đầu tiên ở dưới.', en: 'The pool is empty. Add the first verse below.' },
   poolAdded: { vi: 'Đã thêm {ref} vào danh sách.', en: 'Added {ref} to the pool.' },
   poolUpdated: { vi: 'Đã cập nhật {ref}.', en: 'Updated {ref}.' },
   poolRemoved: { vi: 'Đã xóa {ref} khỏi danh sách.', en: 'Removed {ref} from the pool.' },
