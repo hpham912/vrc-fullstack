@@ -9,12 +9,6 @@ export const spotlightBannerModalStyles = {
   closeBtn: "p-1.5 rounded-full text-stone-300 hover:text-white hover:bg-stone-800 transition-colors",
   closeIcon: "w-5 h-5",
 
-  alertBase: "mx-5 mt-4 p-3 rounded-2xl flex items-center gap-2 text-xs font-semibold",
-  alertSuccess: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60",
-  alertError: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
-  alertIconSuccess: "w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0",
-  alertIconError: "w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0",
-
   form: "flex-1 overflow-y-auto p-5 space-y-5 text-xs text-stone-700",
   stepBlock: "space-y-2",
   stepHeader: "flex items-center justify-between",

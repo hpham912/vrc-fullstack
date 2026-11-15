@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HeartHandshake, Send, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
-import { Modal, Button } from '../../common-component/index.ts';
+import { Modal, Button, Banner } from '../../common-component/index.ts';
 import { prayerRequestModalStyles as s } from './PrayerRequestModal.styles.ts';
 
 interface PrayerRequestModalProps {
@@ -106,9 +106,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
         ) : (
           <form onSubmit={handleSubmit} className={s.form}>
             {error && (
-              <div className={s.errorBox}>
-                {error}
-              </div>
+              <Banner type="error" message={error} variant="card" />
             )}
 
             <div>

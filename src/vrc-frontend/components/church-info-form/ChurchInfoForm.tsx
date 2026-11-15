@@ -10,13 +10,10 @@ import {
   MapPin,
   Clock,
   ExternalLink,
-  CheckCircle2,
-  AlertCircle,
   Plus,
   Video,
-  X,
 } from 'lucide-react';
-import { Card, Button, buttonStyles, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
+import { Card, Button, Banner, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
 import { churchInfoFormStyles as s } from './ChurchInfoForm.styles.ts';
 
 interface ChurchInfoFormProps {
@@ -87,6 +84,9 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
   // save completes. The banner above lives at the top of this long
   // form, far from the save button on a phone. Clears after 4s.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the save button (mobile only) when a save
+  // fails. Unlike success, it does NOT auto-hide.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
 
   // Last saved values — the Save button is enabled only while the
@@ -216,6 +216,7 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
       setSaving(true);
       setFeedback(null);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -274,7 +275,9 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
       onSaved(savedData);
     } catch (err: any) {
       console.error('Error saving church info:', err);
-      showFeedback('error', err.message || t('churchInfoSaveFailed'));
+      const saveErrorMessage = err.message || t('churchInfoSaveFailed');
+      showFeedback('error', saveErrorMessage);
+      setSaveError(saveErrorMessage);
     } finally {
       setSaving(false);
     }
@@ -284,27 +287,12 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
     <>
       {/* Feedback alert — success auto-hides, errors stay until dismissed */}
       {feedback && (
-        <div
-          className={`${s.alertBase} ${
-            feedback.type === 'success' ? s.alertSuccess : s.alertError
-          }`}
-        >
-          {feedback.type === 'success' ? (
-            <CheckCircle2 className={s.alertIconSuccess} />
-          ) : (
-            <AlertCircle className={s.alertIconError} />
-          )}
-          <span className="flex-1">{feedback.message}</span>
-          <button
-            type="button"
-            onClick={dismissFeedback}
-            className={s.alertDismiss}
-            aria-label={t('commonDismiss')}
-            title={t('commonDismiss')}
-          >
-            <X className={s.alertDismissIcon} />
-          </button>
-        </div>
+        <Banner
+          type={feedback.type}
+          message={feedback.message}
+          variant="card"
+          onDismiss={dismissFeedback}
+        />
       )}
 
       {/* Form Body */}
@@ -554,10 +542,16 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
           </Button>
         </div>
         {saveSuccess && (
-          <p className={buttonStyles.saveSuccessMessage}>
-            <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-            {saveSuccess}
-          </p>
+          <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+        )}
+        {saveError && (
+          <Banner
+            type="error"
+            message={saveError}
+            variant="text"
+            className="md:hidden"
+            onDismiss={() => setSaveError(null)}
+          />
         )}
       </form>
     </>

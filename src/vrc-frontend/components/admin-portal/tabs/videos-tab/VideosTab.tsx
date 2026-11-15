@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Save, Video as VideoIcon } from 'lucide-react';
+import { Save, Video as VideoIcon } from 'lucide-react';
 import { Video } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
@@ -8,7 +8,7 @@ import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vr
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { getVideoCategoryLabel, isBuiltinVideoCategory, type VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { AdminActionButtons, Button, buttonStyles, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
+import { AdminActionButtons, Button, Banner, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
 import { videosTabStyles } from './VideosTab.styles.ts';
 
 interface VideosTabProps {
@@ -120,6 +120,9 @@ export const VideosTab: React.FC<VideosTabProps> = ({
   // Success message shown below the save button (mobile only) after a
   // save completes. Clears after 4s, matching the feedback banner.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the save button (mobile only) when a save
+  // fails. Unlike success, it does NOT auto-hide.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
   const [deleteTargetVideo, setDeleteTargetVideo] = useState<Video | null>(null);
   const [deletingVideo, setDeletingVideo] = useState(false);
@@ -202,6 +205,7 @@ export const VideosTab: React.FC<VideosTabProps> = ({
     try {
       setSubmitting(true);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -239,7 +243,9 @@ export const VideosTab: React.FC<VideosTabProps> = ({
       resetVideoForm();
       onRefreshData();
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, t('errSaveVideo')));
+      const saveErrorMessage = getErrorMessage(err, language, t('errSaveVideo'));
+      showFeedback('error', saveErrorMessage);
+      setSaveError(saveErrorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -439,10 +445,16 @@ export const VideosTab: React.FC<VideosTabProps> = ({
             </span>
           </Button>
           {saveSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {saveSuccess}
-            </p>
+            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          )}
+          {saveError && (
+            <Banner
+              type="error"
+              message={saveError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setSaveError(null)}
+            />
           )}
         </div>
       </form>

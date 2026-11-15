@@ -42,8 +42,6 @@ export const versesTabStyles = {
   previewBox: 'p-3.5 rounded-xl bg-white dark:bg-[#161412] border border-stone-200/60 dark:border-stone-800/60 text-center space-y-1',
   previewQuote: 'font-serif italic text-stone-900 dark:text-stone-100 text-xs sm:text-sm leading-relaxed whitespace-pre-line',
   previewRef: 'block text-xs font-semibold text-amber-700 dark:text-amber-400 mt-1',
-  // Pool-full notice (design v3 max-notice).
-  fullNotice: 'p-3 rounded-[10px] bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs sm:text-sm font-semibold leading-relaxed',
   // Verse pool list head.
   poolHead: 'flex items-baseline justify-between gap-2',
   poolCount: 'text-xs font-bold text-stone-500 dark:text-stone-400',

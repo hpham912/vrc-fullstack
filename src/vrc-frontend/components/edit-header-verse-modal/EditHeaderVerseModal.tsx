@@ -3,10 +3,10 @@ import { ChurchInfo, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
-import { Button, buttonStyles, SegmentedControl, TextField } from '../../common-component/index.ts';
+import { Button, Banner, SegmentedControl, TextField } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
-import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Sparkles, Save, BookOpen, Loader2 } from 'lucide-react';
 import { editHeaderVerseModalStyles as s } from './EditHeaderVerseModal.styles.ts';
 
 interface EditHeaderVerseModalProps {
@@ -55,6 +55,9 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   // save completes. The modal closes 700ms after a save, so this is
   // brief — it reinforces the save right where the admin tapped.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the save button (mobile only) when a save
+  // fails. Unlike success, it does NOT auto-hide.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
 
   const [verseTextVi, setVerseTextVi] = useState(currentHeaderVerse.verseTextVi || '');
@@ -151,6 +154,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
       setSaving(true);
       setFeedback(null);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -187,7 +191,9 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
         onClose();
       }, 700);
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || t('headerVerseSaveFailed') });
+      const saveErrorMessage = err.message || t('headerVerseSaveFailed');
+      setFeedback({ type: 'error', message: saveErrorMessage });
+      setSaveError(saveErrorMessage);
     } finally {
       setSaving(false);
     }
@@ -207,14 +213,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
       <form onSubmit={handleSave} className={s.container}>
         {/* Status Feedback */}
         {feedback && (
-          <div className={feedback.type === 'success' ? s.feedbackSuccess : s.feedbackError}>
-            {feedback.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
+          <Banner type={feedback.type} message={feedback.message} variant="card" />
         )}
 
         {/* Bible API Search & Auto-Fill Card */}
@@ -342,10 +341,16 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           </Button>
         </div>
         {saveSuccess && (
-          <p className={buttonStyles.saveSuccessMessage}>
-            <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-            {saveSuccess}
-          </p>
+          <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+        )}
+        {saveError && (
+          <Banner
+            type="error"
+            message={saveError}
+            variant="text"
+            className="md:hidden"
+            onDismiss={() => setSaveError(null)}
+          />
         )}
       </form>
     </Modal>

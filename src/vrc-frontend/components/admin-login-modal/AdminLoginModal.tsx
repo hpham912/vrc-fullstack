@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { User, AlertCircle, ShieldCheck, KeyRound } from 'lucide-react';
-import { Modal, Button } from '../../common-component/index.ts';
+import { User, ShieldCheck, KeyRound } from 'lucide-react';
+import { Modal, Button, Banner } from '../../common-component/index.ts';
 import { adminLoginModalStyles as s } from './AdminLoginModal.styles.ts';
 
 interface AdminLoginModalProps {
@@ -59,10 +59,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       {/* Form Body */}
       <form onSubmit={handleSubmit} className={s.form}>
         {error && (
-          <div className={s.errorBox}>
-            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
+          <Banner type="error" message={error} variant="card" />
         )}
 
         <div>

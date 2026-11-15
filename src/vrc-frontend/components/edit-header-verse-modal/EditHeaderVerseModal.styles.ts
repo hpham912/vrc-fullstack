@@ -5,10 +5,6 @@ export const editHeaderVerseModalStyles = {
   // "English" via the TextField label prop).
   fieldGroup: 'space-y-1.5',
   fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
-  feedbackSuccess:
-    'p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold flex items-center gap-2',
-  feedbackError:
-    'p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs sm:text-sm font-semibold flex items-center gap-2',
   apiCard:
     'p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-3',
   apiCardTitle: 'text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1.5',

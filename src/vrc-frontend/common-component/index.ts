@@ -1,8 +1,9 @@
 export { Modal } from './modal/Modal.tsx';
 export { ConfirmModal } from './confirm-modal/ConfirmModal.tsx';
 export { Button } from './button/Button.tsx';
-export { buttonStyles } from './button/Button.styles.ts';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './button/Button.tsx';
+export { Banner } from './banner/Banner.tsx';
+export type { BannerProps, BannerType, BannerVariant } from './banner/Banner.tsx';
 export { Card } from './card/Card.tsx';
 export type { CardProps, CardVariant, CardPadding } from './card/Card.tsx';
 export { DirectionButtons } from './direction-buttons/DirectionButtons.tsx';

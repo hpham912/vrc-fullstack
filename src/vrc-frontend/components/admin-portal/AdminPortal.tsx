@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { APP_VERSION } from '../../constants/version.ts';
 import { Modal } from '../../common-component/modal/Modal.tsx';
+import { Banner } from '../../common-component/index.ts';
 import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
 import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
@@ -17,8 +18,6 @@ import {
   Video as VideoIcon,
   Plus,
   X,
-  CheckCircle2,
-  AlertCircle,
   RefreshCw,
   Users,
   Sliders,
@@ -135,27 +134,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
         {/* Feedback Banner */}
         {feedback && (
-          <div
-            className={`${s.alertBase} ${
-              feedback.type === 'success' ? s.alertSuccess : s.alertError
-            }`}
-          >
-            {feedback.type === 'success' ? (
-              <CheckCircle2 className={s.alertIconSuccess} />
-            ) : (
-              <AlertCircle className={s.alertIconError} />
-            )}
-            <span className="flex-1">{feedback.message}</span>
-            <button
-              type="button"
-              onClick={() => setFeedback(null)}
-              className="flex-shrink-0 p-1 rounded-lg hover:bg-black/5"
-              aria-label="Dismiss"
-              title={t('commonDismiss')}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <Banner
+            type={feedback.type}
+            message={feedback.message}
+            variant="strip"
+            onDismiss={() => setFeedback(null)}
+          />
         )}
 
         {/* Tab Controls - Mobile Grid (no horizontal scroll needed) */}

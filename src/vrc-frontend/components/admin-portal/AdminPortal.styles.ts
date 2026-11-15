@@ -11,12 +11,6 @@ export const adminPortalStyles = {
   refreshIcon: "w-4 h-4",
   closeIcon: "w-5 h-5",
 
-  alertBase: "p-3 text-xs font-medium flex items-center gap-2 px-6",
-  alertSuccess: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-b border-emerald-200 dark:border-emerald-800/60",
-  alertError: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-b border-rose-200 dark:border-rose-800/60",
-  alertIconSuccess: "w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0",
-  alertIconError: "w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0",
-
   mobileTabSection: "sm:hidden p-3 bg-stone-50 border-b border-stone-200 space-y-2",
   mobileTabGrid: "grid grid-cols-2 gap-1.5",
   mobileTabBtnBase: "px-2.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5",

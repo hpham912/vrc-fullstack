@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Plus, Save, Sparkles } from 'lucide-react';
+import { Plus, Save, Sparkles } from 'lucide-react';
 import { DailyVerse, PoolVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
-import { Button, buttonStyles, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
+import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
 import { versesTabStyles } from './VersesTab.styles.ts';
 
 interface VersesTabProps {
@@ -69,6 +69,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   // after a verse is added or edited. Clears after 4s, matching the
   // feedback banner.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the Add/Save button (mobile only) when
+  // adding or editing fails. Unlike success, it does NOT auto-hide.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
   const [pickingToday, setPickingToday] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<PoolVerse | null>(null);
@@ -178,6 +181,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     try {
       setSubmitting(true);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -208,7 +212,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       resetForm();
       await loadPool();
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, t('errPoolAdd')));
+      const addErrorMessage = getErrorMessage(err, language, t('errPoolAdd'));
+      showFeedback('error', addErrorMessage);
+      setSaveError(addErrorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -235,6 +241,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     try {
       setSubmitting(true);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -262,7 +269,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       resetForm();
       await loadPool();
     } catch (err: any) {
-      showFeedback('error', getErrorMessage(err, language, t('errPoolUpdate')));
+      const updateErrorMessage = getErrorMessage(err, language, t('errPoolUpdate'));
+      showFeedback('error', updateErrorMessage);
+      setSaveError(updateErrorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -560,7 +569,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         </div>
 
         {isPoolFull && !editingPoolId && (
-          <div className={versesTabStyles.fullNotice}>{t('poolFull')}</div>
+          <Banner type="error" message={t('poolFull')} variant="card" />
         )}
 
         <div className={versesTabStyles.addBtnRow}>
@@ -592,10 +601,16 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             </Button>
           )}
           {saveSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {saveSuccess}
-            </p>
+            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          )}
+          {saveError && (
+            <Banner
+              type="error"
+              message={saveError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setSaveError(null)}
+            />
           )}
         </div>
       </section>

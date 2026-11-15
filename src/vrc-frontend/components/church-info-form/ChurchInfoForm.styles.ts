@@ -5,14 +5,6 @@
 // old modal-only styles (backdrop, dialog, header) are gone with the
 // shared Modal.
 export const churchInfoFormStyles = {
-  alertBase: "p-3 rounded-2xl flex items-center gap-2 text-xs font-semibold",
-  alertSuccess: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60",
-  alertError: "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
-  alertIconSuccess: "w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0",
-  alertIconError: "w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0",
-  alertDismiss: "flex-shrink-0 p-1 rounded-lg hover:bg-black/5",
-  alertDismissIcon: "w-4 h-4",
-
   form: "space-y-5 text-xs text-stone-700",
   sectionTitle: "font-serif font-bold text-stone-900 text-sm flex items-center gap-1.5",
   mapPinIcon: "w-4 h-4 text-amber-700 dark:text-amber-400",

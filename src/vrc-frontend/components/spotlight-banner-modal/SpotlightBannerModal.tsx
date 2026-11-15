@@ -8,8 +8,6 @@ import { getErrorMessage } from '../../utils/errors.ts';
 import {
   Sparkles,
   Save,
-  CheckCircle2,
-  AlertCircle,
   Calendar,
   MapPin,
   Palette,
@@ -22,7 +20,7 @@ import {
   Landmark,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button, buttonStyles, TextField } from '../../common-component/index.ts';
+import { Modal, Button, Banner, TextField } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
 interface SpotlightBannerModalProps {
@@ -139,6 +137,9 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   // save completes. The modal closes 900ms after a save, so this is
   // brief — it reinforces the save right where the admin tapped.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the save button (mobile only) when a save
+  // fails. Unlike success, it does NOT auto-hide.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
 
   const now = new Date();
@@ -229,6 +230,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       setSaving(true);
       setFeedback(null);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -331,6 +333,7 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         type: 'error',
         message: friendlyMsg,
       });
+      setSaveError(friendlyMsg);
     } finally {
       setSaving(false);
     }
@@ -347,18 +350,12 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     >
       {/* Feedback message */}
         {feedback && (
-          <div
-            className={`${s.alertBase} ${
-              feedback.type === 'success' ? s.alertSuccess : s.alertError
-            }`}
-          >
-            {feedback.type === 'success' ? (
-              <CheckCircle2 className={s.alertIconSuccess} />
-            ) : (
-              <AlertCircle className={s.alertIconError} />
-            )}
-            <span>{feedback.message}</span>
-          </div>
+          <Banner
+            type={feedback.type}
+            message={feedback.message}
+            variant="card"
+            className="mx-5 mt-4"
+          />
         )}
 
         {/* Form Body */}
@@ -602,10 +599,16 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             </Button>
           </div>
           {saveSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {saveSuccess}
-            </p>
+            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          )}
+          {saveError && (
+            <Banner
+              type="error"
+              message={saveError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setSaveError(null)}
+            />
           )}
         </form>
     </Modal>

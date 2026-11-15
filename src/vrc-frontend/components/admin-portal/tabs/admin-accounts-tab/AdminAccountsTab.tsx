@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
+import { KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { AdminUser } from '../../../../types/index.ts';
-import { Button, buttonStyles, ConfirmModal, Modal } from '../../../../common-component/index.ts';
+import { Button, Banner, ConfirmModal, Modal } from '../../../../common-component/index.ts';
 import { adminAccountsTabStyles as s } from './AdminAccountsTab.styles.ts';
 
 interface AdminAccount {
@@ -44,6 +44,10 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
   // submitting flag but are separate actions. Clears after 4s.
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  // Error messages shown below each save button (mobile only) when the
+  // action fails. Unlike success, they do NOT auto-hide.
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
 
   // Dirty-check: the Create and Change Password buttons stay disabled
@@ -85,6 +89,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
     try {
       setSubmitting(true);
       setCreateSuccess(null);
+      setCreateError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -118,6 +123,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
       loadAdminAccounts();
     } catch (err: any) {
       showFeedback('error', err.message);
+      setCreateError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -181,6 +187,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
     try {
       setSubmitting(true);
       setPasswordSuccess(null);
+      setPasswordError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -204,6 +211,7 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
       setNewPassword('');
     } catch (err: any) {
       showFeedback('error', err.message);
+      setPasswordError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -299,10 +307,16 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
             {submitting ? t('commonCreating') : t('createAdminBtn')}
           </Button>
           {createSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {createSuccess}
-            </p>
+            <Banner type="success" message={createSuccess} variant="text" className="md:hidden" />
+          )}
+          {createError && (
+            <Banner
+              type="error"
+              message={createError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setCreateError(null)}
+            />
           )}
         </div>
       </form>
@@ -408,10 +422,16 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
             {submitting ? t('commonSaving') : t('updatePasswordBtn')}
           </Button>
           {passwordSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {passwordSuccess}
-            </p>
+            <Banner type="success" message={passwordSuccess} variant="text" className="md:hidden" />
+          )}
+          {passwordError && (
+            <Banner
+              type="error"
+              message={passwordError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setPasswordError(null)}
+            />
           )}
         </div>
       </form>

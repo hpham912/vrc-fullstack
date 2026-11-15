@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BookOpen, CheckCircle2, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
+import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, buttonStyles, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
+import { Button, Banner, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -97,6 +97,10 @@ export const EventsTab: React.FC<EventsTabProps> = ({
   // instead of scrolling up to the banner at the top of the portal.
   // Clears after 4s, matching the feedback banner.
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  // Error message shown below the save button (mobile only) when a save
+  // fails. Unlike success, it does NOT auto-hide — it stays until the
+  // admin dismisses it or saves again.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
   // Preview language toggle inside the event preview (same as the
   // header-verse edit preview): the preview follows this, not the app language.
@@ -239,6 +243,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     try {
       setSubmitting(true);
       setSaveSuccess(null);
+      setSaveError(null);
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
@@ -303,7 +308,9 @@ export const EventsTab: React.FC<EventsTabProps> = ({
       onRefreshData();
       onTabChange('manage-events');
     } catch (err: any) {
-      showFeedback('error', err.message || 'Error saving event.');
+      const saveErrorMessage = err.message || 'Error saving event.';
+      showFeedback('error', saveErrorMessage);
+      setSaveError(saveErrorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -711,10 +718,16 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             </span>
           </Button>
           {saveSuccess && (
-            <p className={buttonStyles.saveSuccessMessage}>
-              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
-              {saveSuccess}
-            </p>
+            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          )}
+          {saveError && (
+            <Banner
+              type="error"
+              message={saveError}
+              variant="text"
+              className="md:hidden"
+              onDismiss={() => setSaveError(null)}
+            />
           )}
         </div>
       </form>
