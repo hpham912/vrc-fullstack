@@ -260,6 +260,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       if (editingPoolId === removeTarget.id) resetForm();
       setRemoveTarget(null);
       await loadPool();
+      // Refresh today's verse too — removing a pool verse also deletes
+      // its daily_verses rows, so if it was showing today the card
+      // needs to re-pick from the remaining pool.
+      onRefreshData();
     } catch (err: any) {
       showFeedback('error', getErrorMessage(err, language, t('errPoolRemove')));
     } finally {

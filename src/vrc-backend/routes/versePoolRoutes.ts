@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
-import { versePool } from '../../vrc-db/schema.ts';
-import { eq, asc, count } from 'drizzle-orm';
+import { dailyVerses, versePool } from '../../vrc-db/schema.ts';
+import { eq, asc, count, or, sql } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { AppError } from '../middleware/errorHandler.ts';
 
@@ -139,7 +139,14 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res, next) => {
   }
 });
 
-// DELETE /api/verse-pool/:id - Remove a verse from the pool (Admin only)
+// DELETE /api/verse-pool/:id - Remove a verse from the pool (Admin only).
+// Also deletes the daily_verses rows that came from this pool verse,
+// so removing a verse from the pool removes it from the daily verse
+// too. The pick copies the pool verse's references into the daily row,
+// so match on any of the three reference columns (case-insensitive —
+// the Bible API may normalize the reference's casing). If the removed
+// verse was showing today, its daily row goes too, and the next
+// GET /today picks a fresh verse from the remaining pool.
 router.delete('/:id', requireAdmin, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -150,6 +157,20 @@ router.delete('/:id', requireAdmin, async (req, res, next) => {
     const deleted = await db.delete(versePool).where(eq(versePool.id, id)).returning();
     if (deleted.length === 0) {
       throw new AppError('This pool verse no longer exists.', 404, 'VERSE_NOT_FOUND');
+    }
+    const poolVerse = deleted[0];
+
+    const refs = [poolVerse.reference, poolVerse.referenceEn, poolVerse.referenceVi]
+      .map((ref) => (ref || '').trim().toLowerCase())
+      .filter(Boolean);
+    const uniqueRefs = [...new Set(refs)];
+    if (uniqueRefs.length > 0) {
+      const conditions = uniqueRefs.flatMap((ref) => [
+        sql`LOWER(${dailyVerses.reference}) = ${ref}`,
+        sql`LOWER(${dailyVerses.referenceEn}) = ${ref}`,
+        sql`LOWER(${dailyVerses.referenceVi}) = ${ref}`,
+      ]);
+      await db.delete(dailyVerses).where(or(...conditions));
     }
 
     res.json({ message: 'Verse removed from the pool' });
