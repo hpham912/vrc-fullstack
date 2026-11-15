@@ -7,17 +7,12 @@ export const eventsTabStyles = {
   cancelEditBtn: 'text-xs text-stone-500 hover:text-stone-800 underline',
   auditBox:
     'p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1',
-  fieldGrid: 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0',
   fieldGrid3: 'grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0',
   field: 'w-full min-w-0',
   fieldOverflow: 'w-full min-w-0 overflow-hidden',
   label: 'block text-xs font-bold text-stone-700 mb-1',
   labelPlain: 'block text-xs font-bold text-stone-700',
   input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
-  inputFocus:
-    'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400',
-  textareaFocus:
-    'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-stone-400 resize-none',
   inputDate:
     'w-full max-w-full box-border min-w-0 appearance-none px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
   addressLabelRow: 'flex items-center justify-between mb-1',

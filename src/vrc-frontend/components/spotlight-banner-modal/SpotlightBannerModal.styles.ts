@@ -66,8 +66,6 @@ export const spotlightBannerModalStyles = {
   fieldHint: "text-caption text-stone-400",
   quoteFetchRow: "flex items-center gap-2",
   quoteRefInput: "flex-1 min-w-0 px-3 py-2 bg-stone-50 rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium",
-  inputMedium: "w-full px-3 py-2 bg-stone-50 rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium",
-  inputItalicSerif: "w-full px-3 py-2 bg-stone-50 rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 italic font-serif",
 
   footer: "pt-3 border-t border-stone-200 flex items-center justify-end gap-2.5",
   cancelBtn: "px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors",

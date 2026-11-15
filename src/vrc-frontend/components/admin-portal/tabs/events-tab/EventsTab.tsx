@@ -6,7 +6,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, SegmentedControl, ZoomButton } from '../../../../common-component/index.ts';
+import { Button, SegmentedControl, ZoomButton, BilingualTextField } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -505,65 +505,27 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </div>
         )}
 
-        <div className={s.fieldGrid}>
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventTitleVi')}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Ví dụ: Lễ Thờ Phượng Chúa Nhật"
-              value={eventTitleVi}
-              onChange={(e) => setEventTitleVi(e.target.value)}
-              className={s.inputFocus}
-            />
-          </div>
+        <BilingualTextField
+          label={t('eventsTitleLabel')}
+          valueVi={eventTitleVi}
+          onChangeVi={setEventTitleVi}
+          valueEn={eventTitleEn}
+          onChangeEn={setEventTitleEn}
+          placeholderVi="Ví dụ: Lễ Thờ Phượng Chúa Nhật"
+          placeholderEn="e.g. Sunday Worship Celebration"
+        />
 
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventTitleEn')}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Sunday Worship Celebration"
-              value={eventTitleEn}
-              onChange={(e) => setEventTitleEn(e.target.value)}
-              className={s.inputFocus}
-            />
-          </div>
-        </div>
-
-        <div className={s.fieldGrid}>
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventDescVi')}
-            </label>
-            <textarea
-              rows={3}
-              required
-              placeholder="Chủ đề bài giảng, diễn giả, thông tin sinh hoạt..."
-              value={eventDescriptionVi}
-              onChange={(e) => setEventDescriptionVi(e.target.value)}
-              className={s.textareaFocus}
-            />
-          </div>
-
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventDescEn')}
-            </label>
-            <textarea
-              rows={3}
-              required
-              placeholder="Event details, sermon theme, speaker..."
-              value={eventDescriptionEn}
-              onChange={(e) => setEventDescriptionEn(e.target.value)}
-              className={s.textareaFocus}
-            />
-          </div>
-        </div>
+        <BilingualTextField
+          label={t('adminEventDescLabel')}
+          valueVi={eventDescriptionVi}
+          onChangeVi={setEventDescriptionVi}
+          valueEn={eventDescriptionEn}
+          onChangeEn={setEventDescriptionEn}
+          placeholderVi="Chủ đề bài giảng, diễn giả, thông tin sinh hoạt..."
+          placeholderEn="Event details, sermon theme, speaker..."
+          multiline
+          rows={3}
+        />
 
         <div className={s.fieldGrid3}>
           <div className={s.field}>
@@ -610,48 +572,28 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </div>
         </div>
 
-        <div className={s.fieldGrid}>
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('eventEndTime')}
-            </label>
-            <input
-              type="text"
-              placeholder="05:00 PM"
-              value={eventEndTime}
-              onChange={(e) => setEventEndTime(e.target.value)}
-              className={s.input}
-            />
-          </div>
-
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventLocationVi')}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Main Sanctuary, Fellowship Hall..."
-              value={eventLocationVi}
-              onChange={(e) => setEventLocationVi(e.target.value)}
-              className={s.input}
-            />
-          </div>
-
-          <div className={s.field}>
-            <label className={s.label}>
-              {t('adminEventLocationEn')}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Main Sanctuary, Fellowship Hall..."
-              value={eventLocationEn}
-              onChange={(e) => setEventLocationEn(e.target.value)}
-              className={s.input}
-            />
-          </div>
+        <div className={s.field}>
+          <label className={s.label}>
+            {t('eventEndTime')}
+          </label>
+          <input
+            type="text"
+            placeholder="05:00 PM"
+            value={eventEndTime}
+            onChange={(e) => setEventEndTime(e.target.value)}
+            className={s.input}
+          />
         </div>
+
+        <BilingualTextField
+          label={t('adminEventLocationLabel')}
+          valueVi={eventLocationVi}
+          onChangeVi={setEventLocationVi}
+          valueEn={eventLocationEn}
+          onChangeEn={setEventLocationEn}
+          placeholderVi="Main Sanctuary, Fellowship Hall..."
+          placeholderEn="Main Sanctuary, Fellowship Hall..."
+        />
 
         <div className={s.field}>
           <div className={s.addressLabelRow}>

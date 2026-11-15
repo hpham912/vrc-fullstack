@@ -3,7 +3,7 @@ import { ChurchInfo, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
-import { Button, SegmentedControl } from '../../common-component/index.ts';
+import { Button, SegmentedControl, BilingualTextField } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -271,59 +271,29 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           </div>
         </div>
 
-        {/* Vietnamese Section */}
-        <div className={s.formSection}>
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>{t('headerVerseViRef')}</label>
-            <input
-              type="text"
-              required
-              value={referenceVi}
-              onChange={(e) => setReferenceVi(e.target.value)}
-              placeholder="Giăng 3:16"
-              className={s.textInput}
-            />
-          </div>
+        {/* Reference — one topic group, Vietnamese then English */}
+        <BilingualTextField
+          label={t('headerVerseRefLabel')}
+          valueVi={referenceVi}
+          onChangeVi={setReferenceVi}
+          valueEn={referenceEn}
+          onChangeEn={setReferenceEn}
+          placeholderVi="Giăng 3:16"
+          placeholderEn="John 3:16"
+        />
 
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>{t('headerVerseViText')}</label>
-            <textarea
-              rows={3}
-              required
-              value={verseTextVi}
-              onChange={(e) => setVerseTextVi(e.target.value)}
-              placeholder="Vì Đức Chúa Trời yêu thương thế gian..."
-              className={s.textareaInput}
-            />
-          </div>
-        </div>
-
-        {/* English Section */}
-        <div className={s.formSection}>
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>{t('headerVerseEnRef')}</label>
-            <input
-              type="text"
-              required
-              value={referenceEn}
-              onChange={(e) => setReferenceEn(e.target.value)}
-              placeholder="John 3:16"
-              className={s.textInput}
-            />
-          </div>
-
-          <div className={s.fieldGroup}>
-            <label className={s.fieldLabel}>{t('headerVerseEnText')}</label>
-            <textarea
-              rows={3}
-              required
-              value={verseTextEn}
-              onChange={(e) => setVerseTextEn(e.target.value)}
-              placeholder="For God so loved the world..."
-              className={s.textareaInput}
-            />
-          </div>
-        </div>
+        {/* Verse text — one topic group, Vietnamese then English */}
+        <BilingualTextField
+          label={t('headerVerseTextLabel')}
+          valueVi={verseTextVi}
+          onChangeVi={setVerseTextVi}
+          valueEn={verseTextEn}
+          onChangeEn={setVerseTextEn}
+          placeholderVi="Vì Đức Chúa Trời yêu thương thế gian..."
+          placeholderEn="For God so loved the world..."
+          multiline
+          rows={3}
+        />
 
         {/* Footer Actions */}
         <div className={s.footerRow}>

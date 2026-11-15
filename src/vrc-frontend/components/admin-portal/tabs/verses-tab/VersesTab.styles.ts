@@ -28,9 +28,6 @@ export const versesTabStyles = {
   formHeader: 'flex flex-wrap items-center justify-between gap-2',
   addRow: 'flex items-end gap-2',
   addRowField: 'flex-1 min-w-0',
-  fieldGroup: 'space-y-1.5',
-  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
-  langLabel: 'block text-[11px] font-bold text-amber-800 dark:text-amber-400',
   addBtnRow: 'pt-1',
   // Fetched-verse preview — the EditHeaderVerseModal preview
   // treatment: muted stone card, white inner box, serif italic

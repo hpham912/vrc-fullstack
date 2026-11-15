@@ -8,7 +8,7 @@ import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vr
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { getVideoCategoryLabel, isBuiltinVideoCategory, type VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { AdminActionButtons, Button, ConfirmModal, SegmentedControl } from '../../../../common-component/index.ts';
+import { AdminActionButtons, Button, ConfirmModal, SegmentedControl, BilingualTextField } from '../../../../common-component/index.ts';
 import { videosTabStyles } from './VideosTab.styles.ts';
 
 interface VideosTabProps {
@@ -355,49 +355,23 @@ export const VideosTab: React.FC<VideosTabProps> = ({
           </div>
         )}
 
-        <div className={videosTabStyles.fieldGrid}>
-          <div className={videosTabStyles.field}>
-            <label className={videosTabStyles.label}>{t('adminVideoTitleVi')}</label>
-            <input
-              type="text"
-              required
-              value={videoTitleVi}
-              onChange={(e) => setVideoTitleVi(e.target.value)}
-              className={videosTabStyles.input}
-            />
-          </div>
-          <div className={videosTabStyles.field}>
-            <label className={videosTabStyles.label}>{t('adminVideoTitleEn')}</label>
-            <input
-              type="text"
-              required
-              value={videoTitleEn}
-              onChange={(e) => setVideoTitleEn(e.target.value)}
-              className={videosTabStyles.input}
-            />
-          </div>
-        </div>
+        <BilingualTextField
+          label={t('adminVideoTitleLabel')}
+          valueVi={videoTitleVi}
+          onChangeVi={setVideoTitleVi}
+          valueEn={videoTitleEn}
+          onChangeEn={setVideoTitleEn}
+        />
 
-        <div className={videosTabStyles.fieldGrid}>
-          <div className={videosTabStyles.field}>
-            <label className={videosTabStyles.label}>{t('adminVideoDescVi')}</label>
-            <textarea
-              rows={2}
-              value={videoDescVi}
-              onChange={(e) => setVideoDescVi(e.target.value)}
-              className={videosTabStyles.textarea}
-            />
-          </div>
-          <div className={videosTabStyles.field}>
-            <label className={videosTabStyles.label}>{t('adminVideoDescEn')}</label>
-            <textarea
-              rows={2}
-              value={videoDescEn}
-              onChange={(e) => setVideoDescEn(e.target.value)}
-              className={videosTabStyles.textarea}
-            />
-          </div>
-        </div>
+        <BilingualTextField
+          label={t('adminVideoDescLabel')}
+          valueVi={videoDescVi}
+          onChangeVi={setVideoDescVi}
+          valueEn={videoDescEn}
+          onChangeEn={setVideoDescEn}
+          multiline
+          rows={2}
+        />
 
         <div className={videosTabStyles.presenterDateRow}>
           <div className={videosTabStyles.presenterField}>

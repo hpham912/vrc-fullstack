@@ -22,7 +22,7 @@ import {
   Landmark,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button } from '../../common-component/index.ts';
+import { Modal, Button, BilingualTextField } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
 interface SpotlightBannerModalProps {
@@ -492,25 +492,13 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 {t('spotBadgeHint')}
               </span>
             </div>
-            <label className={s.fieldLabel}>
-              {t('spotBadgeViLabel')}
-            </label>
-            <input
-              type="text"
-              value={badgeVi}
-              onChange={(e) => setBadgeVi(e.target.value)}
-              className={s.inputMedium}
-              placeholder={t('spotBadgePlaceholder')}
-            />
-            <label className={s.fieldLabel}>
-              {t('spotBadgeEnLabel')}
-            </label>
-            <input
-              type="text"
-              value={badgeEn}
-              onChange={(e) => setBadgeEn(e.target.value)}
-              className={s.inputMedium}
-              placeholder={t('spotBadgePlaceholder')}
+            <BilingualTextField
+              valueVi={badgeVi}
+              onChangeVi={setBadgeVi}
+              valueEn={badgeEn}
+              onChangeEn={setBadgeEn}
+              placeholderVi={t('spotBadgePlaceholder')}
+              placeholderEn={t('spotBadgePlaceholder')}
             />
             <p className={s.fieldHint}>
               {t('spotBadgeNote')}
@@ -558,28 +546,16 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 </span>
               </Button>
             </div>
-            <label className={s.fieldLabel}>
-              {t('spotQuoteViLabel')}
-            </label>
-            <input
-              type="text"
-              value={subtitleVi}
-              onChange={(e) => {
-                setSubtitleVi(e.target.value);
-                setSubtitle(e.target.value);
+            <BilingualTextField
+              valueVi={subtitleVi}
+              onChangeVi={(value) => {
+                setSubtitleVi(value);
+                setSubtitle(value);
               }}
-              className={s.inputItalicSerif}
-              placeholder='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
-            />
-            <label className={s.fieldLabel}>
-              {t('spotQuoteEnLabel')}
-            </label>
-            <input
-              type="text"
-              value={subtitleEn}
-              onChange={(e) => setSubtitleEn(e.target.value)}
-              className={s.inputItalicSerif}
-              placeholder='Psalm 100:4 - "Enter his gates with thanksgiving and his courts with praise!"'
+              valueEn={subtitleEn}
+              onChangeEn={setSubtitleEn}
+              placeholderVi='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
+              placeholderEn='Psalm 100:4 - "Enter his gates with thanksgiving and his courts with praise!"'
             />
             <p className={s.fieldHint}>
               {t('spotQuoteNote')}

@@ -5,7 +5,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
-import { Button, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
+import { Button, ConfirmModal, FilterBar, Loading, Select, TextField, BilingualTextField } from '../../../../common-component/index.ts';
 import { versesTabStyles } from './VersesTab.styles.ts';
 
 interface VersesTabProps {
@@ -464,45 +464,29 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           </div>
         )}
 
-        <div className={versesTabStyles.fieldGroup}>
-          <span className={versesTabStyles.fieldLabel}>{t('poolReflectionLabel')}</span>
-          <span className={versesTabStyles.langLabel}>{t('poolLangVi')}</span>
-          <TextField
-            multiline
-            rows={2}
-            value={reflectionVi}
-            onChange={setReflectionVi}
-            placeholder={t('poolReflectionViPlaceholder')}
-          />
-          <span className={versesTabStyles.langLabel}>{t('poolLangEn')}</span>
-          <TextField
-            multiline
-            rows={2}
-            value={reflectionEn}
-            onChange={setReflectionEn}
-            placeholder={t('poolReflectionEnPlaceholder')}
-          />
-        </div>
+        <BilingualTextField
+          label={t('poolReflectionLabel')}
+          valueVi={reflectionVi}
+          onChangeVi={setReflectionVi}
+          valueEn={reflectionEn}
+          onChangeEn={setReflectionEn}
+          placeholderVi={t('poolReflectionViPlaceholder')}
+          placeholderEn={t('poolReflectionEnPlaceholder')}
+          multiline
+          rows={2}
+        />
 
-        <div className={versesTabStyles.fieldGroup}>
-          <span className={versesTabStyles.fieldLabel}>{t('poolPrayerLabel')}</span>
-          <span className={versesTabStyles.langLabel}>{t('poolLangVi')}</span>
-          <TextField
-            multiline
-            rows={2}
-            value={prayerVi}
-            onChange={setPrayerVi}
-            placeholder={t('poolPrayerViPlaceholder')}
-          />
-          <span className={versesTabStyles.langLabel}>{t('poolLangEn')}</span>
-          <TextField
-            multiline
-            rows={2}
-            value={prayerEn}
-            onChange={setPrayerEn}
-            placeholder={t('poolPrayerEnPlaceholder')}
-          />
-        </div>
+        <BilingualTextField
+          label={t('poolPrayerLabel')}
+          valueVi={prayerVi}
+          onChangeVi={setPrayerVi}
+          valueEn={prayerEn}
+          onChangeEn={setPrayerEn}
+          placeholderVi={t('poolPrayerViPlaceholder')}
+          placeholderEn={t('poolPrayerEnPlaceholder')}
+          multiline
+          rows={2}
+        />
 
         {isPoolFull && !editingPoolId && (
           <div className={versesTabStyles.fullNotice}>{t('poolFull')}</div>

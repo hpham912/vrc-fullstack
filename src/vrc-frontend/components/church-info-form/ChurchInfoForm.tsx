@@ -16,7 +16,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { Card, Button, AdminActionButtons, AdminAddButton } from '../../common-component/index.ts';
+import { Card, Button, AdminActionButtons, AdminAddButton, BilingualTextField } from '../../common-component/index.ts';
 import { churchInfoFormStyles as s } from './ChurchInfoForm.styles.ts';
 
 interface ChurchInfoFormProps {
@@ -475,63 +475,25 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
                   />
                 </div>
 
-                <div className={s.serviceGrid}>
-                  <div className={s.subFieldGroup}>
-                    <label className={s.subLabel}>
-                      {t('churchInfoServiceNameVi')}
-                    </label>
-                    <input
-                      type="text"
-                      value={svc.titleVi}
-                      onChange={(e) => updateServiceField(idx, 'titleVi', e.target.value)}
-                      className={s.serviceInputSemibold}
-                      placeholder="Lễ Thờ Phượng Chúa Nhật"
-                    />
-                  </div>
+                <BilingualTextField
+                  label={t('churchInfoServiceNameLabel')}
+                  valueVi={svc.titleVi}
+                  onChangeVi={(value) => updateServiceField(idx, 'titleVi', value)}
+                  valueEn={svc.titleEn || ''}
+                  onChangeEn={(value) => updateServiceField(idx, 'titleEn', value)}
+                  placeholderVi="Lễ Thờ Phượng Chúa Nhật"
+                  placeholderEn="Sunday Worship Service"
+                />
 
-                  <div className={s.subFieldGroup}>
-                    <div className={s.serviceCardHeader}>
-                      <label className={s.subLabel}>
-                        {t('churchInfoServiceTimeVi')}
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      value={svc.time}
-                      onChange={(e) => updateServiceField(idx, 'time', e.target.value)}
-                      className={s.serviceInputAmber}
-                      placeholder="Chúa Nhật • 3:00 PM – 5:00 PM"
-                    />
-                  </div>
-                </div>
-
-                <div className={s.serviceGridPt1}>
-                  <div className={s.subFieldGroup}>
-                    <label className={s.subLabel}>
-                      {t('churchInfoServiceNameEn')}
-                    </label>
-                    <input
-                      type="text"
-                      value={svc.titleEn || ''}
-                      onChange={(e) => updateServiceField(idx, 'titleEn', e.target.value)}
-                      className={s.serviceInputRegular}
-                      placeholder="Sunday Worship Service"
-                    />
-                  </div>
-
-                  <div className={s.subFieldGroup}>
-                    <label className={s.subLabel}>
-                      {t('churchInfoServiceTimeEn')}
-                    </label>
-                    <input
-                      type="text"
-                      value={svc.timeEn || ''}
-                      onChange={(e) => updateServiceField(idx, 'timeEn', e.target.value)}
-                      className={s.serviceInputIndigo}
-                      placeholder="Sunday • 3:00 PM – 5:00 PM"
-                    />
-                  </div>
-                </div>
+                <BilingualTextField
+                  label={t('churchInfoServiceTimeLabel')}
+                  valueVi={svc.time}
+                  onChangeVi={(value) => updateServiceField(idx, 'time', value)}
+                  valueEn={svc.timeEn || ''}
+                  onChangeEn={(value) => updateServiceField(idx, 'timeEn', value)}
+                  placeholderVi="Chúa Nhật • 3:00 PM – 5:00 PM"
+                  placeholderEn="Sunday • 3:00 PM – 5:00 PM"
+                />
 
                 <div className={s.subFieldGroup}>
                   <label className={s.subLabel}>
