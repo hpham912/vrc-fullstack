@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { modalStyles as s } from './Modal.styles.ts';
+import { useBodyScrollLock } from './useBodyScrollLock.ts';
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,6 +25,11 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Lock the background page scroll while this modal is rendered
+  // (including the 200ms fade-out). Reference-counted, so a nested
+  // modal keeps the lock until it closes too.
+  useBodyScrollLock(shouldRender);
 
   useEffect(() => {
     if (isOpen) {

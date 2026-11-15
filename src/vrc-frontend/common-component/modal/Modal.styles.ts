@@ -13,5 +13,5 @@ export const modalStyles = {
   title: "font-serif font-bold text-base sm:text-lg max-sm:[.large-font_&]:text-sm text-white line-clamp-2 break-words",
   closeBtn: "p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors flex-shrink-0",
   closeIcon: "w-4 h-4",
-  body: "overflow-y-auto flex-1",
+  body: "overflow-y-auto overscroll-contain flex-1",
 };

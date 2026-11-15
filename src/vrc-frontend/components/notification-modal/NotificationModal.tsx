@@ -6,6 +6,7 @@ import { CHURCH_NAME } from '../../constants/church.ts';
 import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
 import { Bell, X } from 'lucide-react';
 import { Button, AdminAddButton } from '../../common-component/index.ts';
+import { useBodyScrollLock } from '../../common-component/modal/useBodyScrollLock.ts';
 import { NotificationList } from './NotificationList.tsx';
 import { notificationModalStyles as s } from './NotificationModal.styles.ts';
 
@@ -42,6 +43,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 }) => {
   const { t } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Lock the background page scroll while this popup is open.
+  useBodyScrollLock(isOpen);
+
   // Desktop anchor position, measured from the bell button: the popup
   // sits directly below the bell, right edge aligned with the bell's
   // right edge. Null on mobile (full-screen panel) and whenever the
