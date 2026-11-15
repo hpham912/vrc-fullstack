@@ -100,7 +100,7 @@ export const translations = {
   copied: { vi: 'Đã Sao Chép!', en: 'Copied!' },
   shareVerse: { vi: 'Chia Sẻ', en: 'Share' },
   editVerseBtn: { vi: 'Sửa Lời Chúa', en: 'Edit Verse' },
-  reflectionTitle: { vi: 'Suy Gẫm Mục Vụ', en: 'Pastoral Reflection' },
+  reflectionTitle: { vi: 'Suy Gẫm', en: 'Reflection' },
   prayerTitle: { vi: 'Lời Cầu Nguyện Hôm Nay', en: "Today's Prayer" },
   loadingScripture: { vi: 'Đang tải Lời Chúa...', en: 'Loading scripture...' },
   loading: { vi: 'Đang tải...', en: 'Loading...' },

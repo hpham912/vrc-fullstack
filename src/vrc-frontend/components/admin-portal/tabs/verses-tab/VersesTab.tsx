@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Save, Sparkles } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { CheckCircle2, Plus, Save, Sparkles } from 'lucide-react';
 import { DailyVerse, PoolVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
-import { Button, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
+import { Button, buttonStyles, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
 import { versesTabStyles } from './VersesTab.styles.ts';
 
 interface VersesTabProps {
@@ -65,6 +65,11 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   // The pool verse being edited (tap a pill), or null when adding.
   const [editingPoolId, setEditingPoolId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Success message shown below the Add/Save button (mobile only)
+  // after a verse is added or edited. Clears after 4s, matching the
+  // feedback banner.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
   const [pickingToday, setPickingToday] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<PoolVerse | null>(null);
   const [removingPool, setRemovingPool] = useState(false);
@@ -172,6 +177,11 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     if (!fetched) return;
     try {
       setSubmitting(true);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       await apiFetch('/api/verse-pool', {
         method: 'POST',
@@ -191,7 +201,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           prayerEn: prayerEn.trim() || null,
         }),
       });
-      showFeedback('success', t('poolAdded', { ref: fetched.referenceEn || fetched.reference }));
+      const addedMessage = t('poolAdded', { ref: fetched.referenceEn || fetched.reference });
+      showFeedback('success', addedMessage);
+      setSaveSuccess(addedMessage);
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       resetForm();
       await loadPool();
     } catch (err: any) {
@@ -221,6 +234,11 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     if (!editingPoolId) return;
     try {
       setSubmitting(true);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       await apiFetch(`/api/verse-pool/${editingPoolId}`, {
         method: 'PUT',
@@ -237,7 +255,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           prayerEn: prayerEn.trim() || null,
         }),
       });
-      showFeedback('success', t('poolUpdated', { ref: referenceInput }));
+      const updatedMessage = t('poolUpdated', { ref: referenceInput });
+      showFeedback('success', updatedMessage);
+      setSaveSuccess(updatedMessage);
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       resetForm();
       await loadPool();
     } catch (err: any) {
@@ -550,6 +571,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
               size="md"
               fullWidth
               onClick={handleSavePoolEdit}
+              loading={submitting}
               disabled={submitting}
               leftIcon={<Save className={versesTabStyles.saveIcon} />}
             >
@@ -562,11 +584,18 @@ export const VersesTab: React.FC<VersesTabProps> = ({
               size="md"
               fullWidth
               onClick={handleAddToPool}
+              loading={submitting}
               disabled={submitting || !fetched || isPoolFull}
               leftIcon={<Plus className={versesTabStyles.saveIcon} />}
             >
               <span>{submitting ? t('commonSaving') : t('poolAddToPool')}</span>
             </Button>
+          )}
+          {saveSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {saveSuccess}
+            </p>
           )}
         </div>
       </section>

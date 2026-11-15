@@ -27,4 +27,13 @@ export const buttonStyles = {
     iconMd: "w-8 h-8 rounded-xl",
   },
   fullWidth: "w-full",
+  loadingIcon: "w-3.5 h-3.5 animate-spin",
+  // Success message shown below a save button after a save completes.
+  // Mobile only (the desktop feedback banner at the top of AdminPortal
+  // is easy to see there; on mobile the user is scrolled down at the
+  // save button). Rendered by the form, not by Button, so the form
+  // controls when it appears and what it says.
+  saveSuccessMessage:
+    "mt-2 flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 md:hidden",
+  saveSuccessIcon: "w-3.5 h-3.5 flex-shrink-0",
 };

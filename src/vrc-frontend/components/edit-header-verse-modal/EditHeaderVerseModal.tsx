@@ -3,7 +3,7 @@ import { ChurchInfo, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
-import { Button, SegmentedControl, TextField } from '../../common-component/index.ts';
+import { Button, buttonStyles, SegmentedControl, TextField } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -51,6 +51,11 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   const [fetchingApi, setFetchingApi] = useState(false);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  // Success message shown below the save button (mobile only) after a
+  // save completes. The modal closes 700ms after a save, so this is
+  // brief — it reinforces the save right where the admin tapped.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
 
   const [verseTextVi, setVerseTextVi] = useState(currentHeaderVerse.verseTextVi || '');
   const [verseTextEn, setVerseTextEn] = useState(currentHeaderVerse.verseTextEn || '');
@@ -145,6 +150,11 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
     try {
       setSaving(true);
       setFeedback(null);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       const payload: HeaderVerse = {
         verseTextVi: verseTextVi.trim(),
@@ -170,6 +180,8 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
       }
 
       setFeedback({ type: 'success', message: t('headerVerseSavedSuccess') });
+      setSaveSuccess(t('headerVerseSavedSuccess'));
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       onSaveSuccess?.();
       setTimeout(() => {
         onClose();
@@ -322,18 +334,19 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
             type="submit"
             variant="dark"
             size="md"
+            loading={saving}
             disabled={saving || fetchingApi || !isDirty}
-            leftIcon={
-              saving ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Save className="w-3.5 h-3.5" />
-              )
-            }
+            leftIcon={<Save className="w-3.5 h-3.5" />}
           >
             <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
           </Button>
         </div>
+        {saveSuccess && (
+          <p className={buttonStyles.saveSuccessMessage}>
+            <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+            {saveSuccess}
+          </p>
+        )}
       </form>
     </Modal>
   );

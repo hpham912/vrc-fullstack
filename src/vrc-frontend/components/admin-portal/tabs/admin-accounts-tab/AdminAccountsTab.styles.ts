@@ -8,8 +8,6 @@ export const adminAccountsTabStyles = {
   label: 'block text-xs font-bold text-stone-700 mb-1',
   input: 'w-full px-3 py-2 border border-stone-300 rounded-xl text-xs bg-white',
   submitRow: 'pt-1 text-right',
-  createBtn:
-    'px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors',
   listSection: 'space-y-3',
   sectionTitle: 'font-serif font-bold text-stone-900 text-sm flex items-center gap-2',
   titleIcon: 'w-4 h-4 text-stone-700',
@@ -38,6 +36,4 @@ export const adminAccountsTabStyles = {
   labelSemibold: 'block text-xs font-semibold text-stone-700 mb-1',
   inputSm: 'w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
   submitRowRight: 'text-right pt-1',
-  updateBtn:
-    'px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors',
 };

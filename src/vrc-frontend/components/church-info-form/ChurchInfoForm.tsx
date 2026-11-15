@@ -16,7 +16,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { Card, Button, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
+import { Card, Button, buttonStyles, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
 import { churchInfoFormStyles as s } from './ChurchInfoForm.styles.ts';
 
 interface ChurchInfoFormProps {
@@ -83,6 +83,11 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
 
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  // Success message shown below the save button (mobile only) after a
+  // save completes. The banner above lives at the top of this long
+  // form, far from the save button on a phone. Clears after 4s.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
 
   // Last saved values — the Save button is enabled only while the
   // form differs from these.
@@ -210,6 +215,11 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
     try {
       setSaving(true);
       setFeedback(null);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
 
       const processedServices = services.map((svc) => ({
@@ -259,6 +269,8 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
       // again until the next edit.
       initialRef.current = getFormValues(savedData);
       showFeedback('success', t('churchInfoSaved'));
+      setSaveSuccess(t('churchInfoSaved'));
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       onSaved(savedData);
     } catch (err: any) {
       console.error('Error saving church info:', err);
@@ -534,12 +546,19 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
           <Button
             type="submit"
             variant="dark"
+            loading={saving}
             disabled={saving || !isDirty}
             leftIcon={<Save className={s.plusIconSm} />}
           >
             <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
           </Button>
         </div>
+        {saveSuccess && (
+          <p className={buttonStyles.saveSuccessMessage}>
+            <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+            {saveSuccess}
+          </p>
+        )}
       </form>
     </>
   );

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { CheckCircle2, KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { AdminUser } from '../../../../types/index.ts';
-import { Button, ConfirmModal, Modal } from '../../../../common-component/index.ts';
+import { Button, buttonStyles, ConfirmModal, Modal } from '../../../../common-component/index.ts';
 import { adminAccountsTabStyles as s } from './AdminAccountsTab.styles.ts';
 
 interface AdminAccount {
@@ -39,6 +39,12 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // Success messages shown below each save button (mobile only) after
+  // the action completes. One per form — the two forms share the
+  // submitting flag but are separate actions. Clears after 4s.
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
 
   // Dirty-check: the Create and Change Password buttons stay disabled
   // until the admin has typed something (these are creation/change
@@ -78,6 +84,11 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
 
     try {
       setSubmitting(true);
+      setCreateSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       const res = await fetch(apiUrl('/api/auth/create-admin'), {
         method: 'POST',
@@ -96,7 +107,10 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create admin');
 
-      showFeedback('success', t('adminCreated', { username: newAdminUsername }));
+      const createdMessage = t('adminCreated', { username: newAdminUsername });
+      showFeedback('success', createdMessage);
+      setCreateSuccess(createdMessage);
+      saveSuccessTimeout.current = window.setTimeout(() => setCreateSuccess(null), 4000);
       setNewAdminUsername('');
       setNewAdminPassword('');
       setNewAdminDisplayName('');
@@ -166,6 +180,11 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
 
     try {
       setSubmitting(true);
+      setPasswordSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       const res = await fetch(apiUrl('/api/auth/change-password'), {
         method: 'POST',
@@ -179,6 +198,8 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
       if (!res.ok) throw new Error(data.error || 'Password update failed');
 
       showFeedback('success', t('adminPasswordUpdated'));
+      setPasswordSuccess(t('adminPasswordUpdated'));
+      saveSuccessTimeout.current = window.setTimeout(() => setPasswordSuccess(null), 4000);
       setOldPassword('');
       setNewPassword('');
     } catch (err: any) {
@@ -268,13 +289,21 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
         </div>
 
         <div className={s.submitRow}>
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
+            loading={submitting}
             disabled={submitting || !isCreateDirty}
-            className={s.createBtn}
           >
             {submitting ? t('commonCreating') : t('createAdminBtn')}
-          </button>
+          </Button>
+          {createSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {createSuccess}
+            </p>
+          )}
         </div>
       </form>
 
@@ -369,13 +398,21 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
         </div>
 
         <div className={s.submitRowRight}>
-          <button
+          <Button
             type="submit"
+            variant="dark"
+            size="md"
+            loading={submitting}
             disabled={submitting || !isPasswordDirty}
-            className={s.updateBtn}
           >
-            {t('updatePasswordBtn')}
-          </button>
+            {submitting ? t('commonSaving') : t('updatePasswordBtn')}
+          </Button>
+          {passwordSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {passwordSuccess}
+            </p>
+          )}
         </div>
       </form>
 

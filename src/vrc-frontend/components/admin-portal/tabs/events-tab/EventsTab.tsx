@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
+import { Button, buttonStyles, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -92,6 +92,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 }) => {
   const { t, language } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
+  // Success message shown below the save button (mobile only) after a
+  // save completes, so the admin sees it right where they tapped Save
+  // instead of scrolling up to the banner at the top of the portal.
+  // Clears after 4s, matching the feedback banner.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
   // Preview language toggle inside the event preview (same as the
   // header-verse edit preview): the preview follows this, not the app language.
   const [previewLang, setPreviewLang] = useState<'vi' | 'en'>(language);
@@ -232,6 +238,11 @@ export const EventsTab: React.FC<EventsTabProps> = ({
 
     try {
       setSubmitting(true);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       const payload = {
         title: eventTitleEn.trim(),
@@ -275,9 +286,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         throw new Error(errData?.error || `Failed to save event (HTTP ${res.status})`);
       }
 
-      showFeedback('success', editingEventId
+      const savedMessage = editingEventId
         ? t('adminEventUpdated')
-        : t('adminEventAdded'));
+        : t('adminEventAdded');
+      showFeedback('success', savedMessage);
+      setSaveSuccess(savedMessage);
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
 
       // Dispatch local/push notification
       NotificationClient.triggerNotification(
@@ -684,6 +698,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             type="submit"
             variant="dark"
             size="md"
+            loading={submitting}
             disabled={submitting || !isDirty}
             leftIcon={<Save className="w-3.5 h-3.5" />}
           >
@@ -695,6 +710,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                 : t('commonSave')}
             </span>
           </Button>
+          {saveSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {saveSuccess}
+            </p>
+          )}
         </div>
       </form>
 

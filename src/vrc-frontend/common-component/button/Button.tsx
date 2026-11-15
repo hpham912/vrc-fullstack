@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { buttonStyles as s } from './Button.styles.ts';
 
 export type ButtonVariant = keyof typeof s.variants;
@@ -13,6 +14,11 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   href?: string;
   target?: string;
   rel?: string;
+  // Loading state (used by save buttons): shows a spinning loader in
+  // place of the left icon and disables the button until the async
+  // work finishes. The caller owns the boolean (its submitting/saving
+  // state) and the label text (e.g. "Saving...").
+  loading?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -24,6 +30,8 @@ export const Button: React.FC<ButtonProps> = ({
   href,
   target,
   rel,
+  loading = false,
+  disabled = false,
   className = '',
   children,
   ...props
@@ -31,6 +39,13 @@ export const Button: React.FC<ButtonProps> = ({
   const combinedClassName = `${s.base} ${s.variants[variant]} ${s.sizes[size]} ${
     fullWidth ? s.fullWidth : ''
   } ${className}`.trim();
+  // While loading, the spinner replaces the left icon and the button is
+  // disabled so a second tap cannot start a duplicate save.
+  const resolvedLeftIcon = loading ? (
+    <Loader2 className={s.loadingIcon} aria-hidden="true" />
+  ) : (
+    leftIcon
+  );
 
   if (href) {
     return (
@@ -43,7 +58,7 @@ export const Button: React.FC<ButtonProps> = ({
         title={props.title}
         aria-label={props['aria-label']}
       >
-        {leftIcon}
+        {resolvedLeftIcon}
         {children}
         {rightIcon}
       </a>
@@ -51,8 +66,8 @@ export const Button: React.FC<ButtonProps> = ({
   }
 
   return (
-    <button className={combinedClassName} {...props}>
-      {leftIcon}
+    <button className={combinedClassName} disabled={loading || disabled} {...props}>
+      {resolvedLeftIcon}
       {children}
       {rightIcon}
     </button>

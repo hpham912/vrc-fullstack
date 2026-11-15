@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Video as VideoIcon } from 'lucide-react';
+import { CheckCircle2, Save, Video as VideoIcon } from 'lucide-react';
 import { Video } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
@@ -8,7 +8,7 @@ import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vr
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { getVideoCategoryLabel, isBuiltinVideoCategory, type VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { AdminActionButtons, Button, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
+import { AdminActionButtons, Button, buttonStyles, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
 import { videosTabStyles } from './VideosTab.styles.ts';
 
 interface VideosTabProps {
@@ -117,6 +117,10 @@ export const VideosTab: React.FC<VideosTabProps> = ({
   const [videoDescEn, setVideoDescEn] = useState('');
   const [videoDate, setVideoDate] = useState(getTodayStr());
   const [submitting, setSubmitting] = useState(false);
+  // Success message shown below the save button (mobile only) after a
+  // save completes. Clears after 4s, matching the feedback banner.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
   const [deleteTargetVideo, setDeleteTargetVideo] = useState<Video | null>(null);
   const [deletingVideo, setDeletingVideo] = useState(false);
 
@@ -197,6 +201,11 @@ export const VideosTab: React.FC<VideosTabProps> = ({
 
     try {
       setSubmitting(true);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
       const endpoint = editingVideoId ? `/api/videos/${editingVideoId}` : '/api/videos';
       const method = editingVideoId ? 'PUT' : 'POST';
@@ -223,7 +232,10 @@ export const VideosTab: React.FC<VideosTabProps> = ({
         }),
       });
 
-      showFeedback('success', editingVideoId ? t('adminVideoUpdated') : t('adminVideoSaved'));
+      const savedMessage = editingVideoId ? t('adminVideoUpdated') : t('adminVideoSaved');
+      showFeedback('success', savedMessage);
+      setSaveSuccess(savedMessage);
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       resetVideoForm();
       onRefreshData();
     } catch (err: any) {
@@ -414,6 +426,7 @@ export const VideosTab: React.FC<VideosTabProps> = ({
             type="submit"
             variant="dark"
             size="md"
+            loading={submitting}
             disabled={submitting || !isDirty}
             leftIcon={<Save className="w-3.5 h-3.5" />}
           >
@@ -425,6 +438,12 @@ export const VideosTab: React.FC<VideosTabProps> = ({
                 : t('commonSave')}
             </span>
           </Button>
+          {saveSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {saveSuccess}
+            </p>
+          )}
         </div>
       </form>
 

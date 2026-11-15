@@ -22,7 +22,7 @@ import {
   Landmark,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button, TextField } from '../../common-component/index.ts';
+import { Modal, Button, buttonStyles, TextField } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
 interface SpotlightBannerModalProps {
@@ -135,6 +135,11 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
 
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  // Success message shown below the save button (mobile only) after a
+  // save completes. The modal closes 900ms after a save, so this is
+  // brief — it reinforces the save right where the admin tapped.
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const saveSuccessTimeout = useRef<number | null>(null);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -223,6 +228,11 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     try {
       setSaving(true);
       setFeedback(null);
+      setSaveSuccess(null);
+      if (saveSuccessTimeout.current) {
+        window.clearTimeout(saveSuccessTimeout.current);
+        saveSuccessTimeout.current = null;
+      }
       const token = getToken();
 
       const isAuto = selectedEventId === null;
@@ -304,6 +314,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         type: 'success',
         message: t('spotSaved'),
       });
+      setSaveSuccess(t('spotSaved'));
+      saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       onSaved(updated);
       setTimeout(() => {
         onClose();
@@ -582,12 +594,19 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             <Button
               type="submit"
               variant="dark"
+              loading={saving}
               disabled={saving || !isDirty}
               leftIcon={<Save className={s.saveIcon} />}
             >
               <span>{saving ? t('commonSaving') : t('commonSaveChanges')}</span>
             </Button>
           </div>
+          {saveSuccess && (
+            <p className={buttonStyles.saveSuccessMessage}>
+              <CheckCircle2 className={buttonStyles.saveSuccessIcon} />
+              {saveSuccess}
+            </p>
+          )}
         </form>
     </Modal>
   );
