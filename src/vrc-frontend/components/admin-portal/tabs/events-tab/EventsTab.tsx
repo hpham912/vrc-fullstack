@@ -718,14 +718,13 @@ export const EventsTab: React.FC<EventsTabProps> = ({
             </span>
           </Button>
           {saveSuccess && (
-            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+            <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
           )}
           {saveError && (
             <Banner
               type="error"
               message={saveError}
-              variant="text"
-              className="md:hidden"
+              className="md:hidden mt-2"
               onDismiss={() => setSaveError(null)}
             />
           )}

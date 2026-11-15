@@ -290,7 +290,6 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
         <Banner
           type={feedback.type}
           message={feedback.message}
-          variant="card"
           onDismiss={dismissFeedback}
         />
       )}
@@ -542,14 +541,13 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
           </Button>
         </div>
         {saveSuccess && (
-          <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
         )}
         {saveError && (
           <Banner
             type="error"
             message={saveError}
-            variant="text"
-            className="md:hidden"
+            className="md:hidden mt-2"
             onDismiss={() => setSaveError(null)}
           />
         )}

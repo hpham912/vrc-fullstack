@@ -353,7 +353,6 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
           <Banner
             type={feedback.type}
             message={feedback.message}
-            variant="card"
             className="mx-5 mt-4"
           />
         )}
@@ -599,14 +598,13 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             </Button>
           </div>
           {saveSuccess && (
-            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+            <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
           )}
           {saveError && (
             <Banner
               type="error"
               message={saveError}
-              variant="text"
-              className="md:hidden"
+              className="md:hidden mt-2"
               onDismiss={() => setSaveError(null)}
             />
           )}

@@ -106,7 +106,7 @@ export const PrayerRequestModal: React.FC<PrayerRequestModalProps> = ({ isOpen, 
         ) : (
           <form onSubmit={handleSubmit} className={s.form}>
             {error && (
-              <Banner type="error" message={error} variant="card" />
+              <Banner type="error" message={error} />
             )}
 
             <div>

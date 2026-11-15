@@ -569,7 +569,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         </div>
 
         {isPoolFull && !editingPoolId && (
-          <Banner type="error" message={t('poolFull')} variant="card" />
+          <Banner type="error" message={t('poolFull')} />
         )}
 
         <div className={versesTabStyles.addBtnRow}>
@@ -601,14 +601,13 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             </Button>
           )}
           {saveSuccess && (
-            <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+            <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
           )}
           {saveError && (
             <Banner
               type="error"
               message={saveError}
-              variant="text"
-              className="md:hidden"
+              className="md:hidden mt-2"
               onDismiss={() => setSaveError(null)}
             />
           )}

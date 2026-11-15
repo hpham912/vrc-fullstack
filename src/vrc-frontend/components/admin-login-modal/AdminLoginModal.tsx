@@ -59,7 +59,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       {/* Form Body */}
       <form onSubmit={handleSubmit} className={s.form}>
         {error && (
-          <Banner type="error" message={error} variant="card" />
+          <Banner type="error" message={error} />
         )}
 
         <div>

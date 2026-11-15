@@ -213,7 +213,7 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
       <form onSubmit={handleSave} className={s.container}>
         {/* Status Feedback */}
         {feedback && (
-          <Banner type={feedback.type} message={feedback.message} variant="card" />
+          <Banner type={feedback.type} message={feedback.message} />
         )}
 
         {/* Bible API Search & Auto-Fill Card */}
@@ -341,14 +341,13 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           </Button>
         </div>
         {saveSuccess && (
-          <Banner type="success" message={saveSuccess} variant="text" className="md:hidden" />
+          <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
         )}
         {saveError && (
           <Banner
             type="error"
             message={saveError}
-            variant="text"
-            className="md:hidden"
+            className="md:hidden mt-2"
             onDismiss={() => setSaveError(null)}
           />
         )}

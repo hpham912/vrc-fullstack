@@ -307,14 +307,13 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
             {submitting ? t('commonCreating') : t('createAdminBtn')}
           </Button>
           {createSuccess && (
-            <Banner type="success" message={createSuccess} variant="text" className="md:hidden" />
+            <Banner type="success" message={createSuccess} className="md:hidden mt-2" />
           )}
           {createError && (
             <Banner
               type="error"
               message={createError}
-              variant="text"
-              className="md:hidden"
+              className="md:hidden mt-2"
               onDismiss={() => setCreateError(null)}
             />
           )}
@@ -422,14 +421,13 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
             {submitting ? t('commonSaving') : t('updatePasswordBtn')}
           </Button>
           {passwordSuccess && (
-            <Banner type="success" message={passwordSuccess} variant="text" className="md:hidden" />
+            <Banner type="success" message={passwordSuccess} className="md:hidden mt-2" />
           )}
           {passwordError && (
             <Banner
               type="error"
               message={passwordError}
-              variant="text"
-              className="md:hidden"
+              className="md:hidden mt-2"
               onDismiss={() => setPasswordError(null)}
             />
           )}
