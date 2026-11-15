@@ -40,7 +40,7 @@ export const Banner: React.FC<BannerProps> = ({
   return (
     <div className={combinedClassName} role={type === 'error' ? 'alert' : 'status'}>
       <Icon className={iconClass} aria-hidden="true" />
-      <span className="flex-1">{message}</span>
+      <span className="flex-1 text-left">{message}</span>
       {onDismiss && (
         <button
           type="button"
