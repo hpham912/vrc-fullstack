@@ -31,6 +31,42 @@ export const adminUsers = pgTable('admin_users', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Church members (registered app users, view-only). Registered with a
+// phone number + email + password; the email is verified with a 6-digit
+// code sent by the church's Microsoft 365 email. Login is by phone
+// number OR email + password. Role is always 'member' — members can only
+// view, never administer.
+export const members = pgTable('members', {
+  id: serial('id').primaryKey(),
+  phone: text('phone').notNull().unique(), // E.164, e.g. +14805550199
+  email: text('email').notNull().unique(), // lowercased
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  passwordHash: text('password_hash').notNull(),
+  passwordSalt: text('password_salt').notNull(),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  role: text('role').notNull().default('member'),
+  lastLoginAt: timestamp('last_login_at'),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// One-time email verification codes (registration + forgot password).
+// Only the hash is stored — the plain code is never saved. A code is
+// valid for 10 minutes and at most 5 verification attempts.
+export const emailVerifications = pgTable('email_verifications', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull(), // lowercased
+  codeHash: text('code_hash').notNull(),
+  codeSalt: text('code_salt').notNull(),
+  purpose: text('purpose').notNull(), // 'register' | 'reset'
+  expiresAt: timestamp('expires_at').notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Church events calendar
 export const events = pgTable('events', {
   id: serial('id').primaryKey(),

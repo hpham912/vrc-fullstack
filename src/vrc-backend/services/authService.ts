@@ -42,7 +42,7 @@ export const AuthService = {
       username: user.username,
       displayName: user.displayName,
       role: user.role,
-      exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7-day expiration
+      exp: Date.now() + 365 * 24 * 60 * 60 * 1000, // 1-year session — members and admins stay logged in (the password itself never expires)
     };
 
     const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');

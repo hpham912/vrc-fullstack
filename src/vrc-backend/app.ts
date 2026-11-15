@@ -4,6 +4,8 @@ import { corsMiddleware } from './middleware/securityMiddleware.ts';
 import { errorHandler } from './middleware/errorHandler.ts';
 
 import authRoutes from './routes/authRoutes.ts';
+import memberRoutes from './routes/memberRoutes.ts';
+import adminMemberRoutes from './routes/adminMemberRoutes.ts';
 import eventRoutes from './routes/eventRoutes.ts';
 import verseRoutes from './routes/verseRoutes.ts';
 import versePoolRoutes from './routes/versePoolRoutes.ts';
@@ -55,6 +57,8 @@ export const createApp = () => {
 
   // Mount API Routers
   app.use('/api/auth', authRoutes);
+  app.use('/api/members', memberRoutes);
+  app.use('/api/admin', adminMemberRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/verses', verseRoutes);
   app.use('/api/verse-pool', versePoolRoutes);

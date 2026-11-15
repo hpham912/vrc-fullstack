@@ -9,6 +9,12 @@ export interface TextFieldProps {
   type?: string;
   disabled?: boolean;
   error?: string;
+  // Optional leading icon (a lucide icon component) shown inside the
+  // input on the left, e.g. icon={User}. Omit it and no icon renders —
+  // the input is exactly as before. Single-line inputs only; ignored
+  // for multiline.
+  icon?: React.ComponentType<{ className?: string }>;
+  required?: boolean;
   // Multiline mode renders a <textarea> instead of an <input> — same
   // look, same props. The pool form's reflection and prayer fields
   // use this; the reference field uses the single-line mode.
@@ -27,12 +33,32 @@ export const TextField: React.FC<TextFieldProps> = ({
   type = 'text',
   disabled = false,
   error,
+  icon,
+  required = false,
   multiline = false,
   rows = 3,
   id,
   autoComplete,
   onKeyDown,
 }) => {
+  const Icon = icon;
+  const inputClassName = Icon
+    ? `${textFieldStyles.input} ${textFieldStyles.inputWithIcon}`
+    : textFieldStyles.input;
+  const inputElement = (
+    <input
+      id={id}
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
+      disabled={disabled}
+      required={required}
+      autoComplete={autoComplete}
+      className={inputClassName}
+    />
+  );
   return (
     <div className={textFieldStyles.field}>
       {label && (
@@ -51,18 +77,13 @@ export const TextField: React.FC<TextFieldProps> = ({
           rows={rows}
           className={textFieldStyles.textarea}
         />
+      ) : Icon ? (
+        <div className={textFieldStyles.inputWrapper}>
+          <Icon className={textFieldStyles.inputIcon} />
+          {inputElement}
+        </div>
       ) : (
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder={placeholder}
-          disabled={disabled}
-          autoComplete={autoComplete}
-          className={textFieldStyles.input}
-        />
+        inputElement
       )}
       {error && <span className={textFieldStyles.error}>{error}</span>}
     </div>

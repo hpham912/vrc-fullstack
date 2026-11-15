@@ -11,7 +11,9 @@ import { EventsSection } from './vrc-frontend/components/events-section/EventsSe
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
 import { VideosSection } from './vrc-frontend/components/videos-section/VideosSection.tsx';
 import { NotificationsSection } from './vrc-frontend/components/notifications-section/NotificationsSection.tsx';
-import { AdminLoginModal } from './vrc-frontend/components/admin-login-modal/AdminLoginModal.tsx';
+import { LoginModal } from './vrc-frontend/components/login-modal/LoginModal.tsx';
+import { RegisterModal } from './vrc-frontend/components/register-modal/RegisterModal.tsx';
+import { ForgotPasswordModal } from './vrc-frontend/components/forgot-password-modal/ForgotPasswordModal.tsx';
 import { PrayerRequestModal } from './vrc-frontend/components/prayer-request-modal/PrayerRequestModal.tsx';
 import { NotificationModal } from './vrc-frontend/components/notification-modal/NotificationModal.tsx';
 import { AnnouncementDetailModal } from './vrc-frontend/components/notification-modal/AnnouncementDetailModal.tsx';
@@ -130,6 +132,8 @@ function ChurchAppContent() {
 
   // Modals
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
   const [adminPortalOpen, setAdminPortalOpen] = useState(false);
   const [spotlightModalOpen, setSpotlightModalOpen] = useState(false);
   const [churchInfoModalOpen, setChurchInfoModalOpen] = useState(false);
@@ -690,11 +694,32 @@ function ChurchAppContent() {
         navRef={tabBarRef}
       />
 
-      {/* Admin Login Modal */}
-      <AdminLoginModal
+      {/* Login Modal (shared: admins + members) */}
+      <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
         onLoginSuccess={() => setLoginModalOpen(false)}
+        onOpenRegister={() => {
+          setLoginModalOpen(false);
+          setRegisterModalOpen(true);
+        }}
+        onOpenForgotPassword={() => {
+          setLoginModalOpen(false);
+          setForgotPasswordModalOpen(true);
+        }}
+      />
+
+      {/* Member Registration Modal */}
+      <RegisterModal
+        isOpen={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+        onRegisterSuccess={() => setRegisterModalOpen(false)}
+      />
+
+      {/* Member Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={forgotPasswordModalOpen}
+        onClose={() => setForgotPasswordModalOpen(false)}
       />
 
       {/* Spotlight / Holiday Hero Banner Customizer Modal */}

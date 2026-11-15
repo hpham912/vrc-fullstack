@@ -8,6 +8,7 @@ import { Banner } from '../../common-component/index.ts';
 import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
 import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
+import { MembersTab } from './tabs/members-tab/MembersTab.tsx';
 import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
 import { VideosTab } from './tabs/videos-tab/VideosTab.tsx';
 import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
@@ -20,6 +21,7 @@ import {
   X,
   RefreshCw,
   Users,
+  UsersRound,
   Sliders,
   HeartHandshake,
   Building2,
@@ -217,6 +219,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <button
               type="button"
+              onClick={() => setActiveTab('members')}
+              className={`${s.mobileTabBtnBase} ${
+                activeTab === 'members' ? s.mobileTabActiveAmber : s.mobileTabIdle
+              }`}
+            >
+              <UsersRound className={s.tabIconAmber} />
+              <span className="truncate">{t('tabMembers')}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('prayer-requests')}
               className={`${s.mobileTabBtnBase} ${
                 activeTab === 'prayer-requests' ? s.mobileTabActiveAmber : s.mobileTabIdle
@@ -306,6 +319,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <span>{t('tabAdminAccounts')}</span>
           </button>
 
+          <button
+            onClick={() => setActiveTab('members')}
+            className={`${s.desktopTabBtnBase} ${
+              activeTab === 'members' ? s.desktopTabActiveAmber : s.desktopTabIdleAmber
+            }`}
+          >
+            <UsersRound className={s.tabIconAmber600} />
+            <span>{t('tabMembers')}</span>
+          </button>
+
           {onOpenSpotlightEditor && (
             <button
               type="button"
@@ -331,6 +354,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <ChurchInfoTab activeTab={activeTab} churchInfo={churchInfo} onRefreshData={onRefreshData} />
 
           <AdminAccountsTab activeTab={activeTab} getToken={getToken} adminUser={adminUser} showFeedback={showFeedback} />
+
+          <MembersTab activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} />
 
           <PrayerRequestsTab activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} />
         </div>

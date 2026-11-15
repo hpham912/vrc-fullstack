@@ -16,4 +16,13 @@ export const textFieldStyles = {
   textarea:
     'w-full max-w-full box-border min-w-0 px-3 py-2.5 border border-stone-300 rounded-[10px] text-sm bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/25 disabled:opacity-50 disabled:bg-stone-50 resize-y leading-relaxed',
   error: 'block text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1',
+  // Leading icon (single-line inputs only). The wrapper is relative so
+  // the icon can sit inside the input on the left; the icon is
+  // pointer-events-none so taps land on the input. inputWithIcon adds
+  // the left padding that makes room for it. Omit the icon prop and
+  // none of this renders — the input is exactly as before.
+  inputWrapper: 'relative',
+  inputIcon:
+    'w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none',
+  inputWithIcon: 'pl-9',
 };

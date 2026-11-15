@@ -1,92 +1,214 @@
 import { randomInt } from 'crypto';
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
-import { adminUsers } from '../../vrc-db/schema.ts';
+import { adminUsers, members } from '../../vrc-db/schema.ts';
 import { eq, asc, sql } from 'drizzle-orm';
 import { AuthService } from '../services/authService.ts';
-import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
+import { requireAdmin, requireAuth, AuthRequest } from '../middleware/authMiddleware.ts';
 import { authRateLimiter } from '../middleware/securityMiddleware.ts';
 
 const router = Router();
 
-// POST /api/auth/login - Admin Login
+// POST /api/auth/login — shared login for admins and members.
+// The identifier may be an admin username, an email, or a US phone
+// number (10 digits, with or without +1). Admins are checked first
+// (by username / email), then members (by phone / email). The token
+// carries the role, so the app shows the admin view for role 'admin'
+// and the view-only app for role 'member'.
 router.post('/login', authRateLimiter, async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required.' });
+    const identifier = req.body?.identifier ?? req.body?.username;
+    const password = req.body?.password;
+    if (!identifier || !password) {
+      return res.status(400).json({ error: 'Username / email / phone and password are required.' });
     }
 
-    const cleanUsername = String(username).trim().toLowerCase();
+    const cleanIdentifier = String(identifier).trim();
     const cleanPassword = String(password).trim();
+    const digits = cleanIdentifier.replace(/\D/g, '');
+    const isPhone =
+      (digits.length === 10 || (digits.length === 11 && digits.startsWith('1'))) &&
+      /^\+?1?[\d\s()+-]+$/.test(cleanIdentifier);
 
-    let user: any = null;
+    // The account we log in as: { kind, id, username, displayName,
+    // email, role, passwordHash, passwordSalt } — from admin_users or
+    // members, whichever table holds this identifier.
+    let account: {
+      kind: 'admin' | 'member';
+      id: number;
+      username: string;
+      displayName: string;
+      email: string;
+      role: string;
+      passwordHash: string;
+      passwordSalt: string;
+    } | null = null;
 
     try {
-      const existing = await db
-        .select()
-        .from(adminUsers)
-        .where(sql`LOWER(${adminUsers.username}) = ${cleanUsername} OR LOWER(${adminUsers.email}) = ${cleanUsername}`)
-        .limit(1);
-
-      if (existing.length > 0) {
-        user = existing[0];
+      if (isPhone) {
+        const phone = digits.length === 10 ? `+1${digits}` : `+${digits}`;
+        const found = await db.select().from(members).where(eq(members.phone, phone)).limit(1);
+        if (found.length > 0) {
+          const member = found[0];
+          account = {
+            kind: 'member',
+            id: member.id,
+            username: member.phone,
+            displayName: `${member.firstName} ${member.lastName}`,
+            email: member.email,
+            role: member.role,
+            passwordHash: member.passwordHash,
+            passwordSalt: member.passwordSalt,
+          };
+        }
+      } else {
+        const lowered = cleanIdentifier.toLowerCase();
+        const admins = await db
+          .select()
+          .from(adminUsers)
+          .where(sql`LOWER(${adminUsers.username}) = ${lowered} OR LOWER(${adminUsers.email}) = ${lowered}`)
+          .limit(1);
+        if (admins.length > 0) {
+          const admin = admins[0];
+          account = {
+            kind: 'admin',
+            id: admin.id,
+            username: admin.username,
+            displayName: admin.displayName,
+            email: admin.email,
+            role: admin.role,
+            passwordHash: admin.passwordHash,
+            passwordSalt: admin.passwordSalt,
+          };
+        } else {
+          const found = await db
+            .select()
+            .from(members)
+            .where(sql`LOWER(${members.email}) = ${lowered}`)
+            .limit(1);
+          if (found.length > 0) {
+            const member = found[0];
+            account = {
+              kind: 'member',
+              id: member.id,
+              username: member.phone,
+              displayName: `${member.firstName} ${member.lastName}`,
+              email: member.email,
+              role: member.role,
+              passwordHash: member.passwordHash,
+              passwordSalt: member.passwordSalt,
+            };
+          }
+        }
       }
     } catch (dbErr) {
       console.warn('DB lookup warning during login:', dbErr);
     }
 
-    // Verify DB user if passwordHash is present
-    if (user && user.passwordHash && user.passwordSalt) {
-      const isMatch = AuthService.verifyPassword(cleanPassword, user.passwordHash, user.passwordSalt);
+    // A member whose email is not verified yet cannot log in — they
+    // must finish registration (enter the emailed code) first.
+    if (account?.kind === 'member') {
+      const found = await db.select().from(members).where(eq(members.id, account.id)).limit(1);
+      if (found.length > 0 && !found[0].emailVerified) {
+        return res.status(403).json({
+          error: 'Email chưa được xác minh. Vui lòng nhập mã xác minh đã gửi đến email của bạn. / Email not verified yet. Please enter the verification code sent to your email.',
+        });
+      }
+    }
+
+    // Verify password if a hash is present
+    if (account && account.passwordHash && account.passwordSalt) {
+      const isMatch = AuthService.verifyPassword(cleanPassword, account.passwordHash, account.passwordSalt);
       if (isMatch) {
         const token = AuthService.createToken({
-          id: user.id,
-          username: user.username,
-          displayName: user.displayName,
-          role: user.role,
+          id: account.id,
+          username: account.username,
+          displayName: account.displayName,
+          role: account.role,
         });
+
+        if (account.kind === 'member') {
+          await db
+            .update(members)
+            .set({ lastLoginAt: new Date() })
+            .where(eq(members.id, account.id))
+            .catch(() => {});
+        }
 
         return res.json({
           token,
           user: {
-            id: user.id,
-            username: user.username,
-            displayName: user.displayName,
-            email: user.email,
-            role: user.role,
+            id: account.id,
+            username: account.username,
+            displayName: account.displayName,
+            email: account.email,
+            role: account.role,
           },
         });
       }
     }
 
-    return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác / Invalid username or password.' });
+    return res.status(401).json({ error: 'Tên đăng nhập / email / số điện thoại hoặc mật khẩu không chính xác / Invalid username, email, phone or password.' });
   } catch (error: any) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Đăng nhập thất bại / Login failed' });
   }
 });
 
-// GET /api/auth/me - Verify session
-router.get('/me', requireAdmin, async (req: AuthRequest, res) => {
+// GET /api/auth/me - Verify session (admins and members)
+router.get('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const admin = req.adminUser!;
+    const user = req.user!;
+    if (user.role === 'admin') {
+      try {
+        const found = await db
+          .select({
+            id: adminUsers.id,
+            username: adminUsers.username,
+            email: adminUsers.email,
+            displayName: adminUsers.displayName,
+            role: adminUsers.role,
+            createdAt: adminUsers.createdAt,
+          })
+          .from(adminUsers)
+          .where(eq(adminUsers.id, user.id))
+          .limit(1);
+
+        if (found.length > 0) {
+          return res.json({ user: found[0] });
+        }
+      } catch (e) {
+        console.warn('DB lookup in /me warning:', e);
+      }
+
+      return res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName || 'Administrator',
+          email: user.username === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vrcfamily.org',
+          role: user.role,
+        },
+      });
+    }
+
+    // Member session — look the member up by the token id.
     try {
-      const user = await db
+      const found = await db
         .select({
-          id: adminUsers.id,
-          username: adminUsers.username,
-          email: adminUsers.email,
-          displayName: adminUsers.displayName,
-          role: adminUsers.role,
-          createdAt: adminUsers.createdAt,
+          id: members.id,
+          username: members.phone,
+          email: members.email,
+          displayName: sql<string>`${members.firstName} || ' ' || ${members.lastName}`,
+          role: members.role,
+          createdAt: members.createdAt,
         })
-        .from(adminUsers)
-        .where(eq(adminUsers.id, admin.id))
+        .from(members)
+        .where(eq(members.id, user.id))
         .limit(1);
 
-      if (user.length > 0) {
-        return res.json({ user: user[0] });
+      if (found.length > 0) {
+        return res.json({ user: found[0] });
       }
     } catch (e) {
       console.warn('DB lookup in /me warning:', e);
@@ -94,11 +216,11 @@ router.get('/me', requireAdmin, async (req: AuthRequest, res) => {
 
     res.json({
       user: {
-        id: admin.id,
-        username: admin.username,
-        displayName: admin.displayName || 'Administrator',
-        email: admin.username === 'vrcadmin' ? 'ngochoang5111@gmail.com' : 'admin@vrcfamily.org',
-        role: admin.role,
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName || 'Member',
+        email: '',
+        role: user.role,
       },
     });
   } catch (error: any) {
