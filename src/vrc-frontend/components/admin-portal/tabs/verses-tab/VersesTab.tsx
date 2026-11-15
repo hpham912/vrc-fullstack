@@ -392,7 +392,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             className={versesTabStyles.pickSelect}
           />
         </div>
-        <p className={versesTabStyles.hint}>{t('poolDisplayHint')}</p>
+        <p className={versesTabStyles.hint}>
+          {!loadingPool && pool && pool.length === 0 ? t('poolDisplayEmpty') : t('poolDisplayHint')}
+        </p>
       </section>
 
       {/* Add a Verse / Edit a pool verse */}
@@ -535,7 +537,6 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             </Button>
           )}
         </div>
-        <p className={versesTabStyles.hint}>{t('poolAddHint')}</p>
       </section>
 
       {/* Verse Pool */}
@@ -564,7 +565,6 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         ) : (
           <p className={versesTabStyles.emptyText}>{t('poolEmpty')}</p>
         )}
-        <p className={versesTabStyles.hint}>{t('poolTapToEdit')}</p>
       </section>
 
       {/* Common Confirmation Modal for Remove */}

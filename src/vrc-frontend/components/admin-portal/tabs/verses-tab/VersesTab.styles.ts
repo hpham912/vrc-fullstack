@@ -31,7 +31,7 @@ export const versesTabStyles = {
   // "English" via the TextField label prop).
   fieldGroup: 'space-y-1.5',
   fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
-  addRow: 'flex items-end gap-2',
+  addRow: 'flex flex-col sm:flex-row items-stretch sm:items-end gap-2',
   addRowField: 'flex-1 min-w-0',
   addBtnRow: 'pt-1',
   // Fetched-verse preview — the EditHeaderVerseModal preview
