@@ -63,6 +63,10 @@ export const spotlightBannerModalStyles = {
 
   inputSectionDivider: "space-y-1.5 pt-1 border-t border-stone-100",
   fieldLabel: "block text-label font-bold text-stone-700",
+  // Bilingual field group — two labeled TextFields (Vietnamese then
+  // English). No topic heading here: the step heading above the
+  // fields already serves as the label.
+  fieldGroup: "space-y-1.5",
   fieldHint: "text-caption text-stone-400",
   quoteFetchRow: "flex items-center gap-2",
   quoteRefInput: "flex-1 min-w-0 px-3 py-2 bg-stone-50 rounded-xl border border-stone-300 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium",

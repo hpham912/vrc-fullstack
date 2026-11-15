@@ -22,7 +22,7 @@ import {
   Landmark,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button, BilingualTextField } from '../../common-component/index.ts';
+import { Modal, Button, TextField } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
 interface SpotlightBannerModalProps {
@@ -492,14 +492,20 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 {t('spotBadgeHint')}
               </span>
             </div>
-            <BilingualTextField
-              valueVi={badgeVi}
-              onChangeVi={setBadgeVi}
-              valueEn={badgeEn}
-              onChangeEn={setBadgeEn}
-              placeholderVi={t('spotBadgePlaceholder')}
-              placeholderEn={t('spotBadgePlaceholder')}
-            />
+            <div className={s.fieldGroup}>
+              <TextField
+                label={t('commonLangVi')}
+                value={badgeVi}
+                onChange={setBadgeVi}
+                placeholder={t('spotBadgePlaceholder')}
+              />
+              <TextField
+                label={t('commonLangEn')}
+                value={badgeEn}
+                onChange={setBadgeEn}
+                placeholder={t('spotBadgePlaceholder')}
+              />
+            </div>
             <p className={s.fieldHint}>
               {t('spotBadgeNote')}
             </p>
@@ -546,17 +552,23 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                 </span>
               </Button>
             </div>
-            <BilingualTextField
-              valueVi={subtitleVi}
-              onChangeVi={(value) => {
-                setSubtitleVi(value);
-                setSubtitle(value);
-              }}
-              valueEn={subtitleEn}
-              onChangeEn={setSubtitleEn}
-              placeholderVi='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
-              placeholderEn='Psalm 100:4 - "Enter his gates with thanksgiving and his courts with praise!"'
-            />
+            <div className={s.fieldGroup}>
+              <TextField
+                label={t('commonLangVi')}
+                value={subtitleVi}
+                onChange={(value) => {
+                  setSubtitleVi(value);
+                  setSubtitle(value);
+                }}
+                placeholder='Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"'
+              />
+              <TextField
+                label={t('commonLangEn')}
+                value={subtitleEn}
+                onChange={setSubtitleEn}
+                placeholder='Psalm 100:4 - "Enter his gates with thanksgiving and his courts with praise!"'
+              />
+            </div>
             <p className={s.fieldHint}>
               {t('spotQuoteNote')}
             </p>

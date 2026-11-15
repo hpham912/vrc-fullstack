@@ -16,7 +16,7 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { Card, Button, AdminActionButtons, AdminAddButton, BilingualTextField } from '../../common-component/index.ts';
+import { Card, Button, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
 import { churchInfoFormStyles as s } from './ChurchInfoForm.styles.ts';
 
 interface ChurchInfoFormProps {
@@ -475,25 +475,37 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
                   />
                 </div>
 
-                <BilingualTextField
-                  label={t('churchInfoServiceNameLabel')}
-                  valueVi={svc.titleVi}
-                  onChangeVi={(value) => updateServiceField(idx, 'titleVi', value)}
-                  valueEn={svc.titleEn || ''}
-                  onChangeEn={(value) => updateServiceField(idx, 'titleEn', value)}
-                  placeholderVi="Lễ Thờ Phượng Chúa Nhật"
-                  placeholderEn="Sunday Worship Service"
-                />
+                <div className={s.fieldGroup}>
+                  <span className={s.fieldLabel}>{t('churchInfoServiceNameLabel')}</span>
+                  <TextField
+                    label={t('commonLangVi')}
+                    value={svc.titleVi}
+                    onChange={(value) => updateServiceField(idx, 'titleVi', value)}
+                    placeholder="Lễ Thờ Phượng Chúa Nhật"
+                  />
+                  <TextField
+                    label={t('commonLangEn')}
+                    value={svc.titleEn || ''}
+                    onChange={(value) => updateServiceField(idx, 'titleEn', value)}
+                    placeholder="Sunday Worship Service"
+                  />
+                </div>
 
-                <BilingualTextField
-                  label={t('churchInfoServiceTimeLabel')}
-                  valueVi={svc.time}
-                  onChangeVi={(value) => updateServiceField(idx, 'time', value)}
-                  valueEn={svc.timeEn || ''}
-                  onChangeEn={(value) => updateServiceField(idx, 'timeEn', value)}
-                  placeholderVi="Chúa Nhật • 3:00 PM – 5:00 PM"
-                  placeholderEn="Sunday • 3:00 PM – 5:00 PM"
-                />
+                <div className={s.fieldGroup}>
+                  <span className={s.fieldLabel}>{t('churchInfoServiceTimeLabel')}</span>
+                  <TextField
+                    label={t('commonLangVi')}
+                    value={svc.time}
+                    onChange={(value) => updateServiceField(idx, 'time', value)}
+                    placeholder="Chúa Nhật • 3:00 PM – 5:00 PM"
+                  />
+                  <TextField
+                    label={t('commonLangEn')}
+                    value={svc.timeEn || ''}
+                    onChange={(value) => updateServiceField(idx, 'timeEn', value)}
+                    placeholder="Sunday • 3:00 PM – 5:00 PM"
+                  />
+                </div>
 
                 <div className={s.subFieldGroup}>
                   <label className={s.subLabel}>

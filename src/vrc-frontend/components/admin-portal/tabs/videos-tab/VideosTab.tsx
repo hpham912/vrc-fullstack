@@ -8,7 +8,7 @@ import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vr
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { getVideoCategoryLabel, isBuiltinVideoCategory, type VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { AdminActionButtons, Button, ConfirmModal, SegmentedControl, BilingualTextField } from '../../../../common-component/index.ts';
+import { AdminActionButtons, Button, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
 import { videosTabStyles } from './VideosTab.styles.ts';
 
 interface VideosTabProps {
@@ -355,23 +355,37 @@ export const VideosTab: React.FC<VideosTabProps> = ({
           </div>
         )}
 
-        <BilingualTextField
-          label={t('adminVideoTitleLabel')}
-          valueVi={videoTitleVi}
-          onChangeVi={setVideoTitleVi}
-          valueEn={videoTitleEn}
-          onChangeEn={setVideoTitleEn}
-        />
+        <div className={videosTabStyles.fieldGroup}>
+          <span className={videosTabStyles.fieldLabel}>{t('adminVideoTitleLabel')}</span>
+          <TextField
+            label={t('commonLangVi')}
+            value={videoTitleVi}
+            onChange={setVideoTitleVi}
+          />
+          <TextField
+            label={t('commonLangEn')}
+            value={videoTitleEn}
+            onChange={setVideoTitleEn}
+          />
+        </div>
 
-        <BilingualTextField
-          label={t('adminVideoDescLabel')}
-          valueVi={videoDescVi}
-          onChangeVi={setVideoDescVi}
-          valueEn={videoDescEn}
-          onChangeEn={setVideoDescEn}
-          multiline
-          rows={2}
-        />
+        <div className={videosTabStyles.fieldGroup}>
+          <span className={videosTabStyles.fieldLabel}>{t('adminVideoDescLabel')}</span>
+          <TextField
+            label={t('commonLangVi')}
+            value={videoDescVi}
+            onChange={setVideoDescVi}
+            multiline
+            rows={2}
+          />
+          <TextField
+            label={t('commonLangEn')}
+            value={videoDescEn}
+            onChange={setVideoDescEn}
+            multiline
+            rows={2}
+          />
+        </div>
 
         <div className={videosTabStyles.presenterDateRow}>
           <div className={videosTabStyles.presenterField}>

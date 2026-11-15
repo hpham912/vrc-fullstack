@@ -10,6 +10,11 @@ export const eventsTabStyles = {
   fieldGrid3: 'grid grid-cols-1 sm:grid-cols-3 gap-3 w-full min-w-0',
   field: 'w-full min-w-0',
   fieldOverflow: 'w-full min-w-0 overflow-hidden',
+  // Bilingual field group — one topic in two languages: a topic
+  // heading, then a labeled TextField per language ("Tiếng Việt" /
+  // "English" via the TextField label prop).
+  fieldGroup: 'space-y-1.5',
+  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
   label: 'block text-xs font-bold text-stone-700 mb-1',
   labelPlain: 'block text-xs font-bold text-stone-700',
   input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',

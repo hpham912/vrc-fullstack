@@ -20,6 +20,10 @@ export const churchInfoFormStyles = {
   zoomIcon: "w-4 h-4 text-sky-600 dark:text-sky-400",
   hintText: "text-caption text-stone-500",
   fieldGroup: "space-y-1",
+  // Bilingual field topic heading — one topic in two languages, then
+  // a labeled TextField per language ("Tiếng Việt" / "English" via
+  // the TextField label prop). The group wrapper reuses fieldGroup.
+  fieldLabel: "block text-xs font-bold text-stone-700 dark:text-stone-300",
   label: "block text-label font-bold text-stone-600",
   labelWithRow: "block text-label font-bold text-stone-600 flex items-center justify-between",
   mapLinksGroup: "flex items-center gap-2 text-caption",

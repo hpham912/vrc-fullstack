@@ -6,7 +6,11 @@
 // the palette) needs an explicit dark: twin.
 export const textFieldStyles = {
   field: 'w-full min-w-0',
-  label: 'block text-xs font-bold text-stone-700 mb-1',
+  // Label above the input — the small amber sub-label style (the
+  // pool form's language sub-label). Any text can go here: callers
+  // pass the label, e.g. t('commonLangVi') / t('commonLangEn') for a
+  // bilingual pair. Omit it and nothing renders above the input.
+  label: 'block text-[11px] font-bold text-amber-800 dark:text-amber-400',
   input:
     'w-full max-w-full box-border min-w-0 h-11 px-3 border border-stone-300 rounded-[10px] text-sm bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/25 disabled:opacity-50 disabled:bg-stone-50',
   textarea:

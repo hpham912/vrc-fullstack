@@ -3,7 +3,7 @@ import { ChurchInfo, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
-import { Button, SegmentedControl, BilingualTextField } from '../../common-component/index.ts';
+import { Button, SegmentedControl, TextField } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { Sparkles, Save, BookOpen, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -272,28 +272,42 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
         </div>
 
         {/* Reference — one topic group, Vietnamese then English */}
-        <BilingualTextField
-          label={t('headerVerseRefLabel')}
-          valueVi={referenceVi}
-          onChangeVi={setReferenceVi}
-          valueEn={referenceEn}
-          onChangeEn={setReferenceEn}
-          placeholderVi="Giăng 3:16"
-          placeholderEn="John 3:16"
-        />
+        <div className={s.fieldGroup}>
+          <span className={s.fieldLabel}>{t('headerVerseRefLabel')}</span>
+          <TextField
+            label={t('commonLangVi')}
+            value={referenceVi}
+            onChange={setReferenceVi}
+            placeholder="Giăng 3:16"
+          />
+          <TextField
+            label={t('commonLangEn')}
+            value={referenceEn}
+            onChange={setReferenceEn}
+            placeholder="John 3:16"
+          />
+        </div>
 
         {/* Verse text — one topic group, Vietnamese then English */}
-        <BilingualTextField
-          label={t('headerVerseTextLabel')}
-          valueVi={verseTextVi}
-          onChangeVi={setVerseTextVi}
-          valueEn={verseTextEn}
-          onChangeEn={setVerseTextEn}
-          placeholderVi="Vì Đức Chúa Trời yêu thương thế gian..."
-          placeholderEn="For God so loved the world..."
-          multiline
-          rows={3}
-        />
+        <div className={s.fieldGroup}>
+          <span className={s.fieldLabel}>{t('headerVerseTextLabel')}</span>
+          <TextField
+            label={t('commonLangVi')}
+            value={verseTextVi}
+            onChange={setVerseTextVi}
+            placeholder="Vì Đức Chúa Trời yêu thương thế gian..."
+            multiline
+            rows={3}
+          />
+          <TextField
+            label={t('commonLangEn')}
+            value={verseTextEn}
+            onChange={setVerseTextEn}
+            placeholder="For God so loved the world..."
+            multiline
+            rows={3}
+          />
+        </div>
 
         {/* Footer Actions */}
         <div className={s.footerRow}>

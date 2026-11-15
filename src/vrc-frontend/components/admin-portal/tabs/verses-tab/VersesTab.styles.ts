@@ -26,6 +26,11 @@ export const versesTabStyles = {
   pickSelect: 'flex-1 min-w-0',
   // Add / edit form.
   formHeader: 'flex flex-wrap items-center justify-between gap-2',
+  // Bilingual field group — one topic in two languages: a topic
+  // heading, then a labeled TextField per language ("Tiếng Việt" /
+  // "English" via the TextField label prop).
+  fieldGroup: 'space-y-1.5',
+  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
   addRow: 'flex items-end gap-2',
   addRowField: 'flex-1 min-w-0',
   addBtnRow: 'pt-1',

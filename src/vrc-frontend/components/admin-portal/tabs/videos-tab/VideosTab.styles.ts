@@ -6,6 +6,11 @@ export const videosTabStyles = {
   formTitle: 'font-serif font-bold text-stone-900 text-sm',
   cancelEditBtn: 'text-xs text-stone-500 hover:text-stone-800 underline',
   label: 'block text-xs font-bold text-stone-700 mb-1',
+  // Bilingual field group — one topic in two languages: a topic
+  // heading, then a labeled TextField per language ("Tiếng Việt" /
+  // "English" via the TextField label prop).
+  fieldGroup: 'space-y-1.5',
+  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
   input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
   field: 'w-full min-w-0',
   customCategoryWrap: 'w-full min-w-0 mt-2.5',

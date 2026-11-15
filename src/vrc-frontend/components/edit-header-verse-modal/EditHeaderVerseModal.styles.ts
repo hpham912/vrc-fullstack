@@ -1,5 +1,10 @@
 export const editHeaderVerseModalStyles = {
   container: 'p-4 sm:p-6 space-y-4 sm:space-y-5 text-stone-900 dark:text-stone-100 max-h-[80vh] overflow-y-auto',
+  // Bilingual field group — one topic in two languages: a topic
+  // heading, then a labeled TextField per language ("Tiếng Việt" /
+  // "English" via the TextField label prop).
+  fieldGroup: 'space-y-1.5',
+  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
   feedbackSuccess:
     'p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold flex items-center gap-2',
   feedbackError:
