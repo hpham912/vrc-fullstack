@@ -51,6 +51,28 @@ export interface DailyVerse {
   updatedAt?: string | null;
 }
 
+// A verse in the scripture pool (GET /api/verse-pool). The pool is
+// the SOURCE the daily verse is picked from — it stores only the
+// reference + reflection + prayer (VI + EN), never the verse text.
+// The text is fetched from the Bible API when the verse is picked
+// and written into a daily_verses row. No foreign key, no join.
+export interface PoolVerse {
+  id: number;
+  reference: string;
+  referenceVi?: string | null;
+  referenceEn?: string | null;
+  reflection?: string | null;
+  reflectionVi?: string | null;
+  reflectionEn?: string | null;
+  prayer?: string | null;
+  prayerVi?: string | null;
+  prayerEn?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
 export interface Video {
   id: number;
   platform: 'youtube' | 'facebook';

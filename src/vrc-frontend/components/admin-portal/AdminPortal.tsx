@@ -28,13 +28,12 @@ import {
 
 interface AdminPortalProps {
   events: ChurchEvent[];
-  allVerses: DailyVerse[];
+  todayVerse?: DailyVerse | null;
   videos: Video[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
   focusedMode?: boolean;
   initialEvent?: ChurchEvent | null;
-  initialVerse?: DailyVerse | null;
   initialVideo?: Video | null;
   onClose: () => void;
   onRefreshData: () => void;
@@ -44,13 +43,12 @@ interface AdminPortalProps {
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
   events,
-  allVerses,
+  todayVerse,
   videos,
   churchInfo,
   initialTab = 'create-event',
   focusedMode = false,
   initialEvent,
-  initialVerse,
   initialVideo,
   onClose,
   onRefreshData,
@@ -197,7 +195,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               }`}
             >
               <BookOpen className={s.tabIcon} />
-              <span className="truncate">{t('tabVerses')} ({allVerses.length})</span>
+              <span className="truncate">{t('tabVerses')}</span>
             </button>
 
             <button
@@ -291,7 +289,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             }`}
           >
             <BookOpen className={s.tabIcon} />
-            {t('tabVerses')} ({allVerses.length})
+            {t('tabVerses')}
           </button>
 
           <button
@@ -342,7 +340,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div className={s.contentBody}>
           <EventsTab events={events} churchInfo={churchInfo} initialEvent={initialEvent} adminUser={adminUser} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onTabChange={setActiveTab} onEditingChange={setEventEditing} resetFormSignal={resetEventFormSignal} />
 
-          <VersesTab activeTab={activeTab} allVerses={allVerses} initialVerse={initialVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
+          <VersesTab activeTab={activeTab} todayVerse={todayVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
           <VideosTab videos={videos} activeTab={activeTab} initialVideo={initialVideo} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
 

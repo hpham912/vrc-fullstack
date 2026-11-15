@@ -6,6 +6,7 @@ import { errorHandler } from './middleware/errorHandler.ts';
 import authRoutes from './routes/authRoutes.ts';
 import eventRoutes from './routes/eventRoutes.ts';
 import verseRoutes from './routes/verseRoutes.ts';
+import versePoolRoutes from './routes/versePoolRoutes.ts';
 import videoRoutes from './routes/videoRoutes.ts';
 import notifRoutes from './routes/notifRoutes.ts';
 import spotlightRoutes from './routes/spotlightRoutes.ts';
@@ -56,6 +57,7 @@ export const createApp = () => {
   app.use('/api/auth', authRoutes);
   app.use('/api/events', eventRoutes);
   app.use('/api/verses', verseRoutes);
+  app.use('/api/verse-pool', versePoolRoutes);
   app.use('/api/videos', videoRoutes);
   app.use('/api/notifications', notifRoutes);
   app.use('/api/spotlight', spotlightRoutes);

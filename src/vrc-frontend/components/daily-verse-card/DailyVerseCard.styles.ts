@@ -4,24 +4,12 @@ export const dailyVerseStyles = {
   titleGroup: 'flex items-center justify-between gap-3 w-full sm:w-auto',
   tagText: 'text-caption sm:text-label font-bold uppercase tracking-widest text-amber-700 block mb-0.5',
   heading: 'text-2xl sm:text-3xl max-sm:[.large-font_&]:text-xl font-serif font-bold text-stone-900 break-words',
-  labelFull: 'max-sm:[.large-font_&]:hidden',
-  labelShort: 'hidden max-sm:[.large-font_&]:inline',
-  mobileAddBtn:
-    'sm:hidden w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 flex items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
-  desktopAddBtn:
-    'hidden sm:flex w-8 h-8 rounded-xl bg-stone-950 hover:bg-stone-800 text-amber-400 items-center justify-center shadow-2xs active:scale-95 transition-all flex-shrink-0',
   actionsRow: 'flex flex-nowrap items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1',
-  actionBtn:
-    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 transition-colors',
-  emptyCard: 'py-12 sm:py-16 text-center bg-white rounded-3xl border border-stone-200/70 p-8 shadow-sm',
-  mainCard: 'bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-12 shadow-sm space-y-6 sm:space-y-8',
   cardMetaRow:
     'flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-stone-700 font-semibold pb-3 border-b border-stone-100',
   dateGroup: 'flex min-w-0 items-center gap-2',
   translationBadge:
     'font-bold text-stone-800 dark:text-stone-200 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-md text-xs border border-stone-200 dark:border-stone-700',
-  editIconBtn: 'p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors',
-  deleteIconBtn: 'p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors',
   blockquote: 'my-4 sm:my-6',
   verseText: 'font-serif text-xl sm:text-3xl max-sm:[.large-font_&]:text-lg text-stone-950 dark:text-stone-50 leading-relaxed tracking-normal font-medium break-words',
   verseCiteFooter: 'mt-4 text-right',
@@ -32,14 +20,4 @@ export const dailyVerseStyles = {
   prayerBox: 'mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-500/25',
   prayerLabel: 'text-caption sm:text-label font-bold uppercase tracking-wider text-amber-950 dark:text-amber-300 block mb-1',
   prayerText: 'font-serif italic text-stone-800 dark:text-stone-200 text-xs sm:text-sm leading-relaxed font-medium',
-  archiveWrapper: 'mt-6 sm:mt-8',
-  archiveToggleBtn:
-    'flex items-center justify-between gap-2 w-full p-4 max-sm:[.large-font_&]:p-3.5 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-2xl text-stone-800 dark:text-stone-200 text-xs font-bold transition-colors shadow-2xs whitespace-normal text-left',
-  archiveGrid: 'mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3',
-  archiveItemBase: 'p-4 max-sm:[.large-font_&]:p-3.5 rounded-xl cursor-pointer border text-left transition-all',
-  archiveItemSelected: 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500/50 ring-1 ring-amber-300 dark:ring-amber-500/50',
-  archiveItemUnselected: 'bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border-stone-200 dark:border-stone-800',
-  archiveItemMeta: 'flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-xs text-stone-600 dark:text-stone-400 font-semibold mb-1',
-  archiveItemRef: 'font-serif font-bold text-stone-950 dark:text-stone-100 text-sm',
-  archiveItemSnippet: 'text-stone-700 dark:text-stone-300 text-xs line-clamp-2 mt-1 font-medium',
 };

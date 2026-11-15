@@ -1,32 +1,14 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
-import { dailyVerses } from '../../vrc-db/schema.ts';
-import { eq, desc, sql } from 'drizzle-orm';
+import { dailyVerses, versePool } from '../../vrc-db/schema.ts';
+import { eq, desc, sql, asc } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { AppError } from '../middleware/errorHandler.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
+import { DevotionalService } from '../services/devotionalService.ts';
+import { getVerseDayString } from '../utils/verseDay.ts';
 
 const router = Router();
-
-// Helper to keep strictly the 10 most recent scriptures in PostgreSQL
-async function enforceMaxTenVerses() {
-  try {
-    const allVerses = await db
-      .select({ id: dailyVerses.id, date: dailyVerses.date })
-      .from(dailyVerses)
-      .orderBy(desc(dailyVerses.date));
-
-    if (allVerses.length > 10) {
-      const surplus = allVerses.slice(10);
-      for (const item of surplus) {
-        await db.delete(dailyVerses).where(eq(dailyVerses.id, item.id));
-      }
-      console.log(`Pruned ${surplus.length} older scripture entries in PostgreSQL.`);
-    }
-  } catch (err) {
-    console.warn('Scripture pruning warning:', err);
-  }
-}
 
 // Shared upsert used by POST and PUT: save a verse by its date —
 // update the row for that date if one exists, otherwise insert.
@@ -69,14 +51,193 @@ async function upsertVerseByDate(
   }
 }
 
-// GET /api/verses/today - Get today's verse (or most recent verse) from PostgreSQL
+// Picks a verse for a verse-day and saves it as that day's row.
+//   poolVerseId — a specific pool verse (admin override), or null to
+//     pick one at random.
+//   actorName — who triggered the pick (the admin's name, or 'System'
+//     for the lazy 6 AM pick on a public request).
+//   force — true for the admin override (POST /today/pick): today's
+//     row is replaced even if one already exists. False for the lazy
+//     pick: an existing row for the day is returned as-is and never
+//     overwritten by a second random pick.
+// Returns { ok: true, row, created }: row is the verse-day's row,
+// created is true only when this call saved it. Returns
+// { ok: false, reason } when no verse could be picked — 'empty-pool'
+// (no pool verses), 'verse-not-found' (the named pool verse is gone),
+// or 'fetch-failed' (the Bible API fetch failed; the caller falls
+// back and the pick is retried on the next request). No notification
+// is recorded here; the caller decides (GET /today notifies only on
+// a new row, the admin override notifies always).
+type PickResult =
+  | { ok: true; row: any; created: boolean }
+  | { ok: false; reason: 'empty-pool' | 'verse-not-found' | 'fetch-failed' };
+async function pickAndSaveVerseForDay(
+  verseDay: string,
+  poolVerseId: number | null,
+  actorName: string,
+  force = false
+): Promise<PickResult> {
+  // Lazy pick only: if a row for this verse-day already exists, return
+  // it instead of overwriting today's verse with a second random pick.
+  // (An override passes force=true and skips this check.)
+  if (!force) {
+    const existingForDay = await db
+      .select()
+      .from(dailyVerses)
+      .where(eq(dailyVerses.date, verseDay))
+      .orderBy(asc(dailyVerses.id))
+      .limit(1);
+    if (existingForDay.length > 0) {
+      return { ok: true, row: existingForDay[0], created: false };
+    }
+  }
+
+  // A specific pool verse (admin override) or a random one.
+  // If the pool table cannot be read yet (the migration SQL has not
+  // been run), treat it as an empty pool so the caller falls back to
+  // the most recent verse instead of erroring.
+  let poolRows: (typeof versePool.$inferSelect)[];
+  try {
+    poolRows =
+      poolVerseId !== null
+        ? await db.select().from(versePool).where(eq(versePool.id, poolVerseId)).limit(1)
+        : await db.select().from(versePool).orderBy(sql`RANDOM()`).limit(1);
+  } catch (poolErr) {
+    console.error('Scripture pool pick: could not read verse_pool:', poolErr);
+    return { ok: false, reason: 'empty-pool' };
+  }
+  if (poolRows.length === 0) {
+    return { ok: false, reason: poolVerseId !== null ? 'verse-not-found' : 'empty-pool' };
+  }
+  const poolVerse = poolRows[0];
+
+  // Fetch the verse text from the Bible API (NIV + 1925). The pool
+  // stores only the reference + reflection + prayer — never the text.
+  let fetched;
+  try {
+    const passage = poolVerse.referenceEn || poolVerse.referenceVi || poolVerse.reference;
+    fetched = await DevotionalService.fetchScripture(passage);
+  } catch (fetchErr) {
+    // Do not overwrite anything: the caller falls back to the most
+    // recent verse and the pick is retried on the next request.
+    console.error('Scripture pool pick: Bible API fetch failed:', fetchErr);
+    return { ok: false, reason: 'fetch-failed' };
+  }
+
+  const finalRefEn = fetched.referenceEn || poolVerse.referenceEn || poolVerse.reference;
+  const finalRefVi = fetched.referenceVi || poolVerse.referenceVi || poolVerse.reference;
+  const finalTextEn = fetched.verseTextEn;
+  const finalTextVi = fetched.verseTextVi;
+  // Reflection and prayer come from the pool entry and are optional.
+  // No reflection → store "" (not the verse text): the daily card
+  // hides an empty reflection section instead of showing the text twice.
+  const finalReflEn = (poolVerse.reflectionEn || poolVerse.reflection || '').trim();
+  const finalReflVi = (poolVerse.reflectionVi || poolVerse.reflection || '').trim();
+  const finalPrayerEn = poolVerse.prayerEn
+    ? poolVerse.prayerEn.trim()
+    : poolVerse.prayer
+      ? poolVerse.prayer.trim()
+      : null;
+  const finalPrayerVi = poolVerse.prayerVi
+    ? poolVerse.prayerVi.trim()
+    : poolVerse.prayer
+      ? poolVerse.prayer.trim()
+      : null;
+
+  const insertValues = {
+    date: verseDay,
+    verseText: finalTextEn,
+    verseTextVi: finalTextVi,
+    verseTextEn: finalTextEn,
+    reference: finalRefEn,
+    referenceVi: finalRefVi,
+    referenceEn: finalRefEn,
+    translation: fetched.translationEn || 'NIV',
+    translationVi: fetched.translationVi || '1925',
+    translationEn: fetched.translationEn || 'NIV',
+    reflection: finalReflEn,
+    reflectionVi: finalReflVi,
+    reflectionEn: finalReflEn,
+    prayer: finalPrayerEn,
+    prayerVi: finalPrayerVi,
+    prayerEn: finalPrayerEn,
+    theme: 'Daily Scripture',
+    publishedByUid: null,
+    createdBy: actorName,
+    updatedBy: actorName,
+  };
+  const updateValues = {
+    verseText: finalTextEn,
+    verseTextVi: finalTextVi,
+    verseTextEn: finalTextEn,
+    reference: finalRefEn,
+    referenceVi: finalRefVi,
+    referenceEn: finalRefEn,
+    translation: fetched.translationEn || 'NIV',
+    translationVi: fetched.translationVi || '1925',
+    translationEn: fetched.translationEn || 'NIV',
+    reflection: finalReflEn,
+    reflectionVi: finalReflVi,
+    reflectionEn: finalReflEn,
+    prayer: finalPrayerEn,
+    prayerVi: finalPrayerVi,
+    prayerEn: finalPrayerEn,
+    theme: 'Daily Scripture',
+    updatedBy: actorName,
+    updatedAt: new Date(),
+  };
+
+  const saved = await upsertVerseByDate(insertValues, updateValues);
+  // Re-read the verse-day's first row, so the caller always returns
+  // one consistent row for the day. (Two first-requests racing right
+  // after 6 AM can each pass the check above and both save — the
+  // second upsert updates the first's row, and both may record a
+  // notification. Same check-then-act race as the existing POST /,
+  // and benign: a valid pool verse is shown either way.)
+  const dayRows = await db
+    .select()
+    .from(dailyVerses)
+    .where(eq(dailyVerses.date, verseDay))
+    .orderBy(asc(dailyVerses.id));
+  const firstRow = dayRows[0] || saved[0];
+  const created = saved[0] !== undefined && firstRow.id === saved[0].id;
+  return { ok: true, row: firstRow, created };
+}
+
+// GET /api/verses/today - Get today's verse from PostgreSQL.
+// The "day" is the verse-day: 6:00 AM to 6:00 AM Phoenix time. If no
+// row exists for this verse-day yet, the first request after 6 AM
+// lazily picks a pool verse at random, fetches its text, and saves it
+// as today's row (no scheduler). If the pool is empty or the Bible
+// API fetch fails, fall back to the most recent verse, then to the
+// hardcoded verse below.
 router.get('/today', async (req, res, next) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const verseDay = getVerseDayString();
     let verseResult = await db
       .select()
       .from(dailyVerses)
-      .where(eq(dailyVerses.date, today));
+      .where(eq(dailyVerses.date, verseDay))
+      .orderBy(asc(dailyVerses.id));
+
+    if (verseResult.length === 0) {
+      const picked = await pickAndSaveVerseForDay(verseDay, null, 'System');
+      if (picked.ok) {
+        verseResult = [picked.row];
+        // A new daily row was created by the pick — record it like
+        // POST / does, so users get the new-verse notification.
+        if (picked.created) {
+          await BackendNotificationService.recordNotification(
+            `Scripture of the Day: ${picked.row.referenceEn || picked.row.reference}`,
+            `"${(picked.row.verseTextEn || '').slice(0, 100)}..."`,
+            'verse',
+            picked.row.id
+          );
+        }
+      }
+      // Pick failed (empty pool or Bible API down) — fall through to
+      // the most recent verse below; the pick is retried next request.
+    }
 
     if (verseResult.length === 0) {
       verseResult = await db
@@ -89,7 +250,7 @@ router.get('/today', async (req, res, next) => {
     if (verseResult.length === 0) {
       return res.json({
         id: 0,
-        date: today,
+        date: verseDay,
         verseText:
           'If my people, who are called by my name, will humble themselves and pray and seek my face and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land.',
         verseTextVi:
@@ -126,10 +287,62 @@ router.get('/today', async (req, res, next) => {
   }
 });
 
+// POST /api/verses/today/pick - Admin override: set today's verse.
+// Body: { poolVerseId?: number | null }. A pool verse id displays that
+// pool verse for the rest of today; null/absent picks a new random pool
+// verse immediately. At 6 AM tomorrow the lazy pick takes over again
+// and a random verse is chosen. (Admin only.)
+router.post('/today/pick', requireAdmin, async (req: AuthRequest, res, next) => {
+  try {
+    const verseDay = getVerseDayString();
+    const rawPoolVerseId = req.body?.poolVerseId;
+    const poolVerseId =
+      rawPoolVerseId === undefined || rawPoolVerseId === null
+        ? null
+        : Number(rawPoolVerseId);
+    if (poolVerseId !== null && (isNaN(poolVerseId) || poolVerseId <= 0)) {
+      throw new AppError('Invalid pool verse ID', 400, 'VALIDATION_ERROR');
+    }
+
+    const actorName = req.adminUser?.displayName || req.adminUser?.username || 'Admin';
+    const picked = await pickAndSaveVerseForDay(verseDay, poolVerseId, actorName, true);
+    if (!picked.ok) {
+      if (picked.reason === 'verse-not-found') {
+        throw new AppError('This pool verse no longer exists.', 404, 'VERSE_NOT_FOUND');
+      }
+      if (picked.reason === 'empty-pool') {
+        throw new AppError(
+          'Danh sách câu trống. Hãy thêm một câu vào danh sách trước. / The verse pool is empty. Add a verse to the pool first.',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+      // The Bible API fetch failed — nothing was overwritten.
+      throw new AppError(
+        'Không thể lấy nội dung Lời Chúa từ Kinh Thánh. Vui lòng thử lại. / Could not fetch the verse text from the Bible. Please try again.',
+        400,
+        'VALIDATION_ERROR'
+      );
+    }
+
+    // The admin deliberately set today's verse — notify like POST /
+    // does, whether this created the row or replaced it.
+    await BackendNotificationService.recordNotification(
+      `Scripture of the Day: ${picked.row.referenceEn || picked.row.reference}`,
+      `"${(picked.row.verseTextEn || '').slice(0, 100)}..."`,
+      'verse',
+      picked.row.id
+    );
+
+    res.json(picked.row);
+  } catch (error: any) {
+    next(error);
+  }
+});
+
 // GET /api/verses - List 10 most recent scriptures from PostgreSQL
 router.get('/', async (req, res, next) => {
   try {
-    await enforceMaxTenVerses();
     const list = await db
       .select()
       .from(dailyVerses)
@@ -244,11 +457,6 @@ router.post('/', requireAdmin, async (req: AuthRequest, res, next) => {
     };
 
     const inserted = await upsertVerseByDate(insertValues, updateValues);
-
-    // Keep only the 10 latest verses in the DB so it never fills up:
-    // adding a verse is the one path that grows the table, so prune
-    // here (the list endpoint already prunes on read).
-    await enforceMaxTenVerses();
 
     // Trigger push notification record in PostgreSQL
     await BackendNotificationService.recordNotification(
@@ -386,9 +594,6 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res, next) => {
       // edit always lands.
       updated = await upsertVerseByDate(insertValues, updateValues);
     }
-
-    // A fallback insert grows the table, so prune like POST does.
-    await enforceMaxTenVerses();
 
     res.json(updated[0]);
   } catch (error: any) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChurchInfo, DailyVerse, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index.ts';
+import { ChurchInfo, HeaderVerse, DEFAULT_HEADER_VERSE } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { Modal } from '../../common-component/modal/Modal.tsx';
@@ -13,7 +13,6 @@ interface EditHeaderVerseModalProps {
   isOpen: boolean;
   onClose: () => void;
   churchInfo?: ChurchInfo | null;
-  allVerses?: DailyVerse[];
   onSaveSuccess?: () => void;
 }
 
@@ -41,7 +40,6 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   isOpen,
   onClose,
   churchInfo,
-  allVerses = [],
   onSaveSuccess,
 }) => {
   const { language, t } = useLanguage();
@@ -87,8 +85,8 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
   if (!isOpen) return null;
 
   // Dirty-check: any field differs from the header verse it opened
-  // with. Fetch-from-Bible and quick-pick count as changes, since
-  // they write the text and reference fields.
+  // with. Fetch-from-Bible counts as a change, since it writes the
+  // text and reference fields.
   const baseline = baselineRef.current;
   const isDirty =
     verseTextVi !== baseline.textVi ||
@@ -132,23 +130,6 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
     } finally {
       setFetchingApi(false);
     }
-  };
-
-  // Quick pick from recent daily verses
-  const handleSelectRecentVerse = (verseIdStr: string) => {
-    const id = parseInt(verseIdStr, 10);
-    const selected = allVerses.find((v) => v.id === id);
-    if (!selected) return;
-    setVerseTextVi(selected.verseTextVi || selected.verseText || '');
-    setVerseTextEn(selected.verseTextEn || selected.verseText || '');
-    setReferenceVi(selected.referenceVi || selected.reference || '');
-    setReferenceEn(selected.referenceEn || selected.reference || '');
-    setTranslationVi(selected.translationVi || '1925');
-    setTranslationEn(selected.translationEn || 'NIV');
-    setFeedback({
-      type: 'success',
-      message: `Selected: ${selected.referenceVi || selected.reference}`,
-    });
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -264,27 +245,6 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
               )}
             </button>
           </div>
-
-          {/* Quick select from recent verses if available */}
-          {allVerses.length > 0 && (
-            <div className={s.recentPickerRow}>
-              <span className={s.recentPickerLabel}>{t('headerVersePickRecent')}:</span>
-              <select
-                onChange={(e) => handleSelectRecentVerse(e.target.value)}
-                defaultValue=""
-                className={s.recentSelect}
-              >
-                <option value="" disabled>
-                  {t('headerVerseSelectPlaceholder')}
-                </option>
-                {allVerses.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.referenceVi || v.reference} ({v.referenceEn || v.reference}) - "{v.verseText.slice(0, 45)}..."
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
         {/* Live Preview Card */}

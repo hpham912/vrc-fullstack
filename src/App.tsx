@@ -99,7 +99,6 @@ function ChurchAppContent() {
   }, [activeTab]);
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
-  const [allVerses, setAllVerses] = useState<DailyVerse[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [toastNotification, setToastNotification] = useState<{ id?: any; title: string; body: string } | null>(null);
@@ -161,7 +160,6 @@ function ChurchAppContent() {
   const [adminPortalTab, setAdminPortalTab] = useState('create-event');
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
-  const [editingVerse, setEditingVerse] = useState<DailyVerse | null>(null);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
 
   const safeJson = async (res: Response) => {
@@ -206,20 +204,14 @@ function ChurchAppContent() {
       jobs.push(
         (async () => {
           try {
-            const rawVerses = await safeJson(
-              await fetch(apiUrl('/api/verses'), { cache: 'no-store', headers }),
+            // Only today's verse is ever shown (no archive) — fetch
+            // GET /api/verses/today, which lazy-picks from the pool
+            // after 6 AM Phoenix when a new verse-day starts.
+            const todayData = await safeJson(
+              await fetch(apiUrl('/api/verses/today'), { cache: 'no-store', headers }),
             );
-            if (Array.isArray(rawVerses)) {
-              setAllVerses(rawVerses.slice(0, 10));
-              // Today's verse is the verse dated today, falling back to
-              // the latest verse — the same rule GET /api/verses/today
-              // used, computed here from the list we already fetched.
-              const now = new Date();
-              const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-                now.getDate(),
-              ).padStart(2, '0')}`;
-              const todayVerse = rawVerses.find((verse) => verse.date === todayStr) || rawVerses[0] || null;
-              setTodayVerse(todayVerse);
+            if (todayData && typeof todayData === 'object') {
+              setTodayVerse(todayData);
             }
           } catch (err) {
             console.error('Error refreshing verses:', err);
@@ -422,13 +414,11 @@ function ChurchAppContent() {
   const openAdminWithTab = (
     tab = 'create-event',
     eventToEdit?: ChurchEvent | null,
-    verseToEdit?: DailyVerse | null,
     focused = true,
     videoToEdit?: Video | null,
   ) => {
     setAdminPortalTab(tab);
     setEditingEvent(eventToEdit || null);
-    setEditingVerse(verseToEdit || null);
     setEditingVideo(videoToEdit || null);
     setAdminFocusedMode(focused);
     setAdminPortalOpen(true);
@@ -467,7 +457,7 @@ function ChurchAppContent() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        openAdminPortal={() => openAdminWithTab('admin-accounts', null, null, false)}
+        openAdminPortal={() => openAdminWithTab('admin-accounts', null, false)}
         openLoginModal={() => setLoginModalOpen(true)}
         notifications={notifications}
         notificationCount={unreadCount}
@@ -568,7 +558,7 @@ function ChurchAppContent() {
                 type="button"
                 variant="darkAmber"
                 size="pillSm"
-                onClick={() => openAdminWithTab('manage-events', null, null, false)}
+                onClick={() => openAdminWithTab('manage-events', null, false)}
                 leftIcon={<ShieldCheck className={s.adminBtnIcon} />}
                 title="Admin Dashboard"
               >
@@ -608,7 +598,7 @@ function ChurchAppContent() {
             spotlightConfig={spotlightConfig}
             churchInfo={churchInfo}
             onNavigateTab={setActiveTab}
-            onOpenAdminPortal={() => openAdminWithTab('create-event', null, null, true)}
+            onOpenAdminPortal={() => openAdminWithTab('create-event', null, true)}
             onOpenSpotlightEditor={() => setSpotlightModalOpen(true)}
             onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
             isAdmin={isAdmin}
@@ -631,9 +621,7 @@ function ChurchAppContent() {
           <div>
             <DailyVerseCard
               todayVerse={todayVerse}
-              allVerses={allVerses}
               isAdmin={isAdmin}
-              onRefresh={loadData}
               onOpenAdminPortal={openAdminWithTab}
               isLoading={isLoading}
             />
@@ -659,7 +647,7 @@ function ChurchAppContent() {
             isLoading={isLoading}
             isAdmin={isAdmin}
             onOpenAdminPortal={(tab, video) =>
-              openAdminWithTab(tab, null, null, true, video)
+              openAdminWithTab(tab, null, true, video)
             }
             onRefresh={loadData}
           />
@@ -748,7 +736,6 @@ function ChurchAppContent() {
             isOpen={headerVerseModalOpen}
             onClose={() => setHeaderVerseModalOpen(false)}
             churchInfo={churchInfo || DEFAULT_CHURCH_INFO}
-            allVerses={allVerses}
             onSaveSuccess={loadData}
           />
         </Suspense>
@@ -759,18 +746,16 @@ function ChurchAppContent() {
         <Suspense fallback={<div className={s.lazyFallback}><LoadingShimmer variant="lines" rows={3} className="max-w-md w-full" /></div>}>
           <AdminPortal
             events={events}
-            allVerses={allVerses}
+            todayVerse={todayVerse}
             videos={videos}
             churchInfo={churchInfo}
             initialTab={adminPortalTab}
             focusedMode={adminFocusedMode}
             initialEvent={editingEvent}
-            initialVerse={editingVerse}
             initialVideo={editingVideo}
             onClose={() => {
               setAdminPortalOpen(false);
               setEditingEvent(null);
-              setEditingVerse(null);
               setEditingVideo(null);
             }}
             onRefreshData={loadData}

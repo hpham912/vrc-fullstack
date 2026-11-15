@@ -12,10 +12,6 @@ export const editHeaderVerseModalStyles = {
     'flex-1 px-3.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 placeholder:text-stone-400 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500',
   apiFetchBtn:
     'px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 flex-shrink-0 disabled:opacity-50',
-  recentPickerRow: 'flex flex-col sm:flex-row sm:items-center gap-2 pt-1 border-t border-amber-200/50 dark:border-amber-800/40 text-xs',
-  recentPickerLabel: 'text-stone-600 dark:text-stone-400 font-semibold whitespace-nowrap',
-  recentSelect:
-    'flex-1 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500',
   previewCard:
     'p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-900/80 border border-stone-200/80 dark:border-stone-800 space-y-2',
   previewHeader: 'flex items-center justify-between text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider',

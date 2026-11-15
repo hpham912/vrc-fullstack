@@ -2,111 +2,52 @@ import React, { useState } from 'react';
 import { DailyVerse } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { CHURCH_NAME } from '../../constants/church.ts';
+import { Share2, Copy, Check, Calendar, BookOpen } from 'lucide-react';
 import {
-  Share2,
-  Copy,
-  Check,
-  Calendar,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Pencil,
-  Trash2,
-  Plus,
-  Sparkles,
-} from 'lucide-react';
-import {
-  ConfirmModal,
-  AdminActionButtons,
   AdminAddButton,
   Card,
   Button,
   LoadingShimmer,
   ReadAloudButton,
 } from '../../common-component/index.ts';
-import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { formatReferenceForSpeech } from '../../utils/referenceSpeech.ts';
-import { useAuth } from '../../context/AuthContext.tsx';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
-import { formatDateLocale, formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
+import { formatWeekdayAndDate } from '../../utils/dateFormatter.ts';
 import { dailyVerseStyles as s } from './DailyVerseCard.styles.ts';
 
 interface DailyVerseCardProps {
   todayVerse: DailyVerse | null;
-  allVerses: DailyVerse[];
   isAdmin: boolean;
-  onRefresh?: () => void;
-  onOpenAdminPortal?: (tab?: string, eventToEdit?: any, verseToEdit?: DailyVerse | null) => void;
+  onOpenAdminPortal?: (tab?: string, eventToEdit?: any) => void;
   isLoading?: boolean;
 }
 
+// The Scripture tab shows only the current verse — there is no
+// history/archive UI (picked verses stay in daily_verses, but only
+// today's is displayed). Verse creation/editing lives in AdminPortal
+// (the scripture pool), which has separate Vietnamese + English
+// fields. This card used to carry its own dead single-language
+// create/edit modal (never rendered, and its save only posted one
+// `verseText`, so the backend copied English into the Vietnamese
+// field). It was removed — do not re-add a single-text verse form
+// here. Admins manage verses via onOpenAdminPortal('verses').
 export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   todayVerse,
-  allVerses,
   isAdmin,
-  onRefresh,
   onOpenAdminPortal,
   isLoading = false,
 }) => {
   const { language, t } = useLanguage();
-  const { getToken } = useAuth();
-  const [selectedVerse, setSelectedVerse] = useState<DailyVerse | null>(todayVerse);
   const [copied, setCopied] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
-  const [deleteTargetVerse, setDeleteTargetVerse] = useState<DailyVerse | null>(null);
-  const [deletingVerse, setDeletingVerse] = useState(false);
-  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
 
-  // NOTE: Verse creation/editing lives in AdminPortal, which has separate
-  // Vietnamese + English fields. This card used to carry its own dead
-  // single-language create/edit modal (never rendered, and its save only
-  // posted one `verseText`, so the backend copied English into the
-  // Vietnamese field). It was removed — do not re-add a single-text
-  // verse form here. Admins add verses via onOpenAdminPortal('verses'),
-  // and that form has a "Fetch from Bible" button backed by
-  // POST /api/ai/fetch-scripture, which returns real EN + VI text.
-
-  const handleConfirmDeleteVerse = async () => {
-    if (!deleteTargetVerse) return;
-    try {
-      setDeletingVerse(true);
-      const token = getToken();
-      const res = await fetch(apiUrl(`/api/verses/${deleteTargetVerse.id}`), {
-        method: 'DELETE',
-        headers: apiHeaders({ Authorization: `Bearer ${token}` }),
-      });
-      if (res.ok) {
-        const deletedId = deleteTargetVerse.id;
-        setDeletedIds((prev) => new Set(prev).add(deletedId));
-        if (selectedVerse?.id === deletedId) {
-          const nextVerse = allVerses.find((v) => v.id !== deletedId && !deletedIds.has(v.id)) || null;
-          setSelectedVerse(nextVerse);
-        }
-        setDeleteTargetVerse(null);
-        onRefresh?.();
-      }
-    } finally {
-      setDeletingVerse(false);
-    }
-  };
-
-  const verse = selectedVerse || todayVerse;
+  const verse = todayVerse;
 
   const pick = (vi?: string | null, en?: string | null, fallback?: string | null) => {
     const direct = language === 'vi' ? vi : en;
     if (direct && direct.trim()) return direct.trim();
     return fallback || '';
   };
-
-  // A newly saved (or edited) verse always replaces the card — no
-  // tapping needed. Archive taps still work: they only change the
-  // selection until the next today-verse change arrives.
-  React.useEffect(() => {
-    if (todayVerse) {
-      setSelectedVerse(todayVerse);
-    }
-  }, [todayVerse?.id, todayVerse?.updatedAt]);
 
   const copyToClipboard = () => {
     if (!verse) return;
@@ -185,6 +126,10 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
   }
 
   const verseDateFormatted = formatWeekdayAndDate(verse.date, language);
+  // Pool verses may have no reflection or prayer — hide the whole
+  // section (reflection and prayer alike) when both are empty.
+  const reflectionText = pick(verse.reflectionVi, verse.reflectionEn, verse.reflection);
+  const prayerText = pick(verse.prayerVi, verse.prayerEn, verse.prayer);
 
   return (
     <section className={s.section}>
@@ -217,7 +162,7 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
               progress for the old verse. */}
           <ReadAloudButton
             key={verse.id}
-            text={`${formatReferenceForSpeech(pick(verse.referenceVi, verse.referenceEn, verse.reference), language)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}`}
+            text={`${formatReferenceForSpeech(pick(verse.referenceVi, verse.referenceEn, verse.reference), language)}. ${pick(verse.verseTextVi, verse.verseTextEn, verse.verseText)}. ${reflectionText}`}
             className="flex-shrink-0"
           />
 
@@ -267,12 +212,6 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
             <span className={s.translationBadge}>
               {pick(verse.translationVi, verse.translationEn, verse.translation)}
             </span>
-            {isAdmin && (
-              <AdminActionButtons
-                onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('verses', null, verse) : undefined}
-                onDelete={verse.id > 0 ? () => setDeleteTargetVerse(verse) : undefined}
-              />
-            )}
           </div>
         </div>
 
@@ -287,82 +226,33 @@ export const DailyVerseCard: React.FC<DailyVerseCardProps> = ({
           </footer>
         </blockquote>
 
-        <div className={s.reflectionSection}>
-          <h3 className={s.reflectionLabel}>
-            {t('reflectionTitle')}
-          </h3>
-          <p className={s.reflectionText}>
-            {pick(verse.reflectionVi, verse.reflectionEn, verse.reflection)}
-          </p>
+        {(reflectionText || prayerText) && (
+          <div className={s.reflectionSection}>
+            {reflectionText && (
+              <>
+                <h3 className={s.reflectionLabel}>
+                  {t('reflectionTitle')}
+                </h3>
+                <p className={s.reflectionText}>
+                  {reflectionText}
+                </p>
+              </>
+            )}
 
-          {verse.prayer && (
-            <div className={s.prayerBox}>
-              <span className={s.prayerLabel}>
-                {t('prayerTitle')}
-              </span>
-              <p className={s.prayerText}>
-                "{pick(verse.prayerVi, verse.prayerEn, verse.prayer)}"
-              </p>
-            </div>
-          )}
-        </div>
+            {prayerText && (
+              <div className={s.prayerBox}>
+                <span className={s.prayerLabel}>
+                  {t('prayerTitle')}
+                </span>
+                <p className={s.prayerText}>
+                  "{prayerText}"
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </Card>
       )}
-
-      {/* Past Devotionals Archive */}
-      {allVerses.length > 1 && (
-        <div className={s.archiveWrapper}>
-          <button
-            onClick={() => setShowArchive(!showArchive)}
-            className={s.archiveToggleBtn}
-          >
-            <span className="flex items-center gap-2 min-w-0">
-              <BookOpen className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <span>
-                <span className={s.labelFull}>{t('browseArchive')}</span>
-                <span className={s.labelShort}>{t('browseArchiveShort')}</span> ({allVerses.length})
-              </span>
-            </span>
-            {showArchive ? <ChevronUp className="w-4 h-4 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 flex-shrink-0" />}
-          </button>
-
-          {showArchive && (
-            <div className={s.archiveGrid}>
-              {allVerses.map((item) => {
-                const isSelected = verse.id === item.id;
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setSelectedVerse(item);
-                    }}
-                    className={`${s.archiveItemBase} ${
-                      isSelected ? s.archiveItemSelected : s.archiveItemUnselected
-                    }`}
-                  >
-                    <div className={s.archiveItemMeta}>
-                      <span>{formatDateLocale(item.date, language)}</span>
-                      <span className="font-bold text-amber-800">{pick(item.translationVi, item.translationEn, item.translation)}</span>
-                    </div>
-                    <p className={s.archiveItemRef}>{pick(item.referenceVi, item.referenceEn, item.reference)}</p>
-                    <p className={s.archiveItemSnippet}>"{pick(item.verseTextVi, item.verseTextEn, item.verseText)}"</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-      {/* Common Confirmation Modal for Delete */}
-      <ConfirmModal
-        isOpen={Boolean(deleteTargetVerse)}
-        title={t('verseDeleteTitle')}
-        message={t('verseDeleteConfirm', { reference: deleteTargetVerse?.reference ?? '' })}
-        confirmText={t('commonDelete')}
-        loading={deletingVerse}
-        onConfirm={handleConfirmDeleteVerse}
-        onCancel={() => setDeleteTargetVerse(null)}
-      />
     </section>
   );
 };

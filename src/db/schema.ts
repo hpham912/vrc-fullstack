@@ -88,6 +88,36 @@ export const dailyVerses = pgTable('daily_verses', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Verse pool (Scripture Pool) — the admin's list of verses for the
+// daily scripture pick. Stores each verse's reference plus its
+// pastoral reflection and prayer (VI + EN). The verse TEXT is NOT
+// stored here: it is fetched from the Bible API (NIV + 1925) when the
+// verse is picked, then saved as that day's row in daily_verses
+// together with the reflection/prayer copied from the pool entry.
+// Reflection and prayer are OPTIONAL (nullable) — a pool verse with
+// neither still works, and the daily card then shows just the verse.
+// The pool holds at most 20 verses (enforced by the API, not by the
+// table). No foreign key and no JOIN to daily_verses: the pool is the
+// source list, daily_verses is the record of what was displayed each
+// day, and a pool verse that was never displayed has no row there.
+// Migration SQL: src/vrc-db/sql/verse-pool-create-table.sql
+export const versePool = pgTable('verse_pool', {
+  id: serial('id').primaryKey(),
+  reference: text('reference').notNull(),
+  referenceVi: text('reference_vi'),
+  referenceEn: text('reference_en'),
+  reflection: text('reflection'),
+  reflectionVi: text('reflection_vi'),
+  reflectionEn: text('reflection_en'),
+  prayer: text('prayer'),
+  prayerVi: text('prayer_vi'),
+  prayerEn: text('prayer_en'),
+  createdBy: text('created_by'),
+  updatedBy: text('updated_by'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 // Videos (Video tab) — sermon videos, singings, reels about the
 // church, and any other video — hosted on YouTube or Facebook, the
 // app stores NO video data: only the link, the platform, bilingual
