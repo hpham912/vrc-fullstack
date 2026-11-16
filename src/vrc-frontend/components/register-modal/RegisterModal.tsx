@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { UserPlus, MailCheck } from 'lucide-react';
+import { UserPlus, MessageSquareText } from 'lucide-react';
 import { Modal, Button, Banner, TextField } from '../../common-component/index.ts';
 import { apiUrl } from '../../utils/api.ts';
 import { isValidEmail, isValidName, normalizePhone } from '../../utils/memberValidation.ts';
 import { registerModalStyles as s } from './RegisterModal.styles.ts';
 
 // Member registration (2 steps). Step 1: first name, last name, phone,
-// email, password — validated client-side (names letters only, US
-// phone, email shape, password 6+ chars) and again on the server.
-// Step 2: the 6-digit code emailed to the member. On success the
-// member is logged in directly (the verify endpoint returns a token).
+// optional email, password — validated client-side (names letters only,
+// US phone, email shape when provided, password 6+ chars) and again on
+// the server. Step 2: the 6-digit code texted to the phone (Twilio SMS).
+// On success the member is logged in directly (the verify endpoint
+// returns a token).
 interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,7 +71,8 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
       setError(t('registerPhoneInvalid'));
       return;
     }
-    if (!isValidEmail(email)) {
+    // Email is optional: blank is fine, but a provided email must be valid.
+    if (email.trim() !== '' && !isValidEmail(email)) {
       setError(t('registerEmailInvalid'));
       return;
     }
@@ -88,7 +90,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           phone: normalizedPhone,
-          email: email.trim().toLowerCase(),
+          email: email.trim() === '' ? null : email.trim().toLowerCase(),
           password,
         }),
       });
@@ -107,7 +109,8 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
     setError(null);
     setSuccess(null);
 
-    if (!/^\d{6}$/.test(code.trim())) {
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone || !/^\d{6}$/.test(code.trim())) {
       setError(t('registerCodeInvalid'));
       return;
     }
@@ -117,7 +120,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
       const res = await fetch(apiUrl('/api/members/verify'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code: code.trim() }),
+        body: JSON.stringify({ phone: normalizedPhone, code: code.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t('registerFailed'));
@@ -134,12 +137,17 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
   const handleResend = async () => {
     setError(null);
     setSuccess(null);
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone) {
+      setError(t('registerPhoneInvalid'));
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(apiUrl('/api/members/resend-code'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ phone: normalizedPhone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t('registerFailed'));
@@ -158,7 +166,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
       maxWidthClass="max-w-sm"
       icon={
         <div className={s.headerIconBox}>
-          {step === 1 ? <UserPlus className="w-5 h-5 text-stone-950" /> : <MailCheck className="w-5 h-5 text-stone-950" />}
+          {step === 1 ? <UserPlus className="w-5 h-5 text-stone-950" /> : <MessageSquareText className="w-5 h-5 text-stone-950" />}
         </div>
       }
       subtitle={step === 1 ? t('registerSub') : t('registerVerifySub')}
@@ -221,7 +229,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
           {success && <Banner type="success" message={success} />}
 
           <p className={s.codeHint}>
-            {t('registerCodeSentTo')} <strong>{email.trim().toLowerCase()}</strong>
+            {t('registerCodeSentTo')} <strong>{phone}</strong>
           </p>
 
           <TextField
@@ -230,8 +238,6 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
             onChange={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
             placeholder="123456"
           />
-
-          <p className={s.codeHint}>{t('registerCodeSpamHint')}</p>
 
           <div className={s.footerRow}>
             <Button type="button" variant="secondary" fullWidth onClick={() => setStep(1)}>

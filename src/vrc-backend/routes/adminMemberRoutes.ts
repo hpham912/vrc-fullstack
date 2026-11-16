@@ -18,7 +18,7 @@ router.get('/members', requireAdmin, async (_req: AuthRequest, res) => {
         lastName: members.lastName,
         phone: members.phone,
         email: members.email,
-        emailVerified: members.emailVerified,
+        phoneVerified: members.phoneVerified,
         role: members.role,
         createdAt: members.createdAt,
         lastLoginAt: members.lastLoginAt,

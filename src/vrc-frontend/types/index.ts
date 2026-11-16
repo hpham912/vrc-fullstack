@@ -120,14 +120,15 @@ export interface AdminUser {
 }
 
 // A registered church member (view-only app user). The username is the
-// phone number; login is by phone number OR email + password.
+// phone number; login is by phone number OR email + password. Email is
+// optional (contact only) and the phone is verified by SMS.
 export interface Member {
   id: number;
   firstName: string;
   lastName: string;
   phone: string;
-  email: string;
-  emailVerified: boolean;
+  email?: string | null;
+  phoneVerified: boolean;
   role: string;
   createdAt?: string;
   lastLoginAt?: string | null;

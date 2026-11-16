@@ -55,7 +55,7 @@ router.post('/login', authRateLimiter, async (req, res) => {
             id: member.id,
             username: member.phone,
             displayName: `${member.firstName} ${member.lastName}`,
-            email: member.email,
+            email: member.email ?? '',
             role: member.role,
             passwordHash: member.passwordHash,
             passwordSalt: member.passwordSalt,
@@ -93,7 +93,7 @@ router.post('/login', authRateLimiter, async (req, res) => {
               id: member.id,
               username: member.phone,
               displayName: `${member.firstName} ${member.lastName}`,
-              email: member.email,
+              email: member.email ?? '',
               role: member.role,
               passwordHash: member.passwordHash,
               passwordSalt: member.passwordSalt,
@@ -105,13 +105,13 @@ router.post('/login', authRateLimiter, async (req, res) => {
       console.warn('DB lookup warning during login:', dbErr);
     }
 
-    // A member whose email is not verified yet cannot log in — they
-    // must finish registration (enter the emailed code) first.
+    // A member whose phone is not verified yet cannot log in — they
+    // must finish registration (enter the texted code) first.
     if (account?.kind === 'member') {
       const found = await db.select().from(members).where(eq(members.id, account.id)).limit(1);
-      if (found.length > 0 && !found[0].emailVerified) {
+      if (found.length > 0 && !found[0].phoneVerified) {
         return res.status(403).json({
-          error: 'Email chưa được xác minh. Vui lòng nhập mã xác minh đã gửi đến email của bạn. / Email not verified yet. Please enter the verification code sent to your email.',
+          error: 'Số điện thoại chưa được xác minh. Vui lòng nhập mã xác minh đã gửi đến điện thoại của bạn. / Phone not verified yet. Please enter the verification code sent to your phone.',
         });
       }
     }
@@ -208,7 +208,7 @@ router.get('/me', requireAuth, async (req: AuthRequest, res) => {
         .limit(1);
 
       if (found.length > 0) {
-        return res.json({ user: found[0] });
+        return res.json({ user: { ...found[0], email: found[0].email ?? '' } });
       }
     } catch (e) {
       console.warn('DB lookup in /me warning:', e);

@@ -32,19 +32,20 @@ export const adminUsers = pgTable('admin_users', {
 });
 
 // Church members (registered app users, view-only). Registered with a
-// phone number + email + password; the email is verified with a 6-digit
-// code sent by the church's Microsoft 365 email. Login is by phone
+// phone number + password; the phone is verified with a 6-digit code
+// sent by SMS (Twilio). Email is OPTIONAL — collected for contact only,
+// never verified and never used to send codes. Login is by phone
 // number OR email + password. Role is always 'member' — members can only
 // view, never administer.
 export const members = pgTable('members', {
   id: serial('id').primaryKey(),
   phone: text('phone').notNull().unique(), // E.164, e.g. +14805550199
-  email: text('email').notNull().unique(), // lowercased
+  email: text('email').unique(), // lowercased, optional (nullable)
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   passwordHash: text('password_hash').notNull(),
   passwordSalt: text('password_salt').notNull(),
-  emailVerified: boolean('email_verified').notNull().default(false),
+  phoneVerified: boolean('phone_verified').notNull().default(false),
   role: text('role').notNull().default('member'),
   lastLoginAt: timestamp('last_login_at'),
   createdBy: text('created_by'),
@@ -53,12 +54,12 @@ export const members = pgTable('members', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// One-time email verification codes (registration + forgot password).
+// One-time SMS verification codes (registration + forgot password).
 // Only the hash is stored — the plain code is never saved. A code is
 // valid for 10 minutes and at most 5 verification attempts.
-export const emailVerifications = pgTable('email_verifications', {
+export const phoneVerifications = pgTable('phone_verifications', {
   id: serial('id').primaryKey(),
-  email: text('email').notNull(), // lowercased
+  phone: text('phone').notNull(), // E.164, e.g. +14805550199
   codeHash: text('code_hash').notNull(),
   codeSalt: text('code_salt').notNull(),
   purpose: text('purpose').notNull(), // 'register' | 'reset'

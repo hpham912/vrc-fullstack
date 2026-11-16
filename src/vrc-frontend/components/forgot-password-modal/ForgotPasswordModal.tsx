@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
-import { KeyRound, MailCheck } from 'lucide-react';
+import { KeyRound, MessageSquareText } from 'lucide-react';
 import { Modal, Button, Banner, TextField } from '../../common-component/index.ts';
 import { apiUrl } from '../../utils/api.ts';
-import { isValidEmail } from '../../utils/memberValidation.ts';
+import { normalizePhone } from '../../utils/memberValidation.ts';
 import { forgotPasswordModalStyles as s } from './ForgotPasswordModal.styles.ts';
 
 // Member self-service password reset (2 steps). Step 1: the member's
-// email — a 6-digit code is sent to it. Step 2: the code + a new
-// password. On success the member logs in again from the login screen
-// (the reset does not log them in by itself).
+// phone number — a 6-digit code is texted to it (Twilio SMS). Step 2:
+// the code + a new password. On success the member logs in again from
+// the login screen (the reset does not log them in by itself).
 interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,7 +22,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   const { t } = useLanguage();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   const reset = () => {
     setStep(1);
-    setEmail('');
+    setPhone('');
     setCode('');
     setNewPassword('');
     setError(null);
@@ -50,8 +50,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     setError(null);
     setSuccess(null);
 
-    if (!isValidEmail(email)) {
-      setError(t('registerEmailInvalid'));
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone) {
+      setError(t('registerPhoneInvalid'));
       return;
     }
 
@@ -60,7 +61,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       const res = await fetch(apiUrl('/api/members/forgot-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({ phone: normalizedPhone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t('forgotFailed'));
@@ -77,7 +78,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     setError(null);
     setSuccess(null);
 
-    if (!/^\d{6}$/.test(code.trim())) {
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone || !/^\d{6}$/.test(code.trim())) {
       setError(t('registerCodeInvalid'));
       return;
     }
@@ -92,7 +94,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
+          phone: normalizedPhone,
           code: code.trim(),
           newPassword,
         }),
@@ -117,7 +119,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       maxWidthClass="max-w-sm"
       icon={
         <div className={s.headerIconBox}>
-          {step === 1 ? <KeyRound className="w-5 h-5 text-stone-950" /> : <MailCheck className="w-5 h-5 text-stone-950" />}
+          {step === 1 ? <KeyRound className="w-5 h-5 text-stone-950" /> : <MessageSquareText className="w-5 h-5 text-stone-950" />}
         </div>
       }
       subtitle={step === 1 ? t('forgotSub') : t('forgotVerifySub')}
@@ -128,10 +130,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {error && <Banner type="error" message={error} />}
 
           <TextField
-            label={t('registerEmail')}
-            value={email}
-            onChange={setEmail}
-            placeholder="name@example.com"
+            label={t('registerPhone')}
+            value={phone}
+            onChange={setPhone}
+            placeholder="(480) 555-0199"
           />
 
           <div className={s.footerRow}>
@@ -149,7 +151,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {success && <Banner type="success" message={success} />}
 
           <p className={s.codeHint}>
-            {t('registerCodeSentTo')} <strong>{email.trim().toLowerCase()}</strong>
+            {t('registerCodeSentTo')} <strong>{phone}</strong>
           </p>
 
           <TextField

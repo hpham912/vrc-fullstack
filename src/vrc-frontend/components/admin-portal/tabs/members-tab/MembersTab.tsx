@@ -133,11 +133,11 @@ export const MembersTab: React.FC<MembersTabProps> = ({ getToken, showFeedback, 
                   {member.firstName} {member.lastName}
                 </p>
                 <p className={s.itemMeta}>{member.phone}</p>
-                <p className={s.itemMeta}>{member.email}</p>
+                {member.email ? <p className={s.itemMeta}>{member.email}</p> : null}
                 <p className={s.itemMeta}>
                   {t('membersJoined', { date: formatDate(member.createdAt) })}
                   {' • '}
-                  {member.emailVerified ? t('membersVerified') : t('membersUnverified')}
+                  {member.phoneVerified ? t('membersVerified') : t('membersUnverified')}
                 </p>
               </div>
               <div className={s.itemActions}>
