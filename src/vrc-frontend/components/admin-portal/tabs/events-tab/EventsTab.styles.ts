@@ -63,7 +63,7 @@ export const eventsTabStyles = {
   previewMain: 'flex items-start gap-3.5',
   dateBox: 'flex-shrink-0 w-14 text-center rounded-xl border p-2 shadow-2xs',
   monthText: 'block text-caption font-bold uppercase tracking-wider',
-  previewDay: 'block text-xl font-serif font-bold text-stone-950 leading-tight',
+  previewDay: 'block text-xl font-serif font-bold leading-tight',
   previewContent: 'min-w-0 flex-1 space-y-1',
   previewTitle: 'text-sm sm:text-base font-serif font-bold text-stone-950 leading-snug line-clamp-2',
   previewMeta: 'flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-stone-700 font-medium',

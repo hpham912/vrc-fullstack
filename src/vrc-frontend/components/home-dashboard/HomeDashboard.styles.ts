@@ -37,10 +37,10 @@ export const homeDashboardStyles = {
     'text-label font-bold uppercase tracking-wider text-amber-950 bg-amber-200/95 px-2.5 py-0.5 rounded-full',
   cardMainRow: 'flex items-start gap-3 max-sm:[.large-font_&]:gap-2.5 sm:gap-3.5 min-w-0 w-full max-w-full',
   dateBoxBase:
-    'flex-shrink-0 w-14 max-sm:[.large-font_&]:w-12 sm:w-16 py-2 max-sm:[.large-font_&]:py-1.5 px-1 text-center rounded-2xl shadow-2xs border border-stone-900/10 dark:border-stone-700/60 flex flex-col items-center justify-center select-none bg-white/95 dark:bg-stone-900/90 self-start',
+    'flex-shrink-0 w-14 max-sm:[.large-font_&]:w-12 sm:w-16 py-2 max-sm:[.large-font_&]:py-1.5 px-1 text-center rounded-2xl shadow-2xs border flex flex-col items-center justify-center select-none self-start',
   dateBoxWeekday:
-    'block text-label max-sm:[.large-font_&]:text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-300',
-  dateBoxDay: 'block text-xl sm:text-2xl max-sm:[.large-font_&]:text-lg font-bold text-stone-950 dark:text-stone-50 leading-none my-1',
+    'block text-label max-sm:[.large-font_&]:text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap',
+  dateBoxDay: 'block text-xl sm:text-2xl max-sm:[.large-font_&]:text-lg font-bold leading-none my-1',
   dateBoxMonthBase: 'block text-caption sm:text-label max-sm:[.large-font_&]:text-[11px] font-semibold uppercase tracking-wider leading-tight',
   cardTitleCol: 'flex-1 min-w-0 space-y-1.5 max-w-full',
   cardTitle: 'text-base sm:text-lg font-bold text-stone-950 dark:text-stone-50 leading-snug break-words',

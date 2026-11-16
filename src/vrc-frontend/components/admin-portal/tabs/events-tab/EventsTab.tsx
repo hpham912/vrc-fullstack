@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BookOpen, Clock, Edit3, Flame, MapPin, Save, Star, Trash2, Users, Video } from 'lucide-react';
+import { Clock, Edit3, MapPin, Save, Star, Trash2, Video } from 'lucide-react';
 import { ChurchEvent, ChurchInfo } from '../../../../types/index.ts';
 import { AdminUser } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
+import { getCategoryTheme } from '../../../../utils/categoryTheme.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
 import { Button, Banner, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
@@ -354,44 +355,9 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     if (editingEventId === null) resetEventForm();
   }, [resetFormSignal, editingEventId]);
 
-  // Live preview theme, from the chosen category.
-  const previewTheme = (() => {
-    const lower = (eventCategory || '').toLowerCase();
-    if (lower.includes('youth') || lower.includes('giới trẻ')) {
-      return {
-        cardBg: 'bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/35 dark:from-emerald-950/50 dark:via-stone-900 dark:to-emerald-950/25 border-emerald-200/90 dark:border-emerald-800/50 shadow-xs',
-        dateBox: 'bg-emerald-100/90 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-100 border-emerald-200/90 dark:border-emerald-800/60',
-        monthText: 'text-emerald-800 dark:text-emerald-300',
-        badge: 'bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60',
-        icon: Users,
-      };
-    }
-    if (lower.includes('worship') || lower.includes('thờ phượng')) {
-      return {
-        cardBg: 'bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/35 dark:from-indigo-950/50 dark:via-stone-900 dark:to-indigo-950/25 border-indigo-200/90 dark:border-indigo-800/50 shadow-xs',
-        dateBox: 'bg-indigo-100/90 dark:bg-indigo-950/70 text-indigo-950 dark:text-indigo-100 border-indigo-200/90 dark:border-indigo-800/60',
-        monthText: 'text-indigo-800 dark:text-indigo-300',
-        badge: 'bg-indigo-100/80 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/60',
-        icon: Flame,
-      };
-    }
-    if (lower.includes('bible') || lower.includes('kinh thánh')) {
-      return {
-        cardBg: 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/35 dark:from-amber-950/50 dark:via-stone-900 dark:to-amber-950/25 border-amber-200/90 dark:border-amber-800/50 shadow-xs',
-        dateBox: 'bg-amber-100/90 dark:bg-amber-950/70 text-amber-950 dark:text-amber-100 border-amber-200/90 dark:border-amber-800/60',
-        monthText: 'text-amber-800 dark:text-amber-300',
-        badge: 'bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60',
-        icon: BookOpen,
-      };
-    }
-    return {
-      cardBg: 'bg-gradient-to-br from-purple-50/90 via-white to-purple-50/35 dark:from-purple-950/50 dark:via-stone-900 dark:to-purple-950/25 border-purple-200/90 dark:border-purple-800/50 shadow-xs',
-      dateBox: 'bg-purple-100/90 dark:bg-purple-950/70 text-purple-950 dark:text-purple-100 border-purple-200/90 dark:border-purple-800/60',
-      monthText: 'text-purple-800 dark:text-purple-300',
-      badge: 'bg-purple-100/80 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border-purple-200/80 dark:border-purple-800/60',
-      icon: Star,
-    };
-  })();
+  // Live preview theme — shared with the public event cards so the
+  // preview matches what members see (Design B: solid category date box).
+  const previewTheme = getCategoryTheme(eventCategory);
   const PreviewCategoryIcon = previewTheme.icon;
 
   const previewDateObj = eventDate ? new Date(eventDate + 'T00:00:00') : new Date();
