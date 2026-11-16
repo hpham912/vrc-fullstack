@@ -4,11 +4,27 @@ import { ConfigService } from '../services/configService.ts';
 
 const router = Router();
 
+export type CustomThemeStyle = 'diagonal' | 'horizontal' | 'vertical' | 'radial' | 'bands';
+
+// A custom banner theme saved by an admin (mirrors the frontend
+// CustomTheme type). Stored in the spotlight JSONB doc, so no new
+// table or migration is needed.
+export interface CustomTheme {
+  id: string;
+  name: string;
+  colors: string[];
+  style: CustomThemeStyle;
+}
+
 export interface SpotlightData {
   mode: 'auto' | 'event' | 'custom';
   selectedEventId: number | null;
   isActive: boolean;
-  theme: 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default';
+  theme: 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default' | 'custom';
+  // Saved custom themes. When theme is 'custom', customThemeId names
+  // which one is active.
+  customThemes?: CustomTheme[];
+  customThemeId?: string | null;
   badge: string;
   badgeVi?: string;
   badgeEn?: string;
@@ -38,6 +54,8 @@ export const DEFAULT_SPOTLIGHT: SpotlightData = {
   selectedEventId: null,
   isActive: true,
   theme: 'thanksgiving',
+  customThemes: [],
+  customThemeId: null,
   badge: 'Tempe, Arizona • Chúa Nhật 3:00 PM – 5:00 PM',
   title: 'Hội Thánh Phục Hưng Việt Nam',
   subtitle: 'Thi Thiên 100:4 - "Hãy cảm tạ mà vào các cửa Ngài, hãy ngợi khen mà vào các hành lang Ngài!"',
@@ -73,6 +91,51 @@ router.get('/', async (req, res) => {
   }
 });
 
+const CUSTOM_THEME_STYLES: CustomThemeStyle[] = ['diagonal', 'horizontal', 'vertical', 'radial', 'bands'];
+const MAX_CUSTOM_THEMES = 10;
+const MAX_CUSTOM_COLORS = 5;
+
+// A valid hex color (#rgb or #rrggbb). Anything else is dropped, so a
+// bad value from the client can never break the banner gradient.
+function isValidHexColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value.trim());
+}
+
+// Sanitize the admin's saved custom themes: keep at most 10 themes,
+// each with an id, a short name, 1-5 valid hex colors, and a known
+// style. Returns the clean list plus the active id (null when the
+// requested id does not name a kept theme).
+function sanitizeCustomThemes(
+  rawThemes: unknown,
+  rawActiveId: unknown
+): { customThemes: CustomTheme[]; customThemeId: string | null } {
+  const customThemes: CustomTheme[] = [];
+  if (Array.isArray(rawThemes)) {
+    for (const entry of rawThemes.slice(0, MAX_CUSTOM_THEMES)) {
+      if (!entry || typeof entry !== 'object') continue;
+      const rec = entry as Record<string, unknown>;
+      const id = typeof rec.id === 'string' ? rec.id.trim() : '';
+      if (!id) continue;
+      const name = typeof rec.name === 'string' ? rec.name.trim().slice(0, 40) : '';
+      if (!name) continue;
+      const colors = Array.isArray(rec.colors)
+        ? (rec.colors as unknown[]).filter(isValidHexColor).map((c) => (c as string).trim()).slice(0, MAX_CUSTOM_COLORS)
+        : [];
+      if (colors.length === 0) continue;
+      const style =
+        typeof rec.style === 'string' && (CUSTOM_THEME_STYLES as string[]).includes(rec.style)
+          ? (rec.style as CustomThemeStyle)
+          : 'diagonal';
+      customThemes.push({ id, name, colors, style });
+    }
+  }
+  const customThemeId =
+    typeof rawActiveId === 'string' && customThemes.some((ct) => ct.id === rawActiveId)
+      ? rawActiveId
+      : null;
+  return { customThemes, customThemeId };
+}
+
 // PUT /api/spotlight - Update hero banner configuration (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
@@ -81,6 +144,8 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       selectedEventId,
       isActive,
       theme,
+      customThemes,
+      customThemeId,
       badge,
       badgeVi,
       badgeEn,
@@ -120,11 +185,22 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     const rawDescription = isAuto ? '' : (description ? String(description).trim() : '');
     const rawLocationTag = locationTag ? String(locationTag).trim() : 'Tempe, Arizona';
 
+    // Custom themes: sanitize the admin's saved list and active id.
+    // A theme of 'custom' with no matching saved theme falls back to
+    // the first saved theme (or the default look when there is none).
+    const cleanCustom = sanitizeCustomThemes(customThemes, customThemeId);
+    const cleanTheme = theme || 'thanksgiving';
+
     const updated: SpotlightData = {
       mode: isAuto ? 'auto' : 'event',
       selectedEventId: isAuto ? null : Number(selectedEventId),
       isActive: isActive !== undefined ? Boolean(isActive) : true,
-      theme: theme || 'thanksgiving',
+      theme: cleanTheme,
+      customThemes: cleanCustom.customThemes,
+      customThemeId:
+        cleanTheme === 'custom'
+          ? (cleanCustom.customThemeId ?? cleanCustom.customThemes[0]?.id ?? null)
+          : cleanCustom.customThemeId,
       badge: rawBadge,
       badgeVi: rawBadgeVi,
       badgeEn: rawBadgeEn,

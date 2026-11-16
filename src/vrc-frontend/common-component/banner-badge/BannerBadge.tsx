@@ -4,6 +4,10 @@ import { bannerBadgeStyles } from './BannerBadge.styles.ts';
 export interface BannerBadgeProps {
   children: React.ReactNode;
   className?: string;
+  // Inline style for runtime-computed colors (a custom banner theme's
+  // colors are only known at runtime, so they cannot be Tailwind
+  // classes). Presets keep using className only.
+  style?: React.CSSProperties;
 }
 
 // Shared BannerBadge: the pill label on a banner (featured event,
@@ -11,9 +15,9 @@ export interface BannerBadgeProps {
 // banner's theme via className, so the same pill works on every
 // theme and on any future banner. The caller passes the text (already
 // picked for the current language) as children.
-export const BannerBadge: React.FC<BannerBadgeProps> = ({ children, className }) => {
+export const BannerBadge: React.FC<BannerBadgeProps> = ({ children, className, style }) => {
   return (
-    <div className={`${bannerBadgeStyles.base} ${className ?? ''}`}>
+    <div className={`${bannerBadgeStyles.base} ${className ?? ''}`} style={style}>
       <span className="truncate">{children}</span>
     </div>
   );

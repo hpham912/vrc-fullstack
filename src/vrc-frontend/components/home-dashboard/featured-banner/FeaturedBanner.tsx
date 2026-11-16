@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChurchEvent, SpotlightBannerConfig, SpotlightTheme } from '../../../types/index.ts';
+import { ChurchEvent, CustomTheme, SpotlightBannerConfig, SpotlightTheme } from '../../../types/index.ts';
 import { useLanguage } from '../../../context/LanguageContext.tsx';
 import {
   Calendar,
@@ -8,14 +8,35 @@ import {
   Sliders,
   Navigation,
 } from 'lucide-react';
-import { Button, CountdownTimer, BannerBadge } from '../../../common-component/index.ts';
+import { Button, CountdownTimer, BannerBadge, useIsDarkMode } from '../../../common-component/index.ts';
 import { CHURCH_NAME } from '../../../constants/church.ts';
 import {
   formatDateLocale,
   formatWeekdayAndDate,
 } from '../../../utils/dateFormatter.ts';
 import { getEventStartDate } from '../../../utils/calendar.ts';
+import { getCustomBannerStyles, resolveCustomTheme } from '../../../utils/customTheme.ts';
 import { featuredBannerStyles as s } from './FeaturedBanner.styles.ts';
+
+// A banner theme: Tailwind classes for the presets, plus optional
+// inline styles for a custom theme (its colors are only known at
+// runtime, so they cannot be Tailwind classes). For a custom theme
+// the classes carry only the structure (border width, ring width,
+// shadow); the colors come from the styles.
+interface BannerTheme {
+  wrapper: string;
+  wrapperStyle?: React.CSSProperties;
+  glow1: string;
+  glow1Style?: React.CSSProperties;
+  glow2: string;
+  glow2Style?: React.CSSProperties;
+  badgeText: string;
+  badgeTextStyle?: React.CSSProperties;
+  btnPrimary: string;
+  btnPrimaryStyle?: React.CSSProperties;
+  highlightTag: string;
+  highlightTagStyle?: React.CSSProperties;
+}
 
 interface FeaturedBannerProps {
   activeEvent: ChurchEvent | null;
@@ -100,6 +121,38 @@ const getBannerThemeClasses = (theme: SpotlightTheme = 'thanksgiving') => {
   }
 };
 
+// A custom theme: same banner, but the gradient and accents are built
+// from the admin's colors at runtime (inline styles), since Tailwind
+// cannot generate classes for colors it has never seen. The classes
+// carry only the structure; the colors come from the styles. The ring
+// color is set through Tailwind's --tw-ring-color variable so the
+// ring-4 class picks up the custom accent.
+const getCustomBannerTheme = (customTheme: CustomTheme, isDark: boolean): BannerTheme => {
+  const c = getCustomBannerStyles(customTheme, isDark);
+  return {
+    wrapper: 'border-2 ring-4 shadow-2xl',
+    wrapperStyle: {
+      background: c.wrapperBackground,
+      borderColor: c.borderColor,
+      '--tw-ring-color': c.ringColor,
+    } as React.CSSProperties,
+    glow1: '',
+    glow1Style: { background: c.glow1Background },
+    glow2: '',
+    glow2Style: { background: c.glow2Background },
+    badgeText: '',
+    badgeTextStyle: {
+      background: c.badgeBackground,
+      color: c.badgeTextColor,
+      borderColor: c.badgeBorderColor,
+    },
+    btnPrimary: 'font-bold shadow-lg',
+    btnPrimaryStyle: { background: c.btnBackground, color: c.btnTextColor },
+    highlightTag: '',
+    highlightTagStyle: { color: c.highlightColor },
+  };
+};
+
 export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
   activeEvent,
   spotlightConfig,
@@ -111,6 +164,9 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
   onOpenDirections,
 }) => {
   const { language, t } = useLanguage();
+  // Dark mode is a .dark class on <html>; a custom theme's colors are
+  // inline styles, so they read this to pick their darker stops.
+  const isDark = useIsDarkMode();
 
   // Determine active theme: If theme is set to thanksgiving/christmas/easter/revival/special, ALWAYS honor it!
   const currentThemeKey: SpotlightTheme =
@@ -126,7 +182,18 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
           ? 'revival'
           : (spotlightConfig.theme || 'default'));
 
-  const bannerTheme = getBannerThemeClasses(currentThemeKey);
+  const bannerTheme: BannerTheme =
+    currentThemeKey === 'custom'
+      ? (() => {
+          const active = resolveCustomTheme(
+            spotlightConfig.customThemes,
+            spotlightConfig.customThemeId
+          );
+          // No saved custom theme (or the active one was deleted):
+          // fall back to the Classic look instead of a blank banner.
+          return active ? getCustomBannerTheme(active, isDark) : getBannerThemeClasses('default');
+        })()
+      : getBannerThemeClasses(currentThemeKey);
 
   // Default Church Address and Maps URL set in Schedule
   const defaultChurchAddress = churchAddress;
@@ -180,15 +247,15 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
   const countdownTarget = activeEvent ? getEventStartDate(activeEvent) : null;
 
   return (
-    <div className={`${s.heroBannerBase} ${bannerTheme.wrapper}`}>
+    <div className={`${s.heroBannerBase} ${bannerTheme.wrapper}`} style={bannerTheme.wrapperStyle}>
       {/* Ambient Glows */}
-      <div className={`${s.glowTopRight} ${bannerTheme.glow1}`} />
-      <div className={`${s.glowBottomLeft} ${bannerTheme.glow2}`} />
+      <div className={`${s.glowTopRight} ${bannerTheme.glow1}`} style={bannerTheme.glow1Style} />
+      <div className={`${s.glowBottomLeft} ${bannerTheme.glow2}`} style={bannerTheme.glow2Style} />
 
       <div className={s.heroContent}>
         {/* Top Row: Clean Themed Badge Pill + Admin Customizer Button */}
         <div className={s.heroTopRow}>
-          <BannerBadge className={bannerTheme.badgeText}>
+          <BannerBadge className={bannerTheme.badgeText} style={bannerTheme.badgeTextStyle}>
             {language === 'vi' ? (spotlightConfig?.badgeVi || (displayBadge || '')) : (spotlightConfig?.badgeEn || (displayBadge || ''))}
           </BannerBadge>
 
@@ -252,6 +319,7 @@ export const FeaturedBanner: React.FC<FeaturedBannerProps> = ({
             size="lg"
             onClick={() => onNavigateTab('events')}
             className={bannerTheme.btnPrimary}
+            style={bannerTheme.btnPrimaryStyle}
             rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
           >
             <span className={s.labelFull}>{t('homeViewEvents')}</span>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChurchEvent, ChurchInfo, SpotlightBannerConfig, SpotlightTheme } from '../../types/index.ts';
+import { ChurchEvent, ChurchInfo, CustomTheme, CustomThemeStyle, SpotlightBannerConfig, SpotlightTheme } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
-import { useLanguage } from '../../context/LanguageContext.tsx';
+import { useLanguage, type TranslationKey } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { getErrorMessage } from '../../utils/errors.ts';
+import { CHURCH_NAME } from '../../constants/church.ts';
+import { buildCustomGradient, getCustomBannerStyles, isValidHexColor } from '../../utils/customTheme.ts';
 import {
   Sparkles,
   Save,
@@ -18,9 +20,12 @@ import {
   Cross,
   Flame,
   Landmark,
+  Plus,
+  X,
+  Pencil,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button, Banner, TextField } from '../../common-component/index.ts';
+import { Modal, Button, Banner, TextField, ColorPicker, useIsDarkMode } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
 
 interface SpotlightBannerModalProps {
@@ -49,10 +54,43 @@ const THEME_OPTIONS: ThemeOption[] = [
   { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: Landmark, colorDot: 'bg-stone-700' },
 ];
 
+// How a custom theme's colors are arranged. The style picker shows a
+// live swatch for each one, built from the colors the admin picked.
+const CUSTOM_THEME_STYLE_KEYS: CustomThemeStyle[] = ['diagonal', 'horizontal', 'vertical', 'radial', 'bands'];
+const CUSTOM_THEME_STYLE_LABEL_KEYS: Record<CustomThemeStyle, TranslationKey> = {
+  diagonal: 'spotCustomStyleDiagonal',
+  horizontal: 'spotCustomStyleHorizontal',
+  vertical: 'spotCustomStyleVertical',
+  radial: 'spotCustomStyleRadial',
+  bands: 'spotCustomStyleBands',
+};
+const MAX_CUSTOM_THEMES = 10;
+const MAX_CUSTOM_COLORS = 5;
+const DEFAULT_CUSTOM_COLORS = ['#991b1b', '#166534', '#d4af37'];
+
+// A unique id for a new custom theme or color slot (timestamp +
+// random suffix).
+function newCustomThemeId(): string {
+  return `ct-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// A color slot in the creator: a stable id (the list key — the list
+// can grow/shrink, so the index must not be the key) + the hex value.
+interface CustomColorSlot {
+  id: string;
+  value: string;
+}
+
+function toColorSlots(colors: string[]): CustomColorSlot[] {
+  return colors.map((value) => ({ id: newCustomThemeId(), value }));
+}
+
 // Form values, for dirty-checking: the Save button is only enabled
 // while the form differs from the banner it opened with.
 type SpotlightFormValues = {
   theme: SpotlightTheme;
+  customThemes: CustomTheme[];
+  customThemeId: string | null;
   selectedEventId: number | null;
   badgeVi: string;
   badgeEn: string;
@@ -75,6 +113,8 @@ const getSpotlightValues = (
   const savedRef = savedSubtitle.split(' - ')[0]?.trim() || '';
   return {
     theme: initialConfig?.theme || 'thanksgiving',
+    customThemes: initialConfig?.customThemes ?? [],
+    customThemeId: initialConfig?.customThemeId ?? null,
     selectedEventId: isPast ? null : existingId,
     badgeVi: initialConfig?.badgeVi || initialConfig?.badge || '',
     badgeEn: initialConfig?.badgeEn || initialConfig?.badge || '',
@@ -97,6 +137,25 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const { language, t } = useLanguage();
 
   const [theme, setTheme] = useState<SpotlightTheme>(initialConfig?.theme || 'thanksgiving');
+  // Saved custom themes and which one is active when theme is 'custom'.
+  const [customThemes, setCustomThemes] = useState<CustomTheme[]>(
+    initialConfig?.customThemes ?? []
+  );
+  const [customThemeId, setCustomThemeId] = useState<string | null>(
+    initialConfig?.customThemeId ?? null
+  );
+  // Custom theme creator: open state, the theme being edited (null for
+  // a new one), and the draft name / style / colors.
+  const [creatorOpen, setCreatorOpen] = useState(false);
+  const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
+  const [customName, setCustomName] = useState('');
+  const [customStyle, setCustomStyle] = useState<CustomThemeStyle>('diagonal');
+  const [customColors, setCustomColors] = useState<CustomColorSlot[]>(() =>
+    toColorSlots(DEFAULT_CUSTOM_COLORS)
+  );
+  // Dark mode, for the creator's live preview (same darkening as the
+  // real banner).
+  const isDark = useIsDarkMode();
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     initialConfig?.selectedEventId ?? null
   );
@@ -157,6 +216,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     if (isOpen) {
       const values = getSpotlightValues(initialConfig, events, todayStr);
       setTheme(values.theme);
+      setCustomThemes(values.customThemes);
+      setCustomThemeId(values.customThemeId);
+      setCreatorOpen(false);
+      setEditingCustomId(null);
       setSelectedEventId(values.selectedEventId);
       setBadgeVi(values.badgeVi);
       setBadgeEn(values.badgeEn);
@@ -207,15 +270,132 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     }
   };
 
+  // --- Custom themes ---
+
+  // Open the creator: blank for a new theme, pre-filled when editing
+  // an existing one.
+  const openCustomCreator = (themeToEdit?: CustomTheme) => {
+    if (themeToEdit) {
+      setEditingCustomId(themeToEdit.id);
+      setCustomName(themeToEdit.name);
+      setCustomStyle(themeToEdit.style);
+      setCustomColors(
+        themeToEdit.colors.length > 0
+          ? toColorSlots(themeToEdit.colors)
+          : toColorSlots(DEFAULT_CUSTOM_COLORS)
+      );
+    } else {
+      setEditingCustomId(null);
+      setCustomName('');
+      setCustomStyle('diagonal');
+      setCustomColors(toColorSlots(DEFAULT_CUSTOM_COLORS));
+    }
+    setCreatorOpen(true);
+  };
+
+  const closeCustomCreator = () => {
+    setCreatorOpen(false);
+    setEditingCustomId(null);
+  };
+
+  // The draft theme for the live preview (name + style + colors as
+  // the admin is editing them). Invalid hex values fall back to the
+  // default navy so the preview never breaks mid-typing.
+  const draftCustomTheme: CustomTheme = {
+    id: editingCustomId ?? 'draft',
+    name: customName.trim() || t('spotCustomUntitled'),
+    colors: customColors.map((slot) => (isValidHexColor(slot.value) ? slot.value.trim() : '#0d2d64')),
+    style: customStyle,
+  };
+  const draftPreviewStyles = getCustomBannerStyles(draftCustomTheme, isDark);
+
+  // Save the draft into the list (add new, or update the edited one)
+  // and select it. The modal's Save Changes still persists everything
+  // to the server; this only updates the local list.
+  const handleUseCustomTheme = () => {
+    const name = customName.trim();
+    if (!name) {
+      setFeedback({ type: 'error', message: t('spotCustomNameRequired') });
+      return;
+    }
+    if (customThemes.length >= MAX_CUSTOM_THEMES && !editingCustomId) {
+      setFeedback({ type: 'error', message: t('spotCustomMaxThemes') });
+      return;
+    }
+    const cleanColors = customColors
+      .map((slot) => slot.value.trim())
+      .filter((color) => isValidHexColor(color))
+      .slice(0, MAX_CUSTOM_COLORS);
+    if (cleanColors.length === 0) {
+      setFeedback({ type: 'error', message: t('spotCustomNeedColor') });
+      return;
+    }
+    const id = editingCustomId ?? newCustomThemeId();
+    const saved: CustomTheme = { id, name, colors: cleanColors, style: customStyle };
+    setCustomThemes((prev) => {
+      const exists = prev.some((customTheme) => customTheme.id === id);
+      return exists
+        ? prev.map((customTheme) => (customTheme.id === id ? saved : customTheme))
+        : [...prev, saved];
+    });
+    setTheme('custom');
+    setCustomThemeId(id);
+    setFeedback(null);
+    closeCustomCreator();
+  };
+
+  // Select a saved custom theme from the grid.
+  const handleSelectCustomTheme = (id: string) => {
+    setTheme('custom');
+    setCustomThemeId(id);
+  };
+
+  // Delete a saved custom theme. If it was the active one, fall back
+  // to the first remaining theme (or the Classic preset when none are
+  // left). Nothing is persisted until the modal's Save Changes.
+  const handleDeleteCustomTheme = (id: string) => {
+    setCustomThemes((prev) => {
+      const remaining = prev.filter((customTheme) => customTheme.id !== id);
+      if (customThemeId === id) {
+        if (remaining.length > 0) {
+          setCustomThemeId(remaining[0].id);
+        } else {
+          setCustomThemeId(null);
+          setTheme('thanksgiving');
+        }
+      }
+      return remaining;
+    });
+  };
+
+  const handleAddCustomColor = () => {
+    if (customColors.length >= MAX_CUSTOM_COLORS) return;
+    setCustomColors((prev) => [...prev, { id: newCustomThemeId(), value: '#c9a227' }]);
+  };
+
+  const handleRemoveCustomColor = (id: string) => {
+    if (customColors.length <= 1) return;
+    setCustomColors((prev) => prev.filter((slot) => slot.id !== id));
+  };
+
+  const handleCustomColorChange = (id: string, value: string) => {
+    setCustomColors((prev) =>
+      prev.map((slot) => (slot.id === id ? { ...slot, value } : slot))
+    );
+  };
+
   if (!isOpen) return null;
 
   // Dirty-check: any saved field differs from the banner it opened
   // with. Fetch-from-Bible counts as a change, since it writes the
   // quote fields. The quote reference is only a fetch input (it is
-  // not saved), so changing it alone does not enable Save.
+  // not saved), so changing it alone does not enable Save. The custom
+  // theme list is compared by value (order + content).
   const baseline = baselineRef.current;
   const isDirty =
     theme !== baseline.theme ||
+    JSON.stringify(customThemes) !== JSON.stringify(baseline.customThemes) ||
+    customThemeId !== baseline.customThemeId ||
     selectedEventId !== baseline.selectedEventId ||
     badgeVi !== baseline.badgeVi ||
     badgeEn !== baseline.badgeEn ||
@@ -260,6 +440,8 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
         selectedEventId: isAuto ? null : selectedEventId,
         isActive: true,
         theme,
+        customThemes,
+        customThemeId,
         badge: cleanBadge,
         badgeVi: (badgeVi || '').trim(),
         badgeEn: (badgeEn || '').trim(),
@@ -394,7 +576,227 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                   </button>
                 );
               })}
+
+              {/* Saved custom themes: each shows its name + color strip.
+                  Tapping selects it; the pencil edits it, the x deletes
+                  it (nothing is persisted until Save Changes). */}
+              {customThemes.map((customTheme) => {
+                const isSelected = theme === 'custom' && customThemeId === customTheme.id;
+                return (
+                  <div
+                    key={customTheme.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleSelectCustomTheme(customTheme.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') handleSelectCustomTheme(customTheme.id);
+                    }}
+                    className={`${s.themeBtnBase} ${
+                      isSelected ? s.themeBtnSelected : s.themeBtnIdle
+                    }`}
+                  >
+                    <div className={s.themeBtnContent}>
+                      <Palette className={s.themeBtnIcon} />
+                      <span className={s.themeBtnText}>{customTheme.name}</span>
+                    </div>
+                    <div className={s.customColorStrip}>
+                      {customTheme.colors.map((color, colorIndex) => (
+                        <span
+                          key={`${customTheme.id}-c${colorIndex}`}
+                          className={s.customColorDot}
+                          style={{ background: color }}
+                        />
+                      ))}
+                    </div>
+                    <div className={s.customThemeActions}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCustomCreator(customTheme);
+                        }}
+                        className={s.customActionBtn}
+                        title={t('spotCustomEdit')}
+                        aria-label={`${t('spotCustomEdit')}: ${customTheme.name}`}
+                      >
+                        <Pencil className={s.customActionIcon} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCustomTheme(customTheme.id);
+                        }}
+                        className={s.customActionBtn}
+                        title={t('spotCustomDelete')}
+                        aria-label={`${t('spotCustomDelete')}: ${customTheme.name}`}
+                      >
+                        <X className={s.customActionIcon} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Create a new custom theme (up to 10 saved). */}
+              {customThemes.length < MAX_CUSTOM_THEMES && (
+                <button
+                  type="button"
+                  onClick={() => openCustomCreator()}
+                  className={`${s.themeBtnBase} ${s.customCreateBtn}`}
+                >
+                  <div className={s.themeBtnContent}>
+                    <Plus className={s.themeBtnIcon} />
+                    <span className={s.themeBtnText}>{t('spotCustomCreate')}</span>
+                  </div>
+                </button>
+              )}
             </div>
+
+            {/* Custom theme creator: name, style, up to 5 colors, and a
+                live preview of the banner in the draft theme. */}
+            {creatorOpen && (
+              <div className={s.creatorPanel}>
+                <div className={s.creatorHeader}>
+                  <span className={s.creatorTitle}>
+                    {editingCustomId ? t('spotCustomEditTitle') : t('spotCustomCreateTitle')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={closeCustomCreator}
+                    className={s.customActionBtn}
+                    aria-label={t('commonClose')}
+                  >
+                    <X className={s.customActionIcon} />
+                  </button>
+                </div>
+
+                <TextField
+                  label={t('spotCustomName')}
+                  value={customName}
+                  onChange={setCustomName}
+                  placeholder={t('spotCustomNamePlaceholder')}
+                />
+
+                {/* Style: how the colors are arranged. Each option shows
+                    a live swatch built from the draft colors. */}
+                <div className={s.creatorFieldGroup}>
+                  <span className={s.creatorFieldLabel}>{t('spotCustomStyle')}</span>
+                  <div className={s.styleGrid}>
+                    {CUSTOM_THEME_STYLE_KEYS.map((styleKey) => {
+                      const isSelected = customStyle === styleKey;
+                      return (
+                        <button
+                          key={styleKey}
+                          type="button"
+                          onClick={() => setCustomStyle(styleKey)}
+                          className={`${s.styleBtnBase} ${
+                            isSelected ? s.styleBtnSelected : s.styleBtnIdle
+                          }`}
+                        >
+                          <span
+                            className={s.styleSwatch}
+                            style={{
+                              background: buildCustomGradient(draftCustomTheme.colors, styleKey),
+                            }}
+                          />
+                          <span className={s.styleBtnText}>
+                            {t(CUSTOM_THEME_STYLE_LABEL_KEYS[styleKey])}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Colors: up to 5, each a swatch + hex field. */}
+                <div className={s.creatorFieldGroup}>
+                  <span className={s.creatorFieldLabel}>
+                    {t('spotCustomColors')} ({customColors.length}/{MAX_CUSTOM_COLORS})
+                  </span>
+                  <div className={s.colorList}>
+                    {customColors.map((slot, slotIndex) => (
+                      <div key={slot.id} className={s.colorRow}>
+                        <ColorPicker
+                          label={`${t('spotCustomColor')} ${slotIndex + 1}`}
+                          value={slot.value}
+                          onChange={(value) => handleCustomColorChange(slot.id, value)}
+                        />
+                        {customColors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomColor(slot.id)}
+                            className={s.customActionBtn}
+                            title={t('spotCustomRemoveColor')}
+                            aria-label={`${t('spotCustomRemoveColor')} ${slotIndex + 1}`}
+                          >
+                            <X className={s.customActionIcon} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {customColors.length < MAX_CUSTOM_COLORS && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleAddCustomColor}
+                      leftIcon={<Plus className={s.saveIcon} />}
+                    >
+                      {t('spotCustomAddColor')}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Live preview: a mini banner in the draft theme. */}
+                <div className={s.creatorFieldGroup}>
+                  <span className={s.creatorFieldLabel}>{t('spotCustomPreview')}</span>
+                  <div
+                    className={s.previewBanner}
+                    style={{
+                      background: draftPreviewStyles.wrapperBackground,
+                      borderColor: draftPreviewStyles.borderColor,
+                    }}
+                  >
+                    <span
+                      className={s.previewBadge}
+                      style={{
+                        background: draftPreviewStyles.badgeBackground,
+                        color: draftPreviewStyles.badgeTextColor,
+                        borderColor: draftPreviewStyles.badgeBorderColor,
+                      }}
+                    >
+                      {badgeVi || t('spotCustomPreviewBadge')}
+                    </span>
+                    <span className={s.previewTitle}>
+                      {CHURCH_NAME[language]}
+                    </span>
+                    <span className={s.previewSubtitle}>
+                      {draftCustomTheme.name}
+                    </span>
+                    <span
+                      className={s.previewBtn}
+                      style={{
+                        background: draftPreviewStyles.btnBackground,
+                        color: draftPreviewStyles.btnTextColor,
+                      }}
+                    >
+                      {t('spotCustomPreviewBtn')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={s.creatorActions}>
+                  <Button type="button" variant="secondary" size="sm" onClick={closeCustomCreator}>
+                    {t('commonCancel')}
+                  </Button>
+                  <Button type="button" variant="primary" size="sm" onClick={handleUseCustomTheme}>
+                    {t('spotCustomUse')}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* STEP 2: Pick Event to Feature */}

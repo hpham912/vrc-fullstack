@@ -145,7 +145,20 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type SpotlightTheme = 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default';
+export type CustomThemeStyle = 'diagonal' | 'horizontal' | 'vertical' | 'radial' | 'bands';
+
+// A custom banner theme saved by an admin: a name, 1-5 colors, and a
+// style that decides how those colors are arranged (gradient direction
+// or hard bands). Stored in the spotlight config (church_info/spotlight
+// JSONB), so no new table or migration is needed.
+export interface CustomTheme {
+  id: string;
+  name: string;
+  colors: string[]; // 1-5 hex colors, e.g. ['#991b1b', '#166534', '#d4af37']
+  style: CustomThemeStyle;
+}
+
+export type SpotlightTheme = 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default' | 'custom';
 
 export interface SpotlightBannerConfig {
   id?: string;
@@ -153,6 +166,10 @@ export interface SpotlightBannerConfig {
   selectedEventId?: number | null; // ID of pinned church event if mode is 'event'
   isActive: boolean; // whether holiday/spotlight mode is active
   theme: SpotlightTheme;
+  // Saved custom themes (admin-created). When theme is 'custom',
+  // customThemeId names which one is active.
+  customThemes?: CustomTheme[];
+  customThemeId?: string | null;
   badge?: string;
   badgeVi?: string;
   badgeEn?: string;
