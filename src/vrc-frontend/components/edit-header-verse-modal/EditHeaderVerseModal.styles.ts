@@ -9,10 +9,6 @@ export const editHeaderVerseModalStyles = {
     'p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-3',
   apiCardTitle: 'text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1.5',
   apiSearchRow: 'flex flex-col sm:flex-row items-stretch sm:items-center gap-2',
-  apiSearchInput:
-    'flex-1 px-3.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 placeholder:text-stone-400 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500',
-  apiFetchBtn:
-    'px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 flex-shrink-0 disabled:opacity-50',
   previewCard:
     'p-4 rounded-2xl bg-stone-100/80 dark:bg-stone-900/80 border border-stone-200/80 dark:border-stone-800 space-y-2',
   previewHeader: 'flex items-center justify-between text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider',
@@ -23,6 +19,4 @@ export const editHeaderVerseModalStyles = {
   previewRef: 'block text-xs font-semibold text-amber-700 dark:text-amber-400 mt-1',
   footerRow:
     'pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end gap-2 flex-wrap',
-  cancelBtn:
-    'px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors',
 };

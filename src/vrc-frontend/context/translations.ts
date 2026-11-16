@@ -606,7 +606,7 @@ export const translations = {
   poolUploadEmptyMonth: { vi: 'Chưa có câu nào cho {month}. Tải lên một tệp hoặc thêm câu thủ công.', en: 'No verses for {month} yet. Upload a file or add verses manually.' },
   poolUploadMonthFilter: { vi: 'Xem tháng:', en: 'Viewing month:' },
   poolUploadRowError: { vi: 'Dòng {row}: {message}', en: 'Row {row}: {message}' },
-  poolUploadShowSample: { vi: 'Xem định dạng mẫu', en: 'See the sample format' },
+  poolUploadDownloadTemplate: { vi: 'Tải mẫu', en: 'Download template' },
   poolUploadSampleTitle: { vi: 'Định dạng mẫu — mỗi dòng là một câu', en: 'Sample format — one row per verse' },
   poolUploadSampleNote: { vi: 'Cột reference_en và reference_vi là bắt buộc. Suy ngẫm và lời cầu nguyện có thể để trống.', en: 'The reference_en and reference_vi columns are required. Reflection and prayer can be left empty.' },
 

@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Plus, Save, Sparkles, UploadCloud } from 'lucide-react';
+import { Download, Plus, Save, Sparkles, UploadCloud } from 'lucide-react';
 import { DailyVerse, PoolVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
+import { downloadFromUrl } from '../../../../services/downloadService.ts';
 import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, TextField, Upload, Accordion, Modal } from '../../../../common-component/index.ts';
 import { versesTabStyles } from './VersesTab.styles.ts';
 
@@ -444,6 +445,14 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     setUploadSuccess(null);
   };
 
+  // Download the blank CSV template (header + 2 example verses) so the
+  // admin can fill it in and upload it back. The file lives in public/
+  // so it is served with the app. The download itself is the shared
+  // download service — any screen can download a file the same way.
+  const handleDownloadTemplate = () => {
+    downloadFromUrl('/verse-upload-template.csv', 'verse-upload-template.csv');
+  };
+
   const handleCheckUploadFile = async () => {
     if (!uploadFile) {
       showFeedback('error', t('poolUploadNoFile'));
@@ -869,9 +878,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowSampleModal(true)}
+                      onClick={handleDownloadTemplate}
+                      leftIcon={<Download className={versesTabStyles.saveIcon} />}
                     >
-                      <span>{t('poolUploadShowSample')}</span>
+                      <span>{t('poolUploadDownloadTemplate')}</span>
                     </Button>
                   </div>
                   <Upload
@@ -1013,6 +1023,17 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             </div>
           </div>
           <p className={versesTabStyles.hint}>{t('poolUploadSampleNote')}</p>
+          <div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleDownloadTemplate}
+              leftIcon={<Download className={versesTabStyles.saveIcon} />}
+            >
+              <span>{t('poolUploadDownloadTemplate')}</span>
+            </Button>
+          </div>
         </div>
       </Modal>
 

@@ -6,7 +6,7 @@ import { Modal } from '../../common-component/modal/Modal.tsx';
 import { Button, Banner, SegmentedControl, TextField } from '../../common-component/index.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
-import { Sparkles, Save, BookOpen, Loader2 } from 'lucide-react';
+import { Sparkles, Save, BookOpen } from 'lucide-react';
 import { editHeaderVerseModalStyles as s } from './EditHeaderVerseModal.styles.ts';
 
 interface EditHeaderVerseModalProps {
@@ -224,37 +224,30 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
           </div>
 
           <div className={s.apiSearchRow}>
-            <input
-              type="text"
-              value={searchPassage}
-              onChange={(e) => setSearchPassage(e.target.value)}
-              placeholder={t('headerVerseSearchPlaceholder')}
-              className={s.apiSearchInput}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleFetchFromBibleApi();
-                }
-              }}
-            />
-            <button
+            <div className="min-w-0 flex-1">
+              <TextField
+                value={searchPassage}
+                onChange={setSearchPassage}
+                placeholder={t('headerVerseSearchPlaceholder')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleFetchFromBibleApi();
+                  }
+                }}
+              />
+            </div>
+            <Button
               type="button"
+              variant="primary"
+              size="md"
               disabled={fetchingApi || !searchPassage.trim()}
+              loading={fetchingApi}
               onClick={() => handleFetchFromBibleApi()}
-              className={s.apiFetchBtn}
+              leftIcon={<Sparkles className="w-3.5 h-3.5" />}
             >
-              {fetchingApi ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>{t('headerVerseFetching')}</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{t('headerVerseFetchBible')}</span>
-                </>
-              )}
-            </button>
+              <span>{fetchingApi ? t('headerVerseFetching') : t('headerVerseFetchBible')}</span>
+            </Button>
           </div>
         </div>
 
@@ -322,13 +315,14 @@ export const EditHeaderVerseModal: React.FC<EditHeaderVerseModalProps> = ({
 
         {/* Footer Actions */}
         <div className={s.footerRow}>
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="md"
             onClick={onClose}
-            className={s.cancelBtn}
           >
             {t('commonCancel')}
-          </button>
+          </Button>
           <Button
             type="submit"
             variant="dark"
