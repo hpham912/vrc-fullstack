@@ -1,12 +1,72 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Plus, Save, Sparkles } from 'lucide-react';
+import { Plus, Save, Sparkles, UploadCloud } from 'lucide-react';
 import { DailyVerse, PoolVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
-import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, TextField } from '../../../../common-component/index.ts';
+import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, TextField, Upload } from '../../../../common-component/index.ts';
 import { versesTabStyles } from './VersesTab.styles.ts';
+
+// A verse validated by POST /api/verse-pool/upload (preview step),
+// ready to import. The backend returns canonical references from
+// the Bible API, so these are what gets stored on confirm.
+interface UploadPreviewVerse {
+  reference: string;
+  referenceEn: string;
+  referenceVi: string;
+  reflection: string;
+  reflectionEn: string;
+  reflectionVi: string;
+  prayer: string | null;
+  prayerEn: string | null;
+  prayerVi: string | null;
+}
+
+interface UploadPreview {
+  month: string;
+  daysInMonth: number;
+  verses: UploadPreviewVerse[];
+  warnings: Array<{ code: string; daysInMonth: number; count: number }>;
+  existingCount: number;
+}
+
+interface UploadRowError {
+  row: number;
+  message: string;
+}
+
+// The current month (YYYY-MM) in Phoenix time — the same clock the
+// verse-day uses.
+function currentMonthString(): string {
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }));
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+// Add `offset` months to a YYYY-MM string (offset 0 = the same month).
+function addMonths(month: string, offset: number): string {
+  const [yearText, monthText] = month.split('-');
+  const date = new Date(Number(yearText), Number(monthText) - 1 + offset, 1);
+  const year = date.getFullYear();
+  const monthNumber = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${monthNumber}`;
+}
+
+const EN_MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function formatMonthLabel(month: string, language: 'vi' | 'en'): string {
+  const [yearText, monthText] = month.split('-');
+  const year = Number(yearText);
+  const monthNumber = Number(monthText);
+  if (!year || !monthNumber) return month;
+  if (language === 'vi') return `Tháng ${monthNumber}, ${year}`;
+  return `${EN_MONTH_NAMES[monthNumber - 1]} ${year}`;
+}
 
 interface VersesTabProps {
   // Today's verse (from GET /api/verses/today) — the pool manager
@@ -27,8 +87,10 @@ interface VersesTabProps {
   onOpenHeaderVerseEditor?: () => void;
 }
 
-// The pool holds at most 20 verses (enforced by the API too).
-const POOL_MAX = 20;
+// The pool holds at most 40 verses PER MONTH (enforced by the API
+// too). A month has at most 31 days; the extra room is for verses
+// uploaded beyond the days in the month plus manual adds.
+const POOL_MAX_PER_MONTH = 40;
 
 // Scripture pool manager: today's verse + "display for today" picker,
 // add-a-verse (fetch from Bible + optional reflection/prayer), and the
@@ -76,6 +138,32 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   const [pickingToday, setPickingToday] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<PoolVerse | null>(null);
   const [removingPool, setRemovingPool] = useState(false);
+  // The month being managed (pool list + upload target). Defaults to
+  // the current month — that is the pool the daily pick draws from.
+  // The admin changes it to upload for a future month.
+  const [viewMonth, setViewMonth] = useState<string>(() => currentMonthString());
+  const currentMonth = currentMonthString();
+  // Monthly upload state.
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadPreview, setUploadPreview] = useState<UploadPreview | null>(null);
+  const [uploadErrors, setUploadErrors] = useState<UploadRowError[]>([]);
+  const [uploadChecking, setUploadChecking] = useState(false);
+  const [uploadImporting, setUploadImporting] = useState(false);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const uploadSuccessTimeout = useRef<number | null>(null);
+  // Whether the sample format card is shown. It opens automatically
+  // when an upload fails, so the admin can see the expected format
+  // and fix the file; the admin can also open it any time to check.
+  const [showFormatSample, setShowFormatSample] = useState(false);
+
+  // Month options: the current month plus the next 5, so the admin
+  // can upload ahead. Past months are not offered — their pool is
+  // pruned and cannot be picked.
+  const monthOptions = Array.from({ length: 6 }, (_, index) => {
+    const month = addMonths(currentMonth, index);
+    return { value: month, label: formatMonthLabel(month, language) };
+  });
 
   // Pick the current language's text, falling back to the other
   // language, then to the generic field — same helper as DailyVerseCard.
@@ -89,7 +177,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       ? poolVerse.referenceVi || poolVerse.reference
       : poolVerse.referenceEn || poolVerse.reference;
 
-  const isPoolFull = (pool?.length ?? 0) >= POOL_MAX;
+  const isPoolFull = (pool?.length ?? 0) >= POOL_MAX_PER_MONTH;
 
   // Today's verse as a pool verse, matched by reference (there is no
   // foreign key between daily_verses and verse_pool — the pick copies
@@ -111,11 +199,11 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     return match ? match.id : null;
   })();
 
-  const loadPool = async () => {
+  const loadPool = async (month: string) => {
     setLoadingPool(true);
     try {
       const token = getToken();
-      const data = await apiFetch<PoolVerse[]>('/api/verse-pool', {
+      const data = await apiFetch<PoolVerse[]>(`/api/verse-pool?month=${month}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPool(Array.isArray(data) ? data : []);
@@ -127,13 +215,14 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     }
   };
 
-  // Refetch whenever the tab becomes active, so the list is fresh
-  // after another admin (or this admin, on another tab) changed it.
+  // Refetch whenever the tab becomes active or the viewed month
+  // changes, so the list is fresh after another admin (or this admin,
+  // on another tab) changed it.
   useEffect(() => {
     if (activeTab === 'verses') {
-      loadPool();
+      loadPool(viewMonth);
     }
-  }, [activeTab]);
+  }, [activeTab, viewMonth]);
 
   useEffect(() => {
     onEditingChange(editingPoolId !== null);
@@ -203,6 +292,8 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           prayer: prayerEn.trim() || null,
           prayerVi: prayerVi.trim() || null,
           prayerEn: prayerEn.trim() || null,
+          month: viewMonth,
+          source: 'manual',
         }),
       });
       const addedMessage = t('poolAdded', { ref: fetched.referenceEn || fetched.reference });
@@ -210,7 +301,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       setSaveSuccess(addedMessage);
       saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       resetForm();
-      await loadPool();
+      await loadPool(viewMonth);
     } catch (err: any) {
       const addErrorMessage = getErrorMessage(err, language, t('errPoolAdd'));
       showFeedback('error', addErrorMessage);
@@ -267,7 +358,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       setSaveSuccess(updatedMessage);
       saveSuccessTimeout.current = window.setTimeout(() => setSaveSuccess(null), 4000);
       resetForm();
-      await loadPool();
+      await loadPool(viewMonth);
     } catch (err: any) {
       const updateErrorMessage = getErrorMessage(err, language, t('errPoolUpdate'));
       showFeedback('error', updateErrorMessage);
@@ -289,11 +380,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       showFeedback('success', t('poolRemoved', { ref: pickRef(removeTarget) }));
       if (editingPoolId === removeTarget.id) resetForm();
       setRemoveTarget(null);
-      await loadPool();
-      // Refresh today's verse too — removing a pool verse also deletes
-      // its daily_verses rows, so if it was showing today the card
-      // needs to re-pick from the remaining pool.
-      onRefreshData();
+      await loadPool(viewMonth);
+      // No refresh of today's verse: a pool verse was never picked,
+      // so removing it cannot change what is showing today. History
+      // in daily_verses is never deleted by a pool remove.
     } catch (err: any) {
       showFeedback('error', getErrorMessage(err, language, t('errPoolRemove')));
     } finally {
@@ -330,6 +420,104 @@ export const VersesTab: React.FC<VersesTabProps> = ({
       showFeedback('error', getErrorMessage(err, language, t('errPoolPick')));
     } finally {
       setPickingToday(false);
+    }
+  };
+
+  // Monthly upload — step 1: check the file. Parses + validates it
+  // on the server and returns a preview; nothing is imported yet.
+  // All-or-nothing: any bad row rejects the whole file with a
+  // per-row error list.
+  const handleUploadFileChange = (file: File | null) => {
+    setUploadFile(file);
+    setUploadPreview(null);
+    setUploadErrors([]);
+    setUploadSuccess(null);
+  };
+
+  const handleCheckUploadFile = async () => {
+    if (!uploadFile) {
+      showFeedback('error', t('poolUploadNoFile'));
+      return;
+    }
+    try {
+      setUploadChecking(true);
+      setUploadErrors([]);
+      setUploadPreview(null);
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('month', viewMonth);
+      const preview = await apiFetch<UploadPreview>('/api/verse-pool/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      setUploadPreview(preview);
+    } catch (err: any) {
+      const details = (err as { details?: { errors?: UploadRowError[] } })?.details;
+      if (details && Array.isArray(details.errors) && details.errors.length > 0) {
+        setUploadErrors(details.errors);
+        // Show the sample format so the admin can see what the file
+        // should look like and fix it.
+        setShowFormatSample(true);
+      } else {
+        showFeedback('error', getErrorMessage(err, language, t('errPoolUpload')));
+      }
+    } finally {
+      setUploadChecking(false);
+    }
+  };
+
+  // Monthly upload — step 2: import the previewed verses. If the
+  // month already has pool verses and replace was not confirmed, the
+  // server answers 409 and the Replace confirm modal opens instead.
+  const handleImportUpload = async (replace: boolean) => {
+    if (!uploadPreview) return;
+    try {
+      setUploadImporting(true);
+      const token = getToken();
+      const result = await apiFetch<{ imported: number; month: string }>(
+        '/api/verse-pool/upload/confirm',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            month: uploadPreview.month,
+            verses: uploadPreview.verses,
+            replace,
+          }),
+        }
+      );
+      const importedMessage = t('poolUploadImported', {
+        count: result.imported,
+        month: formatMonthLabel(result.month, language),
+      });
+      showFeedback('success', importedMessage);
+      setUploadSuccess(importedMessage);
+      if (uploadSuccessTimeout.current) {
+        window.clearTimeout(uploadSuccessTimeout.current);
+      }
+      uploadSuccessTimeout.current = window.setTimeout(() => setUploadSuccess(null), 4000);
+      setUploadPreview(null);
+      setUploadFile(null);
+      setUploadErrors([]);
+      setShowReplaceConfirm(false);
+      await loadPool(viewMonth);
+      onRefreshData();
+    } catch (err: any) {
+      const details = (err as { details?: { needsReplace?: boolean; existingCount?: number } })
+        ?.details;
+      const status = (err as { status?: number })?.status;
+      if (status === 409 && details?.needsReplace) {
+        setShowReplaceConfirm(true);
+      } else {
+        showFeedback('error', getErrorMessage(err, language, t('errPoolUpload')));
+      }
+    } finally {
+      setUploadImporting(false);
     }
   };
 
@@ -422,12 +610,16 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             value={displayValue}
             onChange={handlePickToday}
             ariaLabel={t('poolDisplayToday')}
-            disabled={pickingToday || !pool || pool.length === 0}
+            disabled={pickingToday || !pool || pool.length === 0 || viewMonth !== currentMonth}
             className={versesTabStyles.pickSelect}
           />
         </div>
         <p className={versesTabStyles.hint}>
-          {!loadingPool && pool && pool.length === 0 ? t('poolDisplayEmpty') : t('poolDisplayHint')}
+          {viewMonth !== currentMonth
+            ? t('poolDisplayOtherMonth')
+            : !loadingPool && pool && pool.length === 0
+              ? t('poolDisplayEmpty')
+              : t('poolDisplayHint')}
         </p>
       </section>
 
@@ -436,6 +628,16 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         <div className={versesTabStyles.poolHead}>
           <h3 className={versesTabStyles.sectionTitle}>{t('poolListTitle')}</h3>
           <span className={versesTabStyles.poolCount}>{t('poolCount', { count: pool?.length ?? 0 })}</span>
+        </div>
+        <div className={versesTabStyles.pickRow}>
+          <label className={versesTabStyles.pickLabel}>{t('poolUploadMonthFilter')}</label>
+          <Select
+            options={monthOptions}
+            value={viewMonth}
+            onChange={setViewMonth}
+            ariaLabel={t('poolUploadMonthFilter')}
+            className={versesTabStyles.pickSelect}
+          />
         </div>
         {loadingPool ? (
           <Loading text={t('loading')} />
@@ -457,6 +659,159 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         ) : (
           <p className={versesTabStyles.emptyText}>{t('poolEmpty')}</p>
         )}
+        {!loadingPool && pool && pool.length === 0 && (
+          <Banner
+            type="info"
+            message={t('poolUploadEmptyMonth', { month: formatMonthLabel(viewMonth, language) })}
+          />
+        )}
+      </section>
+
+      {/* Upload verses for a month */}
+      <section className={versesTabStyles.section}>
+        <div className={versesTabStyles.formHeader}>
+          <h3 className={versesTabStyles.sectionTitle}>
+            <UploadCloud className={versesTabStyles.uploadSectionIcon} /> {t('poolUploadTitle')}
+          </h3>
+          <span className={versesTabStyles.poolCount}>
+            {formatMonthLabel(viewMonth, language)}
+          </span>
+        </div>
+        <p className={versesTabStyles.hint}>{t('poolUploadHint')}</p>
+        <div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowFormatSample(!showFormatSample)}
+          >
+            <span>{showFormatSample ? t('poolUploadHideSample') : t('poolUploadShowSample')}</span>
+          </Button>
+        </div>
+        <Upload
+          accept={['.csv', '.txt', '.docx']}
+          maxSizeMB={5}
+          file={uploadFile}
+          onFileChange={handleUploadFileChange}
+          disabled={uploadChecking || uploadImporting}
+        />
+        <div className={versesTabStyles.uploadBtnRow}>
+          <Button
+            type="button"
+            variant="dark"
+            size="md"
+            fullWidth
+            onClick={handleCheckUploadFile}
+            loading={uploadChecking}
+            disabled={uploadChecking || uploadImporting || !uploadFile}
+            leftIcon={<UploadCloud className={versesTabStyles.saveIcon} />}
+          >
+            <span>{uploadChecking ? t('poolUploadChecking') : t('poolUploadCheckFile')}</span>
+          </Button>
+        </div>
+
+        {uploadErrors.length > 0 && (
+          <div className={versesTabStyles.uploadErrorList} role="alert">
+            {uploadErrors.map((uploadError, index) => (
+              <p key={`${uploadError.row}-${index}`} className={versesTabStyles.uploadErrorItem}>
+                {t('poolUploadRowError', { row: uploadError.row, message: uploadError.message })}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {showFormatSample && (
+          <div className={versesTabStyles.uploadSampleCard}>
+            <p className={versesTabStyles.uploadSampleTitle}>{t('poolUploadSampleTitle')}</p>
+            <div className={versesTabStyles.uploadSampleTable}>
+              <div className={versesTabStyles.uploadSampleHeaderRow}>
+                <span>reference_en</span>
+                <span>reference_vi</span>
+                <span>reflection_en</span>
+                <span>reflection_vi</span>
+                <span>prayer_en</span>
+                <span>prayer_vi</span>
+              </div>
+              <div className={versesTabStyles.uploadSampleDataRow}>
+                <span>John 3:16</span>
+                <span>Giăng 3:16</span>
+                <span>God loved the world…</span>
+                <span>Đức Chúa Trời yêu thế gian…</span>
+                <span>Thank You Lord…</span>
+                <span>Lạy Chúa, cảm tạ Ngài…</span>
+              </div>
+            </div>
+            <p className={versesTabStyles.hint}>{t('poolUploadSampleNote')}</p>
+          </div>
+        )}
+
+        {uploadPreview && (
+          <>
+            <div className={versesTabStyles.formHeader}>
+              <h4 className={versesTabStyles.sectionTitle}>
+                {t('poolUploadPreviewTitle', {
+                  count: uploadPreview.verses.length,
+                  month: formatMonthLabel(uploadPreview.month, language),
+                })}
+              </h4>
+            </div>
+            {uploadPreview.warnings.map((warning) => (
+              <Banner
+                key={warning.code}
+                type="info"
+                message={
+                  warning.code === 'fewer-than-days'
+                    ? t('poolUploadCountWarning', {
+                        month: formatMonthLabel(uploadPreview.month, language),
+                        days: warning.daysInMonth,
+                        count: warning.count,
+                      })
+                    : t('poolUploadCountExtra', {
+                        month: formatMonthLabel(uploadPreview.month, language),
+                        days: warning.daysInMonth,
+                        count: warning.count,
+                      })
+                }
+              />
+            ))}
+            <div className={versesTabStyles.uploadPreviewList}>
+              {uploadPreview.verses.map((previewVerse) => (
+                <div key={previewVerse.referenceEn} className={versesTabStyles.uploadPreviewRow}>
+                  <p className={versesTabStyles.uploadPreviewRef}>
+                    {pick(previewVerse.referenceVi, previewVerse.referenceEn, previewVerse.reference)}
+                  </p>
+                  {(pick(previewVerse.reflectionVi, previewVerse.reflectionEn, previewVerse.reflection) ||
+                    pick(previewVerse.prayerVi, previewVerse.prayerEn, previewVerse.prayer)) && (
+                    <p className={versesTabStyles.uploadPreviewMeta}>
+                      {pick(previewVerse.reflectionVi, previewVerse.reflectionEn, previewVerse.reflection) ||
+                        pick(previewVerse.prayerVi, previewVerse.prayerEn, previewVerse.prayer)}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className={versesTabStyles.uploadBtnRow}>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                fullWidth
+                onClick={() => handleImportUpload(false)}
+                loading={uploadImporting}
+                disabled={uploadImporting}
+                leftIcon={<Plus className={versesTabStyles.saveIcon} />}
+              >
+                <span>
+                  {uploadImporting
+                    ? t('poolUploadImporting')
+                    : t('poolUploadImport', { count: uploadPreview.verses.length })}
+                </span>
+              </Button>
+            </div>
+          </>
+        )}
+
+        {uploadSuccess && <Banner type="success" message={uploadSuccess} />}
       </section>
 
       {/* Add a Verse / Edit a pool verse */}
@@ -623,6 +978,25 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         loading={removingPool}
         onConfirm={handleRemovePoolVerse}
         onCancel={() => setRemoveTarget(null)}
+      />
+
+      {/* Replace confirm — uploading for a month that already has verses */}
+      <ConfirmModal
+        isOpen={showReplaceConfirm}
+        title={t('poolUploadReplaceTitle', { count: uploadPreview?.existingCount ?? 0 })}
+        message={
+          uploadPreview
+            ? t('poolUploadReplaceBody', {
+                month: formatMonthLabel(uploadPreview.month, language),
+                count: uploadPreview.existingCount,
+              })
+            : ''
+        }
+        confirmText={t('poolUploadReplaceConfirm')}
+        cancelText={t('poolUploadCancel')}
+        loading={uploadImporting}
+        onConfirm={() => handleImportUpload(true)}
+        onCancel={() => setShowReplaceConfirm(false)}
       />
     </div>
   );

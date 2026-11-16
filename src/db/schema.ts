@@ -133,11 +133,20 @@ export const dailyVerses = pgTable('daily_verses', {
 // together with the reflection/prayer copied from the pool entry.
 // Reflection and prayer are OPTIONAL (nullable) — a pool verse with
 // neither still works, and the daily card then shows just the verse.
-// The pool holds at most 20 verses (enforced by the API, not by the
-// table). No foreign key and no JOIN to daily_verses: the pool is the
+// The pool is MONTHLY: each verse belongs to one month (YYYY-MM) and
+// the daily pick draws only from the current month's verses. A verse
+// is deleted from the pool once it is picked (so it cannot repeat),
+// and daily_verses keeps the month's history. The pool holds at most
+// 40 verses per month (enforced by the API, not by the table) — a
+// month has at most 31 days, and the extra room is for verses the
+// admin uploads beyond the days in the month plus manual adds.
+// `source` records where the verse came from: 'upload' (a monthly
+// file upload) or 'manual' (added by hand in AdminPortal).
+// No foreign key and no JOIN to daily_verses: the pool is the
 // source list, daily_verses is the record of what was displayed each
 // day, and a pool verse that was never displayed has no row there.
 // Migration SQL: src/vrc-db/sql/verse-pool-create-table.sql
+// (and verse-pool-add-month.sql for the month/source columns)
 export const versePool = pgTable('verse_pool', {
   id: serial('id').primaryKey(),
   reference: text('reference').notNull(),
@@ -149,6 +158,8 @@ export const versePool = pgTable('verse_pool', {
   prayer: text('prayer'),
   prayerVi: text('prayer_vi'),
   prayerEn: text('prayer_en'),
+  month: text('month'),
+  source: text('source').default('manual'),
   createdBy: text('created_by'),
   updatedBy: text('updated_by'),
   createdAt: timestamp('created_at').defaultNow(),

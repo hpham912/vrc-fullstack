@@ -44,3 +44,5 @@ export { TextField } from './text-field/TextField.tsx';
 export type { TextFieldProps } from './text-field/TextField.tsx';
 export { Select } from './select/Select.tsx';
 export type { SelectProps, SelectOption } from './select/Select.tsx';
+export { Upload } from './upload/Upload.tsx';
+export type { UploadProps } from './upload/Upload.tsx';

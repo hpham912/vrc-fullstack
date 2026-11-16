@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { dailyVerses, versePool } from '../../vrc-db/schema.ts';
-import { eq, desc, sql, asc } from 'drizzle-orm';
+import { eq, desc, sql, asc, isNull, or, like } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { AppError } from '../middleware/errorHandler.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
 import { DevotionalService } from '../services/devotionalService.ts';
 import { getVerseDayString } from '../utils/verseDay.ts';
+import {
+  pruneOldVerseHistory,
+  previousVerseMonth,
+} from '../services/versePruneService.ts';
 
 const router = Router();
 
@@ -92,16 +96,26 @@ async function pickAndSaveVerseForDay(
     }
   }
 
-  // A specific pool verse (admin override) or a random one.
+  // A specific pool verse (admin override) or a random one, drawn
+  // only from the verse-day's month. Rows with no month yet (added
+  // before the month column existed) count as the current month, so
+  // the pool keeps working until the migration backfills them.
   // If the pool table cannot be read yet (the migration SQL has not
   // been run), treat it as an empty pool so the caller falls back to
   // the most recent verse instead of erroring.
+  const verseMonth = verseDay.slice(0, 7);
+  const monthCondition = or(eq(versePool.month, verseMonth), isNull(versePool.month));
   let poolRows: (typeof versePool.$inferSelect)[];
   try {
     poolRows =
       poolVerseId !== null
         ? await db.select().from(versePool).where(eq(versePool.id, poolVerseId)).limit(1)
-        : await db.select().from(versePool).orderBy(sql`RANDOM()`).limit(1);
+        : await db
+            .select()
+            .from(versePool)
+            .where(monthCondition)
+            .orderBy(sql`RANDOM()`)
+            .limit(1);
   } catch (poolErr) {
     console.error('Scripture pool pick: could not read verse_pool:', poolErr);
     return { ok: false, reason: 'empty-pool' };
@@ -188,6 +202,27 @@ async function pickAndSaveVerseForDay(
   };
 
   const saved = await upsertVerseByDate(insertValues, updateValues);
+  // The verse is used for this day — remove it from the pool so it
+  // cannot be picked again this month (or any later month). The daily
+  // row above is the month's history, so nothing is lost. If the
+  // delete fails, the verse was still saved for today; log it and
+  // carry on rather than failing the pick.
+  try {
+    await db.delete(versePool).where(eq(versePool.id, poolVerse.id));
+  } catch (deleteErr) {
+    console.error('Scripture pool pick: could not remove the picked verse from the pool:', deleteErr);
+  }
+  // On the 1st of a month, prune history older than the previous
+  // month (keep the current + previous month only). The history view
+  // is always filtered to those two months, so this only reclaims
+  // space — it never changes what members see.
+  if (verseDay.endsWith('-01')) {
+    try {
+      await pruneOldVerseHistory();
+    } catch (pruneErr) {
+      console.error('Scripture pool pick: monthly prune failed:', pruneErr);
+    }
+  }
   // Re-read the verse-day's first row, so the caller always returns
   // one consistent row for the day. (Two first-requests racing right
   // after 6 AM can each pass the check above and both save — the
@@ -283,6 +318,35 @@ router.get('/today', async (req, res, next) => {
   } catch (error: any) {
     // Hand it to the shared error handler: it logs the real error and
     // sends the user a safe, accurate message instead of raw DB text.
+    next(error);
+  }
+});
+
+// GET /api/verses/history - Past daily verses for the member history
+// view (public). Returns the current month and the previous month,
+// newest first — so on the 1st, when the new month has nothing yet,
+// the previous month's verses still show. ?month=YYYY-MM returns
+// just that month instead. Older months are never returned (the
+// monthly prune deletes them); the view only ever shows these two.
+router.get('/history', async (req, res, next) => {
+  try {
+    const requestedMonth = typeof req.query.month === 'string' ? req.query.month : null;
+    const monthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+    let months: string[];
+    if (requestedMonth && monthPattern.test(requestedMonth)) {
+      months = [requestedMonth];
+    } else {
+      const verseDay = getVerseDayString();
+      const currentMonth = verseDay.slice(0, 7);
+      months = [currentMonth, previousVerseMonth(currentMonth)];
+    }
+    const rows = await db
+      .select()
+      .from(dailyVerses)
+      .where(or(...months.map((month) => like(dailyVerses.date, `${month}-%`))))
+      .orderBy(desc(dailyVerses.date));
+    res.json(rows);
+  } catch (error: any) {
     next(error);
   }
 });

@@ -67,6 +67,8 @@ export interface PoolVerse {
   prayer?: string | null;
   prayerVi?: string | null;
   prayerEn?: string | null;
+  month?: string | null;
+  source?: string | null;
   createdBy?: string | null;
   updatedBy?: string | null;
   createdAt?: string;

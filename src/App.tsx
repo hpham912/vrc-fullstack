@@ -9,6 +9,7 @@ import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
 import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDashboard.tsx';
 import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
 import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
+import { VerseHistorySection } from './vrc-frontend/components/verse-history-section/VerseHistorySection.tsx';
 import { VideosSection } from './vrc-frontend/components/videos-section/VideosSection.tsx';
 import { NotificationsSection } from './vrc-frontend/components/notifications-section/NotificationsSection.tsx';
 import { LoginModal } from './vrc-frontend/components/login-modal/LoginModal.tsx';
@@ -629,6 +630,8 @@ function ChurchAppContent() {
               onOpenAdminPortal={openAdminWithTab}
               isLoading={isLoading}
             />
+
+            <VerseHistorySection isActive={activeTab === 'verse'} todayVerse={todayVerse} />
 
             <div className="max-w-4xl mx-auto px-4 pb-12 text-center">
               <Button
