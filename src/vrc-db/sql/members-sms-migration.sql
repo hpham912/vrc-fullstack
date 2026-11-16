@@ -5,6 +5,14 @@
 -- never used to send codes). Safe to re-run: every statement is guarded
 -- (IF NOT EXISTS / IF EXISTS / DROP NOT NULL is idempotent).
 --
+-- ENVIRONMENT VARIABLES (Cloud Run Variables & Secrets):
+--   REMOVE (no longer used — the email code system is gone):
+--     SMTP_USER, SMTP_PASS, SMTP_FROM
+--   The Twilio credentials are NOT env vars — they live in the
+--   church_info document (see twilio-config-set-values.sql). Env
+--   vars TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_PHONE_NUMBER
+--   still work as a fallback when they are set.
+--
 -- members: email becomes optional (nullable); email_verified is replaced
 -- by phone_verified. Existing rows (if any) get phone_verified = FALSE —
 -- they would need to re-verify by SMS, but no member has registered yet

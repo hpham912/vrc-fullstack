@@ -48,6 +48,15 @@ export interface ChurchInfoData {
   // shows them so the admin can set them.
   zoomMeetingId?: string;
   zoomPasscode?: string;
+  // Twilio SMS credentials (member verification codes). Set via SQL,
+  // not the admin form — see src/vrc-db/sql/twilio-config-set-values.sql.
+  // Optional — older saved church info has none of these fields.
+  // Never rendered anywhere in the app and stripped from the public
+  // GET /api/church-info response; the backend reads them server-side
+  // via ConfigService.
+  twilioAccountSid?: string;
+  twilioAuthToken?: string;
+  twilioPhoneNumber?: string;
   updatedAt: string;
 }
 
@@ -94,6 +103,18 @@ export const DEFAULT_CHURCH_INFO: ChurchInfoData = {
 
 let inMemoryChurchInfo: ChurchInfoData = { ...DEFAULT_CHURCH_INFO };
 
+// The Twilio credentials live in the same church_info document, but
+// they must never be sent to the app — the GET endpoint is public.
+// Strip them from every response; the backend reads them server-side
+// via ConfigService instead.
+function stripTwilioSecrets(info: ChurchInfoData): ChurchInfoData {
+  const publicInfo = { ...info };
+  delete publicInfo.twilioAccountSid;
+  delete publicInfo.twilioAuthToken;
+  delete publicInfo.twilioPhoneNumber;
+  return publicInfo;
+}
+
 // GET /api/church-info - Get sanctuary address & weekly worship schedules
 router.get('/', async (req, res) => {
   try {
@@ -113,25 +134,31 @@ router.get('/', async (req, res) => {
           ? storedData.services
           : inMemoryChurchInfo.services,
       };
-      return res.json(inMemoryChurchInfo);
+      return res.json(stripTwilioSecrets(inMemoryChurchInfo));
     }
 
     // Fallback to in-memory (defaults on a fresh database)
-    res.json(inMemoryChurchInfo);
+    res.json(stripTwilioSecrets(inMemoryChurchInfo));
   } catch (err: any) {
     console.error('Failed to get church info:', err);
-    res.json(inMemoryChurchInfo);
+    res.json(stripTwilioSecrets(inMemoryChurchInfo));
   }
 });
 
 // PUT /api/church-info - Update sanctuary address & worship schedules (Admin only)
 router.put('/', requireAdmin, async (req: AuthRequest, res) => {
   try {
-    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services, headerVerse, zoomMeetingId, zoomPasscode } = req.body;
+    const { sanctuaryName, address, googleMapsUrl, phone, email, regionDescVi, regionDescEn, services, headerVerse, zoomMeetingId, zoomPasscode, twilioAccountSid, twilioAuthToken, twilioPhoneNumber } = req.body;
 
     if (!address || !sanctuaryName) {
       return res.status(400).json({ error: 'Sanctuary name and address are required.' });
     }
+
+    // The Twilio credentials are set via SQL and never sent by the
+    // admin form, so an absent field must keep the stored value. Read
+    // the stored document (not just the in-memory copy) so a save
+    // after a server restart cannot wipe them.
+    const storedInfo = await ConfigService.getChurchInfo();
 
     // Clean and validate services list
     const cleanedServices: WeeklyService[] = Array.isArray(services)
@@ -170,6 +197,12 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
       // stored one. Never a hardcoded default here.
       zoomMeetingId: zoomMeetingId !== undefined ? String(zoomMeetingId).replace(/\D/g, '') : (inMemoryChurchInfo.zoomMeetingId ?? ''),
       zoomPasscode: zoomPasscode !== undefined ? String(zoomPasscode).trim() : (inMemoryChurchInfo.zoomPasscode ?? ''),
+      // Twilio credentials: an empty value clears the field; an
+      // absent field keeps the stored one (from the database, not
+      // just the in-memory copy). The admin form never sends these.
+      twilioAccountSid: twilioAccountSid !== undefined ? String(twilioAccountSid).trim() : (storedInfo?.twilioAccountSid ?? inMemoryChurchInfo.twilioAccountSid ?? ''),
+      twilioAuthToken: twilioAuthToken !== undefined ? String(twilioAuthToken).trim() : (storedInfo?.twilioAuthToken ?? inMemoryChurchInfo.twilioAuthToken ?? ''),
+      twilioPhoneNumber: twilioPhoneNumber !== undefined ? String(twilioPhoneNumber).trim() : (storedInfo?.twilioPhoneNumber ?? inMemoryChurchInfo.twilioPhoneNumber ?? ''),
       updatedAt: new Date().toISOString(),
     };
 
