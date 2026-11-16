@@ -537,6 +537,10 @@ export const VersesTab: React.FC<VersesTabProps> = ({
     ? pick(todayVerse.reflectionVi, todayVerse.reflectionEn, todayVerse.reflection)
     : '';
   const todayPrayer = todayVerse ? pick(todayVerse.prayerVi, todayVerse.prayerEn, todayVerse.prayer) : '';
+  // Today's verse text, computed once so the card can skip the quoted
+  // line entirely when the text is empty — otherwise it renders as
+  // two empty quotes ("").
+  const todayText = todayVerse ? pick(todayVerse.verseTextVi, todayVerse.verseTextEn, todayVerse.verseText) : '';
 
   const displayOptions = [
     { value: 'random', label: t('poolRandomDefault') },
@@ -588,9 +592,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           <>
             <div className={versesTabStyles.todayCard}>
               <div className={versesTabStyles.todayLabel}>{t('poolTodayShowing')}</div>
-              <p className={versesTabStyles.todayText}>
-                “{pick(todayVerse.verseTextVi, todayVerse.verseTextEn, todayVerse.verseText)}”
-              </p>
+              {todayText ? (
+                <p className={versesTabStyles.todayText}>“{todayText}”</p>
+              ) : null}
               <div className={versesTabStyles.todayRef}>
                 {pick(todayVerse.referenceVi, todayVerse.referenceEn, todayVerse.reference)} •{' '}
                 {pick(todayVerse.translationVi, todayVerse.translationEn, todayVerse.translation)}
@@ -619,12 +623,14 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           onChange={handlePickToday}
           label={t('poolDisplayToday')}
           ariaLabel={t('poolDisplayToday')}
-          disabled={pickingToday || !pool || pool.length === 0}
+          disabled={pickingToday || !pool || pool.length === 0 || viewMonth !== currentMonth}
         />
         <p className={versesTabStyles.hint}>
-          {!loadingPool && pool && pool.length === 0
-            ? t('poolDisplayEmpty')
-            : t('poolDisplayHint')}
+          {viewMonth !== currentMonth
+            ? t('poolDisplayOtherMonth')
+            : !loadingPool && pool && pool.length === 0
+              ? t('poolDisplayEmpty')
+              : t('poolDisplayHint')}
         </p>
       </section>
 
@@ -657,6 +663,7 @@ export const VersesTab: React.FC<VersesTabProps> = ({
             }}
             removeLabel={(label) => t('poolRemoveAria', { ref: label })}
             ariaLabel={t('poolListTitle')}
+            wrap
           />
         ) : (
           <p className={versesTabStyles.emptyText}>{t('poolEmpty')}</p>

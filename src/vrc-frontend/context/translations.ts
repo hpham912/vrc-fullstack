@@ -555,6 +555,7 @@ export const translations = {
   poolDisplayToday: { vi: 'Hiển thị hôm nay:', en: 'Display for today:' },
   poolRandomDefault: { vi: 'Ngẫu nhiên (mặc định)', en: 'Random (default)' },
   poolDisplayHint: { vi: 'Chọn một câu để hiển thị đến 6:00 sáng mai. Sau đó, hệ thống sẽ chọn ngẫu nhiên một câu khác từ danh sách.', en: 'Pick a verse to display until 6:00 AM tomorrow. After that, the system will randomly pick another verse from the list.' },
+  poolDisplayOtherMonth: { vi: 'Đang xem tháng khác — chuyển về tháng hiện tại để chọn câu hiển thị hôm nay.', en: 'Viewing another month — switch back to the current month to pick the verse for today.' },
   poolDisplayEmpty: { vi: 'Danh sách đang trống. Thêm một câu vào danh sách bên dưới trước.', en: 'The pool is empty. Add a verse to the pool below first.' },
   poolAddTitle: { vi: 'Thêm Câu Kinh Thánh', en: 'Add a Verse' },
   poolEditTitle: { vi: 'Sửa Câu Trong Danh Sách', en: 'Edit Pool Verse' },

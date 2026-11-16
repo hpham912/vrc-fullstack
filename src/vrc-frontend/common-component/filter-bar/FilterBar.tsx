@@ -26,6 +26,10 @@ export interface FilterBarProps {
   removeLabel?: (label: string) => string;
   ariaLabel?: string;
   className?: string;
+  // Wrap the pills onto multiple lines instead of scrolling sideways.
+  // Opt-in — Events and Videos omit it and keep the scrolling strip.
+  // The verse pool passes it so the admin can see every reference.
+  wrap?: boolean;
 }
 
 // Shared FilterBar: a row of category pills (exactly one selected)
@@ -48,9 +52,9 @@ export interface FilterBarProps {
 //   propagation so it never triggers onChange. It is a <span> with
 //   role="button", not a nested <button> — buttons cannot nest —
 //   with keyboard support (Enter/Space) so it stays reachable.
-export const FilterBar: React.FC<FilterBarProps> = ({ options, value, onChange, onRemove, removeLabel, ariaLabel, className }) => {
+export const FilterBar: React.FC<FilterBarProps> = ({ options, value, onChange, onRemove, removeLabel, ariaLabel, className, wrap = false }) => {
   return (
-    <div className={`${filterBarStyles.row} ${className ?? ''}`} role="group" aria-label={ariaLabel}>
+    <div className={`${wrap ? filterBarStyles.rowWrap : filterBarStyles.row} ${className ?? ''}`} role="group" aria-label={ariaLabel}>
       {options.map((option) => {
         const isSelected = option.value === value;
         const Icon = option.icon;
