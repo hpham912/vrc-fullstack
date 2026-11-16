@@ -158,9 +158,11 @@ export const VersesTab: React.FC<VersesTabProps> = ({
   // any time from the "See the sample format" button.
   const [showSampleModal, setShowSampleModal] = useState(false);
   // Which add option is open in the accordion: the manual add form
-  // (open by default) or the monthly upload (collapsed until the
-  // admin expands it). Single-open — opening one closes the other.
-  const [openAddSection, setOpenAddSection] = useState<'manual' | 'upload'>('manual');
+  // (open by default), the monthly upload (collapsed until the admin
+  // expands it), or null when both are collapsed. Single-open —
+  // opening one closes the other, and tapping the open one closes it,
+  // same as the member verse history.
+  const [openAddSection, setOpenAddSection] = useState<'manual' | 'upload' | null>('manual');
 
   // Month options: the current month plus the next 5, so the admin
   // can upload ahead. Past months are not offered — their pool is
@@ -611,23 +613,18 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           <p className={versesTabStyles.emptyText}>{t('verseEmpty')}</p>
         )}
 
-        <div className={versesTabStyles.pickRow}>
-          <label className={versesTabStyles.pickLabel}>{t('poolDisplayToday')}</label>
-          <Select
-            options={displayOptions}
-            value={displayValue}
-            onChange={handlePickToday}
-            ariaLabel={t('poolDisplayToday')}
-            disabled={pickingToday || !pool || pool.length === 0 || viewMonth !== currentMonth}
-            className={versesTabStyles.pickSelect}
-          />
-        </div>
+        <Select
+          options={displayOptions}
+          value={displayValue}
+          onChange={handlePickToday}
+          label={t('poolDisplayToday')}
+          ariaLabel={t('poolDisplayToday')}
+          disabled={pickingToday || !pool || pool.length === 0}
+        />
         <p className={versesTabStyles.hint}>
-          {viewMonth !== currentMonth
-            ? t('poolDisplayOtherMonth')
-            : !loadingPool && pool && pool.length === 0
-              ? t('poolDisplayEmpty')
-              : t('poolDisplayHint')}
+          {!loadingPool && pool && pool.length === 0
+            ? t('poolDisplayEmpty')
+            : t('poolDisplayHint')}
         </p>
       </section>
 
@@ -637,16 +634,13 @@ export const VersesTab: React.FC<VersesTabProps> = ({
           <h3 className={versesTabStyles.sectionTitle}>{t('poolListTitle')}</h3>
           <span className={versesTabStyles.poolCount}>{t('poolCount', { count: pool?.length ?? 0 })}</span>
         </div>
-        <div className={versesTabStyles.pickRow}>
-          <label className={versesTabStyles.pickLabel}>{t('poolUploadMonthFilter')}</label>
-          <Select
-            options={monthOptions}
-            value={viewMonth}
-            onChange={setViewMonth}
-            ariaLabel={t('poolUploadMonthFilter')}
-            className={versesTabStyles.pickSelect}
-          />
-        </div>
+        <Select
+          options={monthOptions}
+          value={viewMonth}
+          onChange={setViewMonth}
+          label={t('poolUploadMonthFilter')}
+          ariaLabel={t('poolUploadMonthFilter')}
+        />
         {loadingPool ? (
           <Loading text={t('loading')} />
         ) : pool && pool.length > 0 ? (
@@ -682,9 +676,9 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         <Accordion
           openId={openAddSection}
           onToggle={(id) => {
-            // Tapping the open section keeps it open — one of the two
-            // add options is always visible.
-            if (id !== openAddSection) setOpenAddSection(id as 'manual' | 'upload');
+            // Tapping the open section collapses it; tapping the
+            // closed one opens it (and closes the other).
+            setOpenAddSection(openAddSection === id ? null : (id as 'manual' | 'upload'));
           }}
           items={[
             {
@@ -855,13 +849,13 @@ export const VersesTab: React.FC<VersesTabProps> = ({
                 <span className={versesTabStyles.addHeader}>
                   <UploadCloud className={versesTabStyles.addHeaderIcon} aria-hidden="true" />
                   <span className={versesTabStyles.addHeaderTitle}>{t('poolUploadTitle')}</span>
-                  <span className={versesTabStyles.addHeaderMeta}>
-                    {formatMonthLabel(viewMonth, language)}
-                  </span>
                 </span>
               ),
               children: (
                 <>
+                  <p className={versesTabStyles.uploadMonthLine}>
+                    {t('poolUploadMonthFilter')} {formatMonthLabel(viewMonth, language)}
+                  </p>
                   <p className={versesTabStyles.hint}>{t('poolUploadHint')}</p>
                   <div>
                     <Button
