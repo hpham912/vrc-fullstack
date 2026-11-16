@@ -211,7 +211,7 @@ router.put('/', requireAdmin, async (req: AuthRequest, res) => {
     // Save to Postgres for permanent cross-instance persistence
     await ConfigService.saveChurchInfo(updated);
 
-    res.json(updated);
+    res.json(stripTwilioSecrets(updated));
   } catch (err: any) {
     console.error('Failed to update church info:', err);
     res.status(500).json({ error: 'Failed to update church info' });
@@ -244,7 +244,7 @@ router.put('/header-verse', requireAdmin, async (req: AuthRequest, res) => {
 
     await ConfigService.saveChurchInfo(inMemoryChurchInfo);
 
-    res.json(inMemoryChurchInfo);
+    res.json(stripTwilioSecrets(inMemoryChurchInfo));
   } catch (err: any) {
     console.error('Failed to update header verse:', err);
     res.status(500).json({ error: 'Failed to update header verse' });
