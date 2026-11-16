@@ -1,6 +1,6 @@
 import { randomInt } from 'crypto';
 import { Router } from 'express';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, lt } from 'drizzle-orm';
 import { db } from '../../vrc-db/index.ts';
 import { members, phoneVerifications } from '../../vrc-db/schema.ts';
 import { AuthService } from '../services/authService.ts';
@@ -22,10 +22,25 @@ const CODE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const CODE_MAX_ATTEMPTS = 5;
 const RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds
 
+// Delete every verification code whose expiry has passed, so expired
+// codes never sit in the table. Runs whenever a code is issued or
+// checked — a single cheap query. Never throws: a prune failure must
+// not block issuing or checking a code.
+async function pruneExpiredCodes(): Promise<void> {
+  try {
+    await db.delete(phoneVerifications).where(lt(phoneVerifications.expiresAt, new Date()));
+  } catch (err) {
+    console.warn('Verification code prune warning:', err);
+  }
+}
+
 // Stores a fresh hashed code for the phone + purpose, deleting any older
 // ones so only the latest code is valid. Returns the plain code (to text
 // it) or null when the resend cooldown is still active.
 async function issueCode(phone: string, purpose: 'register' | 'reset'): Promise<string | null> {
+  // Sweep every expired code first, so an abandoned code never sits
+  // in the table once its 10 minutes are up.
+  await pruneExpiredCodes();
   const latest = await db
     .select()
     .from(phoneVerifications)
@@ -75,6 +90,9 @@ async function checkCode(
     return 'Bạn đã nhập sai quá nhiều lần. Vui lòng yêu cầu mã mới. / Too many wrong attempts. Please request a new code.';
   }
   if (row.expiresAt && new Date(row.expiresAt).getTime() < Date.now()) {
+    // Expired — remove this row now so it never sits in the table,
+    // then tell the user to request a fresh code.
+    await db.delete(phoneVerifications).where(eq(phoneVerifications.id, row.id));
     return 'Mã đã hết hạn. Vui lòng yêu cầu mã mới. / This code has expired. Please request a new code.';
   }
   const isMatch = AuthService.verifyPassword(code, row.codeHash, row.codeSalt);

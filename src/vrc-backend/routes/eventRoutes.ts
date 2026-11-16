@@ -1,53 +1,43 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
 import { events } from '../../vrc-db/schema.ts';
-import { eq, desc, asc, sql } from 'drizzle-orm';
+import { eq, asc, sql, lt } from 'drizzle-orm';
 import { requireAdmin, AuthRequest } from '../middleware/authMiddleware.ts';
 import { BackendNotificationService } from '../services/notificationService.ts';
 
 const router = Router();
 
-// Helper function to maintain at most 3 past events in PostgreSQL and prune older past events.
-// Runs only via POST /cleanup-expired — deliberately NOT on GET /api/events,
-// so an everyday app load never pays for a cleanup query.
-async function cleanupPastEvents() {
+// Prune past events older than 1 month, so the table never holds a
+// stale event. Runs after every event save (same pattern as the videos
+// 2-month prune) and via POST /cleanup-expired, so an admin can force
+// it. Deliberately NOT on GET /api/events, so an everyday app load
+// never pays for a cleanup query. Returns how many rows were removed.
+// A failure here never throws — the caller runs it after a successful
+// save and must not turn a good save into an error.
+async function cleanupPastEvents(): Promise<number> {
   try {
-    const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-      now.getDate()
-    ).padStart(2, '0')}`;
-
-    // Query past events (where date < todayStr), ordered by date desc (most recent first)
-    const past = await db
-      .select({ id: events.id, date: events.date })
-      .from(events)
-      .where(sql`${events.date} < ${todayStr}`)
-      .orderBy(desc(events.date), desc(events.startTime), desc(events.id));
-
-    // Keep top 3 recent past events; delete any beyond 3
-    if (past.length > 3) {
-      const surplusPast = past.slice(3);
-      const idsToDelete = surplusPast.map((e) => e.id);
-      if (idsToDelete.length > 0) {
-        for (const id of idsToDelete) {
-          await db.delete(events).where(eq(events.id, id));
-        }
-        console.log(`Pruned ${idsToDelete.length} past events in PostgreSQL, keeping 3 most recent.`);
-        return idsToDelete.length;
-      }
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 1);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const deleted = await db
+      .delete(events)
+      .where(lt(events.date, cutoffStr))
+      .returning({ id: events.id });
+    if (deleted.length > 0) {
+      console.log(`Pruned ${deleted.length} past events older than 1 month in PostgreSQL.`);
     }
-    return 0;
+    return deleted.length;
   } catch (err) {
     console.warn('Past events cleanup warning:', err);
     return 0;
   }
 }
 
-// POST /api/events/cleanup-expired - Explicit trigger to clean up past events older than the 3 most recent
+// POST /api/events/cleanup-expired - Explicit trigger to clean up past events older than 1 month
 router.post('/cleanup-expired', requireAdmin, async (_req, res) => {
   try {
     const removedCount = await cleanupPastEvents();
-    res.json({ message: 'Past events pruned to max 3 successfully in PostgreSQL', removedCount });
+    res.json({ message: 'Past events older than 1 month pruned successfully in PostgreSQL', removedCount });
   } catch (err: any) {
     console.error('Failed to run events cleanup:', err);
     res.status(500).json({ error: 'Failed to run events cleanup' });
@@ -224,6 +214,10 @@ router.post('/', requireAdmin, async (req: AuthRequest, res) => {
       newEvent[0].id
     );
 
+    // Prune past events older than 1 month (never throws — a prune
+    // failure must not turn this successful save into an error).
+    await cleanupPastEvents();
+
     res.status(201).json(newEvent[0]);
   } catch (error: any) {
     console.error('Failed to create event in PostgreSQL:', error);
@@ -319,6 +313,10 @@ router.put('/:id', requireAdmin, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
+    // Prune past events older than 1 month (never throws — a prune
+    // failure must not turn this successful save into an error).
+    await cleanupPastEvents();
+
     res.json(updated[0]);
   } catch (error: any) {
     console.error('Failed to update event in PostgreSQL:', error);
@@ -343,6 +341,10 @@ router.delete('/:id', requireAdmin, async (req: AuthRequest, res) => {
     // Remove the notifications that pointed at this event, so the deleted
     // event no longer shows up in the Notifications tab.
     await BackendNotificationService.deleteForEvent(eventId);
+
+    // Prune past events older than 1 month (never throws — a prune
+    // failure must not turn this successful delete into an error).
+    await cleanupPastEvents();
 
     res.json({ message: 'Event successfully removed from database', event: deleted[0] });
   } catch (error: any) {
