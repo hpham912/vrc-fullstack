@@ -15,12 +15,30 @@ export class AppError extends Error {
   }
 }
 
+function isTransientConnectionError(err: any): boolean {
+  const code = err?.code || err?.cause?.code;
+  const msg = String(err?.message || err?.cause?.message || '');
+  return (
+    code === 'ECONNREFUSED' ||
+    code === 'ECONNRESET' ||
+    code === 'EPIPE' ||
+    code === 'ETIMEDOUT' ||
+    code === 'ENOTFOUND' ||
+    code === '08001' ||
+    code === '08006' ||
+    code === '57P01' ||
+    code === '57P02' ||
+    code === '57P03' ||
+    code === '53300' ||
+    msg.includes('Connection terminated')
+  );
+}
+
 // Translate a Postgres / driver error into an accurate user-facing
 // AppError. Drizzle may wrap the pg error, so check both err and
 // err.cause for the pg code.
 function fromPostgres(err: any): AppError | null {
   const code = err?.code || err?.cause?.code;
-  if (!code) return null;
   if (code === '23505') {
     return new AppError('A record with these details already exists.', 409, 'ALREADY_EXISTS');
   }
@@ -33,7 +51,7 @@ function fromPostgres(err: any): AppError | null {
   if (code === '22P02' || code === '22003') {
     return new AppError('One of the values is not valid.', 400, 'VALIDATION_ERROR');
   }
-  if (code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'ENOTFOUND' || code === '57P01' || code === '53300') {
+  if (isTransientConnectionError(err)) {
     return new AppError('The database is temporarily unavailable. Please try again in a moment.', 503, 'SERVICE_UNAVAILABLE');
   }
   return null;
@@ -43,9 +61,6 @@ function toAppError(err: any): AppError {
   if (err instanceof AppError) return err;
   const pg = fromPostgres(err);
   if (pg) return pg;
-  if (err?.code === 'ECONNREFUSED' || err?.code === 'ETIMEDOUT' || err?.code === 'ENOTFOUND') {
-    return new AppError('The service is temporarily unavailable. Please try again in a moment.', 503, 'SERVICE_UNAVAILABLE');
-  }
   // Never send a raw error message (e.g. Postgres internals like
   // "there is no unique or exclusion constraint...") to the user.
   return new AppError('Something went wrong on our side. Please try again.', 500, 'INTERNAL_ERROR');

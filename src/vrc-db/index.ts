@@ -28,11 +28,30 @@ export const createPool = (databaseName: string, poolRef: 'dev' | 'prod'): Pool 
       database: databaseName,
       max: 10,
       connectionTimeoutMillis: 15000,
-      idleTimeoutMillis: 30000,
+      // Retire idle clients after 10s (before Cloud SQL proxy / scale-to-zero
+      // drops the socket) and enable TCP keepalive probes.
+      idleTimeoutMillis: 10000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+      allowExitOnIdle: true,
     });
 
-    pool.on('error', (err) => {
-      console.error(`Database connection error in PostgreSQL [${databaseName}] pool:`, err);
+    pool.on('error', (err: any) => {
+      const msg = err?.message || String(err);
+      const code = err?.code;
+      const isIdleDisconnect =
+        msg.includes('Connection terminated') ||
+        code === 'ECONNRESET' ||
+        code === '57P01' ||
+        code === '57P02' ||
+        code === '57P03';
+      if (isIdleDisconnect) {
+        // pg.Pool automatically evicts the dead idle client and opens a fresh
+        // one on the next query; log concisely without dumping raw Error fields.
+        console.warn(`PostgreSQL [${databaseName}] idle connection closed (${msg}); pool will reconnect on next query.`);
+        return;
+      }
+      console.error(`PostgreSQL [${databaseName}] pool error:`, msg);
     });
 
     global[globalKey] = pool;
