@@ -6,13 +6,12 @@ export const verseHistorySectionStyles = {
   title: 'text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-400',
   monthTitle: 'text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider pt-2',
   emptyText: 'text-sm text-stone-500 dark:text-stone-400 text-center py-2',
-  list: 'space-y-2',
-  row: 'w-full text-left rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-3 space-y-1.5 transition-colors hover:border-amber-400 dark:hover:border-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 dark:focus-visible:ring-amber-400',
+  // The collapsible rows are the shared Accordion (its own card,
+  // header button and chevron). Only the header/content text styles
+  // live here.
   rowHead: 'flex items-baseline justify-between gap-2',
   rowDate: 'flex-shrink-0 text-xs font-bold text-stone-500 dark:text-stone-400',
   rowRef: 'text-sm font-semibold text-stone-900 dark:text-stone-50 min-w-0',
-  rowChevron: 'w-4 h-4 flex-shrink-0 text-stone-400 dark:text-stone-500 transition-transform',
-  rowChevronOpen: 'rotate-180',
   rowText: 'block text-sm leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-line',
   rowExtraLabel:
     'block text-[11px] font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-400 pt-1',

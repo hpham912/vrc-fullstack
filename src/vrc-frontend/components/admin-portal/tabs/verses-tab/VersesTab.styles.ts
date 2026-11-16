@@ -46,22 +46,32 @@ export const versesTabStyles = {
   poolHead: 'flex items-baseline justify-between gap-2',
   poolCount: 'text-xs font-bold text-stone-500 dark:text-stone-400',
   // Monthly upload section.
-  uploadSectionIcon: 'w-3.5 h-3.5 text-amber-700 dark:text-amber-400',
-  uploadMonthRow: 'flex items-center gap-2',
   uploadPreviewList:
     'max-h-64 overflow-y-auto rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 divide-y divide-stone-100 dark:divide-stone-800',
   uploadPreviewRow: 'px-3 py-2 space-y-0.5',
   uploadPreviewRef: 'text-sm font-semibold text-stone-900 dark:text-stone-50',
   uploadPreviewMeta: 'text-xs text-stone-500 dark:text-stone-400 leading-relaxed line-clamp-2',
-  uploadErrorList: 'space-y-1 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-2',
-  uploadErrorItem: 'text-xs text-red-700 dark:text-red-400 leading-relaxed',
+  // One shared error Banner per bad row (dismissible, stays until
+  // dismissed), stacked.
+  uploadErrorStack: 'space-y-2',
   uploadBtnRow: 'pt-1 flex flex-col gap-2',
-  // Sample format card — shown when the admin opens it, and
-  // automatically when an upload fails. The 6-column table scrolls
-  // horizontally on a narrow phone screen.
-  uploadSampleCard:
-    'p-3.5 rounded-2xl bg-stone-100/80 dark:bg-stone-900/80 border border-stone-200/80 dark:border-stone-800 space-y-2',
-  uploadSampleTitle: 'text-xs font-bold text-stone-700 dark:text-stone-300',
+  // Add-area accordion headers — the icon sits inline with the
+  // title (flex, vertically centered), and the month is pushed to
+  // the right of the upload header, before the chevron.
+  addHeader: 'flex items-center gap-1.5 min-w-0',
+  addHeaderIcon: 'w-4 h-4 flex-shrink-0 text-amber-700 dark:text-amber-400',
+  addHeaderTitle:
+    'text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-400 truncate',
+  addHeaderMeta: 'ml-auto flex-shrink-0 text-xs font-bold text-stone-500 dark:text-stone-400',
+  // Cancel-edit button row at the top of the manual form (the title
+  // lives in the accordion header now, so the button moved here).
+  addCancelRow: 'flex justify-end',
+  // Sample format table — shown in the sample modal. The 6-column
+  // table scrolls horizontally on a narrow phone screen.
+  // The modal body has no padding, so this wrapper supplies it
+  // (p-6, same as the admin code modal) — otherwise the table runs
+  // to the edges and is clipped by the rounded corner.
+  uploadSampleModalBody: 'p-6 space-y-3',
   uploadSampleTable: 'overflow-x-auto rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900',
   uploadSampleHeaderRow:
     'grid grid-cols-[repeat(6,minmax(110px,1fr))] gap-px bg-stone-100 dark:bg-stone-800 text-[11px] font-bold uppercase tracking-wide text-stone-600 dark:text-stone-400 [&>span]:px-2 [&>span]:py-1.5 [&>span]:truncate',

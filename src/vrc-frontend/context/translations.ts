@@ -607,7 +607,6 @@ export const translations = {
   poolUploadMonthFilter: { vi: 'Xem tháng:', en: 'Viewing month:' },
   poolUploadRowError: { vi: 'Dòng {row}: {message}', en: 'Row {row}: {message}' },
   poolUploadShowSample: { vi: 'Xem định dạng mẫu', en: 'See the sample format' },
-  poolUploadHideSample: { vi: 'Ẩn định dạng mẫu', en: 'Hide the sample format' },
   poolUploadSampleTitle: { vi: 'Định dạng mẫu — mỗi dòng là một câu', en: 'Sample format — one row per verse' },
   poolUploadSampleNote: { vi: 'Cột reference_en và reference_vi là bắt buộc. Suy ngẫm và lời cầu nguyện có thể để trống.', en: 'The reference_en and reference_vi columns are required. Reflection and prayer can be left empty.' },
 

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { DailyVerse } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiFetch } from '../../utils/api.ts';
 import { formatDateLocale } from '../../utils/dateFormatter.ts';
-import { Loading } from '../../common-component/index.ts';
+import { Accordion, Loading } from '../../common-component/index.ts';
 import { verseHistorySectionStyles } from './VerseHistorySection.styles.ts';
 
 interface VerseHistorySectionProps {
@@ -105,20 +104,18 @@ export const VerseHistorySection: React.FC<VerseHistorySectionProps> = ({
               {' • '}
               {formatMonthTitle(month, language)}
             </h3>
-            <div className={verseHistorySectionStyles.list}>
-              {(byMonth.get(month) || []).map((verse) => {
-                const isOpen = expandedId === verse.id;
+            <Accordion
+              openId={expandedId === null ? null : String(expandedId)}
+              onToggle={(id) =>
+                setExpandedId(expandedId === Number(id) ? null : Number(id))
+              }
+              items={(byMonth.get(month) || []).map((verse) => {
                 const verseText = pick(verse.verseTextVi, verse.verseTextEn, verse.verseText);
                 const reflection = pick(verse.reflectionVi, verse.reflectionEn, verse.reflection);
                 const prayer = pick(verse.prayerVi, verse.prayerEn, verse.prayer);
-                return (
-                  <button
-                    key={verse.id}
-                    type="button"
-                    onClick={() => setExpandedId(isOpen ? null : verse.id)}
-                    aria-expanded={isOpen}
-                    className={verseHistorySectionStyles.row}
-                  >
+                return {
+                  id: String(verse.id),
+                  header: (
                     <span className={verseHistorySectionStyles.rowHead}>
                       <span className={verseHistorySectionStyles.rowRef}>
                         {pick(verse.referenceVi, verse.referenceEn, verse.reference)}
@@ -126,32 +123,28 @@ export const VerseHistorySection: React.FC<VerseHistorySectionProps> = ({
                       <span className={verseHistorySectionStyles.rowDate}>
                         {formatDateLocale(verse.date, language)}
                       </span>
-                      <ChevronDown
-                        className={`${verseHistorySectionStyles.rowChevron} ${isOpen ? verseHistorySectionStyles.rowChevronOpen : ''}`}
-                        aria-hidden="true"
-                      />
                     </span>
-                    {isOpen && (
-                      <>
-                        <span className={verseHistorySectionStyles.rowText}>“{verseText}”</span>
-                        {reflection && (
-                          <>
-                            <span className={verseHistorySectionStyles.rowExtraLabel}>{t('reflectionTitle')}</span>
-                            <span className={verseHistorySectionStyles.rowExtraText}>{reflection}</span>
-                          </>
-                        )}
-                        {prayer && (
-                          <>
-                            <span className={verseHistorySectionStyles.rowExtraLabel}>{t('prayerTitle')}</span>
-                            <span className={verseHistorySectionStyles.rowExtraText}>{prayer}</span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </button>
-                );
+                  ),
+                  children: (
+                    <>
+                      <span className={verseHistorySectionStyles.rowText}>“{verseText}”</span>
+                      {reflection && (
+                        <>
+                          <span className={verseHistorySectionStyles.rowExtraLabel}>{t('reflectionTitle')}</span>
+                          <span className={verseHistorySectionStyles.rowExtraText}>{reflection}</span>
+                        </>
+                      )}
+                      {prayer && (
+                        <>
+                          <span className={verseHistorySectionStyles.rowExtraLabel}>{t('prayerTitle')}</span>
+                          <span className={verseHistorySectionStyles.rowExtraText}>{prayer}</span>
+                        </>
+                      )}
+                    </>
+                  ),
+                };
               })}
-            </div>
+            />
           </div>
         ))
       )}

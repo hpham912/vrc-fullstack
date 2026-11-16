@@ -46,3 +46,5 @@ export { Select } from './select/Select.tsx';
 export type { SelectProps, SelectOption } from './select/Select.tsx';
 export { Upload } from './upload/Upload.tsx';
 export type { UploadProps } from './upload/Upload.tsx';
+export { Accordion } from './accordion/Accordion.tsx';
+export type { AccordionItem } from './accordion/Accordion.tsx';
