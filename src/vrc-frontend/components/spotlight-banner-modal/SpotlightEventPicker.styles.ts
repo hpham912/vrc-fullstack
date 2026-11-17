@@ -1,0 +1,35 @@
+export const spotlightEventPickerStyles = {
+  stepBlockDivider: "space-y-2.5 pt-1 border-t border-stone-100",
+  // Same strings as the modal's own stepHeader / stepLabel — each
+  // styles file stays self-contained.
+  stepHeader: "flex items-center justify-between",
+  stepLabel: "font-serif font-bold text-xs sm:text-sm text-stone-900 flex items-center gap-1.5",
+  calendarIcon: "w-4 h-4 text-indigo-600 dark:text-indigo-400",
+  stepHint: "text-caption text-stone-400 font-medium",
+  eventList: "space-y-2 max-h-56 overflow-y-auto pr-1",
+  eventOptionBase: "p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center justify-between gap-3",
+  eventOptionSelected: "border-amber-600 bg-amber-50/70 dark:bg-amber-950/30 ring-1 ring-amber-400",
+  eventOptionIdle: "border-stone-200 bg-white hover:bg-stone-50",
+  autoInfoGroup: "space-y-0.5",
+  autoBadgeWrap: "flex items-center gap-1.5",
+  autoBadge: "inline-flex items-center gap-1 text-caption font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900",
+  zapIcon: "w-3 h-3 text-amber-700 dark:text-amber-400",
+  autoTitle: "font-bold text-xs text-stone-900",
+  autoSubtitle: "text-label text-stone-500",
+  radioCircleBase: "w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0",
+  radioCircleSelected: "bg-amber-600 border-amber-600 text-white",
+  radioCircleIdle: "border-stone-300 bg-white",
+  checkIcon: "w-3 h-3 stroke-[3]",
+
+  emptyEventsBox: "p-3.5 rounded-2xl border border-stone-200 bg-stone-50 text-center space-y-1",
+  emptyEventsTitle: "text-xs font-semibold text-stone-700",
+  emptyEventsSubtitle: "text-label text-stone-400",
+
+  eventItemLeft: "space-y-1 min-w-0 flex-1",
+  eventMetaRow: "flex items-center gap-2",
+  eventCategoryBadge: "text-caption font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-700",
+  eventDateTime: "text-label font-bold text-stone-800",
+  eventItemTitle: "font-serif font-bold text-xs sm:text-sm text-stone-950 truncate",
+  eventItemLocation: "text-label text-stone-500 truncate flex items-center gap-1",
+  mapPinSm: "w-3 h-3 text-stone-400 flex-shrink-0",
+};

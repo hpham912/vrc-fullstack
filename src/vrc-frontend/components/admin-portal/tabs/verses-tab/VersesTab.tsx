@@ -1,41 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Download, Plus, Save, Sparkles, UploadCloud } from 'lucide-react';
+import { Plus, Sparkles, UploadCloud } from 'lucide-react';
 import { DailyVerse, PoolVerse, ChurchInfo, DEFAULT_HEADER_VERSE } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
 import { getErrorMessage } from '../../../../utils/errors.ts';
 import { fetchScripture, ScriptureResult } from '../../../../services/scriptureApi.ts';
 import { downloadFromUrl } from '../../../../services/downloadService.ts';
-import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, TextField, Upload, Accordion, Modal } from '../../../../common-component/index.ts';
+import { Button, Banner, ConfirmModal, FilterBar, Loading, Select, Accordion } from '../../../../common-component/index.ts';
+import { ManualVerseForm } from './ManualVerseForm.tsx';
+import { VerseUploadSection } from './VerseUploadSection.tsx';
+import type { UploadPreview, UploadRowError } from './VerseUploadSection.tsx';
 import { versesTabStyles } from './VersesTab.styles.ts';
-
-// A verse validated by POST /api/verse-pool/upload (preview step),
-// ready to import. The backend returns canonical references from
-// the Bible API, so these are what gets stored on confirm.
-interface UploadPreviewVerse {
-  reference: string;
-  referenceEn: string;
-  referenceVi: string;
-  reflection: string;
-  reflectionEn: string;
-  reflectionVi: string;
-  prayer: string | null;
-  prayerEn: string | null;
-  prayerVi: string | null;
-}
-
-interface UploadPreview {
-  month: string;
-  daysInMonth: number;
-  verses: UploadPreviewVerse[];
-  warnings: Array<{ code: string; daysInMonth: number; count: number }>;
-  existingCount: number;
-}
-
-interface UploadRowError {
-  row: number;
-  message: string;
-}
 
 // The current month (YYYY-MM) in Phoenix time — the same clock the
 // verse-day uses.
@@ -708,155 +683,32 @@ export const VersesTab: React.FC<VersesTabProps> = ({
                 </span>
               ),
               children: (
-                <>
-                  {editingPoolId && (
-                    <div className={versesTabStyles.addCancelRow}>
-                      <Button type="button" variant="ghost" size="sm" onClick={resetForm}>
-                        <span>{t('cancelEdit')}</span>
-                      </Button>
-                    </div>
-                  )}
-                  <div className={versesTabStyles.addRow}>
-                    <div className={versesTabStyles.addRowField}>
-                      <TextField
-                        label={t('poolRefLabel')}
-                        value={referenceInput}
-                        onChange={setReferenceInput}
-                        placeholder={t('poolRefPlaceholder')}
-                        disabled={editingPoolId !== null}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleFetchScriptureForVerse();
-                          }
-                        }}
-                      />
-                    </div>
-                    {!editingPoolId && (
-                      <Button
-                        type="button"
-                        variant="primary"
-                        size="md"
-                        onClick={handleFetchScriptureForVerse}
-                        disabled={fetchingScripture || isScriptureFetchedForCurrentRef || !referenceInput.trim()}
-                        title={isScriptureFetchedForCurrentRef ? t('adminVerseFetchedHint') : t('adminVerseFetchHint')}
-                        leftIcon={<Sparkles className={versesTabStyles.saveIcon} />}
-                      >
-                        <span>
-                          {fetchingScripture
-                            ? t('commonFetching')
-                            : isScriptureFetchedForCurrentRef
-                              ? t('adminVerseFetchedBadge')
-                              : t('adminVerseFetch')}
-                        </span>
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Fetched preview — the EditHeaderVerseModal preview treatment
-                      (muted stone card + white inner box, serif italic quote). */}
-                  {fetched && !editingPoolId && (
-                    <div className={versesTabStyles.previewCard}>
-                      <div className={versesTabStyles.previewHeader}>
-                        <span>{t('poolPreviewTitle')}</span>
-                      </div>
-                      <div className={versesTabStyles.previewBox}>
-                        <p className={versesTabStyles.previewQuote}>
-                          “{pick(fetched.verseTextVi, fetched.verseTextEn, fetched.verseText)}”
-                          <span className={versesTabStyles.previewRef}>
-                            — {pick(fetched.referenceVi, fetched.referenceEn, fetched.reference)} •{' '}
-                            {pick(fetched.translationVi, fetched.translationEn, fetched.translation)}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className={versesTabStyles.fieldGroup}>
-                    <span className={versesTabStyles.fieldLabel}>{t('poolReflectionLabel')}</span>
-                    <TextField
-                      label={t('commonLangVi')}
-                      value={reflectionVi}
-                      onChange={setReflectionVi}
-                      placeholder={t('poolReflectionViPlaceholder')}
-                      multiline
-                      rows={2}
-                    />
-                    <TextField
-                      label={t('commonLangEn')}
-                      value={reflectionEn}
-                      onChange={setReflectionEn}
-                      placeholder={t('poolReflectionEnPlaceholder')}
-                      multiline
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className={versesTabStyles.fieldGroup}>
-                    <span className={versesTabStyles.fieldLabel}>{t('poolPrayerLabel')}</span>
-                    <TextField
-                      label={t('commonLangVi')}
-                      value={prayerVi}
-                      onChange={setPrayerVi}
-                      placeholder={t('poolPrayerViPlaceholder')}
-                      multiline
-                      rows={2}
-                    />
-                    <TextField
-                      label={t('commonLangEn')}
-                      value={prayerEn}
-                      onChange={setPrayerEn}
-                      placeholder={t('poolPrayerEnPlaceholder')}
-                      multiline
-                      rows={2}
-                    />
-                  </div>
-
-                  {isPoolFull && !editingPoolId && (
-                    <Banner type="error" message={t('poolFull')} />
-                  )}
-
-                  <div className={versesTabStyles.addBtnRow}>
-                    {editingPoolId ? (
-                      <Button
-                        type="button"
-                        variant="dark"
-                        size="md"
-                        fullWidth
-                        onClick={handleSavePoolEdit}
-                        loading={submitting}
-                        disabled={submitting}
-                        leftIcon={<Save className={versesTabStyles.saveIcon} />}
-                      >
-                        <span>{submitting ? t('commonSaving') : t('commonSaveChanges')}</span>
-                      </Button>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="dark"
-                        size="md"
-                        fullWidth
-                        onClick={handleAddToPool}
-                        loading={submitting}
-                        disabled={submitting || !fetched || isPoolFull}
-                        leftIcon={<Plus className={versesTabStyles.saveIcon} />}
-                      >
-                        <span>{submitting ? t('commonSaving') : t('poolAddToPool')}</span>
-                      </Button>
-                    )}
-                    {saveSuccess && (
-                      <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
-                    )}
-                    {saveError && (
-                      <Banner
-                        type="error"
-                        message={saveError}
-                        className="md:hidden mt-2"
-                        onDismiss={() => setSaveError(null)}
-                      />
-                    )}
-                  </div>
-                </>
+                <ManualVerseForm
+                  editingPoolId={editingPoolId}
+                  referenceInput={referenceInput}
+                  onReferenceInputChange={setReferenceInput}
+                  fetched={fetched}
+                  fetchingScripture={fetchingScripture}
+                  isScriptureFetchedForCurrentRef={isScriptureFetchedForCurrentRef}
+                  onFetchScripture={handleFetchScriptureForVerse}
+                  reflectionVi={reflectionVi}
+                  onReflectionViChange={setReflectionVi}
+                  reflectionEn={reflectionEn}
+                  onReflectionEnChange={setReflectionEn}
+                  prayerVi={prayerVi}
+                  onPrayerViChange={setPrayerVi}
+                  prayerEn={prayerEn}
+                  onPrayerEnChange={setPrayerEn}
+                  isPoolFull={isPoolFull}
+                  submitting={submitting}
+                  onAddToPool={handleAddToPool}
+                  onSavePoolEdit={handleSavePoolEdit}
+                  onCancelEdit={resetForm}
+                  saveSuccess={saveSuccess}
+                  saveError={saveError}
+                  onDismissSaveError={() => setSaveError(null)}
+                  pick={pick}
+                />
               ),
             },
             {
@@ -868,174 +720,33 @@ export const VersesTab: React.FC<VersesTabProps> = ({
                 </span>
               ),
               children: (
-                <>
-                  <p className={versesTabStyles.uploadMonthLine}>
-                    {t('poolUploadMonthFilter')} {formatMonthLabel(viewMonth, language)}
-                  </p>
-                  <p className={versesTabStyles.hint}>{t('poolUploadHint')}</p>
-                  <div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleDownloadTemplate}
-                      leftIcon={<Download className={versesTabStyles.saveIcon} />}
-                    >
-                      <span>{t('poolUploadDownloadTemplate')}</span>
-                    </Button>
-                  </div>
-                  <Upload
-                    accept={['.csv', '.txt', '.docx']}
-                    maxSizeMB={5}
-                    file={uploadFile}
-                    onFileChange={handleUploadFileChange}
-                    disabled={uploadChecking || uploadImporting}
-                  />
-                  <div className={versesTabStyles.uploadBtnRow}>
-                    <Button
-                      type="button"
-                      variant="dark"
-                      size="md"
-                      fullWidth
-                      onClick={handleCheckUploadFile}
-                      loading={uploadChecking}
-                      disabled={uploadChecking || uploadImporting || !uploadFile}
-                      leftIcon={<UploadCloud className={versesTabStyles.saveIcon} />}
-                    >
-                      <span>{uploadChecking ? t('poolUploadChecking') : t('poolUploadCheckFile')}</span>
-                    </Button>
-                  </div>
-
-                  {uploadErrors.length > 0 && (
-                    <div className={versesTabStyles.uploadErrorStack}>
-                      {uploadErrors.map((uploadError, index) => (
-                        <Banner
-                          key={`${uploadError.row}-${index}`}
-                          type="error"
-                          message={t('poolUploadRowError', { row: uploadError.row, message: uploadError.message })}
-                          onDismiss={() =>
-                            setUploadErrors(uploadErrors.filter((_, errorIndex) => errorIndex !== index))
-                          }
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {uploadPreview && (
-                    <>
-                      <div className={versesTabStyles.formHeader}>
-                        <h4 className={versesTabStyles.sectionTitle}>
-                          {t('poolUploadPreviewTitle', {
-                            count: uploadPreview.verses.length,
-                            month: formatMonthLabel(uploadPreview.month, language),
-                          })}
-                        </h4>
-                      </div>
-                      {uploadPreview.warnings.map((warning) => (
-                        <Banner
-                          key={warning.code}
-                          type="info"
-                          message={
-                            warning.code === 'fewer-than-days'
-                              ? t('poolUploadCountWarning', {
-                                  month: formatMonthLabel(uploadPreview.month, language),
-                                  days: warning.daysInMonth,
-                                  count: warning.count,
-                                })
-                              : t('poolUploadCountExtra', {
-                                  month: formatMonthLabel(uploadPreview.month, language),
-                                  days: warning.daysInMonth,
-                                  count: warning.count,
-                                })
-                          }
-                        />
-                      ))}
-                      <div className={versesTabStyles.uploadPreviewList}>
-                        {uploadPreview.verses.map((previewVerse) => (
-                          <div key={previewVerse.referenceEn} className={versesTabStyles.uploadPreviewRow}>
-                            <p className={versesTabStyles.uploadPreviewRef}>
-                              {pick(previewVerse.referenceVi, previewVerse.referenceEn, previewVerse.reference)}
-                            </p>
-                            {(pick(previewVerse.reflectionVi, previewVerse.reflectionEn, previewVerse.reflection) ||
-                              pick(previewVerse.prayerVi, previewVerse.prayerEn, previewVerse.prayer)) && (
-                              <p className={versesTabStyles.uploadPreviewMeta}>
-                                {pick(previewVerse.reflectionVi, previewVerse.reflectionEn, previewVerse.reflection) ||
-                                  pick(previewVerse.prayerVi, previewVerse.prayerEn, previewVerse.prayer)}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className={versesTabStyles.uploadBtnRow}>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="md"
-                          fullWidth
-                          onClick={() => handleImportUpload(false)}
-                          loading={uploadImporting}
-                          disabled={uploadImporting}
-                          leftIcon={<Plus className={versesTabStyles.saveIcon} />}
-                        >
-                          <span>
-                            {uploadImporting
-                              ? t('poolUploadImporting')
-                              : t('poolUploadImport', { count: uploadPreview.verses.length })}
-                          </span>
-                        </Button>
-                      </div>
-                    </>
-                  )}
-
-                  {uploadSuccess && <Banner type="success" message={uploadSuccess} />}
-                </>
+                <VerseUploadSection
+                  viewMonth={viewMonth}
+                  uploadFile={uploadFile}
+                  onUploadFileChange={handleUploadFileChange}
+                  uploadPreview={uploadPreview}
+                  uploadErrors={uploadErrors}
+                  onDismissUploadError={(index) =>
+                    setUploadErrors(uploadErrors.filter((errorItem, errorIndex) => errorIndex !== index))
+                  }
+                  uploadChecking={uploadChecking}
+                  uploadImporting={uploadImporting}
+                  uploadSuccess={uploadSuccess}
+                  showSampleModal={showSampleModal}
+                  onShowSampleModalChange={setShowSampleModal}
+                  showReplaceConfirm={showReplaceConfirm}
+                  onShowReplaceConfirmChange={setShowReplaceConfirm}
+                  onCheckFile={handleCheckUploadFile}
+                  onImport={handleImportUpload}
+                  onDownloadTemplate={handleDownloadTemplate}
+                  pick={pick}
+                  formatMonthLabel={formatMonthLabel}
+                />
               ),
             },
           ]}
         />
       </section>
-
-      {/* Sample format modal — opened from the upload section, and
-          automatically when an upload fails. */}
-      <Modal
-        isOpen={showSampleModal}
-        onClose={() => setShowSampleModal(false)}
-        title={t('poolUploadSampleTitle')}
-        maxWidthClass="max-w-lg"
-      >
-        <div className={versesTabStyles.uploadSampleModalBody}>
-          <div className={versesTabStyles.uploadSampleTable}>
-            <div className={versesTabStyles.uploadSampleHeaderRow}>
-              <span>reference_en</span>
-              <span>reference_vi</span>
-              <span>reflection_en</span>
-              <span>reflection_vi</span>
-              <span>prayer_en</span>
-              <span>prayer_vi</span>
-            </div>
-            <div className={versesTabStyles.uploadSampleDataRow}>
-              <span>John 3:16</span>
-              <span>Giăng 3:16</span>
-              <span>God loved the world…</span>
-              <span>Đức Chúa Trời yêu thế gian…</span>
-              <span>Thank You Lord…</span>
-              <span>Lạy Chúa, cảm tạ Ngài…</span>
-            </div>
-          </div>
-          <p className={versesTabStyles.hint}>{t('poolUploadSampleNote')}</p>
-          <div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleDownloadTemplate}
-              leftIcon={<Download className={versesTabStyles.saveIcon} />}
-            >
-              <span>{t('poolUploadDownloadTemplate')}</span>
-            </Button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Common Confirmation Modal for Remove */}
       <ConfirmModal
@@ -1046,25 +757,6 @@ export const VersesTab: React.FC<VersesTabProps> = ({
         loading={removingPool}
         onConfirm={handleRemovePoolVerse}
         onCancel={() => setRemoveTarget(null)}
-      />
-
-      {/* Replace confirm — uploading for a month that already has verses */}
-      <ConfirmModal
-        isOpen={showReplaceConfirm}
-        title={t('poolUploadReplaceTitle', { count: uploadPreview?.existingCount ?? 0 })}
-        message={
-          uploadPreview
-            ? t('poolUploadReplaceBody', {
-                month: formatMonthLabel(uploadPreview.month, language),
-                count: uploadPreview.existingCount,
-              })
-            : ''
-        }
-        confirmText={t('poolUploadReplaceConfirm')}
-        cancelText={t('poolUploadCancel')}
-        loading={uploadImporting}
-        onConfirm={() => handleImportUpload(true)}
-        onCancel={() => setShowReplaceConfirm(false)}
       />
     </div>
   );

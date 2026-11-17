@@ -1,0 +1,27 @@
+// Styles for the video add/edit form (extracted from VideosTab).
+// The published videos list keeps its own keys in VideosTab.styles.ts.
+export const videoFormStyles = {
+  form: 'p-5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3.5 w-full min-w-0 box-border',
+  formHeader: 'flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-200',
+  headerGroup: 'flex items-center gap-2',
+  formTitle: 'font-serif font-bold text-stone-900 text-sm',
+  cancelEditBtn: 'text-xs text-stone-500 hover:text-stone-800 underline',
+  label: 'block text-xs font-bold text-stone-700 mb-1',
+  // Bilingual field group — one topic in two languages: a topic
+  // heading, then a labeled TextField per language ("Tiếng Việt" /
+  // "English" via the TextField label prop).
+  fieldGroup: 'space-y-1.5',
+  fieldLabel: 'block text-xs font-bold text-stone-700 dark:text-stone-300',
+  input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
+  field: 'w-full min-w-0',
+  customCategoryWrap: 'w-full min-w-0 mt-2.5',
+  presenterDateRow: 'flex flex-col sm:flex-row gap-3 w-full min-w-0',
+  presenterField: 'flex-1 min-w-0',
+  dateField: 'w-full sm:w-1/3 min-w-0',
+  invalidMsg: 'text-xs font-semibold text-rose-600 mt-1.5',
+  previewBox: 'mt-2.5 space-y-1.5',
+  previewLabel: 'text-label font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5',
+  previewIcon: 'w-3.5 h-3.5 text-red-600',
+  previewThumb: 'w-40 aspect-video rounded-lg object-cover border border-stone-200 shadow-2xs',
+  submitRow: 'text-right pt-2 border-t border-stone-200',
+};

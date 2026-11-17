@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './vrc-frontend/context/AuthContext.tsx';
-import { LanguageProvider, useLanguage } from './vrc-frontend/context/LanguageContext.tsx';
-import { CHURCH_NAME } from './vrc-frontend/constants/church.ts';
-import { getHomeBannerSrc } from './vrc-frontend/constants/assets.ts';
-import { APP_VERSION, APP_BUILD_DATE } from './vrc-frontend/constants/version.ts';
+import { LanguageProvider } from './vrc-frontend/context/LanguageContext.tsx';
 import { Navbar } from './vrc-frontend/components/nav-bar/Navbar.tsx';
 import { IosTabBar } from './vrc-frontend/components/ios-tab-bar/IosTabBar.tsx';
-import { HomeDashboard } from './vrc-frontend/components/home-dashboard/HomeDashboard.tsx';
-import { EventsSection } from './vrc-frontend/components/events-section/EventsSection.tsx';
-import { DailyVerseCard } from './vrc-frontend/components/daily-verse-card/DailyVerseCard.tsx';
-import { VerseHistorySection } from './vrc-frontend/components/verse-history-section/VerseHistorySection.tsx';
-import { VideosSection } from './vrc-frontend/components/videos-section/VideosSection.tsx';
-import { NotificationsSection } from './vrc-frontend/components/notifications-section/NotificationsSection.tsx';
 import { LoginModal } from './vrc-frontend/components/login-modal/LoginModal.tsx';
 import { RegisterModal } from './vrc-frontend/components/register-modal/RegisterModal.tsx';
 import { ForgotPasswordModal } from './vrc-frontend/components/forgot-password-modal/ForgotPasswordModal.tsx';
@@ -42,33 +33,41 @@ const EditHeaderVerseModal = lazy(() =>
     (module) => ({ default: module.EditHeaderVerseModal })
   )
 );
-import { CrossIcon } from './vrc-frontend/components/cross-icon/CrossIcon.tsx';
-import { Button, LoadingShimmer, Loading, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
-import type { SyncCollection } from './vrc-frontend/common-component/index.ts';
-import { ChurchEvent, DailyVerse, Video, AppNotification, SpotlightBannerConfig, ChurchInfo, DEFAULT_CHURCH_INFO, DEFAULT_SPOTLIGHT, DEFAULT_HEADER_VERSE } from './vrc-frontend/types/index.ts';
-import { Plus, ArrowRight, Pencil } from 'lucide-react';
-import { apiUrl, apiHeaders } from './vrc-frontend/utils/api.ts';
+import { LoadingShimmer, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
+import { useAppData } from './vrc-frontend/hooks/useAppData.ts';
+import { AppHero } from './components/app-hero/AppHero.tsx';
+import { TabContent } from './components/tab-content/TabContent.tsx';
+import { AppFooter } from './components/app-footer/AppFooter.tsx';
+import { FloatingPrayerButton } from './components/floating-prayer-button/FloatingPrayerButton.tsx';
+import { NotificationToast } from './components/notification-toast/NotificationToast.tsx';
+import type { ToastNotification } from './components/notification-toast/NotificationToast.tsx';
+import { PullRefreshBar } from './components/pull-refresh-bar/PullRefreshBar.tsx';
+import { ChurchEvent, Video, AppNotification, DEFAULT_CHURCH_INFO } from './vrc-frontend/types/index.ts';
 import { NotificationClient } from './vrc-frontend/services/notificationClient.ts';
-import {
-  Home,
-  Calendar,
-  BookOpen,
-  Video as VideoIcon,
-  ShieldCheck,
-  Bell,
-  X,
-  HeartHandshake,
-} from 'lucide-react';
 import { appStyles as s } from './App.styles.ts';
 
 function ChurchAppContent() {
   const { isAdmin } = useAuth();
-  const { language, t } = useLanguage();
+
+  // Every collection the app shows, plus the fetch functions. Owned by
+  // the hook; this shell only renders and wires callbacks.
+  const {
+    events,
+    todayVerse,
+    videos,
+    notifications,
+    spotlightConfig,
+    churchInfo,
+    isLoading,
+    refreshCollections,
+    loadData,
+    setSpotlightConfig,
+    setChurchInfo,
+  } = useAppData();
 
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
   const [prayerModalOpen, setPrayerModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Switching tabs always dismisses the notifications panel, so tapping a
   // bottom-bar tab is the way out of it on mobile (it has no close button).
@@ -100,36 +99,8 @@ function ChurchAppContent() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab]);
-  const [events, setEvents] = useState<ChurchEvent[]>([]);
-  const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [toastNotification, setToastNotification] = useState<{ id?: any; title: string; body: string } | null>(null);
 
-  // Hydrate spotlightConfig and churchInfo immediately from localStorage so edits never revert on refresh
-  const [spotlightConfig, setSpotlightConfig] = useState<SpotlightBannerConfig | null>(() => {
-    try {
-      const cached = localStorage.getItem('vrc_cached_spotlight');
-      if (cached) return JSON.parse(cached);
-    } catch {}
-    return DEFAULT_SPOTLIGHT;
-  });
-
-  const [churchInfo, setChurchInfo] = useState<ChurchInfo | null>(() => {
-    try {
-      const cached = localStorage.getItem('vrc_cached_church_info');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed) {
-          if (!parsed.address || parsed.address.toLowerCase().includes('tempe, arizona') || parsed.address.toLowerCase() === 'tempe, az' || parsed.address.toLowerCase() === 'tempe az') {
-            parsed.address = CHURCH_NAME.address;
-          }
-          return parsed;
-        }
-      }
-    } catch {}
-    return DEFAULT_CHURCH_INFO;
-  });
+  const [toastNotification, setToastNotification] = useState<ToastNotification | null>(null);
 
   // Modals
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -166,157 +137,6 @@ function ChurchAppContent() {
   const [adminFocusedMode, setAdminFocusedMode] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
-
-  const safeJson = async (res: Response) => {
-    if (!res || !res.ok) return null;
-    const text = await res.text();
-    if (!text) return null;
-    try {
-      return JSON.parse(text);
-    } catch {
-      return null;
-    }
-  };
-
-  // Refreshes only the given collections — each one is fetched and
-  // applied exactly the way loadData does it, so a live update shows
-  // the same data a full reload would. Used by the live sync (which
-  // re-fetches only what changed) and by loadData for the full load.
-  const refreshCollections = async (collections: SyncCollection[]) => {
-    const headers = apiHeaders();
-    const jobs: Promise<void>[] = [];
-
-    if (collections.includes('events')) {
-      jobs.push(
-        (async () => {
-          try {
-            const rawEvents = await safeJson(
-              await fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
-            );
-            if (Array.isArray(rawEvents)) {
-              setEvents(rawEvents);
-              // Automatically schedule 1-hour before event reminders.
-              if (rawEvents.length > 0) NotificationClient.scheduleEventReminders(rawEvents);
-            }
-          } catch (err) {
-            console.error('Error refreshing events:', err);
-          }
-        })(),
-      );
-    }
-
-    if (collections.includes('verses')) {
-      jobs.push(
-        (async () => {
-          try {
-            // Only today's verse is ever shown (no archive) — fetch
-            // GET /api/verses/today, which lazy-picks from the pool
-            // after 6 AM Phoenix when a new verse-day starts.
-            const todayData = await safeJson(
-              await fetch(apiUrl('/api/verses/today'), { cache: 'no-store', headers }),
-            );
-            if (todayData && typeof todayData === 'object') {
-              setTodayVerse(todayData);
-            }
-          } catch (err) {
-            console.error('Error refreshing verses:', err);
-          }
-        })(),
-      );
-    }
-
-    if (collections.includes('videos')) {
-      jobs.push(
-        (async () => {
-          try {
-            const rawVideos = await safeJson(
-              await fetch(apiUrl('/api/videos'), { cache: 'no-store', headers }),
-            );
-            // Videos are pruned to the last 2 months by the backend — the
-            // backend already orders them newest first.
-            if (Array.isArray(rawVideos)) setVideos(rawVideos);
-          } catch (err) {
-            console.error('Error refreshing videos:', err);
-          }
-        })(),
-      );
-    }
-
-    if (collections.includes('spotlight')) {
-      jobs.push(
-        (async () => {
-          try {
-            const spotlightData = await safeJson(
-              await fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
-            );
-            if (spotlightData) {
-              setSpotlightConfig(spotlightData);
-              try {
-                localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData));
-              } catch {}
-            }
-          } catch (err) {
-            console.error('Error refreshing spotlight:', err);
-          }
-        })(),
-      );
-    }
-
-    if (collections.includes('churchInfo')) {
-      jobs.push(
-        (async () => {
-          try {
-            const churchInfoData = await safeJson(
-              await fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
-            );
-            if (churchInfoData) {
-              if (
-                !churchInfoData.address ||
-                churchInfoData.address.toLowerCase().includes('tempe, arizona') ||
-                churchInfoData.address.toLowerCase() === 'tempe, az' ||
-                churchInfoData.address.toLowerCase() === 'tempe az'
-              ) {
-                churchInfoData.address = CHURCH_NAME.address;
-              }
-              setChurchInfo(churchInfoData);
-              try {
-                localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData));
-              } catch {}
-            }
-          } catch (err) {
-            console.error('Error refreshing church info:', err);
-          }
-        })(),
-      );
-    }
-
-    if (collections.includes('notifications')) {
-      jobs.push(
-        (async () => {
-          try {
-            setNotifications(await NotificationClient.fetchRecent());
-          } catch (err) {
-            console.error('Error refreshing notifications:', err);
-          }
-        })(),
-      );
-    }
-
-    await Promise.all(jobs);
-  };
-
-  // Full load (and manual refresh): refreshes every collection.
-  const loadData = async () => {
-    try {
-      await refreshCollections(SYNC_COLLECTIONS);
-    } catch (err) {
-      console.error('Error fetching church data from database:', err);
-    } finally {
-      // First load done — the screens stop showing the shimmer. Refreshes
-      // keep showing the data they already have instead of flashing.
-      setIsLoading(false);
-    }
-  };
 
   // Live updates: checks GET /api/sync and re-fetches only the
   // collections that changed. No timer — it checks when the app comes
@@ -363,36 +183,6 @@ function ChurchAppContent() {
   }, [activeTab, showNotifModal, markSeen]);
 
   useEffect(() => {
-    loadData();
-    // Prompt permission so notifications are enabled by default
-    NotificationClient.requestPermission().then((granted) => {
-      if (granted && events.length > 0) {
-        NotificationClient.scheduleEventReminders(events);
-      }
-    });
-    // Remote push (FCM) is DEFERRED — Firebase is not initialized in the
-    // Android build, so calling register() here crashes the app on launch
-    // (FirebaseApp not initialized). Local reminders above still work.
-    // Re-enable this line once Firebase is set up and verified.
-    // NotificationClient.registerPushNotifications();
-
-    // Check periodically (every 5 minutes) in case an event reaches the 1-hour reminder window while user is in the app
-    const interval = setInterval(() => {
-      if (events.length > 0) {
-        NotificationClient.scheduleEventReminders(events);
-      }
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (events.length > 0) {
-      NotificationClient.scheduleEventReminders(events);
-    }
-  }, [events]);
-
-  useEffect(() => {
     const handleToast = (e: any) => {
       if (e?.detail) {
         setToastNotification(e.detail);
@@ -429,35 +219,10 @@ function ChurchAppContent() {
     setAdminPortalOpen(true);
   };
 
-  const desktopNavItems = [
-    { id: 'home', label: t('navHome'), icon: Home },
-    { id: 'events', label: t('navEvents'), icon: Calendar },
-    { id: 'verse', label: t('navVerse'), icon: BookOpen },
-    { id: 'videos', label: t('navVideos'), icon: VideoIcon },
-  ];
-
   return (
     <div className={s.pageWrapper}>
-      {/* Pull-to-refresh bar: the shared Loading (spinner + refresh
-          text) shown in the gap below the header as the content slides
-          down. The text follows the pull: pull -> release -> refreshing. */}
-      {(pullDistance > 0 || isPullRefreshing) && (
-        <div
-          className={s.pullRefreshBar}
-          style={{ opacity: Math.min(pullDistance / 30, 1) }}
-          aria-hidden="true"
-        >
-          <Loading
-            text={
-              isPullRefreshing
-                ? t('refreshing')
-                : pullDistance >= 70
-                  ? t('releaseToRefresh')
-                  : t('pullToRefresh')
-            }
-          />
-        </div>
-      )}
+      <PullRefreshBar pullDistance={pullDistance} isPullRefreshing={isPullRefreshing} />
+
       {/* iOS App Navigation Bar */}
       <Navbar
         activeTab={activeTab}
@@ -476,217 +241,39 @@ function ChurchAppContent() {
       />
 
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
-      {/* Nav-only on non-Home tabs for non-admins: just enough top padding
-          to clear the fixed header on mobile (no empty gap, nothing cut
-          off); the desktop nav still shows on desktop. */}
-      <div
-        className={activeTab === 'home' || isAdmin ? s.heroSection : s.heroSectionNavOnly}
-        style={pullContentStyle}
-      >
-        <div className={s.heroInner}>
-          {activeTab === 'home' && (
-            <>
-          <div className={s.locationPill}>
-            <CrossIcon className={s.locationIcon} />
-            <span className={s.labelFull}>{t('heroLocation')}</span>
-            <span className={s.labelShort}>{t('heroLocationShort')}</span>
-          </div>
-
-          <div className={s.titleWrapper}>
-            <img
-              src={getHomeBannerSrc(language, 'light')}
-              alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
-              className={`${s.homeBannerImg} dark:hidden`}
-              onError={(e) => {
-                // If the banner file is missing from the deployed build,
-                // hide the broken image instead of showing a broken icon.
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <img
-              src={getHomeBannerSrc(language, 'dark')}
-              alt={language === 'en' ? CHURCH_NAME.en : CHURCH_NAME.vi}
-              className={`${s.homeBannerImg} hidden dark:block`}
-              onError={(e) => {
-                // If the dark banner file is missing from the deployed
-                // build, fall back to the light banner for this language
-                // instead of showing a broken image. Only swap once.
-                const img = e.currentTarget;
-                const fallback = getHomeBannerSrc(language, 'light');
-                if (!img.src.endsWith(fallback)) {
-                  img.src = fallback;
-                } else {
-                  img.style.display = 'none';
-                }
-              }}
-            />
-          </div>
-
-          {/* Subtitle Scripture Verse chosen by Admin */}
-          {(() => {
-            const currentHeaderVerse = churchInfo?.headerVerse || DEFAULT_HEADER_VERSE;
-            const verseText = language === 'en'
-              ? (currentHeaderVerse.verseTextEn || currentHeaderVerse.verseTextVi)
-              : (currentHeaderVerse.verseTextVi || currentHeaderVerse.verseTextEn);
-            const verseRef = language === 'en'
-              ? (currentHeaderVerse.referenceEn || currentHeaderVerse.referenceVi)
-              : (currentHeaderVerse.referenceVi || currentHeaderVerse.referenceEn);
-
-            return (
-              <div className={s.heroVerseWrapper}>
-                <p className={s.heroVerseQuote}>
-                  "{verseText}"
-                  <span className={s.heroVerseRef}>— {verseRef}</span>
-                </p>
-
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => setHeaderVerseModalOpen(true)}
-                    className={s.heroVerseEditBtn}
-                    title={t('headerVerseEditBtn')}
-                  >
-                    <Pencil className="w-3 h-3" />
-                    <span>{t('headerVerseEditBtn')}</span>
-                  </button>
-                )}
-              </div>
-            );
-          })()}
-            </>
-          )}
-
-          {/* Admin Dashboard Action Button */}
-          {isAdmin && (
-            <div className={s.adminBtnWrapper}>
-              <Button
-                type="button"
-                variant="darkAmber"
-                size="pillSm"
-                onClick={() => openAdminWithTab('manage-events', null, false)}
-                leftIcon={<ShieldCheck className={s.adminBtnIcon} />}
-                title="Admin Dashboard"
-              >
-                <span>Admin Dashboard</span>
-              </Button>
-            </div>
-          )}
-
-          {/* Quick Segmented Navigation Switcher */}
-          <nav className={s.desktopNav}>
-            {desktopNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleTabChange(item.id)}
-                  className={`${s.desktopNavItemBase} ${
-                    isActive ? s.desktopNavItemActive : s.desktopNavItemInactive
-                  }`}
-                >
-                  <Icon className={s.desktopNavIcon} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
+      <AppHero
+        activeTab={activeTab}
+        isAdmin={isAdmin}
+        churchInfo={churchInfo}
+        pullContentStyle={pullContentStyle}
+        onOpenHeaderVerseEditor={() => setHeaderVerseModalOpen(true)}
+        onOpenAdminPortal={() => openAdminWithTab('manage-events', null, false)}
+        onTabChange={handleTabChange}
+      />
 
       {/* Main Content Area */}
-      <main className={s.mainContent} style={pullContentStyle}>
-        {activeTab === 'home' && (
-          <HomeDashboard
-            events={events}
-            todayVerse={todayVerse}
-            spotlightConfig={spotlightConfig}
-            churchInfo={churchInfo}
-            onNavigateTab={setActiveTab}
-            onOpenAdminPortal={() => openAdminWithTab('create-event', null, true)}
-            onOpenSpotlightEditor={() => setSpotlightModalOpen(true)}
-            onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
-            isAdmin={isAdmin}
-            isLoading={isLoading}
-          />
-        )}
-
-        {activeTab === 'events' && (
-          <EventsSection
-            events={events}
-            churchInfo={churchInfo}
-            isAdmin={isAdmin}
-            onRefresh={loadData}
-            onOpenAdminPortal={openAdminWithTab}
-            isLoading={isLoading}
-          />
-        )}
-
-        {activeTab === 'verse' && (
-          <div>
-            <DailyVerseCard
-              todayVerse={todayVerse}
-              isAdmin={isAdmin}
-              onOpenAdminPortal={openAdminWithTab}
-              isLoading={isLoading}
-            />
-
-            <VerseHistorySection isActive={activeTab === 'verse'} todayVerse={todayVerse} />
-
-            <div className="max-w-4xl mx-auto px-4 pb-12 text-center">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveTab('events')}
-                className="underline whitespace-normal max-w-full text-center"
-                rightIcon={<ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />}
-              >
-                <span className="break-words">{t('appUpcomingHint')}</span>
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'videos' && (
-          <VideosSection
-            videos={videos}
-            isLoading={isLoading}
-            isAdmin={isAdmin}
-            onOpenAdminPortal={(tab, video) =>
-              openAdminWithTab(tab, null, true, video)
-            }
-            onRefresh={loadData}
-          />
-        )}
-
-        {activeTab === 'notifications' && (
-          <NotificationsSection
-            notifications={notifications}
-            onSelectNotification={handleSelectNotification}
-            isAdmin={isAdmin}
-            onNotificationAdded={loadData}
-            isLoading={isLoading}
-          />
-        )}
-      </main>
+      <TabContent
+        activeTab={activeTab}
+        events={events}
+        todayVerse={todayVerse}
+        videos={videos}
+        notifications={notifications}
+        spotlightConfig={spotlightConfig}
+        churchInfo={churchInfo}
+        isAdmin={isAdmin}
+        isLoading={isLoading}
+        pullContentStyle={pullContentStyle}
+        onNavigateTab={setActiveTab}
+        onOpenAdminPortal={openAdminWithTab}
+        onOpenSpotlightEditor={() => setSpotlightModalOpen(true)}
+        onOpenChurchInfoEditor={() => setChurchInfoModalOpen(true)}
+        onRefresh={loadData}
+        onSelectNotification={handleSelectNotification}
+      />
 
       {/* Floating Glass Prayer Request Button (Home Only, Sticky Above Bottom Bar) */}
       {activeTab === 'home' && (
-        <button
-          type="button"
-          onClick={() => setPrayerModalOpen(true)}
-          className={s.floatingPrayerBtn}
-          title={t('prayerRequestTitle')}
-          aria-label={t('navPrayer')}
-        >
-          <div className={s.floatingPrayerIconBox}>
-            <HeartHandshake className={s.floatingPrayerIcon} />
-          </div>
-          <span className={s.floatingPrayerText}>
-            {t('navPrayer')}
-          </span>
-        </button>
+        <FloatingPrayerButton onOpen={() => setPrayerModalOpen(true)} />
       )}
 
       {/* Native iOS Bottom Tab Bar: Home, Events, Scripture, Video, Notifications */}
@@ -799,76 +386,12 @@ function ChurchAppContent() {
         </Suspense>
       )}
 
-      {/* Desktop Footer */}
-      <footer className={s.desktopFooter}>
-        <div className={s.footerTopRow}>
-          <div className={s.footerBrandGroup}>
-            <span className={s.footerBrandEn}>
-              <CrossIcon className={s.locationIcon} />
-              <span>{CHURCH_NAME.en}</span>
-            </span>
-            <span className={s.footerBrandDivider}>|</span>
-            <span className={s.footerBrandVi}>{CHURCH_NAME.vi}</span>
-          </div>
+      <AppFooter onNavigateTab={setActiveTab} />
 
-          <div className={s.footerLinksGroup}>
-            <button onClick={() => setActiveTab('home')} className={s.footerLinkBtn}>
-              {t('navHome')}
-            </button>
-            <button onClick={() => setActiveTab('events')} className={s.footerLinkBtn}>
-              {t('navEvents')}
-            </button>
-            <button onClick={() => setActiveTab('verse')} className={s.footerLinkBtn}>
-              {t('navVerse')}
-            </button>
-            <button onClick={() => setActiveTab('videos')} className={s.footerLinkBtn}>
-              {t('navVideos')}
-            </button>
-          </div>
-        </div>
-
-        <div className={s.footerBottomRow}>
-          <p>© {new Date().getFullYear()} {CHURCH_NAME.en} • Tempe, Arizona</p>
-          <div className={s.footerMetaRight}>
-            <span className={s.footerVersion}>v{APP_VERSION} ({APP_BUILD_DATE})</span>
-          </div>
-        </div>
-      </footer>
-
-      {/* Mobile Subtle Version Indicator */}
-      <div className={s.mobileVersionBar}>
-        v{APP_VERSION} • {APP_BUILD_DATE}
-      </div>
-
-      {/* Real-time In-App Notification Toast for Web/Browser */}
-      {toastNotification && (
-        <div className="fixed top-4 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[9999] bg-stone-900/95 backdrop-blur-md text-white border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-3 duration-300">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 flex-shrink-0 mt-0.5">
-            <Bell className="w-4 h-4" />
-          </div>
-          <div className="flex-1 min-w-0 pr-1">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-caption font-bold uppercase tracking-wider text-amber-400">
-                {t('notifReminderTitle')}
-              </span>
-              <span className="text-caption text-stone-400">VRC</span>
-            </div>
-            <h4 className="font-bold text-xs sm:text-sm text-white line-clamp-1 mt-0.5">
-              {toastNotification.title}
-            </h4>
-            <p className="text-xs text-stone-300 line-clamp-2 mt-0.5">
-              {toastNotification.body}
-            </p>
-          </div>
-          <button
-            onClick={() => setToastNotification(null)}
-            className="text-stone-400 hover:text-white p-1 rounded-lg"
-            title="Đóng / Dismiss"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <NotificationToast
+        notification={toastNotification}
+        onDismiss={() => setToastNotification(null)}
+      />
 
       <PrayerRequestModal
         isOpen={prayerModalOpen}

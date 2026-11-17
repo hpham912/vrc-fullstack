@@ -16,26 +16,6 @@ export const eventsSectionStyles = {
   emptyTitle: 'font-serif font-bold text-stone-900 dark:text-stone-100 text-base',
   emptySub: 'text-stone-700 dark:text-stone-400 text-xs mt-1',
   listContainer: 'space-y-4',
-  eventCardBase:
-    'rounded-2xl p-3.5 max-sm:[.large-font_&]:p-3 sm:p-4 transition-all duration-150 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border cursor-pointer active:scale-[0.985] active:brightness-95 select-none shadow-sm',
-  cardTopRow: 'flex flex-wrap items-center justify-between gap-1.5 min-w-0 w-full',
-  badgeGroup: 'flex items-center gap-1.5 flex-wrap min-w-0',
-  categoryBadgeBase: 'inline-flex items-center gap-1 text-label font-bold px-2.5 py-0.5 rounded-full',
-  featuredBadge:
-    'inline-flex items-center gap-1 text-label font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 shadow-2xs',
-  adminActionRow: 'flex items-center gap-1.5 ml-auto',
-  cardMainRow: 'flex items-start gap-3 max-sm:[.large-font_&]:gap-2.5 sm:gap-3.5 min-w-0 w-full max-w-full',
-  dateBoxBase:
-    'flex-shrink-0 w-14 max-sm:[.large-font_&]:w-12 sm:w-16 py-2 max-sm:[.large-font_&]:py-1.5 px-1 text-center rounded-2xl shadow-2xs border flex flex-col items-center justify-center select-none relative self-start',
-  dateBoxWeekday:
-    'block text-label max-sm:[.large-font_&]:text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap',
-  dateBoxDay: 'block text-xl sm:text-2xl max-sm:[.large-font_&]:text-lg font-bold leading-none my-1',
-  dateBoxMonthBase: 'block text-caption sm:text-label max-sm:[.large-font_&]:text-[11px] font-semibold uppercase tracking-wider leading-tight',
-  cardRightCol: 'flex-1 min-w-0 max-w-full flex flex-col gap-1',
-  cardTitle: 'text-base sm:text-lg font-bold text-stone-950 dark:text-stone-50 leading-snug break-words',
-  cardTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-300',
-  cardLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-300 truncate',
-  cardFooterRow: 'pt-2.5 border-t border-stone-900/10 dark:border-stone-800 flex flex-wrap items-center justify-end gap-2 min-w-0 w-full',
   pastSection:
     'pt-8 sm:pt-10 border-t border-stone-200 dark:border-stone-800 space-y-4 w-full min-w-0 max-w-full overflow-hidden',
   pastHeaderRow: 'flex flex-wrap items-center justify-between gap-2 min-w-0 w-full',
@@ -43,23 +23,6 @@ export const eventsSectionStyles = {
   pastSub: 'text-xs text-stone-700 dark:text-stone-400',
   pastCountBadge:
     'text-label font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-850 text-stone-800 dark:text-stone-300 border border-stone-200 dark:border-stone-800 whitespace-nowrap',
-  pastCard:
-    'rounded-2xl p-3.5 max-sm:[.large-font_&]:p-3 sm:p-4 space-y-2.5 w-full min-w-0 max-w-full overflow-hidden box-border select-none border border-stone-200/80 dark:border-stone-800 bg-stone-100/70 dark:bg-[#161412] opacity-75 cursor-default',
-  pastCategoryPill:
-    'inline-flex items-center gap-1 text-label font-bold px-2.5 py-0.5 rounded-full bg-stone-200/80 dark:bg-stone-800 text-stone-700 dark:text-stone-300',
-  concludedPill:
-    'inline-flex items-center gap-1 text-label font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50',
-  pastDateBox:
-    'flex-shrink-0 w-14 max-sm:[.large-font_&]:w-12 sm:w-16 py-2 max-sm:[.large-font_&]:py-1.5 px-1 text-center rounded-2xl shadow-2xs border border-stone-300/70 dark:border-stone-800 flex flex-col items-center justify-center select-none bg-stone-200/60 dark:bg-stone-900/90 self-start',
-  pastDateBoxWeekday:
-    'block text-label max-sm:[.large-font_&]:text-[11px] font-bold uppercase tracking-wide leading-tight whitespace-nowrap text-stone-700 dark:text-stone-400',
-  pastDateBoxDay:
-    'block text-xl sm:text-2xl max-sm:[.large-font_&]:text-lg font-bold text-stone-900 dark:text-stone-300 leading-none my-1',
-  pastDateBoxMonth:
-    'block text-caption sm:text-label max-sm:[.large-font_&]:text-[11px] font-semibold uppercase tracking-wider leading-tight text-stone-700 dark:text-stone-400',
-  pastTitle: 'text-base sm:text-lg font-bold text-stone-900 dark:text-stone-300 leading-snug break-words',
-  pastTimeRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-400',
-  pastLocationRow: 'flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-400 truncate',
   detailMetaCard: 'space-y-2.5 text-xs sm:text-sm text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800',
   detailGoogleBtn:
     'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 active:scale-95 text-white text-label font-bold shadow-2xs transition-all',

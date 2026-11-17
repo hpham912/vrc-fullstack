@@ -4,16 +4,14 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { getGoogleMapsDirectionsUrl, getAppleMapsDirectionsUrl } from '../../utils/directions.ts';
-import { CrossIcon } from '../cross-icon/CrossIcon.tsx';
+import { WeeklyServicesEditor } from './WeeklyServicesEditor.tsx';
 import {
   Save,
   MapPin,
-  Clock,
   ExternalLink,
-  Plus,
   Video,
 } from 'lucide-react';
-import { Card, Button, Banner, AdminActionButtons, AdminAddButton, TextField } from '../../common-component/index.ts';
+import { Card, Button, Banner } from '../../common-component/index.ts';
 import { churchInfoFormStyles as s } from './ChurchInfoForm.styles.ts';
 
 interface ChurchInfoFormProps {
@@ -434,94 +432,12 @@ export const ChurchInfoForm: React.FC<ChurchInfoFormProps> = ({
         </Card>
 
         {/* Section 2: Weekly Service Times */}
-        <div className={s.servicesSection}>
-          <div className={s.servicesHeader}>
-            <h4 className={s.sectionTitle}>
-              <Clock className={s.clockIcon} />
-              <span>{t('churchInfoSchedule')}</span>
-            </h4>
-            <AdminAddButton
-              onClick={handleAddService}
-              title={t('churchInfoAddService')}
-            />
-          </div>
-
-          {services.length === 0 ? (
-            <Card variant="subtle" padding="lg" className="border-dashed text-center space-y-2">
-              <p className={s.emptyServicesText}>
-                {t('churchInfoNoServices')}
-              </p>
-              <Button
-                type="button"
-                variant="dark"
-                size="sm"
-                onClick={handleAddService}
-                leftIcon={<Plus className={s.plusIconSm} />}
-              >
-                <span>{t('churchInfoAddServiceNew')}</span>
-              </Button>
-            </Card>
-          ) : (
-            services.map((svc, idx) => (
-              <Card key={svc.id || idx} variant="subtle" padding="sm" className="space-y-2.5">
-                <div className={s.serviceCardHeader}>
-                  <span className={s.serviceCardTitle}>
-                    <CrossIcon className={s.serviceCrossIcon} />
-                    <span>#{idx + 1}: {svc.titleVi || t('churchInfoNewService')}</span>
-                  </span>
-                  <AdminActionButtons
-                    onDelete={() => handleDeleteService(idx)}
-                  />
-                </div>
-
-                <div className={s.fieldGroup}>
-                  <span className={s.fieldLabel}>{t('churchInfoServiceNameLabel')}</span>
-                  <TextField
-                    label={t('commonLangVi')}
-                    value={svc.titleVi}
-                    onChange={(value) => updateServiceField(idx, 'titleVi', value)}
-                    placeholder="Lễ Thờ Phượng Chúa Nhật"
-                  />
-                  <TextField
-                    label={t('commonLangEn')}
-                    value={svc.titleEn || ''}
-                    onChange={(value) => updateServiceField(idx, 'titleEn', value)}
-                    placeholder="Sunday Worship Service"
-                  />
-                </div>
-
-                <div className={s.fieldGroup}>
-                  <span className={s.fieldLabel}>{t('churchInfoServiceTimeLabel')}</span>
-                  <TextField
-                    label={t('commonLangVi')}
-                    value={svc.time}
-                    onChange={(value) => updateServiceField(idx, 'time', value)}
-                    placeholder="Chúa Nhật • 3:00 PM – 5:00 PM"
-                  />
-                  <TextField
-                    label={t('commonLangEn')}
-                    value={svc.timeEn || ''}
-                    onChange={(value) => updateServiceField(idx, 'timeEn', value)}
-                    placeholder="Sunday • 3:00 PM – 5:00 PM"
-                  />
-                </div>
-
-                <div className={s.subFieldGroup}>
-                  <label className={s.subLabel}>
-                    {t('churchInfoDesc')}
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={svc.descVi}
-                    onChange={(e) => updateServiceField(idx, 'descVi', e.target.value)}
-                    className={s.serviceTextarea}
-                    placeholder="Tôn vinh Chúa, cầu nguyện và lắng nghe Lời Chúa..."
-                  />
-                </div>
-              </Card>
-            ))
-          )}
-        </div>
+        <WeeklyServicesEditor
+          services={services}
+          onAdd={handleAddService}
+          onDelete={handleDeleteService}
+          onUpdateField={updateServiceField}
+        />
 
         {/* Footer Submit Buttons — Save is disabled until a field changes */}
         <div className={s.footer}>

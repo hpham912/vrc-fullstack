@@ -1,20 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChurchEvent, ChurchInfo, CustomTheme, CustomThemeStyle, SpotlightBannerConfig, SpotlightTheme } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
-import { useLanguage, type TranslationKey } from '../../context/LanguageContext.tsx';
+import { useLanguage } from '../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { fetchScripture } from '../../services/scriptureApi.ts';
 import { getErrorMessage } from '../../utils/errors.ts';
-import { CHURCH_NAME } from '../../constants/church.ts';
-import { buildCustomGradient, getCustomBannerStyles, isValidHexColor } from '../../utils/customTheme.ts';
+import { isValidHexColor } from '../../utils/customTheme.ts';
 import {
   Sparkles,
   Save,
-  Calendar,
-  MapPin,
   Palette,
-  Zap,
-  Check,
   Wheat,
   TreePine,
   Cross,
@@ -25,8 +20,10 @@ import {
   Pencil,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Modal, Button, Banner, TextField, ColorPicker, useIsDarkMode } from '../../common-component/index.ts';
+import { Modal, Button, Banner, TextField } from '../../common-component/index.ts';
 import { spotlightBannerModalStyles as s } from './SpotlightBannerModal.styles.ts';
+import { CustomThemeCreator, type CustomColorSlot, MAX_CUSTOM_COLORS } from './CustomThemeCreator.tsx';
+import { SpotlightEventPicker } from './SpotlightEventPicker.tsx';
 
 interface SpotlightBannerModalProps {
   isOpen: boolean;
@@ -54,31 +51,13 @@ const THEME_OPTIONS: ThemeOption[] = [
   { key: 'default', labelVi: 'Cổ Điển (Classic)', labelEn: 'Classic', icon: Landmark, colorDot: 'bg-stone-700' },
 ];
 
-// How a custom theme's colors are arranged. The style picker shows a
-// live swatch for each one, built from the colors the admin picked.
-const CUSTOM_THEME_STYLE_KEYS: CustomThemeStyle[] = ['diagonal', 'horizontal', 'vertical', 'radial', 'bands'];
-const CUSTOM_THEME_STYLE_LABEL_KEYS: Record<CustomThemeStyle, TranslationKey> = {
-  diagonal: 'spotCustomStyleDiagonal',
-  horizontal: 'spotCustomStyleHorizontal',
-  vertical: 'spotCustomStyleVertical',
-  radial: 'spotCustomStyleRadial',
-  bands: 'spotCustomStyleBands',
-};
 const MAX_CUSTOM_THEMES = 10;
-const MAX_CUSTOM_COLORS = 5;
 const DEFAULT_CUSTOM_COLORS = ['#991b1b', '#166534', '#d4af37'];
 
 // A unique id for a new custom theme or color slot (timestamp +
 // random suffix).
 function newCustomThemeId(): string {
   return `ct-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-// A color slot in the creator: a stable id (the list key — the list
-// can grow/shrink, so the index must not be the key) + the hex value.
-interface CustomColorSlot {
-  id: string;
-  value: string;
 }
 
 function toColorSlots(colors: string[]): CustomColorSlot[] {
@@ -159,9 +138,6 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [customButtonColor, setCustomButtonColor] = useState<string | null>(null);
   const [customBadgeColor, setCustomBadgeColor] = useState<string | null>(null);
   const [customBorderColor, setCustomBorderColor] = useState<string | null>(null);
-  // Dark mode, for the creator's live preview (same darkening as the
-  // real banner).
-  const isDark = useIsDarkMode();
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     initialConfig?.selectedEventId ?? null
   );
@@ -312,37 +288,6 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     setCreatorOpen(false);
     setEditingCustomId(null);
   };
-
-  // The draft theme for the live preview (name + style + colors as
-  // the admin is editing them, plus the per-element overrides).
-  // Invalid hex values fall back to the default navy so the preview
-  // never breaks mid-typing.
-  const draftCustomTheme: CustomTheme = {
-    id: editingCustomId ?? 'draft',
-    name: customName.trim() || t('spotCustomUntitled'),
-    colors: customColors.map((slot) => (isValidHexColor(slot.value) ? slot.value.trim() : '#0d2d64')),
-    style: customStyle,
-    buttonColor: customButtonColor,
-    badgeColor: customBadgeColor,
-    borderColor: customBorderColor,
-  };
-  const draftPreviewStyles = getCustomBannerStyles(draftCustomTheme, isDark);
-
-  // The three per-element colors: each is an override (null = auto,
-  // derived from the first theme color). The picker shows the
-  // effective color; picking a color sets the override, and Auto
-  // clears it back to the derived color.
-  const derivedElementColor = draftCustomTheme.colors[0] ?? '#0d2d64';
-  const elementColorRows: {
-    key: 'button' | 'badge' | 'border';
-    labelKey: TranslationKey;
-    value: string | null;
-    onChange: (value: string | null) => void;
-  }[] = [
-    { key: 'button', labelKey: 'spotCustomButtonColor', value: customButtonColor, onChange: setCustomButtonColor },
-    { key: 'badge', labelKey: 'spotCustomBadgeColor', value: customBadgeColor, onChange: setCustomBadgeColor },
-    { key: 'border', labelKey: 'spotCustomBorderColor', value: customBorderColor, onChange: setCustomBorderColor },
-  ];
 
   // Save the draft into the list (add new, or update the edited one)
   // and select it. The modal's Save Changes still persists everything
@@ -714,277 +659,39 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
             </div>
 
             {/* Custom theme creator: name, style, up to 5 colors, and a
-                live preview of the banner in the draft theme. */}
+                live preview of the banner in the draft theme. The parent
+                owns all draft state; the creator only renders it. */}
             {creatorOpen && (
-              <div className={s.creatorPanel}>
-                <div className={s.creatorHeader}>
-                  <span className={s.creatorTitle}>
-                    {editingCustomId ? t('spotCustomEditTitle') : t('spotCustomCreateTitle')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={closeCustomCreator}
-                    className={s.customActionBtn}
-                    aria-label={t('commonClose')}
-                  >
-                    <X className={s.customActionIcon} />
-                  </button>
-                </div>
-
-                <TextField
-                  label={t('spotCustomName')}
-                  value={customName}
-                  onChange={setCustomName}
-                  placeholder={t('spotCustomNamePlaceholder')}
-                />
-
-                {/* Style: how the colors are arranged. Each option shows
-                    a live swatch built from the draft colors. */}
-                <div className={s.creatorFieldGroup}>
-                  <span className={s.creatorFieldLabel}>{t('spotCustomStyle')}</span>
-                  <div className={s.styleGrid}>
-                    {CUSTOM_THEME_STYLE_KEYS.map((styleKey) => {
-                      const isSelected = customStyle === styleKey;
-                      return (
-                        <button
-                          key={styleKey}
-                          type="button"
-                          onClick={() => setCustomStyle(styleKey)}
-                          className={`${s.styleBtnBase} ${
-                            isSelected ? s.styleBtnSelected : s.styleBtnIdle
-                          }`}
-                        >
-                          <span
-                            className={s.styleSwatch}
-                            style={{
-                              background: buildCustomGradient(draftCustomTheme.colors, styleKey),
-                            }}
-                          />
-                          <span className={s.styleBtnText}>
-                            {t(CUSTOM_THEME_STYLE_LABEL_KEYS[styleKey])}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Colors: up to 5, each a swatch + hex field. */}
-                <div className={s.creatorFieldGroup}>
-                  <span className={s.creatorFieldLabel}>
-                    {t('spotCustomColors')} ({customColors.length}/{MAX_CUSTOM_COLORS})
-                  </span>
-                  <div className={s.colorList}>
-                    {customColors.map((slot, slotIndex) => (
-                      <div key={slot.id} className={s.colorRow}>
-                        <ColorPicker
-                          label={`${t('spotCustomColor')} ${slotIndex + 1}`}
-                          value={slot.value}
-                          onChange={(value) => handleCustomColorChange(slot.id, value)}
-                        />
-                        {customColors.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveCustomColor(slot.id)}
-                            className={s.customActionBtn}
-                            title={t('spotCustomRemoveColor')}
-                            aria-label={`${t('spotCustomRemoveColor')} ${slotIndex + 1}`}
-                          >
-                            <X className={s.customActionIcon} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {customColors.length < MAX_CUSTOM_COLORS && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleAddCustomColor}
-                      leftIcon={<Plus className={s.saveIcon} />}
-                    >
-                      {t('spotCustomAddColor')}
-                    </Button>
-                  )}
-                </div>
-
-                {/* Button, pill & border colors: each has its own picker.
-                    Auto (unset) means the element follows the theme
-                    colors; picking a color overrides just that element. */}
-                <div className={s.creatorFieldGroup}>
-                  <span className={s.creatorFieldLabel}>{t('spotCustomElements')}</span>
-                  <div className={s.colorList}>
-                    {elementColorRows.map((row) => {
-                      const isAuto = row.value === null;
-                      const effectiveColor = row.value ?? derivedElementColor;
-                      return (
-                        <div key={row.key} className={s.colorRow}>
-                          <ColorPicker
-                            label={t(row.labelKey)}
-                            value={effectiveColor}
-                            onChange={(value) => row.onChange(value)}
-                          />
-                          {!isAuto && (
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => row.onChange(null)}
-                              title={t('spotCustomAutoHint')}
-                            >
-                              {t('spotCustomAuto')}
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <p className={s.fieldHint}>{t('spotCustomElementsHint')}</p>
-                </div>
-
-                {/* Live preview: a mini banner in the draft theme. */}
-                <div className={s.creatorFieldGroup}>
-                  <span className={s.creatorFieldLabel}>{t('spotCustomPreview')}</span>
-                  <div
-                    className={s.previewBanner}
-                    style={{
-                      background: draftPreviewStyles.wrapperBackground,
-                      borderColor: draftPreviewStyles.borderColor,
-                    }}
-                  >
-                    <span
-                      className={s.previewBadge}
-                      style={{
-                        background: draftPreviewStyles.badgeBackground,
-                        color: draftPreviewStyles.badgeTextColor,
-                        borderColor: draftPreviewStyles.badgeBorderColor,
-                      }}
-                    >
-                      {badgeVi || t('spotCustomPreviewBadge')}
-                    </span>
-                    <span className={s.previewTitle}>
-                      {CHURCH_NAME[language]}
-                    </span>
-                    <span className={s.previewSubtitle}>
-                      {draftCustomTheme.name}
-                    </span>
-                    <span
-                      className={s.previewBtn}
-                      style={{
-                        background: draftPreviewStyles.btnBackground,
-                        color: draftPreviewStyles.btnTextColor,
-                      }}
-                    >
-                      {t('spotCustomPreviewBtn')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={s.creatorActions}>
-                  <Button type="button" variant="secondary" size="sm" onClick={closeCustomCreator}>
-                    {t('commonCancel')}
-                  </Button>
-                  <Button type="button" variant="primary" size="sm" onClick={handleUseCustomTheme}>
-                    {t('spotCustomUse')}
-                  </Button>
-                </div>
-              </div>
+              <CustomThemeCreator
+                editingCustomId={editingCustomId}
+                name={customName}
+                onNameChange={setCustomName}
+                style={customStyle}
+                onStyleChange={setCustomStyle}
+                colors={customColors}
+                onColorChange={handleCustomColorChange}
+                onAddColor={handleAddCustomColor}
+                onRemoveColor={handleRemoveCustomColor}
+                buttonColor={customButtonColor}
+                onButtonColorChange={setCustomButtonColor}
+                badgeColor={customBadgeColor}
+                onBadgeColorChange={setCustomBadgeColor}
+                borderColor={customBorderColor}
+                onBorderColorChange={setCustomBorderColor}
+                badgeText={badgeVi}
+                onCancel={closeCustomCreator}
+                onUse={handleUseCustomTheme}
+              />
             )}
           </div>
 
-          {/* STEP 2: Pick Event to Feature */}
-          <div className={s.stepBlockDivider}>
-            <div className={s.stepHeader}>
-              <label className={s.stepLabel}>
-                <Calendar className={s.calendarIcon} />
-                <span>{t('spotEventStep')}</span>
-              </label>
-              <span className={s.stepHint}>
-                {t('spotEventAuto')}
-              </span>
-            </div>
-
-            <div className={s.eventList}>
-              {/* Option: Auto Next Upcoming Event */}
-              <div
-                onClick={() => setSelectedEventId(null)}
-                className={`${s.eventOptionBase} ${
-                  selectedEventId === null ? s.eventOptionSelected : s.eventOptionIdle
-                }`}
-              >
-                <div className={s.autoInfoGroup}>
-                  <div className={s.autoBadgeWrap}>
-                    <span className={s.autoBadge}>
-                      <Zap className={s.zapIcon} />
-                      <span>{t('spotAuto')}</span>
-                    </span>
-                  </div>
-                  <p className={s.autoTitle}>
-                    {t('spotAutoTitle')}
-                  </p>
-                  <p className={s.autoSubtitle}>
-                    {t('spotAutoSub')}
-                  </p>
-                </div>
-                <div
-                  className={`${s.radioCircleBase} ${
-                    selectedEventId === null ? s.radioCircleSelected : s.radioCircleIdle
-                  }`}
-                >
-                  {selectedEventId === null && <Check className={s.checkIcon} />}
-                </div>
-              </div>
-
-              {upcomingEvents.length === 0 ? (
-                <div className={s.emptyEventsBox}>
-                  <p className={s.emptyEventsTitle}>
-                    {t('spotNoEvents')}
-                  </p>
-                  <p className={s.emptyEventsSubtitle}>
-                    {t('spotNoEventsSub')}
-                  </p>
-                </div>
-              ) : (
-                upcomingEvents.map((evt) => {
-                  const isSelected = selectedEventId === evt.id;
-                  return (
-                    <div
-                      key={evt.id}
-                      onClick={() => setSelectedEventId(evt.id)}
-                      className={`${s.eventOptionBase} ${
-                        isSelected ? s.eventOptionSelected : s.eventOptionIdle
-                      }`}
-                    >
-                      <div className={s.eventItemLeft}>
-                        <div className={s.eventMetaRow}>
-                          <span className={s.eventCategoryBadge}>
-                            {evt.category}
-                          </span>
-                          <span className={s.eventDateTime}>
-                            {evt.date} • {evt.startTime}
-                          </span>
-                        </div>
-                        <p className={s.eventItemTitle}>{evt.title}</p>
-                        <p className={s.eventItemLocation}>
-                          <MapPin className={s.mapPinSm} />
-                          <span>{evt.location} {evt.address ? `• ${evt.address}` : ''}</span>
-                        </p>
-                      </div>
-
-                      <div
-                        className={`${s.radioCircleBase} ${
-                          isSelected ? s.radioCircleSelected : s.radioCircleIdle
-                        }`}
-                      >
-                        {isSelected && <Check className={s.checkIcon} />}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          {/* STEP 2: Pick Event to Feature. The parent owns the
+              selection; the picker only renders it. */}
+          <SpotlightEventPicker
+            events={upcomingEvents}
+            selectedEventId={selectedEventId}
+            onSelect={setSelectedEventId}
+          />
 
           {/* STEP 3: Customizable Pill Tag Text */}
           <div className={s.inputSectionDivider}>

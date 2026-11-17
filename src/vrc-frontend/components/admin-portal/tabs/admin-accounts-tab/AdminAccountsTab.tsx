@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyRound, ShieldCheck, Trash2, UserPlus } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { AdminUser } from '../../../../types/index.ts';
-import { Button, Banner, ConfirmModal, Modal } from '../../../../common-component/index.ts';
+import { Button, ConfirmModal, Modal } from '../../../../common-component/index.ts';
+import { ProvisionAdminForm } from './ProvisionAdminForm.tsx';
+import { AdminAccountsList } from './AdminAccountsList.tsx';
+import { ChangePasswordForm } from './ChangePasswordForm.tsx';
 import { adminAccountsTabStyles as s } from './AdminAccountsTab.styles.ts';
 
-interface AdminAccount {
+export interface AdminAccount {
   id: number;
   username: string;
   email: string;
@@ -25,10 +28,10 @@ interface AdminAccountsTabProps {
   activeTab: string;
 }
 
-// Admin accounts: provision new admins, list existing ones, and change the
-// logged-in admin's password. Owns its own list + form state and its own
-// submitting flag. The parent only renders this tab when it is active, so
-// loading on mount is the same as loading when the tab is opened.
+// Admin accounts shell: owns ALL state and API logic (provision, list,
+// reset, delete, change password) and passes props down to the three
+// child components. The reset-confirm and temporary-code modals stay
+// here because they are driven by the shell's reset state.
 export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, adminUser, showFeedback, activeTab }) => {
   const { t } = useLanguage();
   const [adminList, setAdminList] = useState<AdminAccount[]>([]);
@@ -227,212 +230,43 @@ export const AdminAccountsTab: React.FC<AdminAccountsTabProps> = ({ getToken, ad
 
   return (
     <div className={s.container}>
-      {/* Provision New Admin Account Form */}
-      <form onSubmit={handleCreateAdmin} className={s.createForm}>
-        <div>
-          <h3 className={s.formTitle}>
-            <UserPlus className={s.titleIconAmber} />
-            {t('newAdminTitle')}
-          </h3>
-          <p className={s.formDesc}>
-            {t('newAdminDesc')}
-          </p>
-        </div>
+      <ProvisionAdminForm
+        username={newAdminUsername}
+        password={newAdminPassword}
+        displayName={newAdminDisplayName}
+        email={newAdminEmail}
+        onUsernameChange={setNewAdminUsername}
+        onPasswordChange={setNewAdminPassword}
+        onDisplayNameChange={setNewAdminDisplayName}
+        onEmailChange={setNewAdminEmail}
+        submitting={submitting}
+        isDirty={isCreateDirty}
+        createSuccess={createSuccess}
+        createError={createError}
+        onDismissCreateError={() => setCreateError(null)}
+        onSubmit={handleCreateAdmin}
+      />
 
-        <div className={s.formGrid}>
-          <div>
-            <label className={s.label}>
-              {t('usernameLabel')} *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. pastor_david"
-              value={newAdminUsername}
-              onChange={(e) => setNewAdminUsername(e.target.value)}
-              className={s.input}
-            />
-          </div>
+      <AdminAccountsList
+        adminList={adminList}
+        adminUser={adminUser}
+        onReset={setResetTarget}
+        onDelete={handleDeleteAdmin}
+      />
 
-          <div>
-            <label className={s.label}>
-              {t('passwordLabel')} *
-            </label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={newAdminPassword}
-              onChange={(e) => setNewAdminPassword(e.target.value)}
-              className={s.input}
-            />
-          </div>
-
-          <div>
-            <label className={s.label}>
-              {t('displayNameLabel')} *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Mục sư David Nguyễn"
-              value={newAdminDisplayName}
-              onChange={(e) => setNewAdminDisplayName(e.target.value)}
-              className={s.input}
-            />
-          </div>
-
-          <div>
-            <label className={s.label}>
-              {t('emailLabel')} (Optional)
-            </label>
-            <input
-              type="email"
-              placeholder="pastor@vrcfamily.org"
-              value={newAdminEmail}
-              onChange={(e) => setNewAdminEmail(e.target.value)}
-              className={s.input}
-            />
-          </div>
-        </div>
-
-        <div className={s.submitRow}>
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            loading={submitting}
-            disabled={submitting || !isCreateDirty}
-          >
-            {submitting ? t('commonCreating') : t('createAdminBtn')}
-          </Button>
-          {createSuccess && (
-            <Banner type="success" message={createSuccess} className="md:hidden mt-2" />
-          )}
-          {createError && (
-            <Banner
-              type="error"
-              message={createError}
-              className="md:hidden mt-2"
-              onDismiss={() => setCreateError(null)}
-            />
-          )}
-        </div>
-      </form>
-
-      {/* Existing Admin Accounts List */}
-      <div className={s.listSection}>
-        <h4 className={s.sectionTitle}>
-          <ShieldCheck className={s.titleIcon} />
-          {t('existingAdminsTitle')} ({adminList.length})
-        </h4>
-
-        <div className={s.list}>
-          {adminList.map((adm) => {
-            const isSelf = adminUser?.id === adm.id;
-            return (
-              <div key={adm.id} className={s.item}>
-                <div>
-                  <div className={s.itemMeta}>
-                    <span className={s.displayName}>
-                      {adm.displayName}
-                    </span>
-                    <span className={s.usernameBadge}>
-                      @{adm.username}
-                    </span>
-                    {isSelf && (
-                      <span className={s.selfBadge}>
-                        {t('commonYourAccount')}
-                      </span>
-                    )}
-                  </div>
-                  <p className={s.email}>{adm.email}</p>
-                </div>
-
-                {!isSelf && (
-                  <div className={s.itemActions}>
-                    <button
-                      onClick={() => setResetTarget(adm)}
-                      className={s.resetBtn}
-                      title={t('resetPasswordBtn')}
-                    >
-                      <KeyRound className={s.resetIcon} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAdmin(adm.id, adm.username)}
-                      className={s.deleteBtn}
-                      title={t('deleteAdminBtn')}
-                    >
-                      <Trash2 className={s.deleteIcon} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Change Password for Currently Logged-in Admin */}
-      <form onSubmit={handleChangePassword} className={s.passwordForm}>
-        <h4 className={s.sectionTitle}>
-          <KeyRound className={s.titleIconMuted} />
-          {t('changePasswordTitle')} ({adminUser?.username})
-        </h4>
-
-        <div className={s.formGrid}>
-          <div>
-            <label className={s.labelSemibold}>
-              {t('oldPasswordLabel')} *
-            </label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className={s.inputSm}
-            />
-          </div>
-
-          <div>
-            <label className={s.labelSemibold}>
-              {t('newPasswordLabel')} *
-            </label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className={s.inputSm}
-            />
-          </div>
-        </div>
-
-        <div className={s.submitRowRight}>
-          <Button
-            type="submit"
-            variant="dark"
-            size="md"
-            loading={submitting}
-            disabled={submitting || !isPasswordDirty}
-          >
-            {submitting ? t('commonSaving') : t('updatePasswordBtn')}
-          </Button>
-          {passwordSuccess && (
-            <Banner type="success" message={passwordSuccess} className="md:hidden mt-2" />
-          )}
-          {passwordError && (
-            <Banner
-              type="error"
-              message={passwordError}
-              className="md:hidden mt-2"
-              onDismiss={() => setPasswordError(null)}
-            />
-          )}
-        </div>
-      </form>
+      <ChangePasswordForm
+        adminUsername={adminUser?.username}
+        oldPassword={oldPassword}
+        newPassword={newPassword}
+        onOldPasswordChange={setOldPassword}
+        onNewPasswordChange={setNewPassword}
+        submitting={submitting}
+        isDirty={isPasswordDirty}
+        passwordSuccess={passwordSuccess}
+        passwordError={passwordError}
+        onDismissPasswordError={() => setPasswordError(null)}
+        onSubmit={handleChangePassword}
+      />
 
       {/* Confirm resetting another admin's password to a random code */}
       <ConfirmModal

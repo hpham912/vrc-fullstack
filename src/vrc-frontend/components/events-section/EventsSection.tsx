@@ -3,8 +3,6 @@ import { ChurchEvent, ChurchInfo } from '../../types/index.ts';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import {
   Calendar,
-  Clock,
-  MapPin,
   Search,
   Plus,
   CalendarPlus,
@@ -18,7 +16,6 @@ import {
   ChevronDown,
   ChevronUp,
   History,
-  CheckCircle2,
   Eye,
   Pencil,
   Trash2,
@@ -28,27 +25,18 @@ import {
 } from 'lucide-react';
 import {
   ConfirmModal,
-  CalendarButtons,
   FeaturedStar,
-  AdminActionButtons,
   AdminAddButton,
   Button,
   Card,
+  EventCard,
   EventDetailModal,
   FilterBar,
   LoadingShimmer,
-  ZoomButton,
 } from '../../common-component/index.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
-import {
-  formatDateLocale,
-  getWeekdayName,
-  getEventCardWeekday,
-  getMonthText,
-  getDayNumber,
-} from '../../utils/dateFormatter.ts';
-import { getCategoryTheme, getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
+import { getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
 import { eventsSectionStyles as s } from './EventsSection.styles.ts';
 
 interface EventsSectionProps {
@@ -268,88 +256,16 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         </Card>
       ) : (
         <div className={s.listContainer}>
-          {filteredUpcomingEvents.map((evt) => {
-            const weekday = getEventCardWeekday(evt.date, language);
-            const monthShort = getMonthText(evt.date, language, true);
-            const dayNum = getDayNumber(evt.date);
-            const theme = getCategoryTheme(evt.category);
-            const CategoryIcon = theme.icon;
-
-            return (
-              <div
-                key={evt.id}
-                onClick={() => setSelectedDetailEvent(evt)}
-                className={`${s.eventCardBase} ${theme.cardBg}`}
-              >
-                {/* Top Row: Category Pill + Featured Badge + Admin Actions */}
-                <div className={s.cardTopRow}>
-                  <div className={s.badgeGroup}>
-                    <span className={`${s.categoryBadgeBase} ${theme.badge}`}>
-                      <CategoryIcon className="w-3 h-3" />
-                      <span>{getCategoryLabel(evt.category)}</span>
-                    </span>
-                    {evt.isFeatured && (
-                      <span className={s.featuredBadge}>
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                        <span>{t('featuredBadge')}</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {isAdmin && (
-                    <div className={s.adminActionRow} onClick={(e) => e.stopPropagation()}>
-                      <AdminActionButtons
-                        onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
-                        onDelete={() => setDeleteTargetEvent(evt)}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Main Content Area: Date Box + Title & Timing & Location */}
-                <div className={s.cardMainRow}>
-                  <div className={`${s.dateBoxBase} ${theme.dateBox}`}>
-                    <span className={s.dateBoxWeekday}>
-                      {weekday}
-                    </span>
-                    <span className={s.dateBoxDay}>
-                      {dayNum}
-                    </span>
-                    <span className={`${s.dateBoxMonthBase} ${theme.monthText}`}>
-                      {monthShort}
-                    </span>
-                  </div>
-
-                  {/* Title & Timing & Location (no description, click to see details) */}
-                  <div className={s.cardRightCol}>
-                    <h3 className={s.cardTitle}>
-                      {language === 'vi' ? (evt.titleVi || (evt.title || '')) : (evt.titleEn || (evt.title || ''))}
-                    </h3>
-
-                    <div className={s.cardTimeRow}>
-                      <Clock className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400 flex-shrink-0" />
-                      <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
-                    </div>
-
-                    {evt.location && (
-                      <div className={s.cardLocationRow}>
-                        <MapPin className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                        <span className="truncate">
-                          {language === 'vi' ? (evt.locationVi || (evt.location || '')) : (evt.locationEn || (evt.location || ''))}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Footer row: Zoom button next to the calendar button */}
-                <div className={s.cardFooterRow}>
-                  <ZoomButton event={evt} meetingId={churchInfo?.zoomMeetingId} passcode={churchInfo?.zoomPasscode} stopPropagation className="flex-1 justify-center" />
-                  <CalendarButtons event={evt} stopPropagation variant="menu" />
-                </div>
-              </div>
-            );
-          })}
+          {filteredUpcomingEvents.map((evt) => (
+            <EventCard
+              key={evt.id}
+              event={evt}
+              onClick={() => setSelectedDetailEvent(evt)}
+              onEdit={isAdmin && onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
+              onDelete={isAdmin ? () => setDeleteTargetEvent(evt) : undefined}
+              churchInfo={churchInfo}
+            />
+          ))}
         </div>
       )}
 
@@ -373,78 +289,15 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
           </div>
 
           <div className="space-y-3 w-full min-w-0 max-w-full">
-            {pastEvents.map((evt) => {
-              const weekday = getEventCardWeekday(evt.date, language);
-              const monthShort = getMonthText(evt.date, language, true);
-              const dayNum = getDayNumber(evt.date);
-              const theme = getCategoryTheme(evt.category);
-              const CategoryIcon = theme.icon;
-
-              return (
-                <div
-                  key={evt.id}
-                  className={s.pastCard}
-                >
-                  {/* Top Row: Category Pill + Concluded Badge + Admin actions */}
-                  <div className={s.cardTopRow}>
-                    <div className={s.badgeGroup}>
-                      <span className={s.pastCategoryPill}>
-                        <CategoryIcon className="w-3 h-3 text-stone-500 dark:text-stone-400" />
-                        <span>{getCategoryLabel(evt.category)}</span>
-                      </span>
-                      <span className={s.concludedPill}>
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                        <span>{t('eventsConcluded')}</span>
-                      </span>
-                    </div>
-
-                    {isAdmin && (
-                      <div className={s.adminActionRow} onClick={(e) => e.stopPropagation()}>
-                        <AdminActionButtons
-                          onEdit={onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
-                          onDelete={() => setDeleteTargetEvent(evt)}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Main Content Area: Date Box + Title & Time & Location (disabled style) */}
-                  <div className={s.cardMainRow}>
-                    <div className={s.pastDateBox}>
-                      <span className={s.pastDateBoxWeekday}>
-                        {weekday}
-                      </span>
-                      <span className={s.pastDateBoxDay}>
-                        {dayNum}
-                      </span>
-                      <span className={s.pastDateBoxMonth}>
-                        {monthShort}
-                      </span>
-                    </div>
-
-                    <div className={s.cardRightCol}>
-                      <h4 className={s.pastTitle}>
-                        {language === 'vi' ? (evt.titleVi || (evt.title || '')) : (evt.titleEn || (evt.title || ''))}
-                      </h4>
-
-                      <div className={s.pastTimeRow}>
-                        <Clock className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" />
-                        <span>{evt.startTime}{evt.endTime ? ` – ${evt.endTime}` : ''}</span>
-                      </div>
-
-                      {evt.location && (
-                        <div className={s.pastLocationRow}>
-                          <MapPin className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 flex-shrink-0" />
-                          <span className="truncate">
-                            {language === 'vi' ? (evt.locationVi || (evt.location || '')) : (evt.locationEn || (evt.location || ''))}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {pastEvents.map((evt) => (
+              <EventCard
+                key={evt.id}
+                event={evt}
+                variant="past"
+                onEdit={isAdmin && onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
+                onDelete={isAdmin ? () => setDeleteTargetEvent(evt) : undefined}
+              />
+            ))}
           </div>
         </div>
       )}

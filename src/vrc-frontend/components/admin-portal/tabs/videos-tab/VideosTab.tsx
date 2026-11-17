@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Video as VideoIcon } from 'lucide-react';
 import { Video } from '../../../../types/index.ts';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiFetch } from '../../../../utils/api.ts';
@@ -8,8 +7,9 @@ import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../../../../vr
 import { extractFacebookVideoUrl } from '../../../../../vrc-shared/utils/facebook.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { getVideoCategoryLabel, isBuiltinVideoCategory, type VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { AdminActionButtons, Button, Banner, ConfirmModal, SegmentedControl, TextField } from '../../../../common-component/index.ts';
+import { AdminActionButtons, ConfirmModal } from '../../../../common-component/index.ts';
 import { videosTabStyles } from './VideosTab.styles.ts';
+import { VideoForm, type VideoFormValues } from './VideoForm.tsx';
 
 interface VideosTabProps {
   videos: Video[];
@@ -25,28 +25,6 @@ interface VideosTabProps {
   showFeedback: (type: 'success' | 'error', message: string) => void;
   onRefreshData: () => void;
 }
-
-// Form values, for dirty-checking: the Save button is only enabled
-// while the form differs from the last loaded values (a fresh form,
-// or the video being edited). The video link is one field — the
-// platform (YouTube or Facebook) is detected from the pasted link.
-// isVertical is the admin's Tall/Wide pick for a Facebook video.
-// category is the picker value; customCategory is the typed name
-// when the picker is 'custom' (a stored custom category loads back
-// as picker 'custom' + the stored name).
-type VideoFormValues = {
-  videoUrl: string;
-  platform: 'youtube' | 'facebook';
-  isVertical: boolean;
-  category: VideoCategoryPicker;
-  customCategory: string;
-  presenter: string;
-  titleVi: string;
-  titleEn: string;
-  descVi: string;
-  descEn: string;
-  date: string;
-};
 
 const getTodayStr = () => new Date().toISOString().split('T')[0];
 
@@ -95,7 +73,8 @@ const resolveCategory = (category: VideoCategoryPicker, customCategory: string):
 // for YouTube; a Facebook badge for Facebook, which gives no free
 // thumbnail). The video itself is never stored; only the link,
 // platform, bilingual title + description, the category, the
-// presenter, and the date.
+// presenter, and the date. The form lives in VideoForm; this file
+// owns all state and the list + delete flow.
 export const VideosTab: React.FC<VideosTabProps> = ({
   videos,
   activeTab,
@@ -195,6 +174,39 @@ export const VideosTab: React.FC<VideosTabProps> = ({
     videoDescEn !== baseline.descEn ||
     videoDate !== baseline.date;
 
+  // The form's current values, as one object for VideoForm. The
+  // platform is derived from the link, so it follows the detected
+  // platform (the form never edits it directly).
+  const formValues: VideoFormValues = {
+    videoUrl,
+    platform: previewPlatform || 'youtube',
+    isVertical: videoIsVertical,
+    category: videoCategory,
+    customCategory: videoCustomCategory,
+    presenter: videoPresenter,
+    titleVi: videoTitleVi,
+    titleEn: videoTitleEn,
+    descVi: videoDescVi,
+    descEn: videoDescEn,
+    date: videoDate,
+  };
+
+  // Apply one form edit from VideoForm back into the individual
+  // state fields. Platform is never patched — it is derived from
+  // the link.
+  const handleFormValuesChange = (patch: Partial<VideoFormValues>) => {
+    if (patch.videoUrl !== undefined) setVideoUrl(patch.videoUrl);
+    if (patch.isVertical !== undefined) setVideoIsVertical(patch.isVertical);
+    if (patch.category !== undefined) setVideoCategory(patch.category);
+    if (patch.customCategory !== undefined) setVideoCustomCategory(patch.customCategory);
+    if (patch.presenter !== undefined) setVideoPresenter(patch.presenter);
+    if (patch.titleVi !== undefined) setVideoTitleVi(patch.titleVi);
+    if (patch.titleEn !== undefined) setVideoTitleEn(patch.titleEn);
+    if (patch.descVi !== undefined) setVideoDescVi(patch.descVi);
+    if (patch.descEn !== undefined) setVideoDescEn(patch.descEn);
+    if (patch.date !== undefined) setVideoDate(patch.date);
+  };
+
   const handleSaveVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!previewPlatform || !videoTitleVi.trim() || !videoTitleEn.trim() || !videoDate) {
@@ -274,189 +286,22 @@ export const VideosTab: React.FC<VideosTabProps> = ({
 
   return (
     <div className={videosTabStyles.container}>
-      <form onSubmit={handleSaveVideo} className={videosTabStyles.form}>
-        <div className={videosTabStyles.formHeader}>
-          <div className={videosTabStyles.headerGroup}>
-            <h3 className={videosTabStyles.formTitle}>
-              {editingVideoId ? t('adminVideoEditTitle') : t('adminVideoAddTitle')}
-            </h3>
-            {editingVideoId && (
-              <button type="button" onClick={resetVideoForm} className={videosTabStyles.cancelEditBtn}>
-                {t('cancelEdit')}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className={videosTabStyles.field}>
-          <label className={videosTabStyles.label}>{t('adminVideoUrlLabel')}</label>
-          <input
-            type="text"
-            required
-            placeholder={t('adminVideoUrlPlaceholder')}
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            className={videosTabStyles.input}
-          />
-          {videoUrlInvalid && (
-            <p className={videosTabStyles.invalidMsg}>{t('adminVideoUrlInvalid')}</p>
-          )}
-          {previewYouTubeId && (
-            <div className={videosTabStyles.previewBox}>
-              <span className={videosTabStyles.previewLabel}>
-                <VideoIcon className={videosTabStyles.previewIcon} />
-                <span>{t('adminVideoPreview')}</span>
-              </span>
-              <img
-                src={getYouTubeThumbnailUrl(previewYouTubeId)}
-                alt=""
-                className={videosTabStyles.previewThumb}
-              />
-            </div>
-          )}
-          {previewFacebookUrl && (
-            <div className={videosTabStyles.previewBox}>
-              <span className={videosTabStyles.previewLabel}>
-                <VideoIcon className={videosTabStyles.previewIcon} />
-                <span>{t('adminVideoPreviewFacebook')}</span>
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Category: the four built-ins, or Custom — which opens a
-            text input for the custom name. The name is stored exactly
-            as typed and shown as typed in both languages. */}
-        <div className={videosTabStyles.field}>
-          <label className={videosTabStyles.label}>{t('adminVideoCategoryLabel')}</label>
-          <SegmentedControl
-            options={[
-              { value: 'sermon', label: t('videoCategorySermon') },
-              { value: 'singing', label: t('videoCategorySinging') },
-              { value: 'reel', label: t('videoCategoryReel') },
-              { value: 'other', label: t('videoCategoryOther') },
-              { value: 'custom', label: t('videoCategoryCustom') },
-            ]}
-            value={videoCategory}
-            onChange={setVideoCategory}
-            ariaLabel={t('adminVideoCategoryLabel')}
-          />
-          {videoCategory === 'custom' && (
-            <div className={videosTabStyles.customCategoryWrap}>
-              <label className={videosTabStyles.label}>{t('adminVideoCustomCategoryLabel')}</label>
-              <input
-                type="text"
-                value={videoCustomCategory}
-                onChange={(e) => setVideoCustomCategory(e.target.value)}
-                className={videosTabStyles.input}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Tall / Wide: a Facebook link does not say whether the video
-            is vertical or landscape (a /reel/ link can hold a
-            landscape video), so the admin picks the shape and the
-            player uses it for the frame and modal size. */}
-        {previewPlatform === 'facebook' && (
-          <div className={videosTabStyles.field}>
-            <label className={videosTabStyles.label}>{t('adminVideoShape')}</label>
-            <SegmentedControl
-              options={[
-                { value: 'tall', label: t('adminVideoShapeTall') },
-                { value: 'wide', label: t('adminVideoShapeWide') },
-              ]}
-              value={videoIsVertical ? 'tall' : 'wide'}
-              onChange={(next) => setVideoIsVertical(next === 'tall')}
-              ariaLabel={t('adminVideoShape')}
-            />
-          </div>
-        )}
-
-        <div className={videosTabStyles.fieldGroup}>
-          <span className={videosTabStyles.fieldLabel}>{t('adminVideoTitleLabel')}</span>
-          <TextField
-            label={t('commonLangVi')}
-            value={videoTitleVi}
-            onChange={setVideoTitleVi}
-          />
-          <TextField
-            label={t('commonLangEn')}
-            value={videoTitleEn}
-            onChange={setVideoTitleEn}
-          />
-        </div>
-
-        <div className={videosTabStyles.fieldGroup}>
-          <span className={videosTabStyles.fieldLabel}>{t('adminVideoDescLabel')}</span>
-          <TextField
-            label={t('commonLangVi')}
-            value={videoDescVi}
-            onChange={setVideoDescVi}
-            multiline
-            rows={2}
-          />
-          <TextField
-            label={t('commonLangEn')}
-            value={videoDescEn}
-            onChange={setVideoDescEn}
-            multiline
-            rows={2}
-          />
-        </div>
-
-        <div className={videosTabStyles.presenterDateRow}>
-          <div className={videosTabStyles.presenterField}>
-            <label className={videosTabStyles.label}>{t('adminVideoPresenterLabel')}</label>
-            <input
-              type="text"
-              value={videoPresenter}
-              onChange={(e) => setVideoPresenter(e.target.value)}
-              className={videosTabStyles.input}
-            />
-          </div>
-          <div className={videosTabStyles.dateField}>
-            <label className={videosTabStyles.label}>{t('adminVideoDate')}</label>
-            <input
-              type="date"
-              required
-              value={videoDate}
-              onChange={(e) => setVideoDate(e.target.value)}
-              className={videosTabStyles.input}
-            />
-          </div>
-        </div>
-
-        <div className={videosTabStyles.submitRow}>
-          <Button
-            type="submit"
-            variant="dark"
-            size="md"
-            loading={submitting}
-            disabled={submitting || !isDirty}
-            leftIcon={<Save className="w-3.5 h-3.5" />}
-          >
-            <span>
-              {submitting
-                ? t('commonSaving')
-                : editingVideoId
-                ? t('commonSaveChanges')
-                : t('commonSave')}
-            </span>
-          </Button>
-          {saveSuccess && (
-            <Banner type="success" message={saveSuccess} className="md:hidden mt-2" />
-          )}
-          {saveError && (
-            <Banner
-              type="error"
-              message={saveError}
-              className="md:hidden mt-2"
-              onDismiss={() => setSaveError(null)}
-            />
-          )}
-        </div>
-      </form>
+      <VideoForm
+        values={formValues}
+        onValuesChange={handleFormValuesChange}
+        editingVideoId={editingVideoId}
+        onCancelEdit={resetVideoForm}
+        onSubmit={handleSaveVideo}
+        submitting={submitting}
+        isDirty={isDirty}
+        saveSuccess={saveSuccess}
+        saveError={saveError}
+        onDismissSaveError={() => setSaveError(null)}
+        previewYouTubeId={previewYouTubeId}
+        previewFacebookUrl={previewFacebookUrl}
+        previewPlatform={previewPlatform}
+        videoUrlInvalid={videoUrlInvalid}
+      />
 
       {/* Published videos list */}
       <div className={videosTabStyles.listSection}>
