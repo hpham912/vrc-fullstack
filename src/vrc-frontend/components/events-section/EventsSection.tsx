@@ -294,7 +294,6 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 key={evt.id}
                 event={evt}
                 variant="past"
-                onEdit={isAdmin && onOpenAdminPortal ? () => onOpenAdminPortal('create-event', evt) : undefined}
                 onDelete={isAdmin ? () => setDeleteTargetEvent(evt) : undefined}
               />
             ))}
