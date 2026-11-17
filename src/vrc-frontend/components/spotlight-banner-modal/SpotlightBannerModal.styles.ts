@@ -26,9 +26,14 @@ export const spotlightBannerModalStyles = {
   colorDotSelected: "ring-2 ring-white shadow-xs",
   colorDotIdle: "opacity-60",
 
-  // Saved custom theme buttons: a strip of the theme's colors plus
-  // small edit/delete buttons. The strip reads at a glance which
-  // theme is which.
+  // Saved custom theme buttons: two rows so the name always shows.
+  // Top row is the icon + name; bottom row is the color strip (left)
+  // and the edit/delete buttons (right). A single row squeezed the
+  // name out entirely on a narrow phone (the dots + actions took all
+  // the space).
+  customThemeBtnBase: "px-3 py-2.5 rounded-xl border text-left transition-all flex flex-col gap-1.5 active:scale-95 cursor-pointer",
+  customThemeBtnTop: "flex items-center gap-2 min-w-0",
+  customThemeBtnBottom: "flex items-center justify-between gap-2",
   customColorStrip: "flex items-center gap-0.5 flex-shrink-0",
   customColorDot: "w-2.5 h-2.5 rounded-full border border-white/60 shadow-xs",
   customThemeActions: "flex items-center gap-0.5 flex-shrink-0",

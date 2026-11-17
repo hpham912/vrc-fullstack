@@ -14,6 +14,10 @@ export interface CustomTheme {
   name: string;
   colors: string[];
   style: CustomThemeStyle;
+  // Optional per-element overrides (null = auto, derived from colors).
+  buttonColor?: string | null;
+  badgeColor?: string | null;
+  borderColor?: string | null;
 }
 
 export interface SpotlightData {
@@ -103,12 +107,16 @@ function isValidHexColor(value: unknown): value is string {
 
 // Sanitize the admin's saved custom themes: keep at most 10 themes,
 // each with an id, a short name, 1-5 valid hex colors, and a known
-// style. Returns the clean list plus the active id (null when the
-// requested id does not name a kept theme).
+// style. The per-element overrides (button/pill/border) are kept only
+// when they are valid hex colors; anything else becomes null (auto).
+// Returns the clean list plus the active id (null when the requested
+// id does not name a kept theme).
 function sanitizeCustomThemes(
   rawThemes: unknown,
   rawActiveId: unknown
 ): { customThemes: CustomTheme[]; customThemeId: string | null } {
+  const cleanOverride = (value: unknown): string | null =>
+    isValidHexColor(value) ? (value as string).trim() : null;
   const customThemes: CustomTheme[] = [];
   if (Array.isArray(rawThemes)) {
     for (const entry of rawThemes.slice(0, MAX_CUSTOM_THEMES)) {
@@ -126,7 +134,15 @@ function sanitizeCustomThemes(
         typeof rec.style === 'string' && (CUSTOM_THEME_STYLES as string[]).includes(rec.style)
           ? (rec.style as CustomThemeStyle)
           : 'diagonal';
-      customThemes.push({ id, name, colors, style });
+      customThemes.push({
+        id,
+        name,
+        colors,
+        style,
+        buttonColor: cleanOverride(rec.buttonColor),
+        badgeColor: cleanOverride(rec.badgeColor),
+        borderColor: cleanOverride(rec.borderColor),
+      });
     }
   }
   const customThemeId =

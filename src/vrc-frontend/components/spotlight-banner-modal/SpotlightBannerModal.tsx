@@ -153,6 +153,12 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   const [customColors, setCustomColors] = useState<CustomColorSlot[]>(() =>
     toColorSlots(DEFAULT_CUSTOM_COLORS)
   );
+  // Per-element color overrides (null = auto, derived from the theme
+  // colors). The button is "View Events", the pill is the special
+  // badge, and the border is the banner's border + ring.
+  const [customButtonColor, setCustomButtonColor] = useState<string | null>(null);
+  const [customBadgeColor, setCustomBadgeColor] = useState<string | null>(null);
+  const [customBorderColor, setCustomBorderColor] = useState<string | null>(null);
   // Dark mode, for the creator's live preview (same darkening as the
   // real banner).
   const isDark = useIsDarkMode();
@@ -284,11 +290,17 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
           ? toColorSlots(themeToEdit.colors)
           : toColorSlots(DEFAULT_CUSTOM_COLORS)
       );
+      setCustomButtonColor(themeToEdit.buttonColor ?? null);
+      setCustomBadgeColor(themeToEdit.badgeColor ?? null);
+      setCustomBorderColor(themeToEdit.borderColor ?? null);
     } else {
       setEditingCustomId(null);
       setCustomName('');
       setCustomStyle('diagonal');
       setCustomColors(toColorSlots(DEFAULT_CUSTOM_COLORS));
+      setCustomButtonColor(null);
+      setCustomBadgeColor(null);
+      setCustomBorderColor(null);
     }
     setCreatorOpen(true);
   };
@@ -299,15 +311,35 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   };
 
   // The draft theme for the live preview (name + style + colors as
-  // the admin is editing them). Invalid hex values fall back to the
-  // default navy so the preview never breaks mid-typing.
+  // the admin is editing them, plus the per-element overrides).
+  // Invalid hex values fall back to the default navy so the preview
+  // never breaks mid-typing.
   const draftCustomTheme: CustomTheme = {
     id: editingCustomId ?? 'draft',
     name: customName.trim() || t('spotCustomUntitled'),
     colors: customColors.map((slot) => (isValidHexColor(slot.value) ? slot.value.trim() : '#0d2d64')),
     style: customStyle,
+    buttonColor: customButtonColor,
+    badgeColor: customBadgeColor,
+    borderColor: customBorderColor,
   };
   const draftPreviewStyles = getCustomBannerStyles(draftCustomTheme, isDark);
+
+  // The three per-element colors: each is an override (null = auto,
+  // derived from the first theme color). The picker shows the
+  // effective color; picking a color sets the override, and Auto
+  // clears it back to the derived color.
+  const derivedElementColor = draftCustomTheme.colors[0] ?? '#0d2d64';
+  const elementColorRows: {
+    key: 'button' | 'badge' | 'border';
+    labelKey: TranslationKey;
+    value: string | null;
+    onChange: (value: string | null) => void;
+  }[] = [
+    { key: 'button', labelKey: 'spotCustomButtonColor', value: customButtonColor, onChange: setCustomButtonColor },
+    { key: 'badge', labelKey: 'spotCustomBadgeColor', value: customBadgeColor, onChange: setCustomBadgeColor },
+    { key: 'border', labelKey: 'spotCustomBorderColor', value: customBorderColor, onChange: setCustomBorderColor },
+  ];
 
   // Save the draft into the list (add new, or update the edited one)
   // and select it. The modal's Save Changes still persists everything
@@ -331,7 +363,15 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       return;
     }
     const id = editingCustomId ?? newCustomThemeId();
-    const saved: CustomTheme = { id, name, colors: cleanColors, style: customStyle };
+    const saved: CustomTheme = {
+      id,
+      name,
+      colors: cleanColors,
+      style: customStyle,
+      buttonColor: customButtonColor && isValidHexColor(customButtonColor) ? customButtonColor.trim() : null,
+      badgeColor: customBadgeColor && isValidHexColor(customBadgeColor) ? customBadgeColor.trim() : null,
+      borderColor: customBorderColor && isValidHexColor(customBorderColor) ? customBorderColor.trim() : null,
+    };
     setCustomThemes((prev) => {
       const exists = prev.some((customTheme) => customTheme.id === id);
       return exists
@@ -591,48 +631,50 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') handleSelectCustomTheme(customTheme.id);
                     }}
-                    className={`${s.themeBtnBase} ${
+                    className={`${s.customThemeBtnBase} ${
                       isSelected ? s.themeBtnSelected : s.themeBtnIdle
                     }`}
                   >
-                    <div className={s.themeBtnContent}>
+                    <div className={s.customThemeBtnTop}>
                       <Palette className={s.themeBtnIcon} />
                       <span className={s.themeBtnText}>{customTheme.name}</span>
                     </div>
-                    <div className={s.customColorStrip}>
-                      {customTheme.colors.map((color, colorIndex) => (
-                        <span
-                          key={`${customTheme.id}-c${colorIndex}`}
-                          className={s.customColorDot}
-                          style={{ background: color }}
-                        />
-                      ))}
-                    </div>
-                    <div className={s.customThemeActions}>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCustomCreator(customTheme);
-                        }}
-                        className={s.customActionBtn}
-                        title={t('spotCustomEdit')}
-                        aria-label={`${t('spotCustomEdit')}: ${customTheme.name}`}
-                      >
-                        <Pencil className={s.customActionIcon} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCustomTheme(customTheme.id);
-                        }}
-                        className={s.customActionBtn}
-                        title={t('spotCustomDelete')}
-                        aria-label={`${t('spotCustomDelete')}: ${customTheme.name}`}
-                      >
-                        <X className={s.customActionIcon} />
-                      </button>
+                    <div className={s.customThemeBtnBottom}>
+                      <div className={s.customColorStrip}>
+                        {customTheme.colors.map((color, colorIndex) => (
+                          <span
+                            key={`${customTheme.id}-c${colorIndex}`}
+                            className={s.customColorDot}
+                            style={{ background: color }}
+                          />
+                        ))}
+                      </div>
+                      <div className={s.customThemeActions}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openCustomCreator(customTheme);
+                          }}
+                          className={s.customActionBtn}
+                          title={t('spotCustomEdit')}
+                          aria-label={`${t('spotCustomEdit')}: ${customTheme.name}`}
+                        >
+                          <Pencil className={s.customActionIcon} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCustomTheme(customTheme.id);
+                          }}
+                          className={s.customActionBtn}
+                          title={t('spotCustomDelete')}
+                          aria-label={`${t('spotCustomDelete')}: ${customTheme.name}`}
+                        >
+                          <X className={s.customActionIcon} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -747,6 +789,40 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
                       {t('spotCustomAddColor')}
                     </Button>
                   )}
+                </div>
+
+                {/* Button, pill & border colors: each has its own picker.
+                    Auto (unset) means the element follows the theme
+                    colors; picking a color overrides just that element. */}
+                <div className={s.creatorFieldGroup}>
+                  <span className={s.creatorFieldLabel}>{t('spotCustomElements')}</span>
+                  <div className={s.colorList}>
+                    {elementColorRows.map((row) => {
+                      const isAuto = row.value === null;
+                      const effectiveColor = row.value ?? derivedElementColor;
+                      return (
+                        <div key={row.key} className={s.colorRow}>
+                          <ColorPicker
+                            label={t(row.labelKey)}
+                            value={effectiveColor}
+                            onChange={(value) => row.onChange(value)}
+                          />
+                          {!isAuto && (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => row.onChange(null)}
+                              title={t('spotCustomAutoHint')}
+                            >
+                              {t('spotCustomAuto')}
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className={s.fieldHint}>{t('spotCustomElementsHint')}</p>
                 </div>
 
                 {/* Live preview: a mini banner in the draft theme. */}

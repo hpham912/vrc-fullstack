@@ -156,6 +156,14 @@ export interface CustomTheme {
   name: string;
   colors: string[]; // 1-5 hex colors, e.g. ['#991b1b', '#166534', '#d4af37']
   style: CustomThemeStyle;
+  // Optional per-element overrides. When unset (null/undefined), the
+  // element uses its derived color from the theme colors: the button
+  // is a gradient of the first two colors, the pill is a dark chip
+  // with the first color as its text, and the border is the first
+  // color. Set one to pick that element's color directly.
+  buttonColor?: string | null; // "View Events" button
+  badgeColor?: string | null; // the special pill / badge
+  borderColor?: string | null; // the banner border + ring
 }
 
 export type SpotlightTheme = 'christmas' | 'thanksgiving' | 'easter' | 'revival' | 'special' | 'default' | 'custom';

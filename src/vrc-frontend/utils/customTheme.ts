@@ -60,8 +60,11 @@ export function luminance(hex: string): number {
 }
 
 // True when a color is light enough for dark text on top of it.
+// The threshold (0.35) is where dark text starts to beat white text
+// on contrast: gold (#d4af37, luminance ~0.45) reads far better with
+// dark text, while red/green/navy stay white.
 export function isLightColor(hex: string): boolean {
-  return luminance(hex) > 0.6;
+  return luminance(hex) > 0.35;
 }
 
 // --- gradient builder ---
@@ -119,9 +122,19 @@ export interface CustomBannerStyles {
   highlightColor: string;
 }
 
+// Resolve one per-element override to its effective color (darkened
+// in dark mode, like the theme colors), or null when it is unset or
+// not a valid hex color (the element then uses its derived color).
+function resolveOverrideColor(value: string | null | undefined, isDark: boolean): string | null {
+  if (!value || !isValidHexColor(value)) return null;
+  return isDark ? darkenHex(normalizeHex(value), 0.35) : normalizeHex(value);
+}
+
 // Everything the banner needs to render a custom theme, in one place.
 // Dark mode darkens every color (same idea as the presets' darker
-// stops), so the banner stays readable when the app is dark.
+// stops), so the banner stays readable when the app is dark. The
+// per-element overrides (button/pill/border) are darkened the same
+// way; when one is unset, that element uses its derived color.
 export function getCustomBannerStyles(
   customTheme: CustomTheme,
   isDark: boolean
@@ -134,19 +147,38 @@ export function getCustomBannerStyles(
   const second = colors.length > 1 ? colors[1] : darkenHex(first, 0.25);
   const last = colors[colors.length - 1];
   const wrapperBackground = buildCustomGradient(colors, customTheme.style);
-  const btnBackground = `linear-gradient(90deg, ${first}, ${second})`;
-  const btnTextColor = isLightColor(first) ? '#0f172a' : '#ffffff';
+  // Button: an override is a gradient from the picked color to a
+  // darker shade of itself (so it keeps the presets' gradient look);
+  // auto is a gradient of the first two theme colors.
+  const overrideButton = resolveOverrideColor(customTheme.buttonColor, isDark);
+  const btnBackground = overrideButton
+    ? `linear-gradient(90deg, ${overrideButton}, ${darkenHex(overrideButton, 0.25)})`
+    : `linear-gradient(90deg, ${first}, ${second})`;
+  const btnTextColor = isLightColor(overrideButton ?? first) ? '#0f172a' : '#ffffff';
+  // Pill/badge: an override is a solid background with auto-contrast
+  // text; auto is the dark translucent chip with the first color as
+  // its text and border.
+  const overrideBadge = resolveOverrideColor(customTheme.badgeColor, isDark);
+  const badgeBackground = overrideBadge ?? 'rgba(0, 0, 0, 0.35)';
+  const badgeTextColor = overrideBadge
+    ? isLightColor(overrideBadge)
+      ? '#0f172a'
+      : '#ffffff'
+    : first;
+  const badgeBorderColor = overrideBadge ?? hexToRgba(first, 0.5);
+  // Border + ring: an override, or the first theme color.
+  const border = resolveOverrideColor(customTheme.borderColor, isDark) ?? first;
   return {
     wrapperBackground,
-    borderColor: first,
-    ringColor: hexToRgba(first, 0.2),
+    borderColor: border,
+    ringColor: hexToRgba(border, 0.2),
     glow1Background: hexToRgba(first, 0.4),
     glow2Background: hexToRgba(last, 0.35),
     btnBackground,
     btnTextColor,
-    badgeBackground: 'rgba(0, 0, 0, 0.35)',
-    badgeTextColor: first,
-    badgeBorderColor: hexToRgba(first, 0.5),
+    badgeBackground,
+    badgeTextColor,
+    badgeBorderColor,
     highlightColor: first,
   };
 }
