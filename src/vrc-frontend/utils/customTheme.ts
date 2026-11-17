@@ -11,8 +11,12 @@ export function isValidHexColor(value: unknown): value is string {
   return typeof value === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value.trim());
 }
 
-// Normalize a hex color to #rrggbb (expands #rgb).
+// Normalize a hex color to #rrggbb (expands #rgb). Anything that is
+// not a valid hex color falls back to the default navy, so a bad value
+// can never reach a CSS string (defense in depth — callers validate
+// first, but this makes the function safe for any future caller).
 export function normalizeHex(hex: string): string {
+  if (!isValidHexColor(hex)) return '#0d2d64';
   const h = hex.trim().replace('#', '');
   if (h.length === 3) {
     return `#${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`.toLowerCase();

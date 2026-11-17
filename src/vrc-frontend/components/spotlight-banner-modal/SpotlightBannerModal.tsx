@@ -206,6 +206,9 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
   // fails. Unlike success, it does NOT auto-hide.
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveSuccessTimeout = useRef<number | null>(null);
+  // Auto-clears the top feedback Banner after a "Use This Theme"
+  // confirmation (same 4s as the save success message).
+  const feedbackTimeout = useRef<number | null>(null);
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -380,7 +383,18 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
     });
     setTheme('custom');
     setCustomThemeId(id);
-    setFeedback(null);
+    // Confirm the theme was added/updated, and remind the admin it is
+    // only in the list until the modal's Save Changes persists it.
+    // Clears after 4s, like the save success message.
+    if (feedbackTimeout.current) {
+      window.clearTimeout(feedbackTimeout.current);
+      feedbackTimeout.current = null;
+    }
+    setFeedback({
+      type: 'success',
+      message: t(editingCustomId ? 'spotCustomUpdated' : 'spotCustomAdded', { name }),
+    });
+    feedbackTimeout.current = window.setTimeout(() => setFeedback(null), 4000);
     closeCustomCreator();
   };
 
@@ -454,6 +468,10 @@ export const SpotlightBannerModal: React.FC<SpotlightBannerModalProps> = ({
       if (saveSuccessTimeout.current) {
         window.clearTimeout(saveSuccessTimeout.current);
         saveSuccessTimeout.current = null;
+      }
+      if (feedbackTimeout.current) {
+        window.clearTimeout(feedbackTimeout.current);
+        feedbackTimeout.current = null;
       }
       const token = getToken();
 

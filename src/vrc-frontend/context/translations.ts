@@ -489,6 +489,8 @@ export const translations = {
   spotCustomPreviewBtn: { vi: 'Xem Sự Kiện', en: 'View Events' },
   spotCustomUntitled: { vi: 'Giao Diện Tùy Chỉnh', en: 'Custom Theme' },
   spotCustomUse: { vi: 'Dùng Giao Diện Này', en: 'Use This Theme' },
+  spotCustomAdded: { vi: 'Đã thêm giao diện “{name}” — nhấn Lưu Thay Đổi để giữ lại.', en: 'Theme “{name}” added — tap Save Changes to keep it.' },
+  spotCustomUpdated: { vi: 'Đã cập nhật giao diện “{name}” — nhấn Lưu Thay Đổi để giữ lại.', en: 'Theme “{name}” updated — tap Save Changes to keep it.' },
 
   // Edit church info modal
   churchInfoFillBoth: { vi: 'Vui lòng nhập tên nhà nguyện và địa chỉ', en: 'Please provide sanctuary name and address' },
