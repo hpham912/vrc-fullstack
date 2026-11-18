@@ -11,10 +11,12 @@
 // translucent rose pill with light rose text, so it never turns into
 // a hard red block at night.
 export const announcementBannerStyles = {
-  // Outer spacing around the pill — it floats with 12px clearance on
-  // every side instead of running edge to edge like the old strip.
-  // Carries the pull-to-refresh inline style from the shell.
-  wrapper: 'relative w-full px-3 py-3',
+  // Outer spacing around the pill — 12px on the sides and below.
+  // The top clearance (fixed navbar + gap) comes from the page
+  // wrapper, so the pill sits below the navbar with no extra offset
+  // of its own. Carries the pull-to-refresh inline style from the
+  // shell.
+  wrapper: 'relative w-full px-3 pb-3',
   // The pill itself: fully rounded, soft shadow, thin rose border.
   pill:
     'flex items-center gap-2.5 rounded-full border border-[#fecaca] bg-[#fef2f2] py-[9px] pl-[9px] pr-3.5 text-[#991b1b] shadow-[0_6px_20px_rgba(220,38,38,0.14)] dark:border-[rgba(220,38,38,0.35)] dark:bg-[rgba(220,38,38,0.18)] dark:text-[#fecaca] dark:shadow-[0_6px_20px_rgba(0,0,0,0.4)]',

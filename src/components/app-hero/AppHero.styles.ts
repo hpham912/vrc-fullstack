@@ -1,12 +1,17 @@
 export const appHeroStyles = {
+  // No top padding of its own: the page wrapper already clears the
+  // fixed navbar (56px + 20px gap), so the hero just stacks under
+  // whatever is above it — the banner pill when one is showing, the
+  // navbar when none is.
   heroSection:
-    'border-b border-stone-200/60 dark:border-stone-800 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-28 pb-6 max-sm:[.large-font_&]:pb-5 sm:pb-9 px-4 max-sm:[.large-font_&]:px-3 sm:px-6',
-  // Nav-only hero (non-Home tab, no admin): on mobile it is just enough
-  // top padding to clear the fixed header (56px + safe area) — no extra
-  // gap, and the content is not cut off under the header. On desktop it
-  // keeps the full padding so the segmented nav sits below the header.
+    'border-b border-stone-200/60 dark:border-stone-800 pb-6 max-sm:[.large-font_&]:pb-5 sm:pb-9 px-4 max-sm:[.large-font_&]:px-3 sm:px-6',
+  // Nav-only hero (non-Home tab, no admin): no top padding either —
+  // the page wrapper clears the header, so the segmented nav sits
+  // 20px below it instead of flush under it (the old flush layout
+  // died with the wrapper clearance; 20px is the same gap the Home
+  // hero has always had).
   heroSectionNavOnly:
-    'sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 max-sm:[.large-font_&]:px-3 sm:px-6 pt-[calc(3.5rem+env(safe-area-inset-top,0px))] pb-0 sm:pt-28 sm:pb-9',
+    'sm:border-b sm:border-stone-200/60 dark:sm:border-stone-800 px-4 max-sm:[.large-font_&]:px-3 sm:px-6 pb-0 sm:pb-9',
   heroInner: 'max-w-4xl mx-auto text-center space-y-3 max-sm:[.large-font_&]:space-y-2.5 sm:space-y-3.5',
   locationPill:
     'inline-flex flex-wrap items-center justify-center gap-1.5 max-w-full px-3 max-sm:[.large-font_&]:px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 text-label max-sm:[.large-font_&]:text-[13px] sm:text-xs font-semibold tracking-wide border border-stone-200/60 dark:border-stone-800 text-center',
