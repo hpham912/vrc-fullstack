@@ -243,6 +243,7 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
         }))}
         value={selectedCategory}
         onChange={setSelectedCategory}
+        onClear={selectedCategory !== 'All' ? () => setSelectedCategory('All') : undefined}
         ariaLabel={t('eventsFilterLabel')}
       />
 

@@ -121,6 +121,7 @@ export const VideosSection: React.FC<VideosSectionProps> = ({
           ]}
           value={effectiveFilter}
           onChange={setCategoryFilter}
+          onClear={effectiveFilter !== 'all' ? () => setCategoryFilter('all') : undefined}
           ariaLabel={t('videoCategoryAll')}
           className="mb-3"
         />

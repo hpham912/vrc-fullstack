@@ -5,13 +5,24 @@
 // The row hides its scrollbar (scrollbar-none) so the pills read as
 // a clean strip; the pills never shrink or wrap (flex-shrink-0 +
 // whitespace-nowrap), so a long list scrolls instead of squeezing.
+// The strip is the flex-1 child of the shell (chevron + clear
+// buttons sit beside it), so it also needs min-w-0 to shrink.
 export const filterBarStyles = {
-  row: 'flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 px-0.5 w-full max-w-full',
+  shell: 'flex items-center gap-1.5 sm:gap-2 w-full max-w-full',
+  row: 'flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 px-0.5 flex-1 min-w-0',
   // Wrapped row (opt-in via the wrap prop): the pills flow onto
   // multiple lines instead of scrolling sideways. Used by the verse
   // pool so the admin can see every reference at a glance; Events
   // and Videos keep the scrolling strip.
-  rowWrap: 'flex flex-wrap items-center gap-1.5 sm:gap-2 py-1 px-0.5 w-full max-w-full',
+  rowWrap: 'flex flex-wrap items-center gap-1.5 sm:gap-2 py-1 px-0.5 flex-1 min-w-0',
+  // Chevron + clear buttons beside the strip. Round, pill-height,
+  // same border/background as an inactive pill so they read as part
+  // of the row. At the end of the strip the chevron fades out
+  // (disabled + opacity-30) instead of disappearing, so the pills
+  // never jump sideways while scrolling.
+  sideBtn:
+    'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 shadow-2xs hover:bg-stone-50 dark:bg-stone-900/80 dark:text-stone-300 dark:border-stone-800 dark:hover:bg-stone-800 dark:hover:text-stone-100 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer',
+  sideIcon: 'w-4 h-4',
   pill: 'flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 active:scale-95 flex-shrink-0',
   pillActive:
     'bg-stone-950 text-white shadow-xs ring-2 ring-stone-950/20 dark:bg-amber-500 dark:text-stone-950 dark:ring-amber-500/30',
