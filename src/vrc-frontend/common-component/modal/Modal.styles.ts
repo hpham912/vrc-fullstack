@@ -13,5 +13,8 @@ export const modalStyles = {
   title: "font-serif font-bold text-base sm:text-lg max-sm:[.large-font_&]:text-sm text-white line-clamp-2 break-words",
   closeBtn: "p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors flex-shrink-0",
   closeIcon: "w-4 h-4",
-  body: "overflow-y-auto overscroll-contain flex-1",
+  // Vertical scroll only: horizontal overflow is clipped, so a child
+  // wider than the dialog can never make the whole modal sway
+  // sideways while the user scrolls.
+  body: "overflow-y-auto overflow-x-hidden overscroll-contain flex-1",
 };

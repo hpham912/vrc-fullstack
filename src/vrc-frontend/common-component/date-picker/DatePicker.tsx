@@ -1,5 +1,6 @@
 import React from 'react';
 import { TextField } from '../text-field/TextField.tsx';
+import { textFieldStyles } from '../text-field/TextField.styles.ts';
 import { datePickerStyles } from './DatePicker.styles.ts';
 
 // 'date' is a calendar day; 'datetime' is a day plus a time, in the
@@ -21,38 +22,65 @@ export interface DatePickerProps {
   required?: boolean;
   id?: string;
   // Bounds in the same shape as `value` (ISO for datetime,
-  // "YYYY-MM-DD" for date). The native picker greys out anything
-  // outside them — e.g. an end field with min set to the start.
+  // "YYYY-MM-DD" for date). In datetime mode the bound applies to the
+  // date half — the native picker greys out earlier days; an earlier
+  // time on the same day is the form's own validation, which already
+  // shows the error and disables Save.
   min?: string | null;
   max?: string | null;
 }
 
-// ISO → the local "YYYY-MM-DDTHH:mm" string a datetime-local input
-// holds. Empty or unparseable stays empty.
-const toDatetimeLocalValue = (iso: string | null | undefined): string => {
+const pad = (value: number) => String(value).padStart(2, '0');
+
+// ISO → the local date part "YYYY-MM-DD" a date input holds. Empty
+// or unparseable stays empty.
+const toDatePart = (iso: string | null | undefined): string => {
   if (!iso) return '';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
-    date.getHours(),
-  )}:${pad(date.getMinutes())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
-// A datetime-local value back to ISO. Empty stays null.
-const fromDatetimeLocalValue = (local: string): string | null => {
-  if (!local) return null;
-  const date = new Date(local);
+// ISO → the local time part "HH:mm" a time input holds. Empty or
+// unparseable stays empty.
+const toTimePart = (iso: string | null | undefined): string => {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+// Today's local date part, for a time picked before any date —
+// picking a time on its own means today, the same as a native
+// datetime picker that starts on the current day.
+const todayDatePart = (): string => {
+  const now = new Date();
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
+
+// Date + time parts back to one ISO string. Both empty stays null;
+// a date with no time means the start of that day (00:00).
+const combineDateTime = (datePart: string, timePart: string): string | null => {
+  if (!datePart && !timePart) return null;
+  const date = new Date(`${datePart || todayDatePart()}T${timePart || '00:00'}`);
   if (Number.isNaN(date.getTime())) return null;
   return date.toISOString();
 };
 
 // Shared DatePicker: one component for a date, with time as an
-// option. It is the shared TextField with a native date/datetime
-// input inside — no calendar library, so iOS shows the iOS picker,
+// option. It is the shared TextField with a native date/time input
+// inside — no calendar library, so iOS shows the iOS picker,
 // Android the Android one, and desktop the browser's. The label,
 // error, and dark mode all come from TextField, so the picker can
 // never drift away from the other form fields.
+//
+// Datetime mode is TWO fields, not one datetime-local input: iOS
+// renders datetime-local as one long string ("Nov 17, 2026 at 9:32
+// PM") that overflows a narrow admin form and makes the whole modal
+// sway sideways when scrolling. A date field ("Nov 17, 2026") plus
+// a time field ("9:32 PM") are both short native fields, the same
+// look as the Events tab's date field, and each one fits. The pair
+// still takes and returns one ISO string, so callers do not change.
 export const DatePicker: React.FC<DatePickerProps> = ({
   label,
   mode = 'date',
@@ -66,29 +94,62 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   max,
 }) => {
   const isDatetime = mode === 'datetime';
-  const inputValue = isDatetime ? toDatetimeLocalValue(value) : value ?? '';
-  const inputMin = isDatetime ? toDatetimeLocalValue(min) : min ?? undefined;
-  const inputMax = isDatetime ? toDatetimeLocalValue(max) : max ?? undefined;
+  const inputValue = value ?? '';
+  const datePart = isDatetime ? toDatePart(value) : value ?? '';
+  const timePart = isDatetime ? toTimePart(value) : '';
+  const dateMin = isDatetime ? toDatePart(min) : min ?? undefined;
+  const dateMax = isDatetime ? toDatePart(max) : max ?? undefined;
+
+  if (isDatetime) {
+    return (
+      <div className={datePickerStyles.container}>
+        <div className={datePickerStyles.datetimeRow}>
+          <div className={datePickerStyles.datePart}>
+            <TextField
+              label={label}
+              type="date"
+              value={datePart}
+              onChange={(next) =>
+                onChange(next === '' ? null : combineDateTime(next, timePart))
+              }
+              disabled={disabled}
+              required={required}
+              id={id}
+              min={dateMin || undefined}
+              max={dateMax || undefined}
+            />
+          </div>
+          <div className={datePickerStyles.timePart}>
+            <TextField
+              type="time"
+              value={timePart}
+              onChange={(next) => onChange(combineDateTime(datePart, next))}
+              disabled={disabled}
+              id={id ? `${id}-time` : undefined}
+              ariaLabel={label}
+            />
+          </div>
+        </div>
+        {error && <span className={textFieldStyles.error}>{error}</span>}
+      </div>
+    );
+  }
 
   return (
     <div className={datePickerStyles.container}>
       <TextField
         label={label}
-        type={isDatetime ? 'datetime-local' : 'date'}
+        type="date"
         value={inputValue}
         onChange={(next) => {
-          if (isDatetime) {
-            onChange(fromDatetimeLocalValue(next));
-          } else {
-            onChange(next === '' ? null : next);
-          }
+          onChange(next === '' ? null : next);
         }}
         disabled={disabled}
         error={error}
         required={required}
         id={id}
-        min={inputMin}
-        max={inputMax}
+        min={min ?? undefined}
+        max={max ?? undefined}
       />
     </div>
   );

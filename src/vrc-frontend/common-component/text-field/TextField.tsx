@@ -29,6 +29,10 @@ export interface TextFieldProps {
   min?: string;
   max?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  // Optional accessible name for an input with no visible label —
+  // e.g. the time half of a datetime pair, whose row label sits over
+  // the date half. Omit it and the input has no aria-label, as before.
+  ariaLabel?: string;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -48,6 +52,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   min,
   max,
   onKeyDown,
+  ariaLabel,
 }) => {
   const Icon = icon;
   const inputClassName = Icon
@@ -64,6 +69,7 @@ export const TextField: React.FC<TextFieldProps> = ({
       disabled={disabled}
       required={required}
       autoComplete={autoComplete}
+      aria-label={ariaLabel}
       min={min}
       max={max}
       className={inputClassName}
@@ -84,6 +90,7 @@ export const TextField: React.FC<TextFieldProps> = ({
           onKeyDown={onKeyDown}
           placeholder={placeholder}
           disabled={disabled}
+          aria-label={ariaLabel}
           rows={rows}
           className={textFieldStyles.textarea}
         />
