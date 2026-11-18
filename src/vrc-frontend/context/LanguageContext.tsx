@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { translations, type Language, type TranslationKey } from './translations.ts';
 
 export type { Language, TranslationKey } from './translations.ts';
@@ -46,6 +46,17 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(getSavedLanguage);
+
+  // The page language follows the app language, so native controls
+  // display in the same language as the rest of the app. A date or
+  // time input renders its value in the page language — without this
+  // the page stays lang="en" (from index.html) and every native date
+  // input shows English ("Nov 18, 2026 at 10:25 AM") even when the
+  // app is Vietnamese. This covers every date input at once: the
+  // shared DatePicker and the Events tab date field alike.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
