@@ -1,5 +1,8 @@
 export const modalStyles = {
-  backdropBase: "fixed inset-0 z-[100] flex items-center justify-center p-4 max-sm:[.large-font_&]:p-2.5 bg-stone-950/60 backdrop-blur-xs transition-opacity duration-200",
+  // No z-index here — the component applies `zIndexClass`
+  // (default z-[100]) so a modal that opens from inside another
+  // modal can sit above it.
+  backdropBase: "fixed inset-0 flex items-center justify-center p-4 max-sm:[.large-font_&]:p-2.5 bg-stone-950/60 backdrop-blur-xs transition-opacity duration-200",
   backdropVisible: "opacity-100",
   backdropHidden: "opacity-0",
   dialogBase: "bg-white dark:bg-[#161412] text-stone-900 dark:text-stone-100 rounded-3xl border border-stone-200 dark:border-stone-800 w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200",

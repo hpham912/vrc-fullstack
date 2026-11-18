@@ -7,7 +7,7 @@ import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { getCategoryTheme } from '../../../../utils/categoryTheme.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, Banner, SegmentedControl, ZoomButton, TextField } from '../../../../common-component/index.ts';
+import { Button, Banner, SegmentedControl, ZoomButton, TextField, DatePicker } from '../../../../common-component/index.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -546,15 +546,12 @@ export const EventsTab: React.FC<EventsTabProps> = ({
           </div>
 
           <div className={s.fieldOverflow}>
-            <label className={s.label}>
-              {t('adminEventDate')}
-            </label>
-            <input
-              type="date"
-              required
+            <DatePicker
+              label={t('adminEventDate')}
+              mode="date"
               value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              className={s.inputDate}
+              onChange={(next) => setEventDate(next ?? '')}
+              required
             />
           </div>
 

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import {
   ConfirmModal,
+  DatePicker,
   FeaturedStar,
   AdminAddButton,
   Button,
@@ -377,15 +378,12 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
                 </div>
 
                 <div className="overflow-hidden">
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
-                    {t('eventsDate')}
-                  </label>
-                  <input
-                    type="date"
-                    required
+                  <DatePicker
+                    label={t('eventsDate')}
+                    mode="date"
                     value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
-                    className="appearance-none min-w-0 w-full max-w-full box-border px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    onChange={(next) => setFormDate(next ?? '')}
+                    required
                   />
                 </div>
               </div>

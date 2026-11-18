@@ -3,7 +3,7 @@ import { Save, Video as VideoIcon } from 'lucide-react';
 import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { getYouTubeThumbnailUrl } from '../../../../../vrc-shared/utils/youtube.ts';
 import type { VideoCategoryPicker } from '../../../../utils/videoCategory.ts';
-import { Banner, Button, SegmentedControl, TextField } from '../../../../common-component/index.ts';
+import { Banner, Button, SegmentedControl, TextField, DatePicker } from '../../../../common-component/index.ts';
 import { videoFormStyles } from './VideoForm.styles.ts';
 
 // Form values, for dirty-checking: the Save button is only enabled
@@ -222,13 +222,12 @@ export const VideoForm: React.FC<VideoFormProps> = ({
           />
         </div>
         <div className={videoFormStyles.dateField}>
-          <label className={videoFormStyles.label}>{t('adminVideoDate')}</label>
-          <input
-            type="date"
-            required
+          <DatePicker
+            label={t('adminVideoDate')}
+            mode="date"
             value={values.date}
-            onChange={(e) => onValuesChange({ date: e.target.value })}
-            className={videoFormStyles.input}
+            onChange={(next) => onValuesChange({ date: next ?? '' })}
+            required
           />
         </div>
       </div>

@@ -277,6 +277,7 @@ export const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({
           mode="datetime"
           value={formStartsAt}
           onChange={setFormStartsAt}
+          allowClear
         />
         <DatePicker
           label={t('announceEndLabel')}
@@ -285,6 +286,7 @@ export const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({
           onChange={setFormEndsAt}
           min={formStartsAt}
           error={!scheduleValid ? t('announceEndBeforeStart') : undefined}
+          allowClear
         />
         <p className={announcementsTabStyles.switchHint}>{t('announceEndHint')}</p>
         <div className={announcementsTabStyles.switchRow}>

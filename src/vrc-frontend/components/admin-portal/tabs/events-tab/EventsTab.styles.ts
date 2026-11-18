@@ -18,8 +18,6 @@ export const eventsTabStyles = {
   label: 'block text-xs font-bold text-stone-700 mb-1',
   labelPlain: 'block text-xs font-bold text-stone-700',
   input: 'w-full max-w-full box-border min-w-0 px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
-  inputDate:
-    'w-full max-w-full box-border min-w-0 appearance-none px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white',
   addressLabelRow: 'flex items-center justify-between mb-1',
   hintText: 'text-caption text-stone-400',
   useChurchAddrBtn:

@@ -11,6 +11,13 @@ interface ModalProps {
   subtitle?: React.ReactNode;
   icon?: React.ReactNode;
   maxWidthClass?: string;
+  // Stacking level of the backdrop. Default z-[100] — above the
+  // navbar and the pull-refresh bar. A modal opened from inside
+  // another modal passes a higher one: the DatePicker calendar
+  // passes z-[120] because the event create/edit modal sits at
+  // z-[110] (it must cover the event detail modal), and a calendar
+  // at the default level would open behind the form.
+  zIndexClass?: string;
   children: React.ReactNode;
 }
 
@@ -21,6 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
   subtitle,
   icon,
   maxWidthClass = 'max-w-md',
+  zIndexClass = 'z-[100]',
   children,
 }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
@@ -69,7 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
   // viewport and gets clipped. Same pattern as NotificationModal.
   return createPortal(
     <div
-      className={`${s.backdropBase} ${isVisible ? s.backdropVisible : s.backdropHidden}`}
+      className={`${s.backdropBase} ${zIndexClass} ${isVisible ? s.backdropVisible : s.backdropHidden}`}
       onClick={(e) => {
         // Stop the tap here: this modal is portaled to document.body,
         // but in React's tree it is still a child of whatever opened
