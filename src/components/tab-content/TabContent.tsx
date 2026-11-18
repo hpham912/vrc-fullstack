@@ -6,8 +6,8 @@ import { DailyVerseCard } from '../../vrc-frontend/components/daily-verse-card/D
 import { VerseHistorySection } from '../../vrc-frontend/components/verse-history-section/VerseHistorySection.tsx';
 import { VideosSection } from '../../vrc-frontend/components/videos-section/VideosSection.tsx';
 import { NotificationsSection } from '../../vrc-frontend/components/notifications-section/NotificationsSection.tsx';
-import { Button } from '../../vrc-frontend/common-component/index.ts';
-import { ArrowRight } from 'lucide-react';
+import { Button, Card } from '../../vrc-frontend/common-component/index.ts';
+import { ArrowRight, WifiOff } from 'lucide-react';
 import type {
   ChurchEvent,
   DailyVerse,
@@ -28,6 +28,12 @@ interface TabContentProps {
   churchInfo: ChurchInfo | null;
   isAdmin: boolean;
   isLoading: boolean;
+  // True when a full load came back with nothing and there is no data
+  // already showing. The error view replaces the tab content instead
+  // of the fake-empty screens.
+  loadError: boolean;
+  onRetryLoad: () => void;
+  retryingLoad: boolean;
   pullContentStyle: React.CSSProperties;
   onNavigateTab: (tab: string) => void;
   onOpenAdminPortal: (
@@ -55,6 +61,9 @@ export const TabContent: React.FC<TabContentProps> = ({
   churchInfo,
   isAdmin,
   isLoading,
+  loadError,
+  onRetryLoad,
+  retryingLoad,
   pullContentStyle,
   onNavigateTab,
   onOpenAdminPortal,
@@ -64,6 +73,27 @@ export const TabContent: React.FC<TabContentProps> = ({
   onSelectNotification,
 }) => {
   const { t } = useLanguage();
+
+  // The load failed with nothing to show: say so and offer a retry,
+  // instead of every tab looking empty for no reason. The retry
+  // button spins until the load finishes; the view clears itself
+  // when the load works.
+  if (loadError && !isLoading) {
+    return (
+      <main className={s.mainContent} style={pullContentStyle}>
+        <div className={s.loadErrorWrapper}>
+          <Card variant="empty" padding="empty">
+            <WifiOff className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+            <p className={s.loadErrorTitle}>{t('loadErrorTitle')}</p>
+            <p className={s.loadErrorMessage}>{t('loadErrorMessage')}</p>
+            <Button type="button" variant="primary" loading={retryingLoad} onClick={onRetryLoad}>
+              {t('loadErrorRetry')}
+            </Button>
+          </Card>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={s.mainContent} style={pullContentStyle}>

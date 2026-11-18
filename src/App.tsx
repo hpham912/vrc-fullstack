@@ -33,7 +33,7 @@ const EditHeaderVerseModal = lazy(() =>
     (module) => ({ default: module.EditHeaderVerseModal })
   )
 );
-import { LoadingShimmer, AnnouncementBanner, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
+import { LoadingShimmer, AnnouncementBanner, OfflineBanner, useDataSync, useOnlineStatus, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
 import { useAppData } from './vrc-frontend/hooks/useAppData.ts';
 import { AppHero } from './components/app-hero/AppHero.tsx';
 import { TabContent } from './components/tab-content/TabContent.tsx';
@@ -60,11 +60,41 @@ function ChurchAppContent() {
     spotlightConfig,
     churchInfo,
     isLoading,
+    loadError,
     refreshCollections,
     loadData,
     setSpotlightConfig,
     setChurchInfo,
   } = useAppData();
+
+  // Connection: the offline banner shows while the device reports no
+  // network, and everything reloads the moment it comes back — the
+  // user never has to tap retry after the connection returns.
+  const isOnline = useOnlineStatus();
+  const wasOfflineRef = useRef(false);
+  useEffect(() => {
+    if (!isOnline) {
+      wasOfflineRef.current = true;
+      return;
+    }
+    if (wasOfflineRef.current) {
+      wasOfflineRef.current = false;
+      loadData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline]);
+
+  // Manual retry from the load-error view: the button spins until the
+  // load finishes, then the view clears itself if the load worked.
+  const [retryingLoad, setRetryingLoad] = useState(false);
+  const handleRetryLoad = async () => {
+    setRetryingLoad(true);
+    try {
+      await loadData();
+    } finally {
+      setRetryingLoad(false);
+    }
+  };
 
   // Modern Home tab as default landing
   const [activeTab, setActiveTab] = useState('home');
@@ -155,9 +185,11 @@ function ChurchAppContent() {
   }, [activeTab, checkNow]);
 
   // Pull down from the top of any screen to reload everything now.
-  const { pullDistance, isRefreshing: isPullRefreshing } = usePullToRefresh(() =>
-    refreshCollections(SYNC_COLLECTIONS),
-  );
+  // The boolean result is ignored here — a failed pull over good
+  // data keeps showing the data, it never becomes the error view.
+  const { pullDistance, isRefreshing: isPullRefreshing } = usePullToRefresh(async () => {
+    await refreshCollections(SYNC_COLLECTIONS);
+  });
 
   // Pull-to-refresh: the content below the fixed header slides down
   // with the finger (the whole screen goes down), revealing the refresh
@@ -241,6 +273,12 @@ function ChurchAppContent() {
         notifButtonRef={bellButtonRef}
       />
 
+      {/* No-connection banner: a full-width amber strip under the
+          header while the device reports no network. Renders nothing
+          when online. Slides with the page content while pulling to
+          refresh, like the announcement banner below it. */}
+      <OfflineBanner isOnline={isOnline} style={pullContentStyle} />
+
       {/* Global announcement banner: the newest active announcement,
           soft rose pill under the header on every tab. Renders nothing when
           no announcement is active. Slides with the page content while
@@ -269,6 +307,9 @@ function ChurchAppContent() {
         churchInfo={churchInfo}
         isAdmin={isAdmin}
         isLoading={isLoading}
+        loadError={loadError}
+        onRetryLoad={handleRetryLoad}
+        retryingLoad={retryingLoad}
         pullContentStyle={pullContentStyle}
         onNavigateTab={setActiveTab}
         onOpenAdminPortal={openAdminWithTab}

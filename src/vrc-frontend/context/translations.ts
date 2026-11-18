@@ -493,6 +493,10 @@ export const translations = {
   spotQuoteRefPlaceholder: { vi: 'Thi Thiên 100:4', en: 'Psalm 100:4' },
   spotSaved: { vi: 'Đã lưu cấu hình banner thành công!', en: 'Banner updated successfully!' },
   spotOfflineSaved: { vi: 'Không thể kết nối máy chủ. Thay đổi đã được lưu tạm trên thiết bị này.', en: 'Network connection issue. Changes saved locally on this device.' },
+  offlineMessage: { vi: 'Không có kết nối mạng. Nội dung có thể đã cũ.', en: 'No internet connection. Content may be out of date.' },
+  loadErrorTitle: { vi: 'Không thể tải dữ liệu', en: "Couldn't load data" },
+  loadErrorMessage: { vi: 'Kiểm tra kết nối mạng rồi thử lại.', en: 'Check your connection and try again.' },
+  loadErrorRetry: { vi: 'Thử lại', en: 'Try again' },
   spotSaveFailed: { vi: 'Lỗi khi lưu banner', en: 'Failed to save banner' },
   spotUpdateFailed: { vi: 'Không thể cập nhật banner', en: 'Failed to update spotlight banner' },
 

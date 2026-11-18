@@ -59,3 +59,5 @@ export { Accordion } from './accordion/Accordion.tsx';
 export type { AccordionItem } from './accordion/Accordion.tsx';
 export { AnnouncementBanner } from './announcement-banner/AnnouncementBanner.tsx';
 export type { AnnouncementBannerProps } from './announcement-banner/AnnouncementBanner.tsx';
+export { OfflineBanner } from './offline-banner/OfflineBanner.tsx';
+export { useOnlineStatus } from './offline-banner/useOnlineStatus.ts';

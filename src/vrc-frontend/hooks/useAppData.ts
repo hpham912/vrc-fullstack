@@ -53,6 +53,11 @@ export function useAppData() {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  // True when a full load came back with nothing AND there is no data
+  // already showing — that is when the screens would otherwise look
+  // empty for no reason, so the load-error view replaces them instead.
+  const [loadError, setLoadError] = useState(false);
+
   const safeJson = async (res: Response) => {
     if (!res || !res.ok) return null;
     const text = await res.text();
@@ -68,13 +73,17 @@ export function useAppData() {
   // applied exactly the way loadData does it, so a live update shows
   // the same data a full reload would. Used by the live sync (which
   // re-fetches only what changed) and by loadData for the full load.
-  const refreshCollections = async (collections: SyncCollection[]) => {
+  // Returns true when at least one collection loaded — the caller
+  // (loadData) uses it to decide whether the app has anything to show.
+  // A collection that returns an empty list still counts: empty is
+  // valid data, a failed fetch is not.
+  const refreshCollections = async (collections: SyncCollection[]): Promise<boolean> => {
     const headers = apiHeaders();
-    const jobs: Promise<void>[] = [];
+    const jobs: Promise<boolean>[] = [];
 
     if (collections.includes('events')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             const rawEvents = await safeJson(
               await fetch(apiUrl('/api/events'), { cache: 'no-store', headers }),
@@ -83,9 +92,12 @@ export function useAppData() {
               setEvents(rawEvents);
               // Automatically schedule 1-hour before event reminders.
               if (rawEvents.length > 0) NotificationClient.scheduleEventReminders(rawEvents);
+              return true;
             }
+            return false;
           } catch (err) {
             console.error('Error refreshing events:', err);
+            return false;
           }
         })(),
       );
@@ -93,7 +105,7 @@ export function useAppData() {
 
     if (collections.includes('verses')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             // Only today's verse is ever shown (no archive) — fetch
             // GET /api/verses/today, which lazy-picks from the pool
@@ -103,9 +115,12 @@ export function useAppData() {
             );
             if (todayData && typeof todayData === 'object') {
               setTodayVerse(todayData);
+              return true;
             }
+            return false;
           } catch (err) {
             console.error('Error refreshing verses:', err);
+            return false;
           }
         })(),
       );
@@ -113,16 +128,21 @@ export function useAppData() {
 
     if (collections.includes('videos')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             const rawVideos = await safeJson(
               await fetch(apiUrl('/api/videos'), { cache: 'no-store', headers }),
             );
             // Videos are pruned to the last 2 months by the backend — the
             // backend already orders them newest first.
-            if (Array.isArray(rawVideos)) setVideos(rawVideos);
+            if (Array.isArray(rawVideos)) {
+              setVideos(rawVideos);
+              return true;
+            }
+            return false;
           } catch (err) {
             console.error('Error refreshing videos:', err);
+            return false;
           }
         })(),
       );
@@ -130,7 +150,7 @@ export function useAppData() {
 
     if (collections.includes('spotlight')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             const spotlightData = await safeJson(
               await fetch(apiUrl('/api/spotlight'), { cache: 'no-store', headers }),
@@ -140,9 +160,12 @@ export function useAppData() {
               try {
                 localStorage.setItem('vrc_cached_spotlight', JSON.stringify(spotlightData));
               } catch {}
+              return true;
             }
+            return false;
           } catch (err) {
             console.error('Error refreshing spotlight:', err);
+            return false;
           }
         })(),
       );
@@ -150,7 +173,7 @@ export function useAppData() {
 
     if (collections.includes('churchInfo')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             const churchInfoData = await safeJson(
               await fetch(apiUrl('/api/church-info'), { cache: 'no-store', headers }),
@@ -168,9 +191,12 @@ export function useAppData() {
               try {
                 localStorage.setItem('vrc_cached_church_info', JSON.stringify(churchInfoData));
               } catch {}
+              return true;
             }
+            return false;
           } catch (err) {
             console.error('Error refreshing church info:', err);
+            return false;
           }
         })(),
       );
@@ -178,11 +204,13 @@ export function useAppData() {
 
     if (collections.includes('notifications')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             setNotifications(await NotificationClient.fetchRecent());
+            return true;
           } catch (err) {
             console.error('Error refreshing notifications:', err);
+            return false;
           }
         })(),
       );
@@ -190,7 +218,7 @@ export function useAppData() {
 
     if (collections.includes('announcements')) {
       jobs.push(
-        (async () => {
+        (async (): Promise<boolean> => {
           try {
             const rawAnnouncements = await safeJson(
               await fetch(apiUrl('/api/announcements'), { cache: 'no-store', headers }),
@@ -198,21 +226,39 @@ export function useAppData() {
             // Newest first from the backend; the banner shows the
             // newest row that is switched on AND inside its start/end
             // window, the admin tab shows the whole list.
-            if (Array.isArray(rawAnnouncements)) setAnnouncements(rawAnnouncements);
+            if (Array.isArray(rawAnnouncements)) {
+              setAnnouncements(rawAnnouncements);
+              return true;
+            }
+            return false;
           } catch (err) {
             console.error('Error refreshing announcements:', err);
+            return false;
           }
         })(),
       );
     }
 
-    await Promise.all(jobs);
+    const results = await Promise.all(jobs);
+    return results.some(Boolean);
   };
 
   // Full load (and manual refresh): refreshes every collection.
   const loadData = async () => {
     try {
-      await refreshCollections(SYNC_COLLECTIONS);
+      const loaded = await refreshCollections(SYNC_COLLECTIONS);
+      // A failed load only becomes the error view when there is no
+      // data already showing — a failed pull-to-refresh over good data
+      // must not blank the screen. A partial load (any collection
+      // came back) is not an error either; the failed collections
+      // keep their own empty states.
+      const hasAnyData =
+        events.length > 0 ||
+        todayVerse !== null ||
+        videos.length > 0 ||
+        notifications.length > 0 ||
+        announcements.length > 0;
+      setLoadError(!loaded && !hasAnyData);
     } catch (err) {
       console.error('Error fetching church data from database:', err);
     } finally {
@@ -261,6 +307,7 @@ export function useAppData() {
     spotlightConfig,
     churchInfo,
     isLoading,
+    loadError,
     refreshCollections,
     loadData,
     setSpotlightConfig,

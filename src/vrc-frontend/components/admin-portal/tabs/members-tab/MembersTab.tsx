@@ -4,7 +4,7 @@ import { useLanguage } from '../../../../context/LanguageContext.tsx';
 import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { formatDateLocale } from '../../../../utils/dateFormatter.ts';
 import { Member } from '../../../../types/index.ts';
-import { Button, Banner, ConfirmModal, Modal } from '../../../../common-component/index.ts';
+import { Button, Banner, ConfirmModal, Loading, Modal } from '../../../../common-component/index.ts';
 import { membersTabStyles as s } from './MembersTab.styles.ts';
 
 interface MembersTabProps {
@@ -29,10 +29,16 @@ export const MembersTab: React.FC<MembersTabProps> = ({ getToken, showFeedback, 
   const [resetting, setResetting] = useState(false);
   const [resetCode, setResetCode] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // True while the list is being fetched — the tab shows a spinner
+  // instead of the empty text, so a slow load never reads as "no
+  // members". Only matters while the list is empty; a reload over
+  // existing rows keeps showing them.
+  const [loadingList, setLoadingList] = useState(false);
 
   const loadMembers = async () => {
     const token = getToken();
     if (!token) return;
+    setLoadingList(true);
     try {
       const res = await fetch(apiUrl('/api/admin/members'), {
         headers: apiHeaders({ Authorization: `Bearer ${token}` }),
@@ -47,6 +53,8 @@ export const MembersTab: React.FC<MembersTabProps> = ({ getToken, showFeedback, 
     } catch (err) {
       console.error('Failed to load members:', err);
       setLoadError(t('membersLoadFailed'));
+    } finally {
+      setLoadingList(false);
     }
   };
 
@@ -122,7 +130,9 @@ export const MembersTab: React.FC<MembersTabProps> = ({ getToken, showFeedback, 
 
       {loadError && <Banner type="error" message={loadError} />}
 
-      {memberList.length === 0 && !loadError ? (
+      {loadingList && memberList.length === 0 ? (
+        <Loading text={t('loading')} />
+      ) : memberList.length === 0 && !loadError ? (
         <p className={s.empty}>{t('membersEmpty')}</p>
       ) : (
         <ul className={s.list}>
