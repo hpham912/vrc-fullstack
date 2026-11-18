@@ -215,7 +215,7 @@ export const prayerRequests = pgTable('prayer_requests', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// General Church Announcements — the global red banner under the
+// General Church Announcements — the global announcement pill under the
 // header. Revived Nov 2026: the banner shows the newest active row.
 // `content` is the Vietnamese message (the app's default language);
 // `contentEn` is the English message shown when the app language is

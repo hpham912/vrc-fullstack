@@ -211,7 +211,7 @@ export const translations = {
   tabMembers: { vi: 'Thành Viên', en: 'Members' },
   tabNotices: { vi: 'Thông Báo', en: 'Notices' },
 
-  // Announcements (global red banner under the header)
+  // Announcements (global announcement pill under the header)
   announceFormAddTitle: { vi: 'Thêm Thông Báo', en: 'Add Announcement' },
   announceFormEditTitle: { vi: 'Sửa Thông Báo', en: 'Edit Announcement' },
   announceNameLabel: { vi: 'Tên (chỉ quản trị viên thấy)', en: 'Name (admins only)' },
@@ -225,7 +225,7 @@ export const translations = {
   announceEndHint: { vi: 'Để trống: hiển thị đến khi tắt.', en: 'Leave empty: shows until turned off.' },
   announceEndBeforeStart: { vi: 'Giờ ngừng phải sau giờ bắt đầu và chưa qua.', en: 'The stop time must be after the start time and still in the future.' },
   announceScheduled: { vi: 'Đã hẹn giờ', en: 'Scheduled' },
-  announceEmpty: { vi: 'Chưa có thông báo nào. Thêm một thông báo để hiển thị banner đỏ trên toàn app.', en: 'No announcements yet. Add one to show the red banner across the app.' },
+  announceEmpty: { vi: 'Chưa có thông báo nào. Thêm một thông báo để hiển thị trên toàn app.', en: 'No announcements yet. Add one to show it across the app.' },
   announceSaved: { vi: 'Đã lưu thông báo.', en: 'Announcement saved.' },
   announceUpdated: { vi: 'Đã cập nhật thông báo.', en: 'Announcement updated.' },
   announceDeleted: { vi: 'Đã xóa thông báo.', en: 'Announcement deleted.' },

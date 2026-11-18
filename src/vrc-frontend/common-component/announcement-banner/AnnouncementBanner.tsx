@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Megaphone } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import type { Announcement } from '../../types/index.ts';
 import { isAnnouncementShowing } from '../../utils/announcement.ts';
@@ -18,14 +19,16 @@ export interface AnnouncementBannerProps {
 const TICKER_SPEED_PX_PER_SECOND = 60;
 const MIN_TICKER_DURATION_MS = 8000;
 
-// The global red announcement strip under the header. Shows the
-// newest announcement that is switched on AND inside its start/end
-// window; renders nothing when none is showing. Short text sits still
-// and centered. Long text scrolls across the banner and loops (Web
-// Animations API — no CSS keyframes file to keep in sync, and the
-// duration is computed from the measured text width). Hovering pauses
-// the scroll on desktop. With reduced motion on, the text wraps
-// instead of scrolling.
+// The global announcement pill under the header: a soft rose
+// floating pill (Design A, colour 4). Shows the newest announcement
+// that is switched on AND inside its start/end window; renders
+// nothing when none is showing. Short text sits still, left-aligned
+// next to the megaphone chip. Long text scrolls across the pill and
+// loops (Web Animations API — no CSS keyframes file to keep in sync,
+// and the duration is computed from the measured text width).
+// Hovering pauses the scroll on desktop. With reduced motion on, the
+// text wraps instead of scrolling. Light mode is a light rose pill;
+// dark mode is a translucent rose pill.
 export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   announcements,
   style,
@@ -51,7 +54,7 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const trackRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<Animation | null>(null);
 
-  // Does the text overflow the banner? Measured against a hidden
+  // Does the text overflow the text area? Measured against a hidden
   // single-copy span in the same font, so the answer is exact at any
   // font size (including large-text mode) and after any resize or
   // font load. Never a marquee under reduced motion.
@@ -104,30 +107,35 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   if (!activeAnnouncement) return null;
 
   return (
-    <div
-      ref={containerRef}
-      style={style}
-      className={announcementBannerStyles.banner}
-      role="status"
-      onMouseEnter={() => animationRef.current?.pause()}
-      onMouseLeave={() => animationRef.current?.play()}
-    >
-      {/* Hidden single-copy span, only for the overflow measurement. */}
-      <span ref={measureRef} aria-hidden="true" className={announcementBannerStyles.measureText}>
-        {displayText}
-      </span>
-      {prefersReducedMotion || !isMarquee ? (
-        <p className={prefersReducedMotion ? announcementBannerStyles.wrappedText : announcementBannerStyles.staticText}>
-          {displayText}
-        </p>
-      ) : (
-        <div ref={trackRef} className={announcementBannerStyles.track}>
-          <span className={announcementBannerStyles.textCopy}>{displayText}</span>
-          <span aria-hidden="true" className={announcementBannerStyles.textCopy}>
+    <div style={style} className={announcementBannerStyles.wrapper}>
+      <div
+        className={announcementBannerStyles.pill}
+        role="status"
+        onMouseEnter={() => animationRef.current?.pause()}
+        onMouseLeave={() => animationRef.current?.play()}
+      >
+        <span aria-hidden="true" className={announcementBannerStyles.iconChip}>
+          <Megaphone className="h-4 w-4" />
+        </span>
+        <div ref={containerRef} className={announcementBannerStyles.textContainer}>
+          {/* Hidden single-copy span, only for the overflow measurement. */}
+          <span ref={measureRef} aria-hidden="true" className={announcementBannerStyles.measureText}>
             {displayText}
           </span>
+          {prefersReducedMotion || !isMarquee ? (
+            <p className={prefersReducedMotion ? announcementBannerStyles.wrappedText : announcementBannerStyles.staticText}>
+              {displayText}
+            </p>
+          ) : (
+            <div ref={trackRef} className={announcementBannerStyles.track}>
+              <span className={announcementBannerStyles.textCopy}>{displayText}</span>
+              <span aria-hidden="true" className={announcementBannerStyles.textCopy}>
+                {displayText}
+              </span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

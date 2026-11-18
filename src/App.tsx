@@ -242,7 +242,7 @@ function ChurchAppContent() {
       />
 
       {/* Global announcement banner: the newest active announcement,
-          red strip under the header on every tab. Renders nothing when
+          soft rose pill under the header on every tab. Renders nothing when
           no announcement is active. Slides with the page content while
           pulling to refresh, like the hero and tab content below it. */}
       <AnnouncementBanner announcements={announcements} style={pullContentStyle} />

@@ -145,7 +145,7 @@ export interface AppNotification {
   createdAt: string;
 }
 
-// A global announcement — the red banner under the header. `title` is
+// A global announcement — the announcement pill under the header. `title` is
 // the admin-side label in the Announcements tab, never shown on the
 // banner. `content` is the Vietnamese banner text (the app's default
 // language); `contentEn` is the English text, shown when the app
