@@ -274,12 +274,14 @@ export const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({
         <p className={announcementsTabStyles.switchHint}>{t('announceMessageEnHint')}</p>
         <DatePicker
           label={t('announceStartLabel')}
+          timeLabel={t('announceTimeLabel')}
           mode="datetime"
           value={formStartsAt}
           onChange={setFormStartsAt}
         />
         <DatePicker
           label={t('announceEndLabel')}
+          timeLabel={t('announceTimeLabel')}
           mode="datetime"
           value={formEndsAt}
           onChange={setFormEndsAt}

@@ -28,6 +28,9 @@ export interface DatePickerProps {
   // shows the error and disables Save.
   min?: string | null;
   max?: string | null;
+  // Visible label for the time field in datetime mode (same
+  // language as `label`; the caller owns the copy).
+  timeLabel?: string;
 }
 
 const pad = (value: number) => String(value).padStart(2, '0');
@@ -81,6 +84,14 @@ const combineDateTime = (datePart: string, timePart: string): string | null => {
 // a time field ("9:32 PM") are both short native fields, the same
 // look as the Events tab's date field, and each one fits. The pair
 // still takes and returns one ISO string, so callers do not change.
+//
+// The two fields are STACKED, each full width, each with its own
+// visible label. They used to sit side by side and failed twice on
+// iOS: the flex gap rendered as 0 so the boxes touched, then an
+// explicit margin + fixed time width did not take effect live, so
+// the time box overlapped the date box. Stacked full-width fields
+// need no flex sizing at all, and match every other field in the
+// admin forms. Do not put them side by side again.
 export const DatePicker: React.FC<DatePickerProps> = ({
   label,
   mode = 'date',
@@ -92,6 +103,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   id,
   min,
   max,
+  timeLabel,
 }) => {
   const isDatetime = mode === 'datetime';
   const inputValue = value ?? '';
@@ -102,34 +114,28 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   if (isDatetime) {
     return (
-      <div className={datePickerStyles.container}>
-        <div className={datePickerStyles.datetimeRow}>
-          <div className={datePickerStyles.datePart}>
-            <TextField
-              label={label}
-              type="date"
-              value={datePart}
-              onChange={(next) =>
-                onChange(next === '' ? null : combineDateTime(next, timePart))
-              }
-              disabled={disabled}
-              required={required}
-              id={id}
-              min={dateMin || undefined}
-              max={dateMax || undefined}
-            />
-          </div>
-          <div className={datePickerStyles.timePart}>
-            <TextField
-              type="time"
-              value={timePart}
-              onChange={(next) => onChange(combineDateTime(datePart, next))}
-              disabled={disabled}
-              id={id ? `${id}-time` : undefined}
-              ariaLabel={label}
-            />
-          </div>
-        </div>
+      <div className={datePickerStyles.datetimeStack}>
+        <TextField
+          label={label}
+          type="date"
+          value={datePart}
+          onChange={(next) =>
+            onChange(next === '' ? null : combineDateTime(next, timePart))
+          }
+          disabled={disabled}
+          required={required}
+          id={id}
+          min={dateMin || undefined}
+          max={dateMax || undefined}
+        />
+        <TextField
+          label={timeLabel}
+          type="time"
+          value={timePart}
+          onChange={(next) => onChange(combineDateTime(datePart, next))}
+          disabled={disabled}
+          id={id ? `${id}-time` : undefined}
+        />
         {error && <span className={textFieldStyles.error}>{error}</span>}
       </div>
     );
