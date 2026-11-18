@@ -3,7 +3,7 @@ import { apiUrl, apiHeaders } from '../../utils/api.ts';
 
 // The collections GET /api/sync reports on — one entry per thing the
 // app shows. Keep in sync with syncRoutes.ts on the backend.
-export type SyncCollection = 'events' | 'verses' | 'videos' | 'notifications' | 'churchInfo' | 'spotlight';
+export type SyncCollection = 'events' | 'verses' | 'videos' | 'notifications' | 'churchInfo' | 'spotlight' | 'announcements';
 
 export interface SyncEntry {
   count: number;
@@ -19,6 +19,7 @@ export const SYNC_COLLECTIONS: SyncCollection[] = [
   'notifications',
   'churchInfo',
   'spotlight',
+  'announcements',
 ];
 
 // Checks GET /api/sync and calls onChanged with the collections whose

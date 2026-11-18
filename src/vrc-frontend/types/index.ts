@@ -145,6 +145,26 @@ export interface AppNotification {
   createdAt: string;
 }
 
+// A global announcement — the red banner under the header. `title` is
+// the admin-side label in the Announcements tab, never shown on the
+// banner. `content` is the Vietnamese banner text (the app's default
+// language); `contentEn` is the English text, shown when the app
+// language is English (falls back to `content` when empty). The banner
+// shows the newest row with `active` true AND inside its window:
+// `startsAt` null means "from now", `endsAt` null means "until turned
+// off". Rows past their `endsAt` are deleted by the GET route.
+export interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  contentEn?: string | null;
+  active: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export type CustomThemeStyle = 'diagonal' | 'horizontal' | 'vertical' | 'radial' | 'bands';
 
 // A custom banner theme saved by an admin: a name, 1-5 colors, and a

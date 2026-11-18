@@ -9,6 +9,7 @@ import {
   DailyVerse,
   Video,
   AppNotification,
+  Announcement,
   SpotlightBannerConfig,
   ChurchInfo,
   DEFAULT_CHURCH_INFO,
@@ -23,6 +24,7 @@ export function useAppData() {
   const [todayVerse, setTodayVerse] = useState<DailyVerse | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   // Hydrate spotlightConfig and churchInfo immediately from localStorage so edits never revert on refresh
   const [spotlightConfig, setSpotlightConfig] = useState<SpotlightBannerConfig | null>(() => {
@@ -186,6 +188,24 @@ export function useAppData() {
       );
     }
 
+    if (collections.includes('announcements')) {
+      jobs.push(
+        (async () => {
+          try {
+            const rawAnnouncements = await safeJson(
+              await fetch(apiUrl('/api/announcements'), { cache: 'no-store', headers }),
+            );
+            // Newest first from the backend; the banner shows the
+            // newest row that is switched on AND inside its start/end
+            // window, the admin tab shows the whole list.
+            if (Array.isArray(rawAnnouncements)) setAnnouncements(rawAnnouncements);
+          } catch (err) {
+            console.error('Error refreshing announcements:', err);
+          }
+        })(),
+      );
+    }
+
     await Promise.all(jobs);
   };
 
@@ -237,6 +257,7 @@ export function useAppData() {
     todayVerse,
     videos,
     notifications,
+    announcements,
     spotlightConfig,
     churchInfo,
     isLoading,

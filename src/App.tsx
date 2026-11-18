@@ -33,7 +33,7 @@ const EditHeaderVerseModal = lazy(() =>
     (module) => ({ default: module.EditHeaderVerseModal })
   )
 );
-import { LoadingShimmer, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
+import { LoadingShimmer, AnnouncementBanner, useDataSync, useUnreadNotifications, usePullToRefresh, SYNC_COLLECTIONS } from './vrc-frontend/common-component/index.ts';
 import { useAppData } from './vrc-frontend/hooks/useAppData.ts';
 import { AppHero } from './components/app-hero/AppHero.tsx';
 import { TabContent } from './components/tab-content/TabContent.tsx';
@@ -56,6 +56,7 @@ function ChurchAppContent() {
     todayVerse,
     videos,
     notifications,
+    announcements,
     spotlightConfig,
     churchInfo,
     isLoading,
@@ -240,6 +241,12 @@ function ChurchAppContent() {
         notifButtonRef={bellButtonRef}
       />
 
+      {/* Global announcement banner: the newest active announcement,
+          red strip under the header on every tab. Renders nothing when
+          no announcement is active. Slides with the page content while
+          pulling to refresh, like the hero and tab content below it. */}
+      <AnnouncementBanner announcements={announcements} style={pullContentStyle} />
+
       {/* iOS Hero Card: Title with SVG Cross (never shows as iOS emoji) */}
       <AppHero
         activeTab={activeTab}
@@ -363,6 +370,7 @@ function ChurchAppContent() {
             events={events}
             todayVerse={todayVerse}
             videos={videos}
+            announcements={announcements}
             churchInfo={churchInfo}
             initialTab={adminPortalTab}
             focusedMode={adminFocusedMode}

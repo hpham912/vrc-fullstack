@@ -22,6 +22,12 @@ export interface TextFieldProps {
   rows?: number;
   id?: string;
   autoComplete?: string;
+  // Optional bounds for date/time inputs (e.g. a DatePicker passing
+  // the start as the end field's min so earlier times are greyed out).
+  // Ignored for other input types. Omit them and the input has no
+  // bounds — the input is exactly as before.
+  min?: string;
+  max?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
@@ -39,6 +45,8 @@ export const TextField: React.FC<TextFieldProps> = ({
   rows = 3,
   id,
   autoComplete,
+  min,
+  max,
   onKeyDown,
 }) => {
   const Icon = icon;
@@ -56,6 +64,8 @@ export const TextField: React.FC<TextFieldProps> = ({
       disabled={disabled}
       required={required}
       autoComplete={autoComplete}
+      min={min}
+      max={max}
       className={inputClassName}
     />
   );

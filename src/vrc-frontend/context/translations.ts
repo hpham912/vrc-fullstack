@@ -205,10 +205,35 @@ export const translations = {
   tabManageEvents: { vi: 'Quản Lý Sự Kiện', en: 'Manage Events' },
   tabVerses: { vi: 'Lời Chúa', en: 'Daily Verses' },
   tabVideos: { vi: 'Video', en: 'Video' },
+  tabAnnouncements: { vi: 'Thông Báo Chung', en: 'Announcements' },
   tabChurchInfo: { vi: 'Thông Tin Hội Thánh', en: 'Church Info' },
   tabAdminAccounts: { vi: 'Tài Khoản Quản Trị', en: 'Admin Accounts' },
   tabMembers: { vi: 'Thành Viên', en: 'Members' },
   tabNotices: { vi: 'Thông Báo', en: 'Notices' },
+
+  // Announcements (global red banner under the header)
+  announceFormAddTitle: { vi: 'Thêm Thông Báo', en: 'Add Announcement' },
+  announceFormEditTitle: { vi: 'Sửa Thông Báo', en: 'Edit Announcement' },
+  announceNameLabel: { vi: 'Tên (chỉ quản trị viên thấy)', en: 'Name (admins only)' },
+  announceMessageViLabel: { vi: 'Nội dung (Tiếng Việt)', en: 'Message (Vietnamese)' },
+  announceMessageEnLabel: { vi: 'Nội dung (Tiếng Anh)', en: 'Message (English)' },
+  announceMessageEnHint: { vi: 'Để trống: banner hiển thị nội dung Tiếng Việt cho cả hai ngôn ngữ.', en: 'Leave empty: the banner shows the Vietnamese message in both languages.' },
+  announceActiveLabel: { vi: 'Đang hiển thị trên banner', en: 'Show on the banner' },
+  announceActiveHint: { vi: 'Banner chỉ hiển thị thông báo mới nhất đang bật. Tắt hết thì banner biến mất.', en: 'The banner shows the newest announcement that is on. Turn them all off and the banner disappears.' },
+  announceStartLabel: { vi: 'Bắt đầu hiển thị', en: 'Start showing' },
+  announceEndLabel: { vi: 'Ngừng hiển thị', en: 'Stop showing' },
+  announceEndHint: { vi: 'Để trống: hiển thị đến khi tắt.', en: 'Leave empty: shows until turned off.' },
+  announceEndBeforeStart: { vi: 'Giờ ngừng phải sau giờ bắt đầu và chưa qua.', en: 'The stop time must be after the start time and still in the future.' },
+  announceScheduled: { vi: 'Đã hẹn giờ', en: 'Scheduled' },
+  announceEmpty: { vi: 'Chưa có thông báo nào. Thêm một thông báo để hiển thị banner đỏ trên toàn app.', en: 'No announcements yet. Add one to show the red banner across the app.' },
+  announceSaved: { vi: 'Đã lưu thông báo.', en: 'Announcement saved.' },
+  announceUpdated: { vi: 'Đã cập nhật thông báo.', en: 'Announcement updated.' },
+  announceDeleted: { vi: 'Đã xóa thông báo.', en: 'Announcement deleted.' },
+  announceDeleteTitle: { vi: 'Xóa thông báo này?', en: 'Delete this announcement?' },
+  announceDeleteConfirm: { vi: 'Thông báo “{title}” sẽ bị xóa vĩnh viễn. Nếu đây là thông báo đang hiển thị thì banner sẽ biến mất.', en: '“{title}” will be permanently deleted. If this is the one showing, the banner will disappear.' },
+  announceShowing: { vi: 'Đang hiển thị', en: 'Showing' },
+  announceOn: { vi: 'Đang bật', en: 'On' },
+  announceOff: { vi: 'Đang tắt', en: 'Off' },
 
   // Admin Accounts Management
   newAdminTitle: { vi: 'Tạo Tài Khoản Quản Trị Mới', en: 'Create New Admin Account' },
@@ -336,6 +361,7 @@ export const translations = {
   adminVideoDeleteTitle: { vi: 'Xóa video?', en: 'Delete this video?' },
   adminVideoDeleteConfirm: { vi: 'Xóa video "{title}"? Hành động này không thể hoàn tác.', en: 'Delete the video "{title}"? This cannot be undone.' },
   errSaveVideo: { vi: 'Không thể lưu video. Vui lòng thử lại.', en: 'Could not save the video. Please try again.' },
+  errSaveAnnouncement: { vi: 'Không thể lưu thông báo. Vui lòng thử lại.', en: 'Could not save the announcement. Please try again.' },
   errDeleteVideo: { vi: 'Không thể xóa video. Vui lòng thử lại.', en: 'Could not delete the video. Please try again.' },
 
   // Prayer request

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../../vrc-db/index.ts';
-import { events, dailyVerses, videos, notifications, churchInfo, spotlight } from '../../vrc-db/schema.ts';
+import { events, dailyVerses, videos, notifications, announcements, churchInfo, spotlight } from '../../vrc-db/schema.ts';
 import { count, max } from 'drizzle-orm';
 
 const router = Router();
@@ -16,21 +16,26 @@ const router = Router();
 // tab switch) and re-fetches only the collections whose numbers moved.
 //
 // Change signals, per collection:
-// - events / verses / videos / churchInfo / spotlight: MAX(updated_at).
-//   The write routes set updatedAt on every save, so an edit moves it.
+// - events / verses / videos / churchInfo / spotlight /
+//   announcements: MAX(updated_at). The write routes set updatedAt on
+//   every save, so an edit moves it.
 // - notifications: MAX(created_at). Notifications are never edited
 //   (only created and deleted), so the newest created time is the
 //   right signal. The row count catches deletions for every table.
-// Every table has a created_at column, so no migration was needed.
+// Announcements use MAX(updated_at) like the editable collections,
+// so their `updated_at` column was added by
+// announcements-add-columns.sql — the one migration this endpoint
+// needed, since the revived table only had created_at.
 router.get('/', async (_req, res) => {
   try {
-    const [eventsRow, versesRow, videosRow, notifsRow, churchInfoRow, spotlightRow] = await Promise.all([
+    const [eventsRow, versesRow, videosRow, notifsRow, churchInfoRow, spotlightRow, announcementsRow] = await Promise.all([
       db.select({ count: count(), updatedAt: max(events.updatedAt) }).from(events),
       db.select({ count: count(), updatedAt: max(dailyVerses.updatedAt) }).from(dailyVerses),
       db.select({ count: count(), updatedAt: max(videos.updatedAt) }).from(videos),
       db.select({ count: count(), updatedAt: max(notifications.createdAt) }).from(notifications),
       db.select({ count: count(), updatedAt: max(churchInfo.updatedAt) }).from(churchInfo),
       db.select({ count: count(), updatedAt: max(spotlight.updatedAt) }).from(spotlight),
+      db.select({ count: count(), updatedAt: max(announcements.updatedAt) }).from(announcements),
     ]);
 
     const toEntry = (row: { count: number; updatedAt: Date | null }) => ({
@@ -45,6 +50,7 @@ router.get('/', async (_req, res) => {
       notifications: toEntry(notifsRow[0]),
       churchInfo: toEntry(churchInfoRow[0]),
       spotlight: toEntry(spotlightRow[0]),
+      announcements: toEntry(announcementsRow[0]),
     });
   } catch (err) {
     console.error('GET /api/sync failed:', err);

@@ -11,6 +11,7 @@ import verseRoutes from './routes/verseRoutes.ts';
 import versePoolRoutes from './routes/versePoolRoutes.ts';
 import videoRoutes from './routes/videoRoutes.ts';
 import notifRoutes from './routes/notifRoutes.ts';
+import announcementRoutes from './routes/announcementRoutes.ts';
 import spotlightRoutes from './routes/spotlightRoutes.ts';
 import churchInfoRoutes from './routes/churchInfoRoutes.ts';
 import prayerRoutes from './routes/prayerRoutes.ts';
@@ -64,6 +65,7 @@ export const createApp = () => {
   app.use('/api/verse-pool', versePoolRoutes);
   app.use('/api/videos', videoRoutes);
   app.use('/api/notifications', notifRoutes);
+  app.use('/api/announcements', announcementRoutes);
   app.use('/api/spotlight', spotlightRoutes);
   app.use('/api/church-info', churchInfoRoutes);
   app.use('/api/prayers', prayerRoutes);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChurchEvent, ChurchInfo, DailyVerse, Video } from '../../types/index.ts';
+import { ChurchEvent, ChurchInfo, DailyVerse, Video, Announcement } from '../../types/index.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLanguage } from '../../context/LanguageContext.tsx';
 import { APP_VERSION } from '../../constants/version.ts';
@@ -7,6 +7,7 @@ import { Modal } from '../../common-component/modal/Modal.tsx';
 import { Banner } from '../../common-component/index.ts';
 import { adminPortalStyles as s } from './AdminPortal.styles.ts';
 import { PrayerRequestsTab } from './tabs/prayer-requests-tab/PrayerRequestsTab.tsx';
+import { AnnouncementsTab } from './tabs/announcements-tab/AnnouncementsTab.tsx';
 import { AdminAccountsTab } from './tabs/admin-accounts-tab/AdminAccountsTab.tsx';
 import { MembersTab } from './tabs/members-tab/MembersTab.tsx';
 import { VersesTab } from './tabs/verses-tab/VersesTab.tsx';
@@ -14,6 +15,7 @@ import { VideosTab } from './tabs/videos-tab/VideosTab.tsx';
 import { EventsTab } from './tabs/events-tab/EventsTab.tsx';
 import { ChurchInfoTab } from './tabs/church-info-tab/ChurchInfoTab.tsx';
 import {
+  Megaphone,
   Calendar,
   BookOpen,
   Video as VideoIcon,
@@ -31,6 +33,7 @@ interface AdminPortalProps {
   events: ChurchEvent[];
   todayVerse?: DailyVerse | null;
   videos: Video[];
+  announcements: Announcement[];
   churchInfo?: ChurchInfo | null;
   initialTab?: string;
   focusedMode?: boolean;
@@ -46,6 +49,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   events,
   todayVerse,
   videos,
+  announcements,
   churchInfo,
   initialTab = 'create-event',
   focusedMode = false,
@@ -197,6 +201,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <button
               type="button"
+              onClick={() => setActiveTab('announcements')}
+              className={`${s.mobileTabBtnBase} ${
+                activeTab === 'announcements' ? s.mobileTabActiveDark : s.mobileTabIdle
+              }`}
+            >
+              <Megaphone className={s.tabIcon} />
+              <span className="truncate">{t('tabAnnouncements')} ({announcements.length})</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('church-info')}
               className={`${s.mobileTabBtnBase} ${
                 activeTab === 'church-info' ? s.mobileTabActiveDark : s.mobileTabIdle
@@ -300,6 +315,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('announcements')}
+            className={`${s.desktopTabBtnBase} ${
+              activeTab === 'announcements' ? s.desktopTabActiveDark : s.desktopTabIdle
+            }`}
+          >
+            <Megaphone className={s.tabIcon} />
+            {t('tabAnnouncements')} ({announcements.length})
+          </button>
+
+          <button
             onClick={() => setActiveTab('church-info')}
             className={`${s.desktopTabBtnBase} ${
               activeTab === 'church-info' ? s.desktopTabActiveDark : s.desktopTabIdle
@@ -350,6 +375,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <VersesTab activeTab={activeTab} todayVerse={todayVerse} churchInfo={churchInfo} onOpenHeaderVerseEditor={onOpenHeaderVerseEditor} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} onEditingChange={setVerseEditing} />
 
           <VideosTab videos={videos} activeTab={activeTab} initialVideo={initialVideo} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
+
+          <AnnouncementsTab announcements={announcements} activeTab={activeTab} getToken={getToken} showFeedback={showFeedback} onRefreshData={onRefreshData} />
 
           <ChurchInfoTab activeTab={activeTab} churchInfo={churchInfo} onRefreshData={onRefreshData} />
 

@@ -215,16 +215,34 @@ export const prayerRequests = pgTable('prayer_requests', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// General Church Announcements
+// General Church Announcements — the global red banner under the
+// header. Revived Nov 2026: the banner shows the newest active row.
+// `content` is the Vietnamese message (the app's default language);
+// `contentEn` is the English message shown when the app language is
+// English (falls back to `content` when empty). `title` is only the
+// admin-side label in the Announcements tab, never shown on the
+// banner. `priority`, `linkUrl` and `linkText` are unused leftovers
+// from the original table — kept, not shown.
+// Scheduling (Nov 2026): `startsAt` / `endsAt` are the window the
+// banner shows this row in. Both are TIMESTAMPTZ — unlike the plain
+// `timestamp` columns elsewhere, these are schedule boundaries
+// compared against NOW(), so they must carry a timezone. NULL
+// `startsAt` means "show from now"; NULL `endsAt` means "show until
+// turned off". Rows past their `endsAt` are pruned from the table by
+// the GET route, so finished announcements never pile up.
 export const announcements = pgTable('announcements', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
   content: text('content').notNull(),
+  contentEn: text('content_en'),
   priority: text('priority').notNull().default('normal'),
   linkUrl: text('link_url'),
   linkText: text('link_text'),
   active: boolean('active').notNull().default(true),
+  startsAt: timestamp('starts_at', { withTimezone: true }),
+  endsAt: timestamp('ends_at', { withTimezone: true }),
   createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Push & In-App Notifications
