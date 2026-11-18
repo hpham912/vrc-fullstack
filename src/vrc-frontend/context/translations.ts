@@ -222,7 +222,6 @@ export const translations = {
   announceActiveHint: { vi: 'Banner chỉ hiển thị thông báo mới nhất đang bật. Tắt hết thì banner biến mất.', en: 'The banner shows the newest announcement that is on. Turn them all off and the banner disappears.' },
   announceStartLabel: { vi: 'Bắt đầu hiển thị', en: 'Start showing' },
   announceEndLabel: { vi: 'Ngừng hiển thị', en: 'Stop showing' },
-  announceTimeLabel: { vi: 'Giờ', en: 'Time' },
   announceEndHint: { vi: 'Để trống: hiển thị đến khi tắt.', en: 'Leave empty: shows until turned off.' },
   announceEndBeforeStart: { vi: 'Giờ ngừng phải sau giờ bắt đầu và chưa qua.', en: 'The stop time must be after the start time and still in the future.' },
   announceScheduled: { vi: 'Đã hẹn giờ', en: 'Scheduled' },

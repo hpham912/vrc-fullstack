@@ -1,7 +1,6 @@
 import React from 'react';
 import { TextField } from '../text-field/TextField.tsx';
-import { textFieldStyles } from '../text-field/TextField.styles.ts';
-import { datePickerInlineStyles, datePickerStyles } from './DatePicker.styles.ts';
+import { datePickerStyles } from './DatePicker.styles.ts';
 
 // 'date' is a calendar day; 'datetime' is a day plus a time, in the
 // same component — the time is an option, not a second component.
@@ -28,44 +27,25 @@ export interface DatePickerProps {
   // shows the error and disables Save.
   min?: string | null;
   max?: string | null;
-  // Visible label for the time field in datetime mode (same
-  // language as `label`; the caller owns the copy).
-  timeLabel?: string;
 }
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
-// ISO → the local date part "YYYY-MM-DD" a date input holds. Empty
-// or unparseable stays empty.
-const toDatePart = (iso: string | null | undefined): string => {
+// ISO → the local "YYYY-MM-DDTHH:mm" a datetime-local input holds.
+// Empty or unparseable stays empty.
+const toDatetimeLocal = (iso: string | null | undefined): string => {
   if (!iso) return '';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
-// ISO → the local time part "HH:mm" a time input holds. Empty or
-// unparseable stays empty.
-const toTimePart = (iso: string | null | undefined): string => {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return '';
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
-
-// Today's local date part, for a time picked before any date —
-// picking a time on its own means today, the same as a native
-// datetime picker that starts on the current day.
-const todayDatePart = (): string => {
-  const now = new Date();
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-};
-
-// Date + time parts back to one ISO string. Both empty stays null;
-// a date with no time means the start of that day (00:00).
-const combineDateTime = (datePart: string, timePart: string): string | null => {
-  if (!datePart && !timePart) return null;
-  const date = new Date(`${datePart || todayDatePart()}T${timePart || '00:00'}`);
+// A datetime-local value back to one ISO string. Empty stays null.
+// The value parses as local time, so 10:25 AM stays 10:25 AM Phoenix
+// no matter what timezone the server runs in.
+const fromDatetimeLocal = (local: string): string | null => {
+  if (!local) return null;
+  const date = new Date(local);
   if (Number.isNaN(date.getTime())) return null;
   return date.toISOString();
 };
@@ -77,20 +57,20 @@ const combineDateTime = (datePart: string, timePart: string): string | null => {
 // error, and dark mode all come from TextField, so the picker can
 // never drift away from the other form fields.
 //
-// Datetime mode is TWO fields, not one datetime-local input: iOS
-// renders datetime-local as one long string ("Nov 17, 2026 at 9:32
-// PM") that overflows a narrow admin form and makes the whole modal
-// sway sideways when scrolling. A date field ("Nov 17, 2026") plus
-// a time field ("9:32 PM") are both short native fields, the same
-// look as the Events tab's date field, and each one fits. The pair
-// still takes and returns one ISO string, so callers do not change.
+// Datetime mode is ONE datetime-local input, not two fields. One
+// tap opens the native sheet with the calendar and the time
+// together, and the field shows the whole thing as one string
+// ("Nov 18, 2026 at 10:25 AM"). The pair of separate date + time
+// fields was tried twice and kept fighting the phone (the flex gap
+// rendered as 0, then the margin + fixed width did not take effect
+// live), and stacked they made the form too long on mobile.
 //
-// The two fields sit SIDE BY SIDE, each with its own visible
-// label, bottom-aligned so the labels line up. The layout is
-// inline styles (see DatePicker.styles.ts), not Tailwind classes:
-// the pair failed twice live as classes, so the gap and widths
-// now travel with the JS bundle and cannot go missing from the
-// generated CSS file. Do not move this layout back to classes.
+// The field is sized to its content (fitContent), so it is only as
+// wide as its string needs and never stretches past the modal:
+// the long string is what made the single field look too wide
+// before. `min`/`max` are full datetime-local values in this mode
+// (an earlier time on the same day is still the caller's own
+// validation, which shows the error and disables Save).
 export const DatePicker: React.FC<DatePickerProps> = ({
   label,
   mode = 'date',
@@ -102,46 +82,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   id,
   min,
   max,
-  timeLabel,
 }) => {
   const isDatetime = mode === 'datetime';
   const inputValue = value ?? '';
-  const datePart = isDatetime ? toDatePart(value) : value ?? '';
-  const timePart = isDatetime ? toTimePart(value) : '';
-  const dateMin = isDatetime ? toDatePart(min) : min ?? undefined;
-  const dateMax = isDatetime ? toDatePart(max) : max ?? undefined;
 
   if (isDatetime) {
     return (
       <div className={datePickerStyles.container}>
-        <div style={datePickerInlineStyles.datetimeRow}>
-          <div style={datePickerInlineStyles.datePart}>
-            <TextField
-              label={label}
-              type="date"
-              value={datePart}
-              onChange={(next) =>
-                onChange(next === '' ? null : combineDateTime(next, timePart))
-              }
-              disabled={disabled}
-              required={required}
-              id={id}
-              min={dateMin || undefined}
-              max={dateMax || undefined}
-            />
-          </div>
-          <div style={datePickerInlineStyles.timePart}>
-            <TextField
-              label={timeLabel}
-              type="time"
-              value={timePart}
-              onChange={(next) => onChange(combineDateTime(datePart, next))}
-              disabled={disabled}
-              id={id ? `${id}-time` : undefined}
-            />
-          </div>
-        </div>
-        {error && <span className={textFieldStyles.error}>{error}</span>}
+        <TextField
+          label={label}
+          type="datetime-local"
+          value={toDatetimeLocal(value)}
+          onChange={(next) => onChange(fromDatetimeLocal(next))}
+          disabled={disabled}
+          error={error}
+          required={required}
+          id={id}
+          min={toDatetimeLocal(min) || undefined}
+          max={toDatetimeLocal(max) || undefined}
+          fitContent
+        />
       </div>
     );
   }

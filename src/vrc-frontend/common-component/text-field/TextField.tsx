@@ -29,6 +29,11 @@ export interface TextFieldProps {
   min?: string;
   max?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  // Size the field to its content instead of stretching full width
+  // (e.g. a datetime-local field whose string is shorter than the
+  // form). The field still never exceeds the container. Omit it and
+  // the field is full width, as before.
+  fitContent?: boolean;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -48,6 +53,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   min,
   max,
   onKeyDown,
+  fitContent = false,
 }) => {
   const Icon = icon;
   const inputClassName = Icon
@@ -70,7 +76,14 @@ export const TextField: React.FC<TextFieldProps> = ({
     />
   );
   return (
-    <div className={textFieldStyles.field}>
+    <div
+      className={textFieldStyles.field}
+      style={
+        fitContent
+          ? { width: 'fit-content', maxWidth: '100%', minWidth: 0 }
+          : undefined
+      }
+    >
       {label && (
         <label htmlFor={id} className={textFieldStyles.label}>
           {label}
