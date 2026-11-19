@@ -7,7 +7,8 @@ import { apiUrl, apiHeaders } from '../../../../utils/api.ts';
 import { getCategoryTheme } from '../../../../utils/categoryTheme.ts';
 import { NotificationClient } from '../../../../services/notificationClient.ts';
 import { DEFAULT_EVENT_ADDRESS } from '../../../../constants/church.ts';
-import { Button, Banner, SegmentedControl, ZoomButton, TextField, DatePicker } from '../../../../common-component/index.ts';
+import { Button, Banner, SegmentedControl, ZoomButton, TextField, DatePicker, Select } from '../../../../common-component/index.ts';
+import { getEventPreset, getEventPresetOptions } from '../../../../utils/eventPresets.ts';
 import { eventsTabStyles as s } from './EventsTab.styles.ts';
 
 interface EventsTabProps {
@@ -193,6 +194,33 @@ export const EventsTab: React.FC<EventsTabProps> = ({
     applyEventValues(values);
     baselineRef.current = values;
     setEditingEventAudit(null);
+  };
+
+  // Quick-add: fill the stable fields from a weekly preset. Date,
+  // description, address and organizer are left exactly as they are —
+  // the Wednesday class sometimes meets at a member's home, so the
+  // admin picks the preset and then edits the address. Everything
+  // filled in stays editable. Only for new events, never for edits.
+  const handlePresetChange = (presetId: string) => {
+    const preset = getEventPreset(presetId);
+    if (!preset) return;
+    applyEventValues({
+      titleVi: preset.titleVi,
+      titleEn: preset.titleEn,
+      descriptionVi: eventDescriptionVi,
+      descriptionEn: eventDescriptionEn,
+      category: preset.category,
+      date: eventDate,
+      startTime: preset.startTime,
+      endTime: preset.endTime,
+      locationVi: preset.locationVi,
+      locationEn: preset.locationEn,
+      address: eventAddress,
+      isFeatured: eventIsFeatured,
+      hasZoom: preset.hasZoom,
+      organizer: eventOrganizer,
+      organizerEmail: eventOrganizerEmail,
+    });
   };
 
   const handleEditEvent = (evt: ChurchEvent) => {
@@ -493,6 +521,15 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         )}
 
         <div className={s.fieldGroup}>
+          {editingEventId === null && (
+            <Select
+              id="event-preset-admin"
+              label={t('eventPresetLabel')}
+              value=""
+              options={getEventPresetOptions(t)}
+              onChange={handlePresetChange}
+            />
+          )}
           <span className={s.fieldLabel}>{t('eventsTitleLabel')}</span>
           <TextField
             label={t('commonLangVi')}

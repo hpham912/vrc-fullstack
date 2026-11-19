@@ -34,7 +34,9 @@ import {
   EventDetailModal,
   FilterBar,
   LoadingShimmer,
+  Select,
 } from '../../common-component/index.ts';
+import { getEventPreset, getEventPresetOptions } from '../../utils/eventPresets.ts';
 import { apiUrl, apiHeaders } from '../../utils/api.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { getCategoryLabel as getCategoryLabelUtil } from '../../utils/categoryTheme.ts';
@@ -113,6 +115,21 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
     setFormAddress(evt.address || 'Tempe, Arizona');
     setFormFeatured(evt.isFeatured);
     setEditModalOpen(true);
+  };
+
+  // Quick-add: fill the stable fields from a weekly preset. Date,
+  // description and address are left exactly as they are — the
+  // Wednesday class sometimes meets at a member's home, so the admin
+  // picks the preset and then edits the address. Everything filled in
+  // stays editable. Only for new events, never for edits.
+  const handlePresetChange = (presetId: string) => {
+    const preset = getEventPreset(presetId);
+    if (!preset) return;
+    setFormTitle(language === 'vi' ? preset.titleVi : preset.titleEn);
+    setFormCategory(preset.category);
+    setFormStartTime(preset.startTime);
+    setFormEndTime(preset.endTime);
+    setFormLocation(language === 'vi' ? preset.locationVi : preset.locationEn);
   };
 
   const handleSaveEvent = async (e: React.FormEvent) => {
@@ -346,6 +363,15 @@ export const EventsSection: React.FC<EventsSectionProps> = ({
             </div>
 
             <div className="space-y-3 text-xs sm:text-sm">
+              {!editingEvent && (
+                <Select
+                  id="event-preset"
+                  label={t('eventPresetLabel')}
+                  value=""
+                  options={getEventPresetOptions(t)}
+                  onChange={handlePresetChange}
+                />
+              )}
               <div>
                 <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
                   {t('eventsTitleLabel')}

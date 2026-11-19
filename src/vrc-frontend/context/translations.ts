@@ -595,6 +595,10 @@ export const translations = {
 
   // Admin portal — event form
   adminEventFormTitle: { vi: 'Thêm Sự Kiện Mới Vào Lịch', en: 'Add New Event to Calendar' },
+  eventPresetLabel: { vi: 'Dùng mẫu có sẵn', en: 'Use a preset' },
+  eventPresetPlaceholder: { vi: 'Chọn mẫu sự kiện…', en: 'Choose an event preset…' },
+  presetSundayWorship: { vi: 'Thờ Phượng Chúa Nhật', en: 'Sunday Worship' },
+  presetWednesdayBible: { vi: 'Học Kinh Thánh Thứ Tư', en: 'Wednesday Bible Class' },
   adminEventDescLabel: { vi: 'Mô Tả Chi Tiết *', en: 'Description *' },
   adminEventCategory: { vi: 'Phân Loại', en: 'Category' },
   adminEventDate: { vi: 'Ngày Diễn Ra *', en: 'Date *' },
